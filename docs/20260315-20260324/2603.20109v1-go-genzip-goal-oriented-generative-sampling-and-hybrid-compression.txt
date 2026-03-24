@@ -1,0 +1,385 @@
+Title: GO-GenZip: Goal-Oriented Generative Sampling and Hybrid Compression
+
+URL Source: https://arxiv.org/pdf/2603.20109v1
+
+Published Time: Mon, 23 Mar 2026 01:08:06 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# GO-GenZip: Goal-Oriented Generative Sampling and Hybrid Compression 
+
+Pietro Talli, Qi Liao, Alessandro Lieto, Parijat Bhattacharjee, Federico Chiariotti, and Andrea Zanella 
+
+Abstract —Current network data telemetry pipelines consist of massive streams of fine-grained Key Performance Indicators (KPIs) from multiple distributed sources towards central aggre-gators, making data storage, transmission, and real-time analysis increasingly unsustainable. This work presents a generative AI (GenAI)-driven sampling and hybrid compression framework that redesigns network telemetry from a goal-oriented perspec-tive. Unlike conventional approaches that passively compress fully observed data, our approach jointly optimizes what to observe and how to encode it, guided by the relevance of information to downstream tasks. The framework integrates adaptive sampling policies, using adaptive masking techniques, with generative modeling to identify patterns and preserve critical features across temporal and spatial dimensions. The selectively acquired data are further processed through a hybrid compression scheme that combines traditional lossless coding with GenAI-driven, lossy compression. Experimental results on real network datasets demonstrate over 50 % reductions in sampling and data transfer costs, while maintaining comparable reconstruction accuracy and goal-oriented analytical fidelity in downstream tasks. 
+
+Index Terms —Network telemetry, generative AI, adaptive sam-pling, hybrid compression 
+
+Accepted for publication at IEEE Internation Conference on Communications (ICC) 2026. 
+
+I. I NTRODUCTION 
+
+Next-generation networks are defined by a growing need for adaptability, driven by diverse services and dynamic op-erational contexts, which are critically dependent on robust monitoring and telemetry data [1]. However, the exponential growth of telemetry data, which includes traffic patterns, channel state information, user attributes, and mobility pro-files, places significant strain on network memory, bandwidth, storage, and processing resources. Traditional, centralized monitoring paradigms that aggregate raw telemetry from dis-tributed terminals are increasingly inadequate to manage the complexity introduced by Mobile Edge Computing (MEC) and disaggregated architectures. Consequently, efficient collection, processing, and distributed analysis of telemetry data are key enablers of self-organization capabilities [2]. In parallel, network management is progressively shifting towards modern Machine Learning (ML)-based solutions, which pose a new challenge to system telemetry: identifying and acquiring the most relevant data for each learning objec-tive. In practice, excessive data collection remains common 
+
+P. Talli, F. Chiariotti, and A. Zanella (emails: pietro.talli@phd.unipd.it, federico.chiariotti@unipd.it, andrea.zanella@unipd.it) are with the Dept. of Information Engineering, University of Padova, Italy. Q. Liao and A. Lieto (emails: qi.liao@nokia-bell-labs.com, alessandro.lieto@nokia-bell-labs.com) are with Nokia Bell Labs Stuttgart, Germany. P. Bhattacharjee (email: pari-jat.bhattacharjee@nokia.com) is with Nokia Bengaluru, India. This work was in part supported by the European Union’s NextGenerationEU framework, as part of the Italian National Recovery and Resilience Plan (NRRP), under the RESTART partnership on “Telecommunications of the Future” (PE0000001). 
+
+due to the computational complexity of relevance estimation methods [3] (e.g., Shapley values [4]), leading to ineffi-cient telemetry pipelines. Recent advances in Generative AI (GenAI) and autoencoder-based compression offer a promis-ing path toward adaptive and efficient data reduction [5], [6], [7]. Masked Autoencoders (MaskAEs) can reconstruct high-dimensional data from partial observations [8], yet they typically rely on random masking strategies that ignore data structure, context, and task objectives. This randomness limits their efficiency when applied to structured, high-dimensional telemetry data, where intelligent selection of observed entries is crucial. A promising approach in this direction is goal-oriented communication (GO), which focuses on transmitting only relevant information for a task or a goal [9], [10]. Building on these principles, we propose Goal-Oriented Generative Sampling and Hybrid Compression (GO-GenZip), a goal-oriented generative compression framework for network telemetry that adaptively samples and compresses data based on contextual and task information. GO-GenZip integrates MaskAE-based generative compression with traditional loss-less coding. This strategy allows for a dramatic reduction in the collected and transmitted telemetry data, while preserving the performance of the ML algorithms that use such data. The contribution of this work can be summarized as follows:  
+
+> •
+
+We design an adaptive masking policy to sample and monitor a subset of relevant telemetry data to maximize Goal-Oriented (GO) performance.  
+
+> •
+
+We introduce a hybrid compression policy to balance the tradeoff between reconstruction fidelity and compression efficiency by combining lossy compression based on GenAI with classical lossless methods.  
+
+> •
+
+We propose a GO end-to-end training method to jointly optimize masking and compression policies, thus ensur-ing task-driven data efficiency across multiple objectives.  
+
+> •
+
+We validate the proposed framework on real network telemetry data collected from more than 1,000 operational Base stations (BSs), demonstrating significant gains in efficiency and accuracy compared to policies with fixed and generative-only baselines. Our proposed solution is sufficiently general to be applied in diverse contexts and with various types of data. Since we identify the transfer and processing of large tensors as fundamental challenges in future networks, we believe that this system could also prove valuable in other use cases such as channel charting and Integrated Sensing and Communication (ISAC) scenarios.    
+
+> arXiv:2603.20109v1 [cs.LG] 20 Mar 2026 DCAP (Data collection and analytics platform)
+> App 1
+> App 2
+> App G
+
+X Z Y
+
+... ... 
+
+> Fig. 1. Target scenario.
+
+II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+We consider a multi-source, multi-task network telemetry serving a system of N BSs, belonging to a set N , and G
+
+network applications with goals G = {App 1, ..., App G}, as shown in Fig. 1. Each BS collects a set of K Key Performance Indicators (KPIs), denoted by K, periodically sampled every, e.g., 15 minutes or one hour. We assume time is slotted and, at each time step t, each BS n ∈ N transfers to the Data Collection and Analysis Platform (DCAP) server its local KPI tensor, Xn(t). This vector collects the KPI samples gathered over a predefined period of time Tn, so that we have Xn(t) ∈ RK×Tn . To generalize the notation across the different BSs, which collect and transmit measurements independently and potentially with different periods, hereafter we indicate as X ∈ RD the data collected by a generic BS, where D is the flattened dimensionality of the measurable data. This makes it possible to formulate the subsequent model and policies in general terms, suitable for different BSs and reporting periods. 
+
+A. The Classical Goal-Oriented Compression Problem 
+
+Classical goal-oriented compression has been studied mainly through the lens of the Information Bottleneck (IB) principle [11], [12], which finds a compressed representation 
+
+Z ∈ Z of an input X ∈ X that preserves relevant information about a related variable Y ∈ Y, while minimizing the information about X itself (the “bottleneck”). Mathematically, 
+
+inf  
+
+> p(z|x)
+
+I(X; Z) − βI (Z; Y), (1) where I(A; B) denotes the mutual information between A and 
+
+B, and β controls the trade-off between removing irrelevant information from X and retaining the components that predict 
+
+Y through the compressed representation Z.This formulation focuses solely on the compression stage, that is, on deciding what information to transmit . It is also worth noting that this legacy view treats the source X as fully observed and optimizes only the compression stage. In contrast, we are interested in studying the joint problem of adaptive sampling and hybrid compression , i.e., not only what to transmit but also what to observe in the first place. 
+
+B. Goal-Oriented Sampling and Hybrid Compression Problem 
+
+Modern telemetry systems face two main constraints: (1) source sampling, which incurs monitoring and storage costs, and (2) transmission of encoded data, which drives the com-munication cost. These challenges are amplified for high-dimensional tensor data. To address them, we propose an adaptive encoding function that performs joint sampling and hybrid compression. Here, “hybrid” denotes the ability to combine different compression strategies, including classical lossless compression and generative autoencoders , while a policy learns to adapt to varying contexts. Controlling the fraction of data encoded with lossless compression enables an adaptive management of the bottleneck. Lossless compression introduces no distortion into the original data, thereby preserv-ing mutual information and high fidelity, particularly for sparse data. Conversely, the generative autoencoder compresses data into a small, lossy latent space, so it provides an approximate measurement at a much lower communication cost, as well as allowing the receiver to infer unsampled data. However, training autoencoders to efficiently represent sparse data and preserve reconstruction quality is a complex task, motivating the need for a hybrid approach. We aim to design sampling and hybrid compression policies that depend only on low-cost adaptive context information 
+
+c ∈ RC , with C ≪ K. For the network telemetry use case, in particular, context information can include embeddings of 
+
+BS class , hour index , and task index . This approach makes it possible to adapt the sampling sand compression strategies to the context information, rather than using a single fixed sampling mask and compression scheme for all conditions. The two policies are defined as follows:  
+
+> •
+
+sampling policy : let ms ∈ { 0, 1}D be the binary sampling mask of the observable data space D, where element i is collected (or sampled) iff ms[i] = 1 . The sampled com-ponents can therefore be written as Xs = ms ⊙X, where 
+
+⊙ represents the element-wise product. The sampling pol-icy can be defined as πs : RC → P  {0, 1}D  ⊆ [0 , 1] D ,where P denotes the set of distributions. Given context information c, πs(ms|c) defines the probability that the sampling mask ms is selected.  
+
+> •
+
+hybrid compression policy : let mc ∈ 0, 1D be the “compression selector”, where mc[i] = 1 indicates com-pression by a generative autoencoder, and mc[i] = 0 
+
+by classical lossless coding for each sample entry i.The hybrid compression policy is therefore defined as 
+
+πc : RC → P  {0, 1}D  ⊆ [0 , 1] D , such that πc(mc|c) is the probability of choosing the compression selector mc
+
+given the context c.The encoder and decoder use masks Z and ˆY, defined as 
+
+Z = f (Xs, mc), ˆY = g(Z, mc), (2) with mc ∼ πc(·| c). The expected sampling cost is modeled by 
+
+S(πs) ≜ Ec,ms
+
+" DX
+
+> i=1
+
+cims[i]
+
+#
+
+, (3) Original data              
+
+> X
+> Sampled data
+> ms⊙X
+> Split data
+> mc⊙ms⊙X
+> ELC DLC
+> EGE DGE
+> Reconstructed data ˆX
+> πs
+> Sampling policy
+> πc
+> Compression policy
+> Conditional information cE.g., in telemetry [BS, Hour, Task]
+> LZMA compression
+> GenAI compression
+> Compressed data Zgoes through the network
+> App i
+> ˆY
+> Fig. 2. GO-GenZip sampling and compression architecture.
+
+where ms ∼ πs(·| c) and ci is the sampling cost per-entry. We often have ci = 1 , ∀i, so that S(·) is the expected number of sampled entries. The expected rate of the hybrid scheme is then defined as 
+
+R(πs, π c, f ) = Ec,ms,mc
+
+"
+
+1{mTs mc>0}RGE (X)+ 1
+
+D
+
+> D
+
+X
+
+> i=1
+
+ms[i] (1 − mc[i]) RLC )
+
+#
+
+, (4) where RGE and RLC are the bit-costs produced by the chosen hybrid compression methods, i.e., the generative autoencoder and classical lossless compressor, respectively. 1{mTs mc>0}
+
+denotes the indicator function that returns 1 if at least one entity i in the latent space is sampled and compressed using generative models ( ms[i]mc[i] = 1 ), and 0 otherwise. This formulation ensures that, whenever any element associated with a latent dimension is selected for generative compres-sion, the entire latent representation X is transmitted. The constrained optimization problem is then formulated as: 
+
+max 
+
+> f,g,π s,π c
+
+Ec,ms,mc [I(Z; Y|c, ms, mc)] (5) s.t. (2) , (3) , (4) 
+
+S(πs) ≤ S(ρs),
+
+R(πs, π c, f ) ≤ R(ρc),
+
+where S(ρs) and R(ρc) are the sampling budget and rate budget reflecting the memory size ρs at the transmitter and the communication bandwidth ρc, respectively. III. P ROPOSED SOLUTION 
+
+To solve the problem described in the previous section, we propose a Goal-Oriented Generative Hybrid Sampling and Compression (GO-GenZip) scheme, whose architecture is depicted in Fig. 2. Our solution implements the following steps to achieve data reduction and compression: (1) first, we sample the original data X generated at the source according to a mask 
+
+ms; (2) the sampled data ms ⊙ X are then divided into two subsets to leverage the hybrid compression schemes, as defined by mc; (3) the two data segments are compressed separately, one through a lossless scheme ELC such as the compres-sor Lempel-Ziv Markov chain algorithm (LZMA) and the other through our developed generative encoder model, EGE .Therefore, the representation of compressed data consists of the combination of the latent representation of the GenAI model and compressed samples at the lossless compressor. The compressed data are transferred over the network to reach a centralized server. Finally, data is reconstructed via the lossless decoder, DLC , and the generative decoder model, DGE . The original data are restored by merging the data coming from the two compression methods. In the following subsections, we detail the formulation of the sampling policy and of the hybrid compression scheme. Optionally, a task (App i) that estimates the target ˆY can be considered. It is defined as a function of the reconstructed data, which means that for GO training, the application block is added and the model is optimized end-to-end. 
+
+A. Sampling Policy 
+
+In the adaptive setting, the policy πs is based on the context information c. A fully connected neural network uses this information to obtain log-probabilities (logits) of the sampling and hybrid compression policy. During training, the Gumbel-Softmax distribution [13] is employed to enable differentiable sampling from a categorical distribution, which facilitates learning a stochastic policy. Given a categorical distribution with class probabilities p = ( p1, p 2, . . . , p k), the Gumbel-Softmax sample y = ( y1, y 2, . . . , y k) is computed as 
+
+yi = exp ((log pi + gi)/τ )
+
+Pkj=1 exp ((log pj + gj )/τ ) , (6) where gi are independent and identically distributed samples from the Gumbel(0,1) distribution, and τ > 0 is the tempera-ture parameter controlling the smoothness of the approxima-tion. As τ → 0, the Gumbel-Softmax distribution approaches a one-hot vector, approximating a discrete sample, while for larger values of τ , the output remains soft and differentiable. This property allows the policy πθ parameterized by θ to be updated via gradient-based optimization methods despite the inherently discrete nature of action sampling. To train the policy, Straight-through (ST) gradient esti-mation [14] is used, leading to an effective update of the log-probabilities. Similarly to the reparameterization trick in Variational Autoencoder (VAE), ST allows us to model the output of the policy as a discrete choice in the forward pass, while only the choice probability (soft choice) is considered in the backward pass. Let Xs be the discrete sampled choices for the policy πθ (c); the reparameterized vector ˜Xs is 
+
+˜Xs = y ⊙ Xs + sg ((1 − y) ⊙ Xs), (7) where sg (·) is the stop gradient operation which detaches the input from the gradient tracking. 
+
+B. Hybrid Compression 
+
+Similarly to the sampling policy, a compression policy 
+
+πc is used to obtain the mask mc in which some of the acquired entries are set to zero, meaning that these samples will be compressed by lossless compression based on entropy. Specifically, this exploits the reparameterization trick already explained for the sampling policy. The masked values in this case are compressed with the standard LZMA compression al-gorithm and converted into a string of bits. Since the sampling mask and the hybrid compression mask are binary, the data selected for the GenAI compression method are obtained as 
+
+mc ⊙ ms ⊙ X. As a result, the compressed sample Z is the combination of two formats: the latent representation of the autoencoder and the string of bytes generated by the LZMA algorithm. 
+
+C. Dual Optimization and Constraint Matching 
+
+Our solution jointly optimizes πs and πc by representing them as a D × 3 matrix M ∈ RD×3: each row d of the matrix has 3 columns, representing the log-probability of not sampling the entry d, sampling and compressing it with the GenAI model, and sampling and compressing with LZMA, respectively. The Gumbel-Softmax approach is then used for joint sampling and hybrid compression, improving target accuracy. To include the sampling and compression constraints S(ρs) and R(ρc) in the loss function, we introduce the dual parameters βs and βc. When we consider pure data reconstruction ( Y = X), the loss function can be written as the Lagrangian of the original loss, using multipliers βs and 
+
+βc to weight the constraint functions: 
+
+L = || X− ˆX|| 22+βs(S(πs)−S(ρs))+ βc(R(πs, π c, f )−R(ρc)) ,
+
+(8) where the terms βs, S(πs) and βc, R(πs, π c, f ) are introduced into the loss function to force the policy to match the con-straints. For each combination of βs and βc, the optimization procedure converges to specific sampling and compression rates. Target sampling and compression rates can be obtained by adjusting the dual parameters until the constraints are met. Alg. 1 shows the pseudocode for one iteration of the training procedure of GO-GenZip. D represents the set of all training batches; for each batch, we update the autoencoder and the two policies according to the loss in (8). The reconstructed data ˆX
+
+Algorithm 1 Training Loop of Go-GenZip                                                  
+
+> Require: Egen , D gen , π s, π cparametrized by θ.βs←0,βc←0.λ
+> (learning rate). 1: for B∈ D do
+> 2: ms←πs(c),mc←πc(c)
+> 3: Xg←mc⊙ms⊙X
+> 4: Xh←(1 −mc)⊙ms⊙X
+> 5: ˆX=DGE (EGE (Xs)) + DLC (ELC (Xh))
+> 6: Update θaccording to (8) 7: Update βsand βcaccording to (9) and (10), respectively 8: end for
+
+is then obtained as the combination of the reconstructed data from the two compression methods. It should be noted that the expected sampling rate and compression rate are estimated as the average over a batch to avoid computing the expectation over the entire training dataset. This training loop shows dual optimization of the uncon-strained problem in (8), while the coefficients are updated as 1
+
+βs ← [βs + λ(S(πs) − S(ρs))] + , (9) 
+
+βc ← [βc + λ(R(πs, π c, f ) − R(ρc))] + (10) to enforce the optimization constraints. 
+
+D. Goal-Oriented Training 
+
+The reconstruction set is a special case of the IB system model, in which the target Y corresponds to the input data X.Here, we propose a more general training modality that is more suitable for GO sampling and compression. Since we consider multi-dimensional time-series as entry data, we focus on prediction tasks as optimization goals. Specifically, we collect 
+
+L lookback samples Xt−L+1: t := [ Xt−L+1 , ..., Xt] ∈ RK×L
+
+and use them as input data for a prediction module g :
+
+RK×L → Y . For example, for a given prediction task, the tar-get data ˆY are obtained considering an horizon H, a target k-th KPI, and a specific function: ϕ ∈ { identity, mean, min, max },such that Y = ϕ
+
+
+
+X(k)
+
+> t+1: t+H
+
+
+
+, where X(k) 
+
+> t+1: t+H
+
+denotes the next H samples of the k-th KPI. This creates a wide range of prediction tasks, each requiring attention to different temporal or feature dependencies within the input data. The required level of accuracy on the reconstructed data varies with respect to the prediction function. The training of the model is similar to the data reconstruction task: a specific sampling rate and compression rate constrain the system model, while the the policy and the prediction module try to maximize task performance. However, in the multi-task scenario, a batch of training data is selected to contain different tasks in the same training step, and the context information c is extended to contain the task identifier. Adding the task embedding to the context information realizes the full GO strategy, enabling automatic discovery of the adaptive sampling and hybrid compression strategies. IV. E XPERIMENTAL RESULTS 
+
+In this section, we evaluate our model on real network telemetry data collected by 1162 4G BSs deployed across   
+
+> 1[x]+= max(0 , x )ensures the non-negativity of the multipliers.
+
+0.2 0.4 0.6 0.8 1
+
+0.0 
+
+0.05 
+
+0.1 
+
+Sampling Ratio (SR)     
+
+> Mean Absolute Error
+> CR 4.25 S-G CR 2.83 S-G CR 2.12 S-G
+> CR 4.59 S-H CR 2.93 S-H CR 2.11 S-H
+> lossless
+> Fig. 3. Comparison between Generative compression and Hybrid compression for different SRs.
+
+different regions over a ten-day period, with an hourly sam-pling interval. Each BS reports 34 KPIs at each hour, covering diverse network performance metrics, such as throughput-, latency-, and mobility-related metrics. The data are prepro-cessed to cluster BSs with similar traffic patterns, enabling the extraction of contextual information including BS-class labels. This contextual information supports the learning of special-ized sampling and compression policies. The final context vector includes the embeddings of BS class , hour of the day ,and task identifier (for the multi-task goal-oriented scheme). The system comprises a hybrid multi-task compression architecture with two main components: a MaskedModel for adaptive sampling and compression and a MultiTaskModel 
+
+for multi-task prediction. The former uses an adaptive policy network (two-layer MLP with ELU activation) that maps contextual metadata to per-BS compression decisions via Gumbel-Softmax sampling, selecting among no sampling, Autoencoder (AE)-based generative compression, or LZMA compression. The AE employs a conditional encoder-decoder with configurable latent dimensions determining compression ratios. The latter consists of task-specific predictors with layers (128, 64, 32) with GELU activation and dropout. 
+
+A. Reconstruction Performance of GO-GenZip 
+
+We conducted a first test on data reconstruction accuracy of GO-GenZip, comparing its performance with lossless com-pression in terms of compression ratio. Also, we evaluated the impact of reducing the sampling fraction and constraining the system to limited observability. We tracked the Mean Absolute Error (MAE) over multiple configurations of the proposed model. 
+
+1) Comparison between hybrid and generative compression approaches: To assess the impact of hybrid compression, we trained the model under two configurations: (i) S–G , which employs a sampling policy combined with a solely GenAI-based compression module, and (ii) S–H , which employs a sampling policy together with our proposed hybrid compres-sion policy. Extensive results on the benefit of the hybrid compression scheme are presented in Fig. 3 and 4. We use 
+
+2 3 4 5
+
+0.0 0.05 0.1 Compression Ratio (CR) Mean Absolute Error        
+
+> SR 0.21 S-G SR 0.4 S-G SR 1.0 S-G
+> SR 0.22 S-H SR 0.4 S-H SR 1.0 S-H
+> lossless
+> Fig. 4. Comparison between Generative compression and Hybrid compression for different CRs.
+> fixed S-H adaptive S-H fixed S-G adaptive S-G
+
+0.2 0.4 0.6 0.8 1
+
+0.0 
+
+0.05 
+
+0.1 
+
+0.15 
+
+0.2 
+
+Sampling Ratio (SR) 
+
+> Mean Absolute Error
+
+2 4 6 8
+
+0.05 
+
+0.1 
+
+Compression Ratio (CR) 
+
+> Fig. 5. Comparison of adaptive and fixed method with respect to SR and CR.
+
+the same color to highlight performance curves corresponding to the same compression ratio (CR) or sampling ratio (SR), respectively. These results confirm that the hybrid compression (S-H ), in solid line, consistently improves performance. In Fig. 3 the S–H curves are always below the corresponding 
+
+S–G plots, meaning lower reconstruction error for same CR. Similarly, in Fig. 4 the S–H scheme obtains better performance when compared to S–G . Only when the SR is very low ( ≈ 0.2)the performance of the two methods are equivalent. This is confirmed also from Fig. 3 where all the models obtains similar MAEs regardless of the compression method and the compression ratio. This thorough testing approach demon-strates that the hybrid method not only performs well under various conditions but also maintains its accuracy advantage regardless of the specific compression or sampling settings, highlighting its robustness and reliability. 
+
+2) Comparison between adaptive and fixed policies: The adaptive strategy is compared with a fixed compression and sampling policy. In the fixed case, one sampling mask is learned for all the possible input X, regardless of the con-ditional information. Fig. 5 clearly illustrates that the adaptive solution significantly outperforms the fixed policy when eval-uating the performance with respect to the SR. Specifically, the adaptive approach adjusts dynamically to the context 0 10 20 30 
+
+0
+
+10 
+
+20 
+
+KPI Index 
+
+> Hour
+
+Task 3: Latency - BS 0 
+
+0 10 20 30 
+
+0
+
+10 
+
+20 
+
+KPI Index 
+
+Task 3: Latency - BS 1 
+
+0 10 20 30 
+
+0
+
+10 
+
+20 
+
+KPI Index 
+
+> Hour
+
+Task 4: UL Rate - BS 0 
+
+0 10 20 30 
+
+0
+
+10 
+
+20 
+
+KPI Index 
+
+Task 4: UL Rate - BS 1 
+
+Fig. 6. Visualization of masks for different BS classes and prediction tasks. White, blue, red regions represent the unsampled, compression with generative model, and compression with LZMA, respectively. 
+
+conditions, resulting in a more efficient allocation of sampling resources. This adaptability allows it to maintain a higher sampling ratio where needed, improving overall system perfor-mance and responsiveness. In contrast, the fixed policy, with its static nature, fails to optimize sampling in varying scenarios, leading to less effective outcomes. The two plots in Fig. 5 show that the adaptive policy improves both with respect to varying SR and CR. Together, these results emphasize the clear advantage of employing adaptive methods over fixed policies for better sampling efficiency and system effectiveness. 
+
+B. Multi-Task Training 
+
+We conducted Multi-task training for a dataset of 6 predic-tion tasks using L = 3 and H = 3 for six KPIs: downlink physical resource block usage , radio resource connection ,
+
+latency , downlink payload , uplink rate , handover attempt . Due to the limited space, in Fig. 6 we report an example of obtained masks (white: unsampled, blue: generative compression, red: LZMA compression) for two selected prediction tasks, latency and uplink rate, and two BS classes, with target sampling ratio and compression ratio (0 .5, 0.5) . For each of the plots, on the x-axis we report the KPI index, while on the y-axis the hour of the day. Although certain structural similarities can be observed, distinct sampling patterns emerge across different tasks, confirming that the learned policies selectively emphasize KPIs most relevant to each objective. Moreover, variations between BS classes for the same task suggest that heterogeneous traffic conditions benefit from tailored sampling strategies. In addition, Table I presents the MAE for four tasks out of the six evaluated (due to the limited space) comparing models with and without GO end-to-end training. The goal-oriented training consistently achieves lower errors and smaller variances, demonstrating enhanced robustness and stability across tasks. V. C ONCLUSIONS 
+
+The GO-GenZip scheme presented in this paper proposes novel techniques to adaptively compress networking telemetry 
+
+TABLE I PREDICTION MAE WITH AND WITHOUT GO END -TO -END TRAINING .
+
+Method Task1 Task2 Task3 Task4 
+
+Recon-Based 1.27±0.04 0.09±0.004 0.04±0.003 1.48±0.14 GO E2E 1.21±0.02 0.08±0.003 0.04±0.0008 1.18±0.07 
+
+data based on the goal of the corresponding downstream tasks. This scheme adeptly manages diverse data characteristics, ranging from dense to sparse, by combining lossy generative compression techniques with lossless entropy-based compres-sion. The masking policy has been proved to further augment the compression ratio, especially when task information is given as contextual information. The adopted scheme has shown promising results in both reconstruction accuracy and task objectives, providing high flexibility to adapt to different incoming network requests. Future research endeavors will focus on extending the proposed solution through the evalu-ation of various training schemes and validate the approach’s efficacy across a broader spectrum of networking data types. REFERENCES [1] H. Wen, P. Porras, V. Yegneswaran, and Z. Lin, “A fine-grained telemetry stream for security services in 5g open radio access networks,” in 
+
+Proceedings of the 1st International Workshop on Emerging Topics in Wireless , 2022, pp. 18–23. [2] A. H. Celdr´ an, M. G. P´ erez, F. J. G. Clemente, and G. M. P´ erez, “Automatic monitoring management for 5G mobile networks,” Procedia Computer Science , vol. 110, pp. 328–335, 2017. [3] A. Jovi´ c, K. Brki´ c, and N. Bogunovi´ c, “A review of feature selection methods with applications,” in 2015 38th international convention on information and communication technology, electronics and microelec-tronics (MIPRO) , 2015, pp. 1200–1205. [4] B. Rozemberczki, L. Watson, P. Bayer, H.-T. Yang, O. Kiss, S. Nilsson, and R. Sarkar, “The shapley value in machine learning,” in The 31st International Joint Conference on Artificial Intelligence and the 25th European Conference on Artificial Intelligence , 2022, pp. 5572–5579. [5] G. Hinton and R. Salakhutdinov, “Reducing the dimensionality of data with neural networks,” Science , vol. 313, no. 5786, pp. 504–507, 2006. [6] D. Minnen, J. Ball´ e, and G. Toderici, “Joint autoregressive and hierar-chical priors for learned image compression,” in Conference on Neural Information Processing Systems 2018, 3-8 December 2018, Montr´ eal, Canada , 2018, pp. 10 794–10 803. [7] Z. Cheng, H. Sun, M. Takeuchi, and J. Katto, “Learned image com-pression with discretized gaussian mixture likelihoods and attention modules,” in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , 2020. [8] K. He, X. Chen, S. Xie, Y. Li, P. Doll´ ar, and R. Girshick, “Masked au-toencoders are scalable vision learners,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2022, pp. 16 000–16 009. [9] Q. Liao and T.-Y. Tung, “AdaSem: Adaptive goal-oriented semantic communications for end-to-end camera relocalization,” in IEEE Confer-ence on Computer Communications (INFOCOM) , 2024, pp. 1111–1120. [10] P. Talli, F. Pase, F. Chiariotti, A. Zanella, and M. Zorzi, “Effective communication with dynamic feature compression,” IEEE Transactions on Communications , vol. 72, no. 9, pp. 5595–5610, 2024. [11] N. Tishby, F. C. Pereira, and W. Bialek, “The information bottleneck method,” arXiv preprint physics/0004057 , 2000. [12] I. Butakov, A. Tolmachev, S. Malanchuk, A. Neopryatnaya, A. Frolov, and K. Andreev, “Information bottleneck analysis of deep neural net-works via lossy compression,” in International Conference on Learning Representations (ICLR) , 2024. [13] E. Jang, S. Gu, and B. Poole, “Categorical reparameterization with gumbel-softmax,” arXiv preprint arXiv:1611.01144 , 2016. [14] L. Liu, C. Dong, X. Liu, B. Yu, and J. Gao, “Bridging discrete and backpropagation: Straight-through and beyond,” Advances in Neural Information Processing Systems , vol. 36, pp. 12 291–12 311, 2023.

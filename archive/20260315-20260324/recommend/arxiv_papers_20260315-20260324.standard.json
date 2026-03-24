@@ -1,16 +1,432 @@
 {
   "mode": "standard",
-  "generated_at": "2026-03-24T04:22:49.957455+00:00",
+  "generated_at": "2026-03-24T04:42:15.901176+00:00",
   "stats": {
     "mode": "standard",
-    "tag_count": 0,
-    "deep_divecandidates": 0,
-    "deep_cap": null,
-    "deep_selected": 0,
-    "quick_candidates": 0,
-    "quick_skim_target": 10,
-    "quick_selected": 0
+    "tag_count": 1,
+    "deep_divecandidates": 7,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 5,
+    "quick_skim_target": 11,
+    "quick_selected": 5
   },
-  "deep_dive": [],
-  "quick_skim": []
+  "deep_dive": [
+    {
+      "id": "2603.14190v1",
+      "title": "Sublime: Sublinear Error & Space for Unbounded Skewed Streams",
+      "abstract": "Modern stream processing systems must often track the frequency of distinct keys in a data stream in real-time. Since monitoring the exact counts often entails a prohibitive memory footprint, many applications rely on compact, probabilistic data structures called frequency estimation sketches to approximate them. However, mainstream frequency estimation sketches fall short in two critical aspects: (1) They are memory-inefficient under data skew. This is because they use uniformly-sized counters to track the key counts and thus waste memory on storing the leading zeros of many small counter values. (2) Their estimation error deteriorates at least linearly with the stream's length, which may grow indefinitely over time. This is because they count the keys using a fixed number~of~counters.   We present Sublime, a framework that generalizes frequency estimation sketches to address these problems by dynamically adapting to the stream's skew and length. To save memory under skew, Sublime uses short counters upfront and elongates them with extensions stored within the same cache line as they overflow. It leverages novel bit manipulation routines to quickly access a counter's extension. It also controls the scaling of its error rate by expanding its number of approximate counters as the stream grows. We apply Sublime to Count-Min Sketch and Count Sketch. We show, theoretically and empirically, that Sublime significantly improves accuracy and memory over the state of the art while maintaining competitive or superior performance.",
+      "authors": [
+        "Navid Eslami",
+        "Ioana O. Bercea",
+        "Rasmus Pagh",
+        "Niv Dayan"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.DB",
+        "cs.IT"
+      ],
+      "published": "2026-03-15T02:57:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.14190v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "frequency estimation sketches for skewed streams",
+      "llm_evidence_cn": "针对偏斜流的频率估计Sketch算法",
+      "llm_evidence": "针对偏斜流的频率估计Sketch算法",
+      "canonical_evidence": "针对偏斜流的频率估计Sketch算法",
+      "llm_tldr_en": "Proposes Sublime, a memory-efficient sketch for real-time frequency estimation in skewed data streams.",
+      "llm_tldr_cn": "提出Sublime，一种针对偏斜数据流实时频率估计的高内存效率Sketch算法。",
+      "llm_tldr": "提出Sublime，一种针对偏斜数据流实时频率估计的高内存效率Sketch算法。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "sketch-based algorithms for network telemetry and measurement",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16786v1",
+      "title": "Elastic Sketch under Random Stationary Streams: Limiting Behavior and Near-Optimal Configuration",
+      "abstract": "\\texttt{Elastic-Sketch} is a hash-based data structure for counting item's appearances in a data stream, and it has been empirically shown to achieve a better memory-accuracy trade-off compared to classical methods. This algorithm combines a \\textit{heavy block}, which aims to maintain exact counts for a small set of dynamically \\textit{elected} items, with a light block that implements \\texttt{Count-Min} \\texttt{Sketch} (\\texttt{CM}) for summarizing the remaining traffic. The heavy block dynamics are governed by a hash function~$β$ that hashes items into~$m_1$ buckets, and an \\textit{eviction threshold}~$λ$, which controls how easily an elected item can be replaced. We show that the performance of \\texttt{Elastic-Sketch} strongly depends on the stream characteristics and the choice of~$λ$. Since optimal parameter choices depend on unknown stream properties, we analyze \\texttt{Elastic-Sketch} under a \\textit{stationary random stream} model -- a common assumption that captures the statistical regularities observed in real workloads. Formally, as the stream length goes to infinity, we derive closed-form expressions for the limiting distribution of the counters and the resulting expected counting error. These expressions are efficiently computable, enabling practical grid-based tuning of the heavy and \\texttt{CM} blocks memory split (via $m_1$) and the eviction threshold~$λ$. We further characterize the structure of the optimal eviction threshold, substantially reducing the search space and showing how this threshold depends on the arrival distribution. Extensive numerical simulations validate our asymptotic results on finite streams from the Zipf distribution.",
+      "authors": [
+        "Younes Ben Mazziane",
+        "Vinay Kumar B. R.",
+        "Othmane Marfoq"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.PF"
+      ],
+      "published": "2026-03-17T17:00:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.16786v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "analysis of Elastic Sketch for traffic counting in data streams",
+      "llm_evidence_cn": "数据流中流量计数的Elastic Sketch分析",
+      "llm_evidence": "数据流中流量计数的Elastic Sketch分析",
+      "canonical_evidence": "数据流中流量计数的Elastic Sketch分析",
+      "llm_tldr_en": "Analyzes the limiting behavior and optimal configuration of Elastic Sketch for network measurement.",
+      "llm_tldr_cn": "分析了用于网络测量的Elastic Sketch的极限行为和近优配置。",
+      "llm_tldr": "分析了用于网络测量的Elastic Sketch的极限行为和近优配置。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "sketch-based algorithms for network telemetry and measurement",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20109v1",
+      "title": "GO-GenZip: Goal-Oriented Generative Sampling and Hybrid Compression",
+      "abstract": "Current network data telemetry pipelines consist of massive streams of fine-grained Key Performance Indicators (KPIs) from multiple distributed sources towards central aggregators, making data storage, transmission, and real-time analysis increasingly unsustainable. This work presents a generative AI (GenAI)-driven sampling and hybrid compression framework that redesigns network telemetry from a goal-oriented perspective. Unlike conventional approaches that passively compress fully observed data, our approach jointly optimizes what to observe and how to encode it, guided by the relevance of information to downstream tasks. The framework integrates adaptive sampling policies, using adaptive masking techniques, with generative modeling to identify patterns and preserve critical features across temporal and spatial dimensions. The selectively acquired data are further processed through a hybrid compression scheme that combines traditional lossless coding with GenAI-driven, lossy compression. Experimental results on real network datasets demonstrate over 50$\\%$ reductions in sampling and data transfer costs, while maintaining comparable reconstruction accuracy and goal-oriented analytical fidelity in downstream tasks.",
+      "authors": [
+        "Pietro Talli",
+        "Qi Liao",
+        "Alessandro Lieto",
+        "Parijat Bhattacharjee",
+        "Federico Chiariotti",
+        "Andrea Zanella"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.IT"
+      ],
+      "published": "2026-03-20T16:33:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.20109v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "generative AI-driven sampling and hybrid compression for network telemetry",
+      "llm_evidence_cn": "生成式AI驱动的网络遥测采样与混合压缩",
+      "llm_evidence": "生成式AI驱动的网络遥测采样与混合压缩",
+      "canonical_evidence": "生成式AI驱动的网络遥测采样与混合压缩",
+      "llm_tldr_en": "Presents a goal-oriented framework using adaptive sampling and GenAI to optimize network telemetry pipelines.",
+      "llm_tldr_cn": "提出一种利用自适应采样和生成式AI优化网络遥测流水线的目标导向框架。",
+      "llm_tldr": "提出一种利用自适应采样和生成式AI优化网络遥测流水线的目标导向框架。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20573v1",
+      "title": "immUNITY: Detecting and Mitigating Low Volume & Slow Attacks with Programmable Switches and SmartNICs",
+      "abstract": "Our analysis of recent Internet traces shows that up to 71% of flows contain suspicious behaviors indicative of low-volume network attacks such as port scans. However, distinguishing anomalous traffic in real time is challenging as each attack flow may comprise only a few packets.   We extend prior work that tracks heavy hitter flows to also detect low-volume and slow attacks by combining the capabilities of both switches and SmartNICs. We flip the usual design approach by proposing an efficient filter data structure used to quickly route traffic marked as benign towards destination end-systems. We make careful use of limited programmable switch memory and pipeline stages, and complement them with SmartNIC resources to analyze the remaining traffic that may be anomalous. Using machine learning classifiers and intrusion detection rules deployed on the SmartNIC, we identify malicious source IPs, which then undergo more detailed forensics for attack mitigation. Finally, we develop a dataplane based protocol to rapidly coordinate data structure updates between these devices. We implement immUNITY in a testbed with Tofino v1 switch and Bluefield 3 SmartNIC, demonstrating its high accuracy, while minimizing traffic that's analyzed outside the switch.",
+      "authors": [
+        "Cuidi Wei",
+        "Shaoyu Tu",
+        "Daiki Hata",
+        "Toru Hasegawa",
+        "Yuki Koizumi",
+        "K. K. Ramakrishnan",
+        "Junji Takemasa",
+        "Timothy Wood"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.CR"
+      ],
+      "published": "2026-03-21T00:06:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.20573v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "detecting flows using programmable switches and SmartNICs",
+      "llm_evidence_cn": "使用可编程交换机和智能网卡检测流量",
+      "llm_evidence": "使用可编程交换机和智能网卡检测流量",
+      "canonical_evidence": "使用可编程交换机和智能网卡检测流量",
+      "llm_tldr_en": "immUNITY uses programmable switches and SmartNICs to detect low-volume attacks by tracking flow behaviors.",
+      "llm_tldr_cn": "immUNITY利用可编程交换机和智能网卡，通过追踪流行为检测低流量攻击。",
+      "llm_tldr": "immUNITY利用可编程交换机和智能网卡，通过追踪流行为检测低流量攻击。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16497v1",
+      "title": "Bridging the High-Frequency Data Gap: A Millisecond-Resolution Network Dataset for Advancing Time Series Foundation Models",
+      "abstract": "Time series foundation models (TSFMs) require diverse, real-world datasets to adapt across varying domains and temporal frequencies. However, current large-scale datasets predominantly focus on low-frequency time series with sampling intervals, i.e., time resolution, in the range of seconds to years, hindering their ability to capture the nuances of high-frequency time series data. To address this limitation, we introduce a novel dataset that captures millisecond-resolution wireless and traffic conditions from an operational 5G wireless deployment, expanding the scope of TSFMs to incorporate high-frequency data for pre-training. Further, the dataset introduces a new domain, wireless networks, thus complementing existing more general domains like energy and finance. The dataset also provides use cases for short-term forecasting, with prediction horizons spanning from 100 milliseconds (1 step) to 9.6 seconds (96 steps). By benchmarking traditional machine learning models and TSFMs on predictive tasks using this dataset, we demonstrate that most TSFM model configurations perform poorly on this new data distribution in both zero-shot and fine-tuned settings. Our work underscores the importance of incorporating high-frequency datasets during pre-training and forecasting to enhance architectures, fine-tuning strategies, generalization, and robustness of TSFMs in real-world applications.",
+      "authors": [
+        "Subina Khanal",
+        "Seshu Tirupathi",
+        "Merim Dzaferagic",
+        "Marco Ruffini",
+        "Torben Bach Pedersen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-17T13:23:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.16497v1",
+      "tags": [
+        "keyword:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "High-frequency network traffic and wireless condition dataset",
+      "llm_evidence_cn": "高频网络流量与无线状况数据集",
+      "llm_evidence": "高频网络流量与无线状况数据集",
+      "canonical_evidence": "高频网络流量与无线状况数据集",
+      "llm_tldr_en": "Introduces a millisecond-resolution dataset for high-frequency network traffic and wireless monitoring.",
+      "llm_tldr_cn": "引入了一个毫秒级分辨率的数据集，用于高频网络流量和无线监控研究。",
+      "llm_tldr": "引入了一个毫秒级分辨率的数据集，用于高频网络流量和无线监控研究。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network traffic measurement methods for high-speed links",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16748v1",
+      "title": "Fine-Grained Network Traffic Classification with Contextual QoS Profiling",
+      "abstract": "Accurate network traffic classification is vital for managing modern applications with strict Quality of Service (QoS) demands, such as edge computing, real-time XR, and autonomous systems. While recent advances in application-level classification show high accuracy, they often miss fine-grained in-app QoS variations critical for service differentiation. This paper proposes a hierarchical graph neural network (GNN) framework that combines a three-level graph representation with an automated QoS-aware assignment algorithm. The model captures multi-scale temporal patterns via packet aggregation, time-window clustering, and session-level behavior modeling. QoS priorities are derived using five key metrics (bandwidth, jitter, packet stability, burst frequency, and burst stability), processed through logarithmic transformation and weighted ranking. Evaluations across 14 usage scenarios from YouTube, Prime Video, TikTok, and Zoom show that the proposed GNN significantly outperforms state-of-the-art methods in service-level classification. The QoS-aware assignment further refines classification to enhance user experience. This work advances QoS-aware traffic classification by enabling precise in-app usage differentiation and adaptive service prioritization in dynamic network environments.",
+      "authors": [
+        "Huiwen Zhang",
+        "Feng Ye"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-17T16:27:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.16748v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "fine-grained network traffic classification",
+      "llm_evidence_cn": "细粒度网络流量分类",
+      "llm_evidence": "细粒度网络流量分类",
+      "canonical_evidence": "细粒度网络流量分类",
+      "llm_tldr_en": "Introduces a GNN framework for fine-grained traffic classification based on QoS metrics.",
+      "llm_tldr_cn": "引入一种基于QoS指标的GNN框架，用于细粒度网络流量分类。",
+      "llm_tldr": "引入一种基于QoS指标的GNN框架，用于细粒度网络流量分类。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.19867v1",
+      "title": "Vulnerability Analysis of eBPF-enabled Containerized Deployments of 5G Core Networks",
+      "abstract": "The extended Berkeley Packet Filter (eBPF) is useful for faster packet processing and network monitoring in softwarized deployments. Similarly, softwarized deployments of 5G core network services adopted eBPF to meet the stringent latency and bandwidth requirements of underlying applications. While the existing studies focused on network performance, security concerns over eBPF-enabled platforms are overlooked. In this paper, we study the vulnerability analysis of 5G core network deployments that use eBPF for packet processing and traffic monitoring. In particular, we consider the following aspects: a) tracing, b) denial-of-service (DoS), c) stealing information, and d) bash injection. We present the detailed attack scenarios with step-by-step implementation of containerized and eBPF-enabled 5G network functions using Open5GS. The experiment results show that the aforementioned vulnerabilities are present in eBPF-enabled 5G deployments and can be exploited by attackers. Finally, we present some mitigation techniques useful for addressing the vulnerabilities. The source code and implementation details are made available at https://github.com/chimms1/5G-eBPF-exploits.",
+      "authors": [
+        "Yash Deshpande",
+        "Samaresh Bera"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-20T11:34:46+00:00",
+      "link": "https://arxiv.org/pdf/2603.19867v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "eBPF for network monitoring and traffic monitoring",
+      "llm_evidence_cn": "用于网络监控和流量监控的eBPF技术",
+      "llm_evidence": "用于网络监控和流量监控的eBPF技术",
+      "canonical_evidence": "用于网络监控和流量监控的eBPF技术",
+      "llm_tldr_en": "Analyzes vulnerabilities in 5G core networks that utilize eBPF for packet processing and monitoring.",
+      "llm_tldr_cn": "分析了使用eBPF进行数据包处理和监控的5G核心网的安全性漏洞。",
+      "llm_tldr": "分析了使用eBPF进行数据包处理和监控的5G核心网的安全性漏洞。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.16018v1",
+      "title": "Galaxy Tracer: A Topology-First 3D Interface for Interactive PCAP Exploration",
+      "abstract": "Packet analysis tools conventionally present capture data through tabular packet lists, constraining the analyst to a sequential view that obscures the relational structure of network communication. This paper presents Galaxy Tracer, a browser-native packet capture exploration system in which the default interface is an interactive three-dimensional network topology rather than a packet list. Hosts appear as spatially positioned nodes, conversations as edges, and protocol groupings as visually distinct clusters. A synchronized packet list remains available as a secondary view, sharing filter state with the topology so that structural and tabular inspection function as one continuous workflow. The system parses PCAP and PCAPNG formats, dissects over 90 protocols, and renders the topology through Three.js. The paper argues that the third spatial dimension is not merely aesthetic but analytically meaningful: it reveals density, clustering, host centrality, and communication scale that are difficult to perceive in list-only tools.",
+      "authors": [
+        "Ryan Younger"
+      ],
+      "primary_category": "cs.HC",
+      "categories": [
+        "cs.HC",
+        "cs.NI"
+      ],
+      "published": "2026-03-16T23:54:16+00:00",
+      "link": "https://arxiv.org/pdf/2603.16018v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "interactive PCAP exploration and packet analysis",
+      "llm_evidence_cn": "交互式PCAP探索与数据包分析",
+      "llm_evidence": "交互式PCAP探索与数据包分析",
+      "canonical_evidence": "交互式PCAP探索与数据包分析",
+      "llm_tldr_en": "Galaxy Tracer provides a 3D topology interface for interactive exploration of network packet captures.",
+      "llm_tldr_cn": "Galaxy Tracer为网络数据包捕获的交互式探索提供了一个3D拓扑界面。",
+      "llm_tldr": "Galaxy Tracer为网络数据包捕获的交互式探索提供了一个3D拓扑界面。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.15042v1",
+      "title": "Guaranteeing Semantic and Performance Determinism in Flexible GPU Sharing",
+      "abstract": "GPU sharing is critical for maximizing hardware utilization in modern data centers. However, existing approaches present a stark trade-off: coarse-grained temporal multiplexing incurs severe tail-latency spikes for interactive services, while fine-grained spatial partitioning often necessitates invasive kernel modifications that compromise behavioral equivalence.   We present DetShare, a novel GPU sharing system that prioritizes determinism and transparency. DetShare ensures semantic determinism (unmodified kernels yield identical results) and performance determinism (predictable tail latency), all while maintaining complete transparency (zero code modification). DetShare introduces GPU coroutines, a new abstraction that decouples logical execution contexts from physical GPU resources. This decoupling enables flexible, fine-grained resource allocation via lightweight context migration.   Our evaluation demonstrates that DetShare improves training throughput by up to 79.2% compared to temporal sharing. In co-location scenarios, it outperforms state-of-the-art baselines, reducing P99 tail latency by 15.1% without compromising throughput. Furthermore, through workload-aware placement and our TPOT-First scheduling policy, DetShare decreases average inference latency by 69.1% and reduces Time-Per-Output-Token (TPOT) SLO violations by 21.2% relative to default policies.",
+      "authors": [
+        "Zhenyuan Yang",
+        "Wenxin Zheng",
+        "Mingyu Li"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.OS"
+      ],
+      "published": "2026-03-16T09:48:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.15042v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GPU sharing system for data centers",
+      "llm_evidence_cn": "数据中心的GPU共享系统",
+      "llm_evidence": "数据中心的GPU共享系统",
+      "canonical_evidence": "数据中心的GPU共享系统",
+      "llm_tldr_en": "DetShare ensures performance determinism and predictable tail latency in data center GPU sharing.",
+      "llm_tldr_cn": "DetShare确保了数据中心GPU共享中的性能确定性和可预测的尾部延迟。",
+      "llm_tldr": "DetShare确保了数据中心GPU共享中的性能确定性和可预测的尾部延迟。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16119v1",
+      "title": "BLADE: Adaptive Wi-Fi Contention Control for Next-Generation Real-Time Communication",
+      "abstract": "Next-generation real-time communication (NGRTC) applications, such as cloud gaming and XR, demand consistently ultra-low latency. However, through our first large-scale measurement, we find that despite the deployment of edge servers, dedicated congestion control, and loss recovery mechanisms, cloud gaming users still experience long-tail latency in Wi-Fi networks. We further identify that Wi-Fi last-mile access points (APs) serve as the primary latency bottleneck. Specifically, short-term packet delivery droughts, caused by fundamental limitations in Wi-Fi contention control standards, are the root cause. To address this issue, we propose BLADE, an adaptive contention control algorithm that dynamically adjusts the contention windows (CW) of all Wi-Fi transmitters based on the channel contention level in a fully distributed manner. Our NS3 simulations and real-world evaluations with commercial Wi-Fi APs demonstrate that, compared to standard contention control, BLADE reduces Wi-Fi packet transmission tail latency by over 5X under heavy channel contention and significantly stabilizes MAC throughput while ensuring fast and fair convergence. Consequently, BLADE reduces the video stall rate in cloud gaming by over 90%.",
+      "authors": [
+        "Fengqian Guo",
+        "Yuhan Zhou",
+        "Longwei Jiang",
+        "Congcong Miao",
+        "Yuxin Liu",
+        "Chenren Xu",
+        "Hancheng Lu",
+        "Chang Wen Chen",
+        "Yaxiong Xie",
+        "Honghao Liu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-17T04:56:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.16119v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "large-scale measurement of Wi-Fi latency bottlenecks",
+      "llm_evidence_cn": "Wi-Fi延迟瓶颈的大规模测量研究",
+      "llm_evidence": "Wi-Fi延迟瓶颈的大规模测量研究",
+      "canonical_evidence": "Wi-Fi延迟瓶颈的大规模测量研究",
+      "llm_tldr_en": "Analyzes Wi-Fi latency bottlenecks and proposes an adaptive contention control algorithm for real-time apps.",
+      "llm_tldr_cn": "分析了Wi-Fi延迟瓶颈，并为实时应用提出了一种自适应竞争控制算法。",
+      "llm_tldr": "分析了Wi-Fi延迟瓶颈，并为实时应用提出了一种自适应竞争控制算法。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.21596v1",
+      "title": "In-network Attack Detection with Federated Deep Learning in IoT Networks: Real Implementation and Analysis",
+      "abstract": "The rapid expansion of the Internet of Things (IoT) and its integration with backbone networks have heightened the risk of security breaches. Traditional centralized approaches to anomaly detection, which require transferring large volumes of data to central servers, suffer from privacy, scalability, and latency limitations. This paper proposes a lightweight autoencoder-based anomaly detection framework designed for deployment on resource-constrained edge devices, enabling real-time detection while minimizing data transfer and preserving privacy. Federated learning is employed to train models collaboratively across distributed devices, where local training occurs on edge nodes and only model weights are aggregated at a central server. A real-world IoT testbed using Raspberry Pi sensor nodes was developed to collect normal and attack traffic data. The proposed federated anomaly detection system, implemented and evaluated on the testbed, demonstrates its effectiveness in accurately identifying network attacks. The communication overhead was reduced significantly while achieving comparable performance to the centralized method.",
+      "authors": [
+        "Devashish Chaudhary",
+        "Sutharshan Rajasegarar",
+        "Shiva Raj Pokhrel",
+        "Lei Pan",
+        "Ruby D"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "published": "2026-03-23T05:46:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.21596v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "In-network anomaly detection for real-time monitoring",
+      "llm_evidence_cn": "用于实时监控的网络内异常检测",
+      "llm_evidence": "用于实时监控的网络内异常检测",
+      "canonical_evidence": "用于实时监控的网络内异常检测",
+      "llm_tldr_en": "Proposes a lightweight autoencoder for real-time in-network anomaly detection in IoT edge devices.",
+      "llm_tldr_cn": "提出一种轻量级自编码器，用于物联网边缘设备的实时网络内异常检测。",
+      "llm_tldr": "提出一种轻量级自编码器，用于物联网边缘设备的实时网络内异常检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
 }
