@@ -1,0 +1,165 @@
+Title: A monitoring system for collecting and aggregating metrics from distributed clouds
+
+URL Source: https://arxiv.org/pdf/2603.05241v1
+
+Published Time: Fri, 06 Mar 2026 02:08:11 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# A monitoring system for collecting and aggregating metrics from distributed clouds 
+
+Tamara Rankovi´ c
+
+Faculty of Technical Sciences 
+
+University of Novi Sad Novi Sad, Serbia tamara.rankovic@uns.ac.rs 
+
+Mateja Rilak 
+
+Faculty of Technical Sciences 
+
+University of Novi Sad Novi Sad, Serbia rilak.sr38.2021@uns.ac.rs 
+
+Janko Rakonjac 
+
+Faculty of Technical Sciences 
+
+University of Novi Sad Novi Sad, Serbia rakonjac.sr33.2021@uns.ac.rs 
+
+Miloˇ s Simi´ c
+
+Faculty of Technical Sciences 
+
+University of Novi Sad Novi Sad, Serbia milos.simic@uns.ac.rs 
+
+Abstract —Applications requiring real-time processing of large volumes of data have been the main driver for rethinking the traditional cloud, giving rise to novel cloud models. Distributed cloud (DC) is a model that allows users to dynamically create and dispose of strategically located ad-hoc clouds that contain resources best tailored to their needs. It is essential for this model to provide a high degree of observability for it to be viable in real-world scenarios. In this paper, we present the design and implementation of a monitoring system that collects metrics from DCs and makes them accessible to diverse clients. Agents running on nodes are responsible for collecting machine-, container-, and application-level metrics. During the health-check protocol, that data is transferred from the node to DC’s control plane running inside the cloud. There, it is persisted and served via multiple APIs, including a streaming API. Moreover, node metrics are aggregated for every DC in order to provide a more comprehensive view of the system’s state. 
+
+Index Terms —metrics, monitoring system, distributed cloud, cloud computing, distributed systems 
+
+I. I NTRODUCTION 
+
+In the past decade, we have seen a pronounced transfor-mation of the cloud model. Requirements posed by modern applications have been the main driver of this transformation. Real-time transfer, processing, and retrieval of large volumes of data have been shown to be inefficient or impossible when relying on remote centralized datacenters [1]. To address these issues, many novel cloud models, like edge and fog computing, have emerged [2, 3]. While proposing different solutions, they all embrace the concept of data locality - processing data on locations where it is stored, but also storing it near locations where it is generated. Modern manufacturing facilities, power plants, autonomous vehicles, and other related use cases, where data sources and consumers are in near proximity and real-time data processing and retrieval are essential, benefit from this organization tremendously. Besides introducing ef-ficiency, data privacy and security are also enhanced, as data may never cross the boundary of trusted locations or networks. The distributed cloud (DC) model is one of the models concerned with presented problems [4, 5]. It consists of cloud and DC layers. The cloud layer is the traditional centralized 
+
+Funded by the European Union (TaRDIS, 101093006). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union. Neither the European Union nor the granting authority can be held responsible for them. 
+
+cloud, while the DC layer is meant to offload the cloud layer and also serve clients with strict latency and privacy requirements. The DC layer consists of dynamic DCs formed and discarded by users. Each DC should be tailored to the user’s needs, including its resource capacity and location [4, 6]. The lifecycle of a DC is coordinated by a control plane in the cloud layer, but the DC itself ensures its proper operation, providing a hybrid architecture. Users are expected to specify configuration and workloads for their DCs, while the system is responsible for its convergence to the desired state. This model allows for seamless cooperation between the cloud and the DC. To make the DC model a viable option for real-world appli-cations, we need to provide a rich ecosystem of functionalities and reliable tools around it. Efforts towards this have been made by introducing namespaces and dataspaces, allowing for virtual DCs that provide multitenancy capabilities [7, 8]. Moreover, mechanisms for dynamic system and application reconfiguration were developed [9], with native support for misconfiguration prevention and detection [10]. Access to any resource in the DC is managed by a hierarchical attribute-based model [11, 12]. Considering DC’s complex architecture and interactions among its components, it is necessary to ensure a high degree of observability. To achieve this in any environment, it is a standard practice to collect various metrics, logs, and traces [13]. They serve as a foundation for monitoring the system’s behavior and performance and detecting any bottlenecks or failures. Moreover, workload schedulers and infrastructure autoscalers rely primarily on metrics as inputs for making decisions. Existing monitoring solutions have become highly sophisti-cated and have numerous capabilities, however, none of them are native to the DC model. As DCs are dynamic, regularly being formed or destroyed, and with many nodes constantly joining or leaving, the monitoring system needs to be flexi-ble enough to accommodate these fluctuations. Additionally, as hardware comprising DCs can often be resource-limited, lightweight tools are essential to ensure minimal resource consumption by system components. The focus of this paper is on designing and implementing a monitoring system native for DCs, more precisely for collect-
+
+> arXiv:2603.05241v1 [cs.DC] 5 Mar 2026
+
+ing metrics from DCs and making them accessible to clients. We consider end users who manage DCs the primary clients, as it is crucial for them to have insight into the state of their DC infrastructure and applications running on it. However, we take more potential clients into consideration, including workload schedulers, infrastructure, and application-level autoscalers, who make decisions based on this data. Moreover, if these clients incorporate machine learning models, they can utilize collected metrics also as training sets. In Section II we discuss existing monitoring solutions, par-ticularly the cloud-native ones. Sections III and IV present our solution, its design and implementation respectively. In Section V we provide reasoning behind certain design decisions and discuss the system’s limitations and possible improvements, while Section VI concludes the paper and outlines directions for future work. II. R ELATED WORK 
+
+Prometheus 1 is a widely used monitoring system with a rich set of tools and integrations. It is a centralized metrics collection and analysis solution that uses a pull communication model. A Prometheus instance is configured to periodically scrape metrics from desired targets and store them in its time-series database. Targets can expose their metrics directly when instrumented with client libraries. However, when that is not possible, usually in third-party systems, numerous exporters have been developed to extract and transform metrics from such systems into the Prometheus format. The standardiza-tion of this format, called OpenMetrics 2, was introduced to encourage interoperability between different monitoring tools. Kubernetes 3, a popular container orchestrator, has a resource metrics pipeline and a full metrics pipeline. The first one serves a limited set of metrics via the metrics-server which collects metrics from nodes and stores them only in memory for a short time. This pipeline is primarily meant to be used by autoscalers. The second pipeline provides a significantly richer set of metrics from nodes but requires users to implement their adapter that exposes those metrics. All metrics are transmitted in the OpenMetrics format. When orchestrating workloads over a federation of clusters, a scheduler needs to have a global view of the entire feder-ation. Acala [14] is designed to aggregate metrics from fed-erations of Kubernetes clusters. Global View Cluster contains Prometheus storage and a set of Acala controllers that periodi-cally request metrics from clusters. There is an Acala member in every cluster that processes these requests by collecting metrics from all nodes inside that cluster. Before returning a response, it applies data reduction strategies, aggregation, and deduplication. Aggregation calculates cluster averages for metrics that allow so, and discards values for individual nodes, while deduplication compares the current with the previous value of the same metric, and discards it if they are equal. 
+
+> 1Prometheus: https://prometheus.io/
+> 2OpenMetrics: https://openmetrics.io/
+> 3Kubernetes: https://kubernetes.io/
+
+There have been efforts to integrate monitoring into cloud-extending models similar to the DC, so we give them special attention as solutions developed for one model could also apply to the others [15]. EdgeCloud Mon [16] integrates cloud with edge by proposing a system that collects infrastructure, pod, and virtual machine metrics from k3s 4 edge clusters and transfers them to the cloud for long-term storage and access. Every node exposes infrastructure metrics through the node exporter 5 and a custom agent that provides additional machine metrics. Additionally, kubevirt-exporter collects metrics for virtual machines running on worker nodes by collecting them via the KubeVirt API. This virtualization technique is aimed at workloads that require Windows as the operating system. In-side every cluster, a Prometheus instance periodically scrapes metrics from exporters on worker nodes and kubevirt-exporter running on the master node, and pushes them to the cloud. Compared to all the centralized solutions we discussed, FogMon [17] presents a two-layer distributed architecture that promotes fault tolerance. On the first layer are follower nodes that collect their metrics and send them to the leader node they were assigned to, which resides in the second layer. Leader nodes aggregate metrics from follower nodes and share them with other leaders through a peer-to-peer network via a gossip protocol. III. S YSTEM DESIGN 
+
+To provide a comprehensive overview of a DC’s state, we need to collect metrics on multiple levels. The first one is the 
+
+machine level , consisting of each node’s hardware and system software. Aside from gathering machine metrics for individual nodes, it is also valuable to aggregate a subset of them for every DC. Therefore, we differentiate between node-level and DC-level machine metrics. The second level is the container level , as all user-defined workloads are running inside this isolated environment. When the model evolves to support other environments, such as virtual machines and unikernels, this level will also evolve to incorporate them, so we may refer to it as the isolated environment level . Lastly, the application level is the one that should allow client applications to generate arbitrary metrics that will be processed by and stored in the system. The metrics subsystem comprises multiple components re-sponsible for collecting, processing, storing, and retrieving metrics. They can be separated into ones running on nodes and ones running in the control plane. Fig. 1 displays the extended architecture of the DC platform. Every node contains the following components:  
+
+> •
+
+Machine-level collector providing an API for accessing node-level machine metrics.  
+
+> •
+
+Container-level collector providing an API for accessing container-level metrics.  
+
+> •
+
+Metrics agent responsible for collecting node metrics from all levels and transferring them to the control plane.  
+
+> 4k3s: https://k3s.io/
+> 5Node exporter: https://github.com/prometheus/node exporter user & organization
+> management
+> API gateway
+> authorization
+> node registry
+> scheduler seccomp profile
+> management
+> data schema
+> management
+> configuration
+> management
+> namespace
+> management
+> CLI tool
+> rate limiter
+> metrics processor metrics reader
+> control plane
+> DC
+> node node
+> node node
+> DC
+> node node
+> node node
+> node
+> membership
+> agent
+> configuration
+> agent
+> machine-level
+> collector
+> metrics
+> agent
+> container-
+> level collector
+
+Fig. 1: DC platform architecture Inside the control plane, we have another set of components:  
+
+> •
+
+Metrics storage where all collected metrics reside.  
+
+> •
+
+Processor responsible for collecting metrics from the nodes, aggregating and storing them.  
+
+> •
+
+Reader implementing the API for retrieving the collected metrics, intended for clients of the DC platform. The collection process can be divided into two steps, the first one being the collection of metrics from different levels inside a node, and the second one being the collection from nodes by the control plane. Firstly, we discuss how metrics collection on the node is designed. Machine and container metrics are exposed by their respec-tive collectors that implement an agreed-upon API so that their implementation can be swapped seamlessly. The API must have only one HTTP GET /metrics endpoint, following the example of Prometheus. A response to the endpoint invoca-tion should be a list of collected metrics from the previous invocation. Here, and in all other metrics transmission points, we comply with the OpenMetrics standard, in order to simplify integration with existing cloud-native tools. The metrics agent periodically sends requests to machine and container collectors and stores results on the file system temporarily, until they are transferred to the control plane for long-term persistence. The frequency at which the agent performs this operation is configurable. Application-level metrics operate similarly, with the main difference being that collection targets are dynamic, and de-fined by DC users. Therefore, the Metrics agent must maintain a target list. When a user submits a new application to the con-trol plane, they should specify if that application implements a metrics API, the same one described for machine and container collectors. If it does, when the scheduler assigns an instance of that application to a node, it should notify the Metrics agent of the address where the application will be reachable. When the application gets terminated, the agent should be notified once again, so it can remove the address from its target list. As with metrics on other levels, the agent periodically polls the targets, gathers results, and stores them on a file system. It should be noted that the system doesn’t restrict what metrics are to be collected. They are completely custom, allowing users to generate any information they deem valuable from their applications, as long as the API is implemented correctly. Now we describe how metrics are transfered from the nodes to the control plane and are processed and stored there. Processor is a component whose main purpose is to monitor the health of the node pool. It periodically sends a ping request and, if a node doesn’t reply within a defined interval, it is considered dead. The processor relies on the node registry to get the list of all nodes and updates it according to health-check results. We piggyback metrics data on this protocol, with the goal of reducing the number of requests between nodes and the control plane. When a node replies to a ping, it also adds to the reply all metrics collected from the previous ping. After that, it clears transmitted data from its temporary storage. When the Processor receives metrics, it writes them to the Metrics storage. Even though this method can cause data loss if the Processor doesn’t successfully persist the data, we opted for it because one of the main properties of nodes is that they are resource-limited. As we previously mentioned, certain machine metrics, such as total and available hardware resources, should exist not only on a node level but also on a DC level. A simple strategy we propose is for a Processor to periodically retrieve the latest node-level metrics for each DC, perform a respective aggregation function, usually a sum or an average, and store the result. The Reader component implements APIs for clients to access stored metrics. It provides both a REST and a streaming API. The REST API endpoints are listed in Table I. In all cases, the response is a list of metrics in the OpenMetrics text format. The streaming API allows clients to subscribe to the latest node or DC metrics. It can be useful for real-time dash-boards, schedulers, or autoscalers. We define a topic hierarchy 
+
+metrics. {nodes |dc }.{id |*} and allow the use of wildcards (*) to subscribe to multiple topics at once. If a client wants to subscribe to metrics of a DC with id X, they should use the topic metrics.dc.X . On the other hand, if they want to receive metrics for all nodes, the topic would be metrics.nodes.* 
+
+IV. I MPLEMENTATION 
+
+The DC platform we provided with a monitoring subsys-tem is an open-source project named constellations (c12s) 6.Starometry 7 is an implementation of the Metrics agent, while Processor and Reader are both part of the protostar project 8.All components, including the ones presented in this paper, are written in Go programming language. Communication between the control plane and nodes, as well as the streaming API, are implemented using NATS 9 as the message broker. Node exporter and Windows exporter 10 are used as machine-level collectors on nodes, while cAdvisor 11 is used for ac-cessing container-level metrics. Prometheus was chosen as the Metrics storage, because of its native support for OpenMetrics format and a rich query language. The correctness of the implementation was tested in labo-ratory conditions with simulated nodes running inside virtual machines. However, tests in realistic environments on hetero-geneous hardware are part of our future work. V. D ISCUSSION 
+
+In this section, we will present the reasoning behind the system’s design choices and discuss our solution’s limitations, as well as directions for possible improvements. When deciding on the architecture, we primarily focused on small-scale DCs, where centralized collection and processing points are sufficient. However, in large DCs comprising thou-sands of nodes, this strategy can easily overload the control plane and cause more frequent failures or traffic congestion. For these scenarios, we propose a peer-to-peer network to be formed inside every DC. With communication established between nodes, they would be able to perform health checks internally, and the control plane needs to directly communicate with only a small number of nodes to collect states for the entire DC. Furthermore, metrics can still be piggybacked on the health-check protocol, so that data aggregation load can be distributed between nodes. There are numerous approaches to this, from gossip-based aggregation [18, 19], to hierarchical strategies [20, 21]. We leave this question to our future work. 
+
+> 6c12s source code: https://github.com/c12s/
+> 7starometry source code: https://github.com/c12s/starometry
+> 8protostar source code: https://github.com/c12s/protostar
+> 9NATS: https://nats.io/
+> 10 Windows exporter: https://github.com/prometheus-community/windows exporter
+> 11 cAdvisor: https://github.com/google/cadvisor
+
+As nodes generate large amounts of metrics data constantly, it is necessary to incorporate strategies to reduce it in transit and at rest. Here we distinguish between lossless and lossy strategies. The usage of lossless compression algorithms suit-able for time-series data could significantly lower the amount of network and persistent storage required. However, the focus should be on lightweight algorithms, as compression and decompression would introduce latency and the need for more processing power. A lossy strategy that could drastically decrease data size is a dynamic sampling of metrics so that only relevant data points are recorded. If values are stable over long periods, with occasional notable changes, most of that data can be discarded on the node. This way, only a small subset has to be transferred to the control plane and permanently stored, while the rest can be reconstructed with a satisfactory degree of accuracy. One design decision we mentioned in Section III, that could present a system limitation in certain cases, is potential data loss if a node sends its metrics, and deletes it, but the control plane doesn’t persist it successfully. We opted for this approach to reduce the node’s disk usage and with an assumption that rare metrics losses are tolerable to users. However, if nodes have ample disk space and no metrics loss is allowed, the proposed collection strategy can be altered. The control plane could be extended to send confirmation messages when it saves the data, and only then would nodes remove it from its storage. If no confirmation is received within a defined interval, the node will resend that data. Because DCs should support diverse use cases and can have varying structures, they have to offer multiple strategies regarding metrics collection, aggregation, compression, and storage. Therefore, we argue that the platform should include all the approaches we discussed here and allow the end user to select a configuration most appropriate for their needs. VI. C ONCLUSION 
+
+In this paper, we proposed one possible design for a metrics collection, aggregation, and retrieval system operating inside DCs, and discussed its refinements and alternatives. It covers metrics from the lowest machine level, to the custom metrics generated by client applications. Components are separated into ones running on nodes, responsible for data collection, and ones inside the control plane, gathering data from nodes, aggregating, and serving it to users. We supplemented this design with an implementation integrated into an existing open-source DC platform. As our solution is centralized, heavily relying on the control plane, we plan to complement it with a more decentralized strategy in which DCs collect and aggregate data, and only later share it with the control plane for easier access. Also, we will focus on lightweight algorithms that filter and com-press metrics in order to minimize the amount of required resources. Furthermore, a well-equipped alerting mechanism is an indispensable component of any monitoring system, thus its development is also part of our future work. We also plan to utilize the monitoring system for developing infrastructure TABLE I: Metrics REST API 
+
+Method Path Parameters Description 
+
+/api/metrics-api/nodes/ {nodeID }/{timestamp }
+
+nodeID - Node identifier timestamp - Range start timestamp The endpoint retrieves metrics for the specified node, collected from the specified timestamp until now. /api/metrics-api/nodes/ {nodeID }/{start }/{end }
+
+nodeID - Node identifier start - Range start timestamp stop - Range stop timestamp The endpoint retrieves metrics for the specified node, collected for the specified time range. /api/metrics-api/dc/ {dcID }/{timestamp } dcID - DC identifier timestamp - Range start timestamp The endpoint retrieves metrics for the specified DC, collected from the specified timestamp until now. /api/metrics-api/dc/ {dcID }/{start }/{end }
+
+dcID - DC identifier start - Range start timestamp stop - Range stop timestamp The endpoint retrieves metrics for the specified DC, collected for the specified time range. /api/metrics-api/containers/ {containerID }/{timestamp }
+
+containerID - Container identifier timestamp - Range start timestamp The endpoint retrieves metrics for the specified con-tainer, collected from the specified timestamp until now. /api/metrics-api/containers/ {containerID }/{start }/{end }
+
+containerID - Container identifier start - Range start timestamp stop - Range stop timestamp The endpoint retrieves metrics for the specified con-tainer, collected for the specified time range. GET /api/metrics-api/apps/ {appID }/{timestamp } appID - Application identifier timestamp - Range start timestamp The endpoint retrieves metrics for the specified appli-cation, collected from the specified timestamp until now. /api/metrics-api/apps/ {appID }/{start }/{end }
+
+appID - Application identifier start - Range start timestamp stop - Range stop timestamp The endpoint retrieves metrics for the specified ap-plication, collected for the specified time range. /api/metrics-api/ {timestamp } timestamp - Range start timestamp The endpoint retrieves all metrics collected from the specified timestamp until now. Primarily intended to be used for training of machine learning models. /api/metrics-api/ {start }/{end } start - Range start timestamp stop - Range stop timestamp The endpoint retrieves all metrics collected for the specified time range. Also intended to be used for training machine learning models. /api/metrics-api/nodes/ {nodeID }/latest nodeID - Node identifier The endpoint retrieves latest metrics for the specified node. It contains only a subset of crucial metrics, intended for displaying on dashboards. /api/metrics-api/dc/ {dcID }/latest dcID - DC identifier The endpoint retrieves latest metrics for the specified DC. It contains only a subset of crucial metrics, intended for displaying on dashboards. 
+
+and application-level autoscaleres. To ensure the correct and efficient operation of all components, we will test our system in realistic environments. REFERENCES [1] A. J. Ferrer, J. M. Marqu` es, and J. Jorba, “Towards the decentralised cloud: Survey on approaches and challenges for mobile, ad hoc, and edge computing,” ACM Computing Surveys (CSUR) , vol. 51, no. 6, pp. 1–36, 2019. [2] W. Shi, J. Cao, Q. Zhang, Y. Li, and L. Xu, “Edge computing: Vision and challenges,” IEEE internet of things journal , vol. 3, no. 5, pp. 637–646, 2016. [3] F. Bonomi, R. Milito, J. Zhu, and S. Addepalli, “Fog computing and its role in the internet of things,” in Proceedings of the first edition of the MCC workshop on Mobile cloud computing , 2012, pp. 13–16. [4] M. Simi´ c, I. Proki´ c, J. Dedei´ c, G. Sladi´ c, and B. Milosavljevi´ c, “Towards edge computing as a service: Dynamic formation of the micro data-centers,” IEEE Access , vol. 9, pp. 114 468–114 484, 2021. [5] M. Simi´ c, G. Sladi´ c, M. Zari´ c, and B. Markoski, “Infrastructure as software in micro clouds at the edge,” Sensors , vol. 21, no. 21, p. 7001, 2021. [6] A. Greenberg, J. Hamilton, D. A. Maltz, and P. Patel, “The cost of a cloud: research problems in data center networks,” pp. 68–73, 2008. [7] M. Simi´ c, J. Dedei´ c, M. Stojkov, and I. Proki´ c, “A hierarchical names-pace approach for multi-tenancy in distributed clouds,” IEEE Access ,2024. [8] ——, “Data overlay mesh in distributed clouds allowing collaborative applications,” IEEE Access , 2025. [9] T. Rankovi´ c, I. Kovaˇ cevi´ c, V. Maksimovi´ c, G. Sladi´ c, and M. Simi´ c, “Configuration management in the distributed cloud,” in Conference on Information Technology and its Applications . Springer, 2024, pp. 224– 235. [10] T. Rankovi´ c, F. ˇ Silji´ c, J. Tomi´ c, G. Sladi´ c, and M. Simi´ c, “Miscon-figuration prevention and error cause detection for distributed-cloud applications,” in 2024 IEEE 22nd Jubilee International Symposium on Intelligent Systems and Informatics (SISY) . IEEE, 2024, pp. 000 297– 000 302. [11] T. Rankovi´ c, M. Simi´ c, M. Stojkov, and G. Sladi´ c, “Access control in a distributed micro-cloud environment,” in Conference on Information Technology and its Applications . Springer, 2024, pp. 435–447. [12] T. Rankovi´ c, V. Maksimovi´ c, M. Simi´ c, B. Milosavljevi´ c, and G. Sladi´ c, “Enforcing zero trust in distributed cloud deployments,” INFORMATION TECHNOLOGY AND DEVELOPMENT OF EDUCATION ITRO 2023 ,p. 142. [13] S. Karumuri, F. Solleza, S. Zdonik, and N. Tatbul, “Towards observabil-ity data management at scale,” ACM Sigmod Record , vol. 49, no. 4, pp. 18–23, 2021. [14] C.-K. Huang and G. Pierre, “Aggregate monitoring for geo-distributed kubernetes cluster federations,” IEEE Transactions on Cloud Computing ,2024. [15] B. Costa, J. Bachiega Jr, L. R. Carvalho, M. Rosa, and A. Araujo, “Monitoring fog computing: A review, taxonomy and open challenges,” 
+
+Computer Networks , vol. 215, p. 109189, 2022. [16] I. Korontanis, A. Makris, and K. Tserpes, “Edgecloud mon: Alightweight monitoring stack for k3s clusters,” SoftwareX , vol. 26, p. 101675, 2024. [17] A. Brogi, S. Forti, and M. Gaglianese, “Measuring the fog, gently,” in 
+
+International Conference on Service-Oriented Computing . Springer, 2019, pp. 523–538. [18] D. Kempe, A. Dobra, and J. Gehrke, “Gossip-based computation of aggregate information,” in 44th Annual IEEE Symposium on Foundations of Computer Science, 2003. Proceedings. IEEE, 2003, pp. 482–491. [19] M. Jelasity, A. Montresor, and O. Babaoglu, “Gossip-based aggregation in large dynamic networks,” ACM Transactions on Computer Systems (TOCS) , vol. 23, no. 3, pp. 219–252, 2005. [20] M. L. Massie, B. N. Chun, and D. E. Culler, “The ganglia distributed monitoring system: design, implementation, and experience,” Parallel Computing , vol. 30, no. 7, pp. 817–840, 2004. [21] K. Graffi and A. Disterh¨ oft, “Skyeye: A tree-based peer-to-peer monitor-ing approach,” Pervasive and Mobile Computing , vol. 40, pp. 593–610, 2017.

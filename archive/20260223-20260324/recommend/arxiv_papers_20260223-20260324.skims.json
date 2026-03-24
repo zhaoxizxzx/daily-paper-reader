@@ -1,0 +1,276 @@
+{
+  "mode": "skims",
+  "generated_at": "2026-03-24T04:51:41.252886+00:00",
+  "stats": {
+    "mode": "skims",
+    "forced_all_quick": true,
+    "min_score": 8.0,
+    "deep_divecandidates": 7,
+    "deep_cap": null,
+    "deep_selected": 0,
+    "quick_candidates": 7,
+    "quick_skim_target": null,
+    "quick_selected": 7
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.14190v1",
+      "title": "Sublime: Sublinear Error & Space for Unbounded Skewed Streams",
+      "abstract": "Modern stream processing systems must often track the frequency of distinct keys in a data stream in real-time. Since monitoring the exact counts often entails a prohibitive memory footprint, many applications rely on compact, probabilistic data structures called frequency estimation sketches to approximate them. However, mainstream frequency estimation sketches fall short in two critical aspects: (1) They are memory-inefficient under data skew. This is because they use uniformly-sized counters to track the key counts and thus waste memory on storing the leading zeros of many small counter values. (2) Their estimation error deteriorates at least linearly with the stream's length, which may grow indefinitely over time. This is because they count the keys using a fixed number~of~counters.   We present Sublime, a framework that generalizes frequency estimation sketches to address these problems by dynamically adapting to the stream's skew and length. To save memory under skew, Sublime uses short counters upfront and elongates them with extensions stored within the same cache line as they overflow. It leverages novel bit manipulation routines to quickly access a counter's extension. It also controls the scaling of its error rate by expanding its number of approximate counters as the stream grows. We apply Sublime to Count-Min Sketch and Count Sketch. We show, theoretically and empirically, that Sublime significantly improves accuracy and memory over the state of the art while maintaining competitive or superior performance.",
+      "authors": [
+        "Navid Eslami",
+        "Ioana O. Bercea",
+        "Rasmus Pagh",
+        "Niv Dayan"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.DB",
+        "cs.IT"
+      ],
+      "published": "2026-03-15T02:57:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.14190v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Sublinear error and space sketch for unbounded skewed streams",
+      "llm_evidence_cn": "针对无界偏斜流的亚线性误差与空间Sketch",
+      "llm_evidence": "针对无界偏斜流的亚线性误差与空间Sketch",
+      "canonical_evidence": "针对无界偏斜流的亚线性误差与空间Sketch",
+      "llm_tldr_en": "Proposes Sublime, a frequency estimation sketch that handles data skew and long streams with sublinear error.",
+      "llm_tldr_cn": "提出了Sublime，一种处理数据偏斜和长流且具有亚线性误差的频率估计Sketch。",
+      "llm_tldr": "提出了Sublime，一种处理数据偏斜和长流且具有亚线性误差的频率估计Sketch。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest papers on sketch based network measurement in high speed networks",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16786v1",
+      "title": "Elastic Sketch under Random Stationary Streams: Limiting Behavior and Near-Optimal Configuration",
+      "abstract": "\\texttt{Elastic-Sketch} is a hash-based data structure for counting item's appearances in a data stream, and it has been empirically shown to achieve a better memory-accuracy trade-off compared to classical methods. This algorithm combines a \\textit{heavy block}, which aims to maintain exact counts for a small set of dynamically \\textit{elected} items, with a light block that implements \\texttt{Count-Min} \\texttt{Sketch} (\\texttt{CM}) for summarizing the remaining traffic. The heavy block dynamics are governed by a hash function~$β$ that hashes items into~$m_1$ buckets, and an \\textit{eviction threshold}~$λ$, which controls how easily an elected item can be replaced. We show that the performance of \\texttt{Elastic-Sketch} strongly depends on the stream characteristics and the choice of~$λ$. Since optimal parameter choices depend on unknown stream properties, we analyze \\texttt{Elastic-Sketch} under a \\textit{stationary random stream} model -- a common assumption that captures the statistical regularities observed in real workloads. Formally, as the stream length goes to infinity, we derive closed-form expressions for the limiting distribution of the counters and the resulting expected counting error. These expressions are efficiently computable, enabling practical grid-based tuning of the heavy and \\texttt{CM} blocks memory split (via $m_1$) and the eviction threshold~$λ$. We further characterize the structure of the optimal eviction threshold, substantially reducing the search space and showing how this threshold depends on the arrival distribution. Extensive numerical simulations validate our asymptotic results on finite streams from the Zipf distribution.",
+      "authors": [
+        "Younes Ben Mazziane",
+        "Vinay Kumar B. R.",
+        "Othmane Marfoq"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.PF"
+      ],
+      "published": "2026-03-17T17:00:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.16786v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Elastic Sketch for counting items in data streams",
+      "llm_evidence_cn": "用于数据流项计数的Elastic Sketch",
+      "llm_evidence": "用于数据流项计数的Elastic Sketch",
+      "canonical_evidence": "用于数据流项计数的Elastic Sketch",
+      "llm_tldr_en": "Provides theoretical analysis and optimal configuration for Elastic Sketch in high-speed traffic measurement.",
+      "llm_tldr_cn": "为高速流量测量中的Elastic Sketch算法提供理论分析与近优配置方案。",
+      "llm_tldr": "为高速流量测量中的Elastic Sketch算法提供理论分析与近优配置方案。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest papers on sketch based network measurement in high speed networks",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.10930v1",
+      "title": "Huffman-Bucket Sketch: A Simple $O(m)$ Algorithm for Cardinality Estimation",
+      "abstract": "We introduce the Huffman-Bucket Sketch (HBS), a simple, mergeable data structure that losslessly compresses a HyperLogLog (HLL) sketch with $m$ registers to optimal space $O(m+\\log n)$ bits, with amortized constant-time updates, acting as a drop-in replacement for HLL that retains mergeability and substantially reduces memory requirements. We partition registers into small buckets and encode their values with a global Huffman codebook derived from the strongly concentrated HLL rank distribution, using the current cardinality estimate for determining the mode of the distribution. We prove that the Huffman tree needs rebuilding only $O(\\log n)$ times over a stream, roughly when cardinality doubles. The framework can be extended to other sketches with similar strongly concentrated distributions. We provide preliminary numerical evidence that suggests that HBS is practical and can potentially be competitive with state-of-the-art in practice.",
+      "authors": [
+        "Matti Karppa"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS"
+      ],
+      "published": "2026-03-11T16:14:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.10930v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Huffman-Bucket Sketch for cardinality estimation in data streams",
+      "llm_evidence_cn": "用于数据流基数估计的Huffman-Bucket Sketch算法",
+      "llm_evidence": "用于数据流基数估计的Huffman-Bucket Sketch算法",
+      "canonical_evidence": "用于数据流基数估计的Huffman-Bucket Sketch算法",
+      "llm_tldr_en": "Introduces a mergeable sketch that compresses HyperLogLog for optimal space in cardinality estimation.",
+      "llm_tldr_cn": "引入了一种可合并的Sketch结构，通过压缩HLL实现最优空间的基数估计。",
+      "llm_tldr": "引入了一种可合并的Sketch结构，通过压缩HLL实现最优空间的基数估计。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "sketch-based algorithms for network telemetry and measurement",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20109v1",
+      "title": "GO-GenZip: Goal-Oriented Generative Sampling and Hybrid Compression",
+      "abstract": "Current network data telemetry pipelines consist of massive streams of fine-grained Key Performance Indicators (KPIs) from multiple distributed sources towards central aggregators, making data storage, transmission, and real-time analysis increasingly unsustainable. This work presents a generative AI (GenAI)-driven sampling and hybrid compression framework that redesigns network telemetry from a goal-oriented perspective. Unlike conventional approaches that passively compress fully observed data, our approach jointly optimizes what to observe and how to encode it, guided by the relevance of information to downstream tasks. The framework integrates adaptive sampling policies, using adaptive masking techniques, with generative modeling to identify patterns and preserve critical features across temporal and spatial dimensions. The selectively acquired data are further processed through a hybrid compression scheme that combines traditional lossless coding with GenAI-driven, lossy compression. Experimental results on real network datasets demonstrate over 50$\\%$ reductions in sampling and data transfer costs, while maintaining comparable reconstruction accuracy and goal-oriented analytical fidelity in downstream tasks.",
+      "authors": [
+        "Pietro Talli",
+        "Qi Liao",
+        "Alessandro Lieto",
+        "Parijat Bhattacharjee",
+        "Federico Chiariotti",
+        "Andrea Zanella"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.IT"
+      ],
+      "published": "2026-03-20T16:33:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.20109v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "adaptive sampling and generative telemetry framework",
+      "llm_evidence_cn": "自适应采样与生成式遥测框架",
+      "llm_evidence": "自适应采样与生成式遥测框架",
+      "canonical_evidence": "自适应采样与生成式遥测框架",
+      "llm_tldr_en": "Introduces a goal-oriented generative sampling and compression framework for network telemetry.",
+      "llm_tldr_cn": "引入了一种面向目标的生成式采样与压缩框架，用于网络遥测。",
+      "llm_tldr": "引入了一种面向目标的生成式采样与压缩框架，用于网络遥测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "adaptive traffic sampling techniques for accurate measurement",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20573v1",
+      "title": "immUNITY: Detecting and Mitigating Low Volume & Slow Attacks with Programmable Switches and SmartNICs",
+      "abstract": "Our analysis of recent Internet traces shows that up to 71% of flows contain suspicious behaviors indicative of low-volume network attacks such as port scans. However, distinguishing anomalous traffic in real time is challenging as each attack flow may comprise only a few packets.   We extend prior work that tracks heavy hitter flows to also detect low-volume and slow attacks by combining the capabilities of both switches and SmartNICs. We flip the usual design approach by proposing an efficient filter data structure used to quickly route traffic marked as benign towards destination end-systems. We make careful use of limited programmable switch memory and pipeline stages, and complement them with SmartNIC resources to analyze the remaining traffic that may be anomalous. Using machine learning classifiers and intrusion detection rules deployed on the SmartNIC, we identify malicious source IPs, which then undergo more detailed forensics for attack mitigation. Finally, we develop a dataplane based protocol to rapidly coordinate data structure updates between these devices. We implement immUNITY in a testbed with Tofino v1 switch and Bluefield 3 SmartNIC, demonstrating its high accuracy, while minimizing traffic that's analyzed outside the switch.",
+      "authors": [
+        "Cuidi Wei",
+        "Shaoyu Tu",
+        "Daiki Hata",
+        "Toru Hasegawa",
+        "Yuki Koizumi",
+        "K. K. Ramakrishnan",
+        "Junji Takemasa",
+        "Timothy Wood"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.CR"
+      ],
+      "published": "2026-03-21T00:06:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.20573v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Uses programmable switches and data structures to track heavy hitters and detect attacks",
+      "llm_evidence_cn": "利用可编程交换机和数据结构追踪重流量并检测攻击",
+      "llm_evidence": "利用可编程交换机和数据结构追踪重流量并检测攻击",
+      "canonical_evidence": "利用可编程交换机和数据结构追踪重流量并检测攻击",
+      "llm_tldr_en": "Combines programmable switches and SmartNICs with efficient data structures for real-time traffic monitoring.",
+      "llm_tldr_cn": "结合可编程交换机与SmartNIC，利用高效数据结构实现实时流量监控与攻击检测。",
+      "llm_tldr": "结合可编程交换机与SmartNIC，利用高效数据结构实现实时流量监控与攻击检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.05241v1",
+      "title": "A monitoring system for collecting and aggregating metrics from distributed clouds",
+      "abstract": "Applications requiring real-time processing of large volumes of data have been the main driver for rethinking the traditional cloud, giving rise to novel cloud models. Distributed cloud (DC) is a model that allows users to dynamically create and dispose of strategically located ad-hoc clouds that contain resources best tailored to their needs. It is essential for this model to provide a high degree of observability for it to be viable in real-world scenarios. In this paper, we present the design and implementation of a monitoring system that collects metrics from DCs and makes them accessible to diverse clients. Agents running on nodes are responsible for collecting machine-, container-, and application-level metrics. During the health-check protocol, that data is transferred from the node to the DC's control plane running inside the cloud. There, it is persisted and served via multiple APIs, including a streaming API. Moreover, node metrics are aggregated for every DC in order to provide a more comprehensive view of the system's state.",
+      "authors": [
+        "Tamara Ranković",
+        "Mateja Rilak",
+        "Janko Rakonjac",
+        "Miloš Simić"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-03-05T14:56:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.05241v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Monitoring system for collecting and aggregating metrics from distributed clouds",
+      "llm_evidence_cn": "用于从分布式云收集和聚合指标的监控系统",
+      "llm_evidence": "用于从分布式云收集和聚合指标的监控系统",
+      "canonical_evidence": "用于从分布式云收集和聚合指标的监控系统",
+      "llm_tldr_en": "Presents a monitoring system for real-time metric collection and observability in distributed cloud environments.",
+      "llm_tldr_cn": "设计并实现了一种用于分布式云环境实时指标收集和可观测性的监控系统。",
+      "llm_tldr": "设计并实现了一种用于分布式云环境实时指标收集和可观测性的监控系统。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.11023v1",
+      "title": "Measurement-Driven O-RAN Diagnostics with Tail Latency and Scheduler Indicators",
+      "abstract": "We investigate cross-layer performance diagnostics for an O-RAN instance by jointly analyzing application-level latency and radio-layer behavior from a real measurement campaign. Measurements were conducted at multiple link distances (2, 6 and 11 meters) using two representative UE configurations (a commercial smartphone and a modem-based device), under both static conditions and a controlled dynamic obstruction scenario. Rather than relying on averages, the study adopts tail-focused latency characterization (e.g., 95th percentile and exceedance probabilities) and connects it to scheduler- and link-adaptation indicators (e.g., block error behavior, modulation/coding selection and signal quality). The results reveal (i) UE-dependent differences that primarily manifest in the latency tail, (ii) systematic scaling of tail latency with distance and payload and (iii) cases where radio-layer dynamics are detectable even when end-to-end latency appears stable, motivating the need for cross-layer evidence. Distinct from much of the existing literature (often centered on throughput, simulated setups, or single-layer KPIs) this work contributes a measurement-driven methodology for interpretable O-RAN diagnostics and proposes lightweight, window-based \"degradation flags\" that combine tail latency and radio indicators to support practical monitoring and troubleshooting.",
+      "authors": [
+        "Theofanis P. Raptis",
+        "Weronika Maria Bachan",
+        "Roberto Verdone"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-11T17:49:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.11023v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "cross-layer performance diagnostics and measurement campaign",
+      "llm_evidence_cn": "跨层性能诊断与测量活动",
+      "llm_evidence": "跨层性能诊断与测量活动",
+      "canonical_evidence": "跨层性能诊断与测量活动",
+      "llm_tldr_en": "Analyzes O-RAN performance using real measurements of tail latency and radio-layer scheduler indicators.",
+      "llm_tldr_cn": "通过对尾部延迟和无线层调度指标的实际测量，分析了O-RAN的跨层性能诊断。",
+      "llm_tldr": "通过对尾部延迟和无线层调度指标的实际测量，分析了O-RAN的跨层性能诊断。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ]
+}
