@@ -25,4 +25,43 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
-  intent_profiles: []
+  intent_profiles:
+    - tag: NetMes
+      description: 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。
+      enabled: true
+      keywords:
+        - keyword: network measurement
+          keyword_cn: 网络测量
+          query: latest research on network measurement techniques and systems
+        - keyword: traffic measurement
+          keyword_cn: 流量测量
+          query: network traffic measurement methods for high-speed links
+        - keyword: sketch data structure
+          keyword_cn: Sketch数据结构
+          query: sketch-based algorithms for network telemetry and measurement
+        - keyword: traffic sampling
+          keyword_cn: 流量采样
+          query: adaptive traffic sampling techniques for accurate measurement
+        - keyword: network monitoring
+          keyword_cn: 网络监控
+          query: real-time network monitoring systems for data centers
+        - keyword: programmable switches
+          keyword_cn: 可编程交换机
+          query: network measurement using P4 and programmable switches
+      intent_queries:
+        - query: latest papers on sketch based network measurement in high speed networks
+          query_cn: 高速网络中基于Sketch的网络测量最新论文
+          enabled: true
+          source: manual
+          note: ''
+        - query: traffic measurement and monitoring systems for data centers
+          query_cn: 数据中心的流量测量与监控系统
+          enabled: true
+          source: manual
+          note: ''
+        - query: advancements in network traffic sampling and heavy hitter detection
+          query_cn: 网络流量采样与大流检测的进展
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-24T04:37:41.694Z'
