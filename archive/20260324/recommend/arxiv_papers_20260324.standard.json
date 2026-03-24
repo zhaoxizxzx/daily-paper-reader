@@ -1,0 +1,295 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-24T20:23:41.583621+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 7,
+    "quick_skim_target": 11,
+    "quick_selected": 7
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.21310v1",
+      "title": "WN-Wrangle: Wireless Network Data Wrangling Assistant",
+      "abstract": "Data wrangling continues to be the most time-consuming task in the data science pipeline and wireless network data is no exception. Prior approaches for automatic or assisted data-wrangling primarily target unordered, single-table data. However, unlike traditional datasets where rows in a table are unordered and assumed to be independent of each other, wireless network datasets are often collected across multiple measurement devices, producing multiple, temporally ordered tables that must be integrated for obtaining the complete dataset. For instance, to create a dataset of the signal quality of 5G cell towers within a geographic region, GPS data collected by cellphones must be joined with radio frequency measurements of the corresponding cell towers. However, the join key timestamp typically exhibits mismatched sampling periods, causing a misalignment. Data wrangling techniques for generic time-series datasets also fail here, since they lack knowledge of domain-specific data semantics, which are often defined by network protocols and system configurations. To aid in wrangling wireless network datasets, we demonstrate WN-Wrangle, an interactive wrangling assistant, tailored to the wireless network domain that suggests the top-k next-best wrangling operations, along with rich, domain-specific explanations. Under the hood, WN-Wrangle enforces temporal constraints- and a wireless network semantics-aware mechanism to score and rank an extended set of wrangling operators to improve the data quality. We demonstrate how WN-Wrangle identifies elusive data-quality issues specific to the wireless network domain and suggests accurate wrangling steps over datasets obtained from the widely used POWDER city-scale wireless testbed.",
+      "authors": [
+        "Anirudh Kamath",
+        "Dustin Maas",
+        "Jacobus Van der Merwe",
+        "Anna Fariha"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB",
+        "cs.NI"
+      ],
+      "published": "2026-03-22T16:35:31+00:00",
+      "link": "https://arxiv.org/pdf/2603.21310v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "data wrangling and integration for wireless network measurements",
+      "llm_evidence_cn": "无线网络测量数据的清洗与集成",
+      "llm_evidence": "无线网络测量数据的清洗与集成",
+      "canonical_evidence": "无线网络测量数据的清洗与集成",
+      "llm_tldr_en": "An assistant for integrating temporally ordered wireless network measurement datasets.",
+      "llm_tldr_cn": "一种用于集成具有时间顺序的无线网络测量数据集的辅助工具。",
+      "llm_tldr": "一种用于集成具有时间顺序的无线网络测量数据集的辅助工具。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14661v1",
+      "title": "AtlasRAN: Modeling and Performance Evaluation of Open 5G Platforms for Ubiquitous Wireless Networks",
+      "abstract": "Fifth-generation (5G) systems are increasingly studied as shared communication and computing infrastructure for connected vehicles, roadside edge platforms, and future unmanned-system applications. Yet results from simulators, host-OS emulators, digital twins, and hardware-in-the-loop testbeds are often compared as if timing, input/output (I/O), and control-loop behavior were equivalent across them. They are not. Consequently, apparent limits in throughput, latency, scalability, or real-time behavior may reflect the execution harness rather than the wireless design itself.   This paper presents \\textit{AtlasRAN}, a capability-oriented framework for modeling and performance evaluation of 5G Open Radio Access Network (O-RAN) platforms. It introduces two reference architectures, terminology that separates functional compatibility from timing fidelity, and a capability matrix that maps research questions to evaluation environments that can support them credibly. O-RAN is used here as an experimental coordinate system spanning Centralized Unit (CU)/Distributed Unit (DU) partitioning, fronthaul transport, control exposure, and core-network anchoring.   We validate \\textit{AtlasRAN} through a CU-DU uplink load study on a coherent CPU-GPU edge platform. For both a CPU-only baseline and a GPU-accelerated low-density parity-check decoding variant, aggregate goodput drops sharply as user count rises from 1 to 12, while fairness remains near ideal and compute utilization decreases rather than increases. This pattern indicates time-scale dilation and online I/O starvation in the emulation harness, not decoder saturation, as the dominant scaling limit. The key lesson is that timing, memory, and transport semantics must be reported as first-class experimental variables when evaluating ubiquitous 5G infrastructure.",
+      "authors": [
+        "Ryan Barker",
+        "Tolunay Seyfi",
+        "Alireza Ebrahimi Dorcheh",
+        "Julia Boone",
+        "Fatemeh Afghah",
+        "Joseph Boccuzzi"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-15T23:34:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.14661v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "performance evaluation and modeling of 5G network platforms",
+      "llm_evidence_cn": "5G网络平台的性能评估与建模",
+      "llm_evidence": "5G网络平台的性能评估与建模",
+      "canonical_evidence": "5G网络平台的性能评估与建模",
+      "llm_tldr_en": "AtlasRAN provides a framework for modeling and evaluating the performance of 5G Open RAN systems.",
+      "llm_tldr_cn": "AtlasRAN提供了一个用于建模和评估5G开放式无线接入网系统性能的框架。",
+      "llm_tldr": "AtlasRAN提供了一个用于建模和评估5G开放式无线接入网系统性能的框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.14661v2",
+      "title": "AtlasRAN: Modeling and Performance Evaluation of Open 5G Platforms for Ubiquitous Wireless Networks",
+      "abstract": "Fifth-generation (5G) systems are increasingly studied as shared communication and computing infrastructure for connected vehicles, roadside edge platforms, and future unmanned-system applications. Yet results from simulators, host-OS emulators, digital twins, and hardware-in-the-loop testbeds are often compared as if timing, input/output (I/O), and control-loop behavior were equivalent across them. They are not. Consequently, apparent limits in throughput, latency, scalability, or real-time behavior may reflect the execution harness rather than the wireless design itself.   This paper presents \\textit{AtlasRAN}, a capability-oriented framework for modeling and performance evaluation of 5G Open Radio Access Network (O-RAN) platforms. It introduces two reference architectures, terminology that separates functional compatibility from timing fidelity, and a capability matrix that maps research questions to evaluation environments that can support them credibly. O-RAN is used here as an experimental coordinate system spanning Centralized Unit (CU)/Distributed Unit (DU) partitioning, fronthaul transport, control exposure, and core-network anchoring.   We validate \\textit{AtlasRAN} through a CU-DU uplink load study on a coherent CPU-GPU edge platform. For both a CPU-only baseline and a GPU-accelerated low-density parity-check decoding variant, aggregate goodput drops sharply as user count rises from 1 to 12, while fairness remains near ideal and compute utilization decreases rather than increases. This pattern indicates time-scale dilation and online I/O starvation in the emulation harness, not decoder saturation, as the dominant scaling limit. The key lesson is that timing, memory, and transport semantics must be reported as first-class experimental variables when evaluating ubiquitous 5G infrastructure.",
+      "authors": [
+        "Ryan Barker",
+        "Tolunay Seyfi",
+        "Alireza Ebrahimi Dorcheh",
+        "Julia Boone",
+        "Fatemeh Afghah",
+        "Joseph Boccuzzi"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-15T23:34:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.14661v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "performance evaluation and modeling of 5G network platforms",
+      "llm_evidence_cn": "5G网络平台的性能评估与建模",
+      "llm_evidence": "5G网络平台的性能评估与建模",
+      "canonical_evidence": "5G网络平台的性能评估与建模",
+      "llm_tldr_en": "AtlasRAN provides a framework for modeling and evaluating the performance of 5G Open RAN systems.",
+      "llm_tldr_cn": "AtlasRAN提供了一个用于建模和评估5G开放式无线接入网系统性能的框架。",
+      "llm_tldr": "AtlasRAN提供了一个用于建模和评估5G开放式无线接入网系统性能的框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.15344v1",
+      "title": "Unsupervised Cross-Protocol Anomaly Analysis in Mobile Core Networks via Multi-Embedding Models Consensus",
+      "abstract": "Mobile core networks rely on several signalling protocols in parallel, such as SS7, Diameter, and GTP, so many security-relevant problems become visible only when their interactions are analyzed jointly. At the same time, labeled examples of real attacks and cross-protocol misconfigurations are scarce, which complicates supervised detection. We therefore study unsupervised cross-protocol anomaly analysis on fused representations that combine SS7, Diameter, and GTP signalling. For each subscriber, we aggregate messages into per-minute fused records, serialize each record as text, embed it with several models, and apply unsupervised anomaly detection. We then assign each record a consensus score equal to the number of embedding models that flag it as anomalous. For evaluation, we generate cross-protocol-plausible synthetic anomalies by swapping one field group at a time between pairs of records, preserving per-message validity while making the fused view contradictory. On 219,294 fused records, 44.15% are flagged by at least one model, but only 0.97% reach full agreement across all six. Higher consensus is strongly associated with synthetic records, where for k=1-4 the odds that a flagged record is synthetic are hundreds of times greater than for original records, and for k>=5 all flagged records are synthetic, with extremely small p-values. Cosine distances between synthetic and original records also increase with consensus, suggesting clearer separation in embedding space. These results support the use of multi-embedding consensus to prioritize a much smaller set of candidate cross-protocol inconsistencies for further inspection.",
+      "authors": [
+        "Aayush Garg",
+        "Orlando Amaral Cejas"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-16T14:30:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.15344v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unsupervised cross-protocol anomaly analysis and fused representations of signaling traffic",
+      "llm_evidence_cn": "无监督跨协议异常分析及信令流量融合表示",
+      "llm_evidence": "无监督跨协议异常分析及信令流量融合表示",
+      "canonical_evidence": "无监督跨协议异常分析及信令流量融合表示",
+      "llm_tldr_en": "Analyzes mobile core network signaling traffic for anomaly detection using multi-embedding models.",
+      "llm_tldr_cn": "利用多嵌入模型对移动核心网信令流量进行无监督异常分析。",
+      "llm_tldr": "利用多嵌入模型对移动核心网信令流量进行无监督异常分析。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.15854v1",
+      "title": "FlashSampling: Fast and Memory-Efficient Exact Sampling",
+      "abstract": "Sampling from a categorical distribution is mathematically simple, but in large-vocabulary decoding, it often triggers extra memory traffic and extra kernels after the LM head. We present FlashSampling, an exact sampling primitive that fuses sampling into the LM-head matmul and never materializes the logits tensor in HBM. The method is simple: compute logits tile-by-tile on chip, add Gumbel noise, keep only one maximizer per row and per vocabulary tile, and finish with a small reduction over tiles. The fused tiled kernel is exact because $\\argmax$ decomposes over a partition; grouped variants for online and tensor-parallel settings are exact by hierarchical factorization of the categorical distribution. Across H100, H200, B200, and B300 GPUs, FlashSampling speeds up kernel-level decode workloads, and in end-to-end vLLM experiments, it reduces time per output token by up to $19%$ on the models we test. These results show that exact sampling, with no approximation, can be integrated into the matmul itself, turning a bandwidth-bound postprocessing step into a lightweight epilogue. Project Page: https://github.com/FlashSampling/FlashSampling.",
+      "authors": [
+        "Tomas Ruiz",
+        "Zhen Qin",
+        "Yifan Zhang",
+        "Xuyang Shen",
+        "Yiran Zhong",
+        "Mengdi Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-03-16T19:37:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.15854v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "fast and memory-efficient exact sampling primitive",
+      "llm_evidence_cn": "快速且内存高效的精确采样原语",
+      "llm_evidence": "快速且内存高效的精确采样原语",
+      "canonical_evidence": "快速且内存高效的精确采样原语",
+      "llm_tldr_en": "Introduces FlashSampling, a fused kernel for fast, memory-efficient exact sampling.",
+      "llm_tldr_cn": "引入FlashSampling，一种用于快速、内存高效精确采样的融合算子。",
+      "llm_tldr": "引入FlashSampling，一种用于快速、内存高效精确采样的融合算子。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "adaptive traffic sampling techniques for accurate measurement",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20789v1",
+      "title": "NextSense: A Semi-Synthetic Sensing Data generation Platform",
+      "abstract": "Emerging integrated sensing and communication (ISAC) applications require large volumes of data, but collecting such datasets in real networks is costly, time consuming, and often infeasible due to limited access to low level measurements. In this paper we present NextSense, an open and modular semi-synthetic data generation platform that consists of a 5G stack, a channel emulator, and an UE emulator. The platform allows users full customization on radio configuration, channel and mobility, and traffic profiles through an API and GUI, and produces multi-perspective outputs that combine symbol-level IQ samples, protocol traces, and key performance indicators across UE, RAN, and CN. This paper describes the NextSense's architecture, and validates its ability to act as a faithful proxy for real measurements in sensing use cases.",
+      "authors": [
+        "David Rico Menéndez",
+        "Pablo Picazo-Martínez",
+        "Antonio de la Oliva",
+        "Carlos Jesús Bernardos",
+        "Chathura Sarathchandra",
+        "Alain Mourad"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-21T12:29:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.20789v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "platform for generating protocol traces and key performance indicators in 5G networks",
+      "llm_evidence_cn": "生成5G网络协议追踪和关键性能指标的平台",
+      "llm_evidence": "生成5G网络协议追踪和关键性能指标的平台",
+      "canonical_evidence": "生成5G网络协议追踪和关键性能指标的平台",
+      "llm_tldr_en": "A semi-synthetic data generation platform for 5G network sensing and protocol analysis.",
+      "llm_tldr_cn": "一个用于5G网络感知和协议分析的半合成数据生成平台。",
+      "llm_tldr": "一个用于5G网络感知和协议分析的半合成数据生成平台。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21082v1",
+      "title": "AnyPro: Preference-Preserving Anycast Optimization based on Strategic AS-Path Prepending",
+      "abstract": "Operating large-scale anycast networks is challenging because client-to-site mappings often misalign with operator's expectation due to opaque inter-domain routing. We present AnyPro, the first system to unlock the full potential of AS-path prepending (ASPP), efficiently deriving globally optimal configurations to steer clients toward performance-optimal sites at scale. AnyPro first employs an efficient polling mechanism to identify all clients sensitive to ASPP. By analyzing the routing changes during the process, the system derives a set of ASPP constraints that guide client traffic toward the desired sites. We then formulate the anycast optimization problem as a constraint-based program and compute optimal ASPP configurations. Extensive evaluation on a global testbed with 20 PoPs demonstrates the effectiveness of AnyPro: it reduces the 90th percentile latency by 37.7% compared to baseline configurations without ASPP. Furthermore, we show that AnyPro can be integrated with PoP-level anycast optimization techniques to achieve additional performance gains.",
+      "authors": [
+        "Minyuan Zhou",
+        "Yuning Chen",
+        "Jiaqi Zheng",
+        "Yifei Xu",
+        "Pan Hu",
+        "Yongping Tang",
+        "Wendong Yin",
+        "Jie Lin",
+        "Qingyan Yu",
+        "Yuanchao Su",
+        "Guihai Chen",
+        "Wanchun Dou",
+        "Songwu Lu",
+        "Wan Du"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-22T06:31:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.21082v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "anycast optimization and traffic steering via routing analysis",
+      "llm_evidence_cn": "通过路由分析进行任播优化和流量引导",
+      "llm_evidence": "通过路由分析进行任播优化和流量引导",
+      "canonical_evidence": "通过路由分析进行任播优化和流量引导",
+      "llm_tldr_en": "AnyPro optimizes anycast networks by analyzing routing changes to steer traffic to optimal sites.",
+      "llm_tldr_cn": "AnyPro 通过分析路由变化来优化任播网络，将流量引导至最佳站点。",
+      "llm_tldr": "AnyPro 通过分析路由变化来优化任播网络，将流量引导至最佳站点。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

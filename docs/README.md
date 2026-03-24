@@ -6,61 +6,44 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-02-23 ~ 2026-03-24
-- 运行时间：2026-03-24 04:52:15 UTC
+- 最新运行日期：2026-03-24
+- 运行时间：2026-03-24 20:24:28 UTC
 - 运行状态：成功
 - 本次总论文数：7
 - 精读区：0
 - 速读区：7
 
 ### 今日简报（AI）
-今日深挖数据流处理前沿，速览 7 篇论文，重点攻克 Sketch 算法在空间效率与误差控制上的理论极限。
-Sublime 与 Elastic Sketch 两篇满分佳作揭示了倾斜流下的亚线性优化及最优配置，Huffman-Bucket 则实现了 $O(m)$ 的极简基数估计。
-建议优先研读两篇满分论文，掌握大规模动态数据流的高效表征与性能调优策略。
-- 详情：[/20260223-20260324/README](/20260223-20260324/README)
+今日速览 7 篇前沿论文，聚焦无线网络数据治理与 Open 5G 平台的性能建模。
+重点关注 WN-Wrangle 助手如何自动化简化网络数据清洗，以及 AtlasRAN 对开放 5G 架构的深度评估。
+建议对 AI 驱动的网络自动化和 5G 基础设施感兴趣的读者优先研读这两项框架。
+- 详情：[/202603/24/README](/202603/24/README)
 
 ### 精读区论文标签
-1. [Sublime: Sublinear Error & Space for Unbounded Skewed Streams](/20260315-20260324/2603.14190v1-sublime-sublinear-error--space-for-unbounded-skewed-streams)  
-   标签：评分：10.0/10、query:netmes
-   evidence：针对偏斜流的频率估计Sketch算法
-2. [Elastic Sketch under Random Stationary Streams: Limiting Behavior and Near-Optimal Configuration](/20260315-20260324/2603.16786v1-elastic-sketch-under-random-stationary-streams-limiting-behavior-and-near-optimal-configuration)  
-   标签：评分：10.0/10、query:netmes
-   evidence：数据流中流量计数的Elastic Sketch分析
-3. [GO-GenZip: Goal-Oriented Generative Sampling and Hybrid Compression](/20260315-20260324/2603.20109v1-go-genzip-goal-oriented-generative-sampling-and-hybrid-compression)  
-   标签：评分：9.0/10、query:netmes
-   evidence：生成式AI驱动的网络遥测采样与混合压缩
-4. [immUNITY: Detecting and Mitigating Low Volume & Slow Attacks with Programmable Switches and SmartNICs](/20260315-20260324/2603.20573v1-immunity-detecting-and-mitigating-low-volume--slow-attacks-with-programmable-switches-and-smartnics)  
-   标签：评分：9.0/10、query:netmes
-   evidence：使用可编程交换机和智能网卡检测流量
-5. [Bridging the High-Frequency Data Gap: A Millisecond-Resolution Network Dataset for Advancing Time Series Foundation Models](/20260315-20260324/2603.16497v1-bridging-the-high-frequency-data-gap-a-millisecond-resolution-network-dataset-for-advancing-time-series-foundation-models)  
-   标签：评分：8.0/10、query:netmes
-   evidence：高频网络流量与无线状况数据集
-6. [Fine-Grained Network Traffic Classification with Contextual QoS Profiling](/20260315-20260324/2603.16748v1-fine-grained-network-traffic-classification-with-contextual-qos-profiling)  
-   标签：评分：8.0/10、query:netmes
-   evidence：细粒度网络流量分类
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Sublime: Sublinear Error & Space for Unbounded Skewed Streams](/20260223-20260324/2603.14190v1-sublime-sublinear-error--space-for-unbounded-skewed-streams)  
-   标签：评分：10.0/10、query:netmes
-   evidence：针对无界偏斜流的亚线性误差与空间Sketch
-2. [Elastic Sketch under Random Stationary Streams: Limiting Behavior and Near-Optimal Configuration](/20260223-20260324/2603.16786v1-elastic-sketch-under-random-stationary-streams-limiting-behavior-and-near-optimal-configuration)  
-   标签：评分：10.0/10、query:netmes
-   evidence：用于数据流项计数的Elastic Sketch
-3. [Huffman-Bucket Sketch: A Simple $O(m)$ Algorithm for Cardinality Estimation](/20260223-20260324/2603.10930v1-huffman-bucket-sketch-a-simple-om-algorithm-for-cardinality-estimation)  
-   标签：评分：9.0/10、query:netmes
-   evidence：用于数据流基数估计的Huffman-Bucket Sketch算法
-4. [GO-GenZip: Goal-Oriented Generative Sampling and Hybrid Compression](/20260223-20260324/2603.20109v1-go-genzip-goal-oriented-generative-sampling-and-hybrid-compression)  
-   标签：评分：9.0/10、query:netmes
-   evidence：自适应采样与生成式遥测框架
-5. [immUNITY: Detecting and Mitigating Low Volume & Slow Attacks with Programmable Switches and SmartNICs](/20260223-20260324/2603.20573v1-immunity-detecting-and-mitigating-low-volume--slow-attacks-with-programmable-switches-and-smartnics)  
-   标签：评分：9.0/10、query:netmes
-   evidence：利用可编程交换机和数据结构追踪重流量并检测攻击
-6. [A monitoring system for collecting and aggregating metrics from distributed clouds](/20260223-20260324/2603.05241v1-a-monitoring-system-for-collecting-and-aggregating-metrics-from-distributed-clouds)  
-   标签：评分：8.0/10、query:netmes
-   evidence：用于从分布式云收集和聚合指标的监控系统
-7. [Measurement-Driven O-RAN Diagnostics with Tail Latency and Scheduler Indicators](/20260223-20260324/2603.11023v1-measurement-driven-o-ran-diagnostics-with-tail-latency-and-scheduler-indicators)  
-   标签：评分：8.0/10、query:netmes
-   evidence：跨层性能诊断与测量活动
+1. [WN-Wrangle: Wireless Network Data Wrangling Assistant](/202603/24/2603.21310v1-wn-wrangle-wireless-network-data-wrangling-assistant)  
+   标签：评分：7.0/10、query:netmes
+   evidence：无线网络测量数据的清洗与集成
+2. [AtlasRAN: Modeling and Performance Evaluation of Open 5G Platforms for Ubiquitous Wireless Networks](/202603/24/2603.14661v1-atlasran-modeling-and-performance-evaluation-of-open-5g-platforms-for-ubiquitous-wireless-networks)  
+   标签：评分：6.0/10、query:netmes
+   evidence：5G网络平台的性能评估与建模
+3. [AtlasRAN: Modeling and Performance Evaluation of Open 5G Platforms for Ubiquitous Wireless Networks](/202603/24/2603.14661v2-atlasran-modeling-and-performance-evaluation-of-open-5g-platforms-for-ubiquitous-wireless-networks)  
+   标签：评分：6.0/10、query:netmes
+   evidence：5G网络平台的性能评估与建模
+4. [Unsupervised Cross-Protocol Anomaly Analysis in Mobile Core Networks via Multi-Embedding Models Consensus](/202603/24/2603.15344v1-unsupervised-cross-protocol-anomaly-analysis-in-mobile-core-networks-via-multi-embedding-models-consensus)  
+   标签：评分：6.0/10、query:netmes
+   evidence：无监督跨协议异常分析及信令流量融合表示
+5. [FlashSampling: Fast and Memory-Efficient Exact Sampling](/202603/24/2603.15854v1-flashsampling-fast-and-memory-efficient-exact-sampling)  
+   标签：评分：6.0/10、query:netmes
+   evidence：快速且内存高效的精确采样原语
+6. [NextSense: A Semi-Synthetic Sensing Data generation Platform](/202603/24/2603.20789v1-nextsense-a-semi-synthetic-sensing-data-generation-platform)  
+   标签：评分：6.0/10、query:netmes
+   evidence：生成5G网络协议追踪和关键性能指标的平台
+7. [AnyPro: Preference-Preserving Anycast Optimization based on Strategic AS-Path Prepending](/202603/24/2603.21082v1-anypro-preference-preserving-anycast-optimization-based-on-strategic-as-path-prepending)  
+   标签：评分：6.0/10、query:netmes
+   evidence：通过路由分析进行任播优化和流量引导
 
 
 <div class="dpr-home-promo-card">
