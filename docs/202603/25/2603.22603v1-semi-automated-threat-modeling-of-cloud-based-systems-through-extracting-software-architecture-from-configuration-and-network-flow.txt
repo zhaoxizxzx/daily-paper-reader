@@ -1,0 +1,645 @@
+Title: Semi-Automated Threat Modeling of Cloud-Based Systems Through Extracting Software Architecture from Configuration and Network Flow
+
+URL Source: https://arxiv.org/pdf/2603.22603v1
+
+Published Time: Wed, 25 Mar 2026 00:25:44 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> IEEE TRANSACTIONS ON SERVICES COMPUTING, VOL. XX, NO. X, [MONTH] [YEAR] 1
+
+# Semi-Automated Threat Modeling of Cloud-Based Systems Through Extracting Software Architecture from Configuration and Network Flow 
+
+Nicholas Pecka, Member, IEEE, Lotfi Ben Othmane, Bharat Bhargava, and Renée Bryce Fellow, IEEE, 
+
+Abstract —Traditional threat modeling occurs during design, but cloud deployments introduce unanticipated threats—especially multi-stage attacks chaining vulnerabilities across trust boundaries. Existing security tools analyze components in isolation, cannot detect architectural threats from system composition, and cannot validate runtime behavior against configured policies. This gap leaves organizations vulnerable to attacks exploiting architectural weaknesses. This paper addresses this gap through a key innovation: automatically inferring system architecture from runtime observations to enable continuous threat modeling. Our methodology combines static configuration analysis with observed network flows to construct architecture graphs reflecting actual operational behavior, then applies systematic threat detection using platform-agnostic abstractions (components, domains, interfaces, access policies, flows). This enables consistent threat identification across bare metal, Kubernetes, and cloud infrastructure without manual diagram maintenance. We validate the methodology using a supply-chain system with ML components deployed on all three platforms, injecting 17 infrastructure and ML threats. Results show detection of all 17 threat types across all platforms, while existing security tools detected only 6-47% with zero ML threat coverage, confirming the necessity of runtime-aware, architecture-level threat analysis. 
+
+Index Terms —Architecture recovery, configuration manage-ment, Kubernetes, threat modeling, runtime security analysis, dynamic analysis, cloud security. 
+
+I. I NTRODUCTION 
+
+Organizations increasingly adopt microservice architectures, containerization, and cloud-native technologies aligned with Development and Operators (DevOps) [1] and Agile method-ologies [2], [3]. While enabling faster delivery and operational flexibility, these approaches introduce security challenges that traditional development practices struggle to address [4]. Pecka et al. [5], [6] showed that container orchestration platforms introduce privilege escalation and supply chain risks differing from traditional infrastructure. The attack surface grows continuously as features deploy, dependencies update, and architectures evolve, often outpacing security testing. Automated security tools detect component-level vulnerabil-ities but miss architectural threats from system composition, trust boundaries, and runtime behavior. Threat modeling ad-dresses these concerns [7], [8], but is typically performed only 
+
+N. Pecka is with the University of North Texas, Denton, TX, USA and Red Hat, Raleigh, NC, USA. L. Ben Othmane and R. Bryce are with the University of North Texas, Denton, TX, USA. B. Bhargava is with Purdue University, West Lafayette, IN, USA. Manuscript received [DATE]; revised [DATE]. 
+
+during design [9], yielding outdated models [10], and requires manual effort impractical for continuous development. Architectural vulnerabilities—cross-boundary flows, priv-ilege escalation paths, exposed trust relationships—enable multi-stage attacks. ML-enabled systems face additional risks: model theft, training data exposure, and API exploitation through misconfigurations. Without continuous threat model-ing reflecting runtime behavior, security assessments become outdated, leaving attack paths undetected. This paper addresses this gap through a key innovation: au-tomatically inferring system architecture from runtime obser-vations to enable continuous threat modeling without manual diagram maintenance. Our methodology combines static con-figuration analysis with observed network flows to construct architecture graphs reflecting actual operational behavior, then detects architectural threats including ML-specific vulnerabil-ities from deployment misconfigurations (unauthorized model access, cross-zone training data access, unencrypted model transfers, exposed inference APIs). We validate the methodology on a software supply chain system deployed across bare metal, Kubernetes [11], and AWS [12]. Injecting 17 infrastructure and ML threats, we compared against six tools: three Infrastructure-as-Code (IaC) scanners (Trivy, Checkov, KubeLinter) and three Cloud Secu-rity Posture Management (CSPM) tools (Kubescape, Docker Bench Security, Prowler [13]). Our methodology detected all 17 threats; existing tools identified only 6-47% with zero ML coverage, confirming the necessity of runtime-aware, architecture-level analysis. The primary contribution is automatically inferring archi-tectural context from runtime observations with built-in ML component recognition, enabling continuous security assess-ment as systems evolve. Specific contributions include: 1) A technique for continuously generating threat models from running systems by inferring architecture from runtime observations and configuration. 2) An implementation correlating static configuration with runtime flows to produce accurate architecture graphs without requiring pre-existing diagrams, addressing di-agram drift. 3) An empirical evaluation identifying all 17 introduced threat types across three deployment platforms, com-pared to existing solutions detecting only 6-47% with zero ML threat coverage. Section II positions our approach relative to existing re-search. Section III presents the platform-agnostic abstrac-
+
+> arXiv:2603.22603v1 [cs.CR] 23 Mar 2026
+
+tions and threat detection algorithms. Section IV validates the methodology across three platforms with comparative evaluation. Section VI discusses validity threats. Section VII concludes. II. R ELATED WORK 
+
+Static Security Analysis. Vulnerability scanners (Trivy [14], Checkov [15], KubeLinter [16]) and CSPM tools (Prisma Cloud [17], Wiz [18], AWS Security Hub [19]) detect known CVEs [20] and misconfigurations through static analysis of container images, IaC templates, and cloud configurations. However, they analyze components in isolation, are platform-specific, and cannot detect architectural threats emerging from system composition or runtime behavior contradicting con-figured policies. Our methodology provides platform-agnostic architectural threat identification through runtime analysis. 
+
+Runtime Monitoring and Network Security. Runtime mon-itoring tools (Falco [21], AWS GuardDuty) and service mesh platforms (Istio [22], Linkerd [23]) provide security teleme-try through system call observation, anomaly detection, and traffic visibility. While valuable for incident detection and microsegmentation, they produce event-level alerts or ob-servability dashboards without classifying architectural threats using frameworks like STRIDE [24] or constructing attack graphs. Our approach correlates runtime observations with configuration and trust boundaries to generate structured threat models. 
+
+Automated Threat Modeling. Recent research automates threat modeling through LLMs and runtime adaptation. Aus-pex [25] uses LLMs to generate STRIDE threats from dia-grams but requires accurate up-to-date architectural diagrams. Our methodology infers architecture from running systems, addressing diagram drift [10]. ACTISM [26] and ThreMo-LIA [27] target domain-specific architectures (automotive, LLM applications) while our approach generalizes across deployment paradigms. 
+
+Constructing Threat Modeling Rules. Fu et al. [28] propose an approach that analyzes vulnerabilities disclosed in the NVD dataset, classifies them into a threat taxonomy, and derives threat-modeling rules with high accuracy. These rules enable identification of threats applicable to a target system. By grounding threat identification in continuously updated vulnerability disclosures, the approach helps keep pace with an evolving threat landscape and supports detecting newly emerging threats in existing systems. 
+
+Our Contributions. We address three gaps: (1) architecture inference from runtime observations without requiring pre-existing diagrams [29], [30], (2) platform-agnostic abstractions applying uniformly across bare-metal, Kubernetes, and cloud, and (3) ML/AI-aware threat modeling with built-in ML com-ponent recognition, achieving 100% threat detection versus 0% ML threat coverage by existing tools. III. M ETHODOLOGY 
+
+A. Core Concepts 
+
+Our methodology uses platform-agnostic abstractions em-ployed throughout Algorithms 1 and 2: logical domains D 
+
+> Fig. 1. Semi-automated Threat Modeling Methodology
+
+group components by security properties, components C are computational units, interfaces I expose functionality, access policies A govern communication, and runtime flows H cap-ture observed behavior [31], [32]. These form architecture graphs G = ( V, Eg , Z) mapped to threat modeling constructs: trust boundaries B, threat elements Et (processes/datastores/en-tities), and dataflows F with security metadata [33], [7], [34]. 
+
+B. Semi-automated Threat Modeling Process 
+
+Our semi-automated threat modeling methodology consists of five iterative stages (Figure 1): (1) Data Collection ex-tracts configuration data and runtime flows from the deployed system, (2) Architecture Construction builds an architecture graph representing the actual operational state of the system, capturing both the intended design and emergent runtime behavior, (3) Threat Modeling Mapping maps the inferred architecture to threat modeling constructs compatible with established frameworks (PyTM, Microsoft Threat Modeling Tool), (4) Threat Identification applies systematic pattern-based detection algorithms to identify security weaknesses, and (5) Mitigation Planning prioritizes identified threats by risk score and generates platform-specific mitigation rec-ommendations. The methodology operates continuously, re-analyzing the system as configurations change and new flows emerge, maintaining an up-to-date threat model that reflects the evolving security posture of the running system. The core of our approach lies in two main processes: (1) in-ferring the system architecture from runtime observations, and (2) identifying and analyzing architectural threats. Algorithm 1 describes how we extract platform-specific configuration data, correlate it with observed network flows to build an archi-tecture graph, and map this graph to platform-agnostic threat modeling constructs. Algorithm 2 details how we apply threat frameworks to identify security weaknesses, correlate them with known vulnerabilities, and generate actionable mitigation recommendations. 
+
+1) Architecture Inference from Runtime Observations: We transform running systems into structured threat models by collecting system configuration S = ( D, C, I, A) (domains, components, interfaces, policies) and runtime flows H via 2platform-specific monitoring tools. The architecture inference process constructs graph G = (V, Eg , Z) where vertices represent components, edges capture observed flows, and zones partition security domains. We correlate network-level identifiers (IPs, service names) to logical components using platform-specific strategies, then validate edges against poli-cies to identify anomalous flows. Finally, we map platform-specific graphs to threat modeling constructs: zones become trust boundaries B, components become threat elements Et
+
+(processes/datastores/entities), and flows become dataflows F
+
+enriched with security metadata (Table II). 
+
+2) Threat Identification and Mitigation Planning: Once we have constructed the threat model T = ( B, Et, F) through architecture inference (Algorithm 1), the second phase applies security frameworks to identify threats, correlates findings with known vulnerabilities, and generates prioritized miti-gation recommendations. This process enriches the abstract threat model with actionable security intelligence. We begin by applying threat frameworks (such as STRIDE [24], MITRE ATT&CK [35], and OWASP ML Secu-rity Top 10 [36]) to each threat model element and dataflow, generating a set of potential threats Θ based on element types and communication patterns. Elements classified as processes face threats like elevation of privilege and tampering, while datastores are vulnerable to information disclosure and denial of service. Dataflows that cross trust boundaries receive elevated scrutiny as they represent transitions between security domains. The methodology then correlates architectural threats with known vulnerabilities by querying vulnerability databases K
+
+using component version information. This integration com-bines architectural analysis with component-level security in-telligence, enabling detection of threats that emerge from both deployment topology and software vulnerabilities. When threat intelligence feeds L are available, we further enrich the threat set with contextual information about active attack campaigns and emerging threat patterns. Risk prioritization considers both intrinsic threat severity and contextual factors Ψ such as external exposure, data sensitivity, and compliance requirements. The methodology calculates risk scores for each identified threat and applies organizational security policies P to filter and prioritize find-ings. Finally, the methodology generates platform-specific mitiga-tion recommendations R by querying a mitigation knowledge base that maps abstract threats to concrete security controls. Where possible, we generate automated remediation configu-rations Am that can be directly applied to the target platform (e.g., NetworkPolicy YAML for Kubernetes, Security Group rules for AWS). This produces an actionable mitigation plan 
+
+M = (Θ p, R, Am) containing prioritized threats, mitigation recommendations, and automated remediation artifacts. Algo-rithm 2 formalizes this process. 
+
+3) Platform-Agnostic Construct Mappings: Our method-ology achieves platform independence through a set of ab-stract constructs that map consistently to platform-specific implementations. Table II demonstrates how each abstract construct ( D, C, I, A, etc.) defined in Algorithms 1 and 2 
+
+Algorithm 1: Architecture Inference from Runtime Observations  
+
+> 1:
+
+Input: Running software system Σ 
+
+> 2:
+
+Output: Threat model T = ( B, Et, F) 
+
+> 3: 4:
+
+// Phase 1: Extract Configuration and Runtime Data  
+
+> 5:
+
+Collect logical domains D, components C, interfaces I,policies A 
+
+> 6:
+
+Collect runtime flows H = {h = ( s, d, p, v )} via monitoring tools  
+
+> 7:
+
+{where s = source component, d = destination, p =port/protocol, v = verdict}  
+
+> 8:
+
+S ← (D, C, I, A) 
+
+> 9:
+
+{Note: H is collected separately from static configuration S} 
+
+> 10: 11:
+
+// Phase 2: Construct Architecture Graph  
+
+> 12:
+
+Initialize V ← ∅ , Eg ← ∅ , Z ← ∅  
+
+> 13:
+
+for each component c ∈ C do  
+
+> 14:
+
+Create vertex v with metadata from c and add to V 
+
+> 15:
+
+end for  
+
+> 16:
+
+for each flow h = ( s, d, p, v ) ∈ H do  
+
+> 17:
+
+Correlate h.s and h.d to vertices vs, v d ∈ V using IP/DNS/name matching  
+
+> 18:
+
+if vs̸ = null and vd̸ = null and vs̸ = vd then  
+
+> 19:
+
+Create or update edge e = ( vs, v d, ω ) where 
+
+ω = {h.p, h.v } in Eg 
+
+> 20:
+
+end if  
+
+> 21:
+
+end for  
+
+> 22:
+
+for each domain d ∈ D do  
+
+> 23:
+
+Create zone z = {v ∈ V : v.domain = d} and add to 
+
+Z 
+
+> 24:
+
+end for  
+
+> 25:
+
+for each edge e ∈ E g do  
+
+> 26:
+
+if not permitted by A or missing interface in I then  
+
+> 27:
+
+Flag edge e as anomalous  
+
+> 28:
+
+end if  
+
+> 29:
+
+end for  
+
+> 30:
+
+G ← (V, Eg , Z) 
+
+> 31: 32:
+
+// Phase 3: Map to Threat Modeling Constructs  
+
+> 33:
+
+Initialize B ← ∅ , Et ← ∅ , F ← ∅  
+
+> 34:
+
+for each zone z ∈ Z do  
+
+> 35:
+
+Create trust boundary b encapsulating z and add to B 
+
+> 36:
+
+end for  
+
+> 37:
+
+for each vertex v ∈ V do  
+
+> 38:
+
+Classify v as process, datastore, or external entity  
+
+> 39:
+
+Add classified element to Et 
+
+> 40:
+
+end for  
+
+> 41:
+
+for each edge e = ( vs, v d, ω ) ∈ E g do  
+
+> 42:
+
+Find elements es, e d ∈ E t corresponding to vs, v d 
+
+> 43:
+
+Create dataflow f = ( es, e d, metadata ) and add to F 
+
+> 44:
+
+if f crosses a boundary in B then  
+
+> 45:
+
+Flag f for elevated scrutiny  
+
+> 46:
+
+end if  
+
+> 47:
+
+end for  
+
+> 48: 49:
+
+Return T = ( B, Et, F)
+
+3Algorithm 2: Threat Identification and Mitigation Planning  
+
+> 1:
+
+Input: Threat model T = ( B, Et, F), knowledge base K,threat intelligence L, policies P 
+
+> 2:
+
+Output: Mitigation plan M = (Θ p, R, Am) 
+
+> 3: 4:
+
+// Phase 1: Apply Threat Frameworks and Correlate Vulnerabilities  
+
+> 5:
+
+Initialize Θ ← ∅  
+
+> 6:
+
+for each element e ∈ E t do  
+
+> 7:
+
+Apply threat framework (STRIDE) based on element type; add to Θ 
+
+> 8:
+
+end for  
+
+> 9:
+
+for each dataflow f ∈ F do  
+
+> 10:
+
+Apply threat framework based on dataflow properties  
+
+> 11:
+
+if f crosses trust boundary in B then  
+
+> 12:
+
+Apply elevated scrutiny and additional threat patterns  
+
+> 13:
+
+end if  
+
+> 14:
+
+Add identified threats to Θ 
+
+> 15:
+
+end for  
+
+> 16:
+
+for each element e ∈ E t do  
+
+> 17:
+
+Query K for vulnerabilities; enrich Θ with vulnerability data  
+
+> 18:
+
+end for  
+
+> 19:
+
+if L is available then  
+
+> 20:
+
+Match patterns from L against Et and F; enrich Θ 
+
+> 21:
+
+end if  
+
+> 22:
+
+// Phase 2: Calculate Risk Scores and Prioritize Threats  
+
+> 23:
+
+Extract contextual factors Ψ from system metadata  
+
+> 24:
+
+for each threat θ ∈ Θ do  
+
+> 25:
+
+Calculate risk score r(θ) using severity and Ψ 
+
+> 26:
+
+end for  
+
+> 27:
+
+Sort Θ by risk score, apply policies P, create Θp ⊆ Θ 
+
+> 28:
+
+Construct attack graph Ga from F and Θ 
+
+> 29:
+
+{Vertices = components, edges = exploitable dataflows}  
+
+> 30:
+
+Identify attack paths in Ga crossing multiple boundaries in B 
+
+> 31:
+
+// Phase 3: Generate Mitigation Recommendations  
+
+> 32:
+
+Initialize R ← ∅ , Am ← ∅  
+
+> 33:
+
+for each threat θ ∈ Θp do  
+
+> 34:
+
+Query mitigation knowledge base; create recommendations; add to R 
+
+> 35:
+
+if mitigation can be automated then  
+
+> 36:
+
+Generate platform-specific config; add to Am 
+
+> 37:
+
+end if  
+
+> 38:
+
+end for  
+
+> 39:
+
+Return M = (Θ p, R, Am)
+
+translates to concrete platform mechanisms across bare-metal, Kubernetes, and cloud deployments. These mappings enable our threat detection algorithms to operate uniformly across diverse infrastructure types while leveraging platform-native data collection tools and security constructs. 
+
+C. Illustrative Example: Platform-Agnostic Threat Detection 
+
+To illustrate how our platform-agnostic methodology op-erates across diverse infrastructures, Figure 2 shows the de-tection process for T01 (Unauthenticated External Access). The same abstract threat detection logic applies uniformly across platforms by mapping platform-specific configurations to our abstract constructs. For example, detecting T01 requires identifying: (1) an external-facing interface ( I), (2) absence of authentication policy ( A), and (3) observed external traffic (H). On Kubernetes, this manifests as a LoadBalancer Ser-vice without authentication annotation and a NetworkPolicy gap. On bare-metal, it appears as a 0.0.0.0 binding with missing iptables rules. On AWS, it emerges as a Security Group permitting 0.0.0.0/0 ingress without IAM authentication requirements. Despite differing implementations, the abstract detection algorithm remains identical, validating our method-ology’s platform independence. IV. E VALUATION 
+
+To validate that our methodology automatically infers archi-tecture from runtime observations and detects threats across heterogeneous deployments, we deployed a software supply chain system across three platforms and evaluated architecture inference and threat identification capabilities using platform-agnostic abstractions. The supply chain consists of eight components (Gitea, Jenkins, Docker Registry, Application, PostgreSQL, MLflow Model Registry, ML Inference Ser-vice, Training Data Storage) representing a modern DevOps workflow with integrated MLOps. The system was deployed across bare-metal infrastructure, a Kubernetes cluster [37], and Amazon Web Services [12]. We intentionally introduced sev-enteen types of architectural threats into the supply chains (ten traditional infrastructure threats T01-T10 plus seven AI/ML-specific threats T11-T17) using platform-specific mechanisms but with conceptually identical security implications. We then applied our five-stage semi-automated threat modeling methodology to each deployment to validate cross-platform generalization. 
+
+A. Experimental Setup 1) Supply Chain System: To demonstrate our methodology on a realistic software supply chain, we deployed a modern continuous integration and delivery (CI/CD) pipeline with inte-grated MLOps capabilities. The system consists of eight com-ponents spanning traditional DevOps infrastructure (source control, build automation, artifact storage, application runtime, database) and ML lifecycle management (training data storage, model registry, inference service). This architecture represents contemporary enterprise workflows where code changes and ML model updates flow through automated build, training, and deployment processes. 4TABLE I GROUND TRUTH THREAT TAXONOMY AND PLATFORM IMPLEMENTATIONS 
+
+ID Threat Type Bare-Metal Kubernetes Cloud (AWS) 
+
+T01 Unauthenticated external ac-cess (T1190) 
+
+Public IP, no firewall LoadBalancer, no NetworkPolicy Security Group 0.0.0.0/0 T02 Excessive permissions (T1078) Process runs as root cluster-admin RBAC Jenkins IAM role with admin permissions T03 Unencrypted cross-boundary flow (T1040) 
+
+HTTP (no TLS) HTTP (no mTLS) HTTP (no TLS) T04 Missing network segmentation 
+
+> (T1021)
+
+Flat network, iptables AC-CEPT all No NetworkPolicies Permissive Security Groups al-low all VPC traffic T05 Anonymous registry access 
+
+> (T1525)
+
+Docker Registry with no auth Docker Registry with no auth Docker Registry with no auth T06 CI/CD to production access 
+
+> (T1199)
+
+Jenkins SSH key to prod VM RBAC allows Jenkins SA to access prod-zone Jenkins IAM role can access prod resources T07 Missing audit logging 
+
+> (T1562.002)
+
+Docker log-driver: none Namespace annotations dis-able audit logging Docker log-driver: none T08 Exposed secrets in config 
+
+> (T1552)
+
+Plaintext passwords in con-fig files Secrets in ConfigMap (not Secret) Hardcoded passwords in user-data and config files T09 Overly broad source control ac-cess (NIST 800-161) 
+
+Gitea allows anonymous clone Gitea allows anonymous clone Gitea allows anonymous clone T10 Missing resource limits (T1496) No Docker memory/CPU limits No resource requests/limits No Docker memory/CPU lim-its 
+
+ML/AI-Specific Threats 
+
+T11 Unauthorized model access 
+
+> (ML03, AML.T0040)
+
+MLflow exposed on 0.0.0.0:5000, no authentication MLflow Service type LoadBalancer, no auth ConfigMap MLflow exposed on 0.0.0.0:5001 MLFLOW_AUTH=none +S3 bucket public-read ACL T12 Training data poisoning 
+
+> (ML02/LLM04, AML.T0020)
+
+Jenkins has write mount to training data directory Jenkins ServiceAccount edit role in dev-zone Jenkins IAM role has s3:PutObject on training bucket T13 Model theft via API (ML05, AML.T0024) 
+
+ML inference API exposed 0.0.0.0:8000, no rate limit-ing ML inference Service Clus-terIP, no authentication ML inference Security Group allows 0.0.0.0/0, no throttling T14 Unencrypted model transfer 
+
+> (NIST AI RMF)
+
+HTTP transfer MLflow to inference service HTTP Service-to-Service, no mTLS HTTP EC2-to-EC2 within VPC T15 ML pipeline to production ac-cess (LLM03, AML.T0010) 
+
+Jenkins SSH key to prod VM running inference Jenkins ServiceAccount edit role in prod-zone Jenkins IAM role with ec2:* enabling SSH to prod EC2 in-stance T16 Missing model provenance 
+
+> (LLM03, NIST AI RMF)
+
+MLflow filesystem backend, no versioning enforcement MLflow ConfigMap no ver-sioning config S3 bucket versioning disabled T17 Exposed model metadata 
+
+> (LLM02, AML.T0024)
+
+Flask /debug/model-info endpoint enabled /debug endpoints in infer-ence pod ConfigMap Flask /debug/model-info endpoint with DEBUG_MODE=true Framework references: T-numbers indicate MITRE ATT&CK techniques; ML-numbers refer to OWASP ML Security Top 10; LLM-numbers refer to OWASP LLM Top 10 2025; AML.T-numbers indicate MITRE ATLAS techniques; NIST references cite NIST 800-161 or NIST AI RMF. STRIDE framework alignment is detailed in the Framework Alignment paragraph above. 
+
+System Architecture. Our supply chain workflow: developers commit code/ML scripts to Gitea (source control); Jenkins (build automation) triggers application builds and ML training jobs, producing container images and trained models; Docker Registry stores container artifacts; MLflow (model registry) stores ML model artifacts, versioning, and metrics in the CI/CD zone; containerized Node.js application (production) connects to PostgreSQL database and ML inference service; Flask-based ML inference service loads models from MLflow and exposes prediction APIs. Training data storage (dev zone) contains datasets for model training, representing a critical asset requiring access control. 
+
+Trust Zones. The supply chain spans three trust zones with distinct security properties: the development zone (Gitea, Training Data Storage), CI/CD zone (Jenkins, Docker Registry, MLflow Model Registry), and production zone (Application, PostgreSQL, ML Inference Service). Both application artifacts and ML models flow across these boundaries—code commits trigger builds, trained models move from CI/CD to produc-tion, and inference services query model registries—creating multiple trust boundary crossings where architectural threats can manifest. 
+
+Technology Stack. All components deployed as containers: Gitea v1.21 (Git), Jenkins v2.440 (CI/CD) [38], Docker Reg-istry v2.8 (artifacts), Node.js v20 (application), PostgreSQL v15 (database), MLflow v2.9.2 (model registry), Python 3.11+Flask (ML inference), scikit-learn 1.3.2 (fraud detection model), PVCs/Docker volumes/S3 (training data). The same stack deploys across all three environments (bare-metal, Ku-bernetes, AWS), ensuring differences in threat detection are 5Fig. 2. Platform-agnostic threat detection workflow showing how T01 (Unauthenticated External Access) is detected across Kubernetes, bare-metal, and AWS deployments. The abstract algorithm (center) processes platform-specific data (left) through unified constructs to identify architectural threats regardless of deployment mechanism. Generated with Claude Code. 
+
+attributable to deployment topology rather than application differences. 
+
+ML Workflow and Threat Surface. The integrated MLOps pipeline introduces a parallel workflow alongside traditional application deployment: training data (dev zone) → ML training (Jenkins in CI/CD zone) → model storage (MLflow in CI/CD zone) → production inference (prod zone). This creates additional attack surfaces beyond traditional infrastruc-ture threats. The ML components enable evaluation of seven AI-specific architectural threat types (T11-T17): unauthorized model access, training data poisoning, model theft via API, un-encrypted model transfer, CI/CD pipeline privilege escalation to production ML services, missing model provenance track-ing, and exposed model metadata through debug endpoints. These threats are architectural in nature—emerging from deployment topology, trust boundary crossings, and access control misconfigurations aligning with our methodology’s focus on deployment-level security analysis. 
+
+2) Ground Truth Threat Taxonomy: We defined seventeen architectural threat types representative of common supply chain security weaknesses including emerging AI/ML deploy-ment threats, described in Table I. The first ten threats (T01-T10) represent traditional infrastructure security concerns derived from STRIDE [24], [39], MITRE ATT&CK [35], and NIST SP 800-161 [40]. The additional seven threats (T11-T17) address ML/AI-specific architectural vulnerabili-ties, systematically selected from established ML security frameworks including MITRE ATLAS [41], OWASP Machine Learning Security Top 10 [36], OWASP LLM Top 10 [42], NIST AI Risk Management Framework [43], and OpenSSF MLSecOps guidelines [44], [45]. This selection was further informed by documented real-world ML deployment security incidents [46]. These ML threats focus on deployment-level architectural concerns (unauthorized model access, training data tampering, model extraction via APIs, unencrypted model transfer, cross-zone ML pipeline access, missing provenance tracking, exposed debug endpoints) rather than algorithmic ML security issues (adversarial examples, model poisoning attacks). This taxonomy represents common architectural vul-nerabilities in ML deployment scenarios but is not exhaustive of all possible ML security threats. Each threat was intention-ally introduced into all three deployment environments using the native security constructs of that platform. For example, Threat T01 (unauthenticated external access) was implemented as:  
+
+> •
+
+Bare-Metal : Jenkins VM exposed on public network interface with no iptables firewall restrictions  
+
+> •
+
+Kubernetes : Jenkins Service of type LoadBalancer with no NetworkPolicy or Ingress authentication  
+
+> •
+
+Cloud (AWS) : Jenkins EC2 instance with Security Group allowing 0.0.0.0/0 ingress on port 8080 Although the implementation details differ, the architectural 6TABLE II CONSTRUCT MAPPINGS ACROSS DEPLOYMENT ENVIRONMENTS                                                                               
+
+> Construct Platform-Specific Implementations
+> D(Domains) Bare-Metal: Network segments, VLANs, VM pools; K8s: Namespaces; AWS:
+> VPCs, Subnets, AZs
+> C(Components) Bare-Metal: VMs, processes, services;
+> K8s: Pods, Deployments, StatefulSets;
+> AWS: EC2, containers
+> I(Interfaces) Bare-Metal: Network ports, sockets; K8s:
+> Services, Ingresses; AWS: Security Group rules, EC2 ports
+> A(Access Policies) Bare-Metal: iptables, firewall rules; K8s:
+> NetworkPolicies, RBAC; AWS: Security Groups, NACLs, IAM
+> H(Runtime Flows) Bare-Metal: tcpdump, iptables; K8s: Cil-ium Hubble, service mesh; AWS: VPC Flow Logs
+> V(Graph Vertices) Bare-Metal: VMs, processes; K8s: Pods (grouped); AWS: EC2, containers
+> Eg(Graph Edges) Bare-Metal: VM-to-VM paths; K8s:
+> Pod-to-pod; AWS: EC2-to-EC2, container flows
+> Z(Zones) Bare-Metal: Network zones, VLANs;
+> K8s: Namespace partitions; AWS: VPC/-subnet partitions
+> B(Trust Boundaries) Bare-Metal: Segment boundaries, DMZ;
+> K8s: Namespace/cluster boundaries;
+> AWS: VPC/subnet boundaries
+> Et(Threat Elements) Bare-Metal: VM as Process/Datastore;
+> K8s: Pod as Process, PVC as Datastore;
+> AWS: EC2 as Process
+> F(Dataflows) Bare-Metal: VM traffic; K8s: Pod traffic, cross-namespace; AWS: EC2 traffic, cross-subnet
+
+threat (unprotected trust boundary crossing from untrusted external zone to CI/CD zone) remains conceptually identical. This design allows us to evaluate whether our methodology’s abstract constructs correctly identify threats independent of platform-specific mechanisms. Our ground truth threat taxonomy was derived from es-tablished security frameworks including STRIDE [24], [39], MITRE ATT&CK [35], MITRE ATLAS [41], NIST SP 800-161 [40], NIST AI RMF [43], OWASP ML Security Top 10 [36], and OWASP LLM Top 10 [42]. Each threat rep-resents an architectural vulnerability emerging from deploy-ment topology rather than implementation bugs, demonstrating cross-platform manifestation through platform-specific mech-anisms. 
+
+Framework Alignment. Traditional infrastructure threats (T01-T10) align with STRIDE categories (Spoofing, Tam-pering, Information Disclosure, Denial of Service, Elevation of Privilege, Repudiation) and MITRE ATT&CK techniques (T1190, T1078, T1040, T1021, T1525, T1199, T1562.002, T1552, T1496). ML/AI-specific threats (T11-T17) map to OWASP ML Security Top 10 [36], OWASP LLM Top 10 [42], MITRE ATLAS [41] (AML.T0040, AML.T0020, AML.T0024, AML.T0010), and NIST AI RMF [43] require-ments. This systematic alignment ensures our threat taxonomy represents recognized security concerns rather than ad-hoc selections. 
+
+Note on Threat Types vs. Instances : We distinguish between threat types and threat instances . A threat type (T01-T17) represents a category of architectural vulnerability, while an instance represents a specific occurrence of that threat type in the deployed system. For example, T08 (Exposed Secrets) is a single threat type that manifests as multiple instances when plaintext credentials appear in different configuration files (gitea-secrets, database-credentials, application environment variables, etc.). Our evaluation reports both the number of threat types detected and the total number of threat instances identified across all components. 
+
+B. Case Studies 
+
+We deployed the supply chain system across three distinct platforms to evaluate the generalization of our methodol-ogy. As described in Section III-B3, Table II shows how abstract constructs map to platform-specific implementations. The following subsections present deployment configurations and how we applied our methodology. Results are explained in the next section. 
+
+Note : The case studies follow a parallel structure (Data Collection and Architecture Construction, Threat Modeling Mapping, Threat Detection, and Results) to demonstrate that our methodology applies uniformly across diverse platforms despite platform-specific implementation differences. Data collection used platform-native tools: bare-metal em-ployed SSH/Docker inspect for configuration, tcpdump for flows, and iptables analysis for policies; Kubernetes used kubectl API for configuration, Cilium Hubble/Falco for flows/events, and NetworkPolicy/RBAC queries for policies; AWS used boto3 SDK for configuration (EC2, VPC, IAM), VPC Flow Logs for network data, and Security Group/IAM APIs for policies. All tools collected data continuously throughout evaluation. 
+
+1) Cross-Platform Deployment Case Studies: All three platforms deployed identical eight-component supply chains across three trust zones (dev, CI/CD, prod) with the same threat boundary crossings: training data (dev) → model train-ing (CI/CD) → model storage (CI/CD) → production infer-ence (prod). Bare-metal used three Proxmox VMs running Ubuntu 22.04 with Docker. Data collection via SSH extracted VMs as domains ( D), containers as components ( C), and ipta-bles/SSH keys as policies ( A). Tcpdump captured flows ( H). Detection used iptables analysis for T04, SSH key correlation for T06, and docker-compose inspection for ML threats T11-T17. Results: 49 threat instances detected (42 traditional + 7 ML). Kubernetes deployed across three namespaces on an RKE2 cluster. API queries extracted namespaces as domains, pods as components, NetworkPolicies/RBAC as policies. Cil-ium Hubble captured eBPF flows. Detection used Service API analysis for T01, RBAC correlation for T06, and ConfigMap inspection for ML threats. Results: 47 threat instances (40 traditional + 7 ML). AWS used three EC2 t3.micro instances in separate VPC subnets. Boto3 API queries extracted VPC/-subnets as domains, EC2/containers as components, Security Groups/IAM as policies. Tcpdump via SSH captured flows. 7Fig. 3. AWS cloud environment showing three EC2 instances across three subnets within a single VPC, connected via Internet Gateway 
+
+Detection analyzed Security Group rules for T01/T04, IAM policies for T02/T06, and S3 bucket policies for ML threat T11. Results: All 17 threat types detected. All platforms demonstrated consistent threat detection using platform-specific mechanisms mapped to abstract constructs: VMs/namespaces/subnets became trust boundaries ( B), con-tainers/pods/instances became threat elements ( Et), and ob-served flows became dataflows ( F). Each deployment iden-tified the attack chain: External → T01 → T02 → T06 →
+
+T08. Platform-agnostic ML threat detection (Section IV-B2) succeeded across all environments using unified detection patterns adapted to platform-specific configurations. 
+
+2) ML/AI Threat Detection Across Platforms: Our method-ology detected all seven ML-specific architectural threats (T11-T17) across all three platforms using platform-agnostic detection logic–they are described in Table I–that adapts to platform-specific mechanisms. This subsection details how each ML threat type manifests across deployment paradigms and the abstract detection patterns that enable cross-platform identification. These abstract detection patterns demonstrate how our methodology’s platform-agnostic constructs enable consistent ML threat detection across diverse infrastructures. By rec-ognizing ML components (model registries, training data stores, inference services) as first-class architectural elements, the methodology applies ML-specific threat logic uniformly regardless of whether components are deployed as Docker containers on VMs, Kubernetes pods, or EC2 instances with S3 storage. V. R ESULTS AND ANALYSIS 
+
+We present validation results demonstrating that our methodology successfully performs platform-agnostic threat modeling across diverse deployment paradigms. 
+
+A. Cross-Platform Methodology Validation 
+
+Our methodology successfully validated all core capabili-ties across three deployment platforms. The methodology in-ferred architecture graphs from runtime observations, mapped platform-specific mechanisms to abstract constructs, and iden-tified all 17 intentionally introduced threat types (10 traditional infrastructure threats T01-T10 plus 7 ML-specific threats T11-T17) on bare-metal, Kubernetes, and AWS deployments using identical abstract detection logic. ML threat detection on bare-metal identified 49 total threat instances (42 traditional + 7 ML-specific), Kubernetes detected 47 instances (40 traditional + 7 ML-specific), and AWS detected all 17 threat types (T01-T17), demonstrating consistent cross-platform detection with the same abstract threat logic applied through platform-specific mechanisms. In comparison, existing security scanning tools detected only 6-47% of all threats with default configurations (Ta-ble IV). Static IaC scanners with default configurations de-tected 6-18%, while CSPM tools with default configurations detected 41-47%. Critically, no existing tool detected any of the seven ML-specific threats (0/7) without hand-crafted custom rules. Furthermore, none can detect the three runtime-confirmed ML threats (T12, T14, T15) which require ob-serving ML component communication patterns. This demon-strates that static configuration analysis alone is insufficient for comprehensive threat detection in modern distributed systems, particularly for emerging ML/AI deployment architectures. Architectural threats that emerge from component composi-tion, trust boundary crossings, runtime behavior, and ML-specific access patterns require the semi-automated correlation capabilities and built-in ML component recognition provided by our methodology. 
+
+B. Performance Analysis 
+
+Our methodology’s overhead consists of two components: runtime data collection infrastructure and threat analysis ex-ecution. We measured comprehensive performance metrics across all three platforms to characterize deployment-specific costs and trade-offs (Table III). 
+
+Runtime Data Collection Infrastructure. Table III shows platform-specific overhead. Kubernetes requires Cilium/Hub-ble and Falco (187m CPU, 1.89 GB RAM). Bare-metal uses tcpdump ( ∼2m CPU, ∼20 MB RAM per host). AWS uses VPC Flow Logs (managed service, $0.50/GB cost). We empirically measured VPC Flow Log delivery delay of 58 seconds (range: 53-62s), faster than AWS documentation’s 10-20 minute estimate [12]. 
+
+Trade-off Analysis. Platforms trade prerequisites, execution time, and latency. Kubernetes: 32.65s total, requires Hubble/-Falco infrastructure. Bare-metal: 191.84s total, no additional infrastructure. AWS: 60s total (1.92s + 58s VPC Flow Log 8TABLE III CROSS -P LATFORM PERFORMANCE METRICS                                                             
+
+> Metric Kubernetes Bare-Metal AWS Cloud
+> Test Environment Hardware
+> Infrastructure 3 nodes (RKE2 cluster) 3 VMs (Proxmox) 3 EC2 instances Total CPU 13 cores (3+5+5) 6 cores (2×3) 6 vCPUs (2×3) Total Memory 26 GB (6+10+10) 12 GB (4×3) 3 GB (1×3) Instance Types Mixed (control+workers) VM (2 core, 4 GB each) t3.micro (2 vCPU, 1 GB)
+> Data Collection Tools
+> Tools Hubble + Falco DaemonSets tcpdump VPC Flow Logs Minimum CPU Required 187m (1.4% of 13 cores) ∼2m per host AWS-managed Minimum Memory Required 1.89 GB (7.3% of 26 GB) ∼20 MB per host AWS-managed
+> Data Collection Overhead (during execution)
+> Collection Time 1.56s (API queries) 191.79s (tcpdump + parsing) ∼1-5s (query Flow Logs) CPU During Collection 48.3% avg 0.1% avg AWS hypervisor-level Memory During Collection 84.8 MB peak 18.4 MB peak AWS hypervisor-level
+> Threat Modeling Execution Time
+> Data Extraction 1.56s 191.79s 1.92s - Network flow collection 0.24s (Hubble+Falco query) 180.17s (tcpdump) VPC Flow Logs ( 58s delay) - Metadata collection 1.32s (K8s API) 11.62s (SSH queries) 1.92s (boto3) Threat Analysis 31.09s 0.05s 1.92s - Tool scanning 31.08s (Trivy+Kubescape) 0.02s (Docker Bench+Checkov) 1.89s (Prowler+Checkov) - Correlation 0.01s 0.03s 0.03s
+> Total Per-Scan Time 32.65s 191.84s 1.92s + 58s delay*
+> Resource Consumption
+> Peak Memory 84.8 MB 18.4 MB 15.0 MB Average CPU (during scan) 2.5% 0.06% 0.11%
+
+*AWS total time includes empirical VPC Flow Log delivery delay: 58-second average (range: 53-62s) from network activity to CloudWatch availability, measured across 3 ENIs. VPC Flow Logs consume AWS infrastructure resources (hypervisor-level) not visible to user VMs; incurs monetary costs ($0.50/GB) rather than user VM overhead. 
+
+delay), managed service costs. Kubernetes suits rapid threat detection with existing observability, bare-metal suits periodic assessment, AWS suits cloud-native deployments accepting managed service costs. 
+
+Algorithm Complexity and Scalability. The architecture graph construction (Algorithm 1) has O(n²) worst-case com-plexity for flow correlation, though realistic systems exhibit sparse communication patterns reducing practical complexity. Threat detection (Algorithm 2) scales linearly O(n) with the number of components and dataflows. Our evaluation ana-lyzed small-scale deployments: 3-5 infrastructure units per platform (VMs for bare-metal, pod groups for Kubernetes, EC2 instances for AWS) hosting eight application components distributed across three trust zones. For large-scale deployments (50+ services), flow correla-tion complexity depends on communication density—sparse service meshes maintain near-linear scaling while densely connected systems approach quadratic complexity. Threat de-tection remains linear regardless of scale. Memory requires approximately 50-100 MB per 100 components. Practical strategies such as zone-based analysis and incremental updates can mitigate scaling challenges. Production-scale validation remains future work. 
+
+C. Comparative Analysis 
+
+To demonstrate why runtime-aware architectural threat modeling is necessary and what capabilities it provides be-yond existing security analysis approaches, we compared our methodology against six widely-adopted open-source security scanning tools representing two categories: Static IaC Scanners (Trivy, Checkov, KubeLinter) that analyze infrastructure-as-code templates pre-deployment, and Cloud Security Posture Management (CSPM) tools (Kubescape, Docker Bench Se-curity, Prowler) that assess security posture of deployed in-frastructure. These tools represent the current state-of-practice for automated security analysis in cloud-native environments and are deployed across development lifecycles for both pre-deployment validation and runtime compliance monitoring. 
+
+1) Tool Selection and Methodology: We selected six open-source tools with active maintenance and platform coverage: Static IaC Scanners (Trivy, Checkov, KubeLinter) analyz-ing pre-deployment templates, and CSPM tools (Kubescape, Docker Bench Security, Prowler) assessing deployed infras-tructure. Each tool was executed against our deployment configurations with default security policies: Trivy/Checkov scanned manifests and Terraform configs, KubeLinter an-alyzed Kubernetes YAML, Kubescape scanned the run-ning cluster (47 controls), Docker Bench ran CIS checks (105 checks), and Prowler performed AWS assessment (301 checks). All outputs were mapped to our T01-T17 threat taxonomy for direct comparison. 
+
+Comparison Scope. Our evaluation used default tool con-figurations. Tools supporting custom policies could theoret-ically detect additional threats with hand-crafted rules, but would require encoding architectural knowledge (trust zones, component roles, ML semantics) not present in static files. Our contribution is automatically inferring this context from runtime observation. In Table IV, ∼ indicates threats requiring custom deployment-specific rules. Runtime-correlation threats (T03, T06, T12, T14, T15) cannot be confirmed even with custom rules—they require observing network flows, unique to our runtime+static correlation approach. 
+
+2) Detection Coverage Comparison: Our threat detection contributions span three capability classes: (1) Runtime-9TABLE IV COMPARATIVE THREAT DETECTION : O UR METHODOLOGY VS . E XISTING TOOLS                                                                                                                                                                
+
+> ID Threat Type Dynamic TM Docker Bench Trivy Checkov KubeLinter Kubescape Prowler Traditional Infrastructure Threats
+> T01 Unauthenticated Access ✓✓∼✓∼✓✓
+> T02 Excessive Permissions ✓✓×××✓✓
+> T03 Unencrypted Communication ✓××✓×✓✓
+> T04 Network Segmentation ✓✓∼∼∼✓✓
+> T05 Anonymous Registry ✓✓××××✓
+> T06 CI/CD to Prod Access ✓✓×××✓✓
+> T07 Missing Logging ✓✓×✓✓✓✓
+> T08 Exposed Secrets ✓×✓××✓✓
+> T09 Broad Source Access ✓×∼∼∼××T10 Resource Limits ✓✓×××✓×
+> ML/AI-Specific Architectural Threats
+> T11 Unauthorized Model Access ✓×∼∼∼∼∼
+> T12 Training Data Poisoning ✓××××××T13 Model Theft via API ✓×∼∼∼∼∼
+> T14 Unencrypted Model Transfer ✓××××××T15 ML Pipeline to Prod Access ✓××××××T16 Missing Model Provenance ✓×∼∼∼∼∼
+> T17 Exposed Model Metadata ✓×∼∼∼∼∼
+> Legend: ✓= Detected with default config, ×= Cannot detect, ∼= Could detect with custom rules
+> Total (Traditional) 10/10 7/10 1/10 3/10 1/10 8/10 8/10
+> Total (ML-Specific) 7/7 0/7 0/7 0/7 0/7 0/7 0/7
+> Total (All Threats) 17/17 (100%) 7/17 (41%) 1/17 (6%) 3/17 (18%) 1/17 (6%) 8/17 (47%) 8/17 (47%)
+
+Confirmed Threats (T03, T06, T12, T14, T15) require corre-lating runtime network flows with static configuration—static tools cannot detect these without runtime observation. (2) ML-Specific Static Threats (T11, T13, T16, T17) require ML com-ponent domain knowledge; static tools lack built-in awareness of ML deployment semantics and cannot recognize MLflow, training data stores, or inference services as distinct security-relevant types. (3) Architectural Context Threats (T01, T04, T09) require understanding system architecture including trust zone definitions—tools could detect these with custom policies encoding deployment-specific architectural knowledge, but this varies across deployments and is not present in config-uration files alone. Our contribution: automatically inferring architectural context from runtime observation combined with 
+
+built-in ML component recognition , eliminating deployment-specific policy authoring while enabling runtime-confirmed threat detection. Table IV presents the comparative detection results across all tools and threat types. Our methodology achieved 100% coverage (17/17 threat types detected including both tradi-tional infrastructure and ML-specific threats), while existing tools with default configurations exhibited a wide range of detection capabilities. Static IaC scanners detected only 6-18% of all threats: Trivy (1/17, 6%), Checkov (3/17, 18%), and KubeLinter (1/17, 6%). CSPM tools performed signifi-cantly better, detecting 41-47% of threats: Kubescape (8/17, 47%), Docker Bench Security (7/17, 41%), and Prowler (8/17, 47%). However, critically, no existing tool—neither static nor CSPM—detected any ML-specific threats with default config-urations (0/7, 0%), demonstrating a universal gap in current security tooling for ML/AI deployment scenarios. While static tools could theoretically detect four ML configuration issues (T11, T13, T16, T17) with hand-crafted ML-aware custom rules, they fundamentally cannot detect runtime-confirmed ML threats (T12, T14, T15) which require observing actual ML component communication patterns. Additionally, all seven ML threats require recognizing ML components (MLflow, training data stores, inference services) as distinct architectural elements with ML-specific threat profiles—a capability absent from existing tools even with custom policy support. Static IaC scanners detected 1-3 threats (6-18%): Trivy/KubeLinter found T07 (logging), Checkov found T01/T03/T07 (access/encryption/logging). CSPM tools achieved 7-8 threats (41-47%): Kubescape (8 threats via RBAC/NetworkPolicy analysis), Docker Bench (7 threats via CIS checks), Prowler (8 threats via AWS security checks). However, all tools detected zero ML-specific threats (T11-T17), which require ML-aware configuration correlation absent from existing scanners. Critically, CSPM tools identify isolated misconfigurations without architectural context. For example, Kubescape flags cluster-admin RBAC but cannot determine it enables cicd-zone →prod-zone boundary crossing. Docker Bench detects missing resource limits but cannot correlate with cross-zone DoS risk. Our methodology provides architectural signifi-cance: not just what is misconfigured, but why it constitutes an exploitable threat chain. 
+
+3) Methodology Capabilities Beyond Existing Approaches: 
+
+Our methodology provides three unique capabilities: (1) Runtime-Aware Architectural Analysis correlates static config-10 uration with observed network flows, validating that security controls are enforced at runtime and detecting configuration drift missed by static and CSPM-only assessment. (2) Cross-Component Threat Correlation constructs system-wide archi-tecture graphs enabling detection of multi-hop attack paths across security domains—CSPM tools detect isolated mis-configurations without correlating permissions with cross-zone access patterns. (3) ML/AI-Aware Threat Modeling uniquely detected all seven ML threats (T11-T17) while ALL six existing tools detected zero, demonstrating fundamental gaps: lack of ML component recognition (MLflow, training data stores, inference services) as distinct architectural elements, and inability to confirm runtime exploitation of ML access paths through flow observation. These capabilities complement existing tools: use static scanners for pre-deployment validation, CSPM tools for com-pliance monitoring, and our methodology for architectural threat modeling, cross-zone attack path analysis, and ML/AI deployment security assessment. VI. T HREATS TO VALIDITY 
+
+Internal Validity. Communication flows must occur during observation; we mitigated this by executing complete end-to-end workflows before analysis. Flow correlation uses connec-tion metadata (IP, port) rather than packet contents, enabling encrypted traffic handling via platform-native tools (Cilium Hubble, VPC Flow Logs). 
+
+Methodology Scope. Our approach detects architectural 
+
+threats from deployment topology. It cannot detect application-level vulnerabilities, implementation bugs, or supply chain artifact attacks—these require complementary techniques. 
+
+External Validity. Evaluation focused on supply chain archi-tecture (8 components, 3 trust zones) [47], [48]. Validation on additional system types (microservice meshes, serverless) remains future work [49], [50]. Our 17-threat taxonomy rep-resents common vulnerabilities [40] but is not exhaustive. 
+
+Construct/Reliability. Platform-specific threat implementa-tions required judgment on conceptual equivalence. Repro-ducibility is supported by open-source implementation [29]. VII. C ONCLUSION 
+
+Traditional threat modeling during design becomes outdated as cloud deployments evolve, leaving organizations vulnerable to architectural threats from runtime behavior and system composition. Existing security tools analyze components in isolation, lacking the architectural context to detect cross-boundary attacks, privilege escalation paths, and ML-specific deployment vulnerabilities. This paper addresses this gap through a key innovation: automatically inferring system archi-tecture from runtime observations to enable continuous threat modeling without manual diagram maintenance. Our method-ology combines static configuration analysis with observed network flows to construct architecture graphs reflecting actual operational behavior, then applies systematic threat detection using platform-agnostic abstractions working uniformly across bare-metal, Kubernetes, and AWS. We validated this approach on a software supply chain system with ML components, injecting 17 infrastructure and ML threats. Results demonstrate detection of all 17 threat types across all platforms, while existing tools detected only 6-47% with zero ML coverage, confirming static scanners cannot validate runtime behavior and CSPM tools lack archi-tectural context for cross-component correlation. This is crit-ical because ML-enabled cloud systems face evolving attack surfaces where multi-stage attacks chain architectural weak-nesses—exposed trust boundaries, unauthorized cross-zone access, ML infrastructure misconfigurations—to compromise critical assets. Our methodology enables maintaining accurate threat models reflecting operational security reality, supporting continuous architecture-level assessment across heterogeneous deployments. Future work includes extending the methodology to addi-tional system architectures (microservice meshes, event-driven systems, IoT deployments) and incorporating automated re-mediation generation that produces platform-specific security configurations from identified threats. DATA AVAILABILITY 
+
+The code is available at https://github.com/npecka/threat-model-generator. REFERENCES [1] V. Mohan and L. ben Othmane. Secdevops: Is it a marketing buzzword? - mapping research on security in devops. In 2016 11th International Conference on Availability, Reliability and Security (ARES) , pages 542– 547, 2016. [2] L. ben ben Othmane, P. Angin, H. Weffers, and B. Bhargava. Extending the agile development process to develop acceptably secure software.                           
+
+> IEEE Transactions on Dependable and Secure Computing , 11(6):497– 509, 2014. [3] L. b. Othmane, P. Angin, H. Weffers, and B. Bhargava. Extending the agile development process to develop acceptably secure software.
+> IEEE Transactions on Dependable and Secure Computing , 11(6):497– 509, Nov 2014. [4] A. Quintessence. The devsecops cultural transformation. https://www. pagerduty.com/blog/devsecops-ops-guide/, 03 2021. Accessed on Jan. 2022. [5] N. Pecka, L. Ben Othmane, and A. Valani. Privilege escalation attack scenarios on the devops pipeline within a kubernetes environment. In
+> Proceedings of the International Conference on Software and System Processes and International Conference on Global Software Engineer-ing , ICSSP’22, page 45–49, New York, NY, USA, 2022. Association for Computing Machinery. [6] N. Pecka and L. Ben Othmane. Insider attacks on the devops pipeline. https://github.com/npecka/InsiderAttacksontheDevOpsPipeline, 2022. [7] A. Shostack. Threat modeling: Designing for security. 2014. [8] J. A Ingalsbe, L. Kunimatsu, T. Baeten, and N. R Mead. Threat modeling: diving into the deep end. IEEE software , 25(1):28–34, 2008. [9] D. Dhillon. Developer-driven threat modeling: Lessons learned in the trenches. IEEE Security and Privacy , 9(4):41–47, July 2011. [10] D. M. Le, P. Behnamghader, J. Garcia, D. Link, A. Shahbazian, and N. Medvidovic. An empirical study of architectural change in open-source software systems. In 2015 IEEE/ACM 12th Working Conference on Mining Software Repositories , pages 235–245, May 2015. [11] Kubernetes. Kubernetes components. https://kubernetes.io/docs/ concepts/overview/components/, 2024. Accessed on Dec. 2023. [12] Amazon. Aws. https://www.aws.amazon.com, 2006. Accessed on Jan. 2023. [13] Prowler. Secure any cloud at ai speed. Accessed on Jan. 2026. [14] Aqua Security. Trivy: A simple and comprehensive vulnerability scanner for containers, 2024. Accessed on Nov. 2025. [15] Bridgecrew. Checkov: Static code analysis tool for infrastructure as code, 2024. Accessed on Nov. 2025.
+
+11 [16] StackRox. Kubelinter: A static analysis tool for kubernetes yaml files and helm charts, 2024. Accessed on Nov. 2025. [17] Palo Alto Networks. Prisma cloud: Cloud native security platform, 2024. Accessed on Nov. 2025. [18] Wiz. Wiz: Cloud security platform, 2024. Accessed on Nov. 2025. [19] Amazon Web Services. Aws security hub: Cloud security posture management, 2024. Accessed on Nov. 2025. [20] Attaxion. Cwe vs. cve vs. cvss: What are the differences. https://attaxion. com/blog/cwe-vs-cve-cvss-difference/, 2023. Accessed on Dec. 2024. [21] The Falco Project. Falco: Cloud native runtime security, 2024. Accessed on Nov. 2025. [22] Google, IBM, and Lyft. Istio: An open platform to connect, manage, and secure microservices. 2017. [23] Buoyant. Linkerd: Ultralight service mesh for kubernetes, 2024. Ac-cessed on Nov. 2025. [24] S. Hernan, S. Lambert, T. Ostwald, and A. Shostack. Uncover security design flaws using the stride approach. In MSDN Magazine . Microsoft, 2006. [25] A. Crossman, A. R. Plummer, C. Sekharudu, D. Warrier, and M. Yekran-gian. Auspex: Building threat modeling tradecraft into an arti-ficial intelligence–based copilot. arXiv preprint arXiv:2503.09586 ,March 2025. AI-based automated threat modeling tool :contentRefer-ence[oaicite:1]index=1. [26] S. Huang, C. M. Poskitt, and L.K. Shar. Actism: Threat-informed dynamic security modelling for automotive systems. arXiv preprint arXiv:2412.00416 , November 2024. Dynamic threat modeling in au-tomotive domain :contentReference[oaicite:3]index=3. [27] F.V. Jedrzejewski, D. Fucci, and O. Adamov. Thremolia: Threat mod-eling of large language model-integrated applications. arXiv preprint arXiv:2504.18369 , April 2025. LLM-integrated app threat modeling :contentReference[oaicite:4]index=4. [28] C. Fu, H. Zhang, and X. Guan. An automated approach to constructing stride threat rule model and updating rule base. ACM Trans. Softw. Eng. Methodol. , Oct 2025. [29] J. Garcia, I. Krka, C. Mattmann, and N. Medvidovic. Obtaining ground-truth software architectures. In Proc. of the 2013 International Conference on Software Engineering , pages 901–910. IEEE Press, 2013. [30] G.C. Murphy, D. Notkin, and K.J. Sullivan. Software reflexion models: Bridging the gap between design and implementation. IEEE Transac-tions on Software Engineering , 27(4):364–380, 2001. [31] L. Bass, P. Clements, and R. Kazman. Software architecture in practice. 2012. [32] R. N. Taylor, N. Medvidovic, and E. M. Dashofy. Software Architecture: Foundations, Theory, and Practice . Wiley Publishing, 2009. [33] F. Swiderski and W. Snyder. Threat modeling . Microsoft Press, 2004. [34] L. Sion, K. Yskout, D. Van Landuyt, A. van den Berghe, and W. Joosen. Security threat modeling: Are data flow diagrams enough? In Pro-ceedings of the IEEE/ACM 42nd International Conference on Software Engineering Workshops , ICSEW’20, page 254–257, New York, NY, USA, 2020. Association for Computing Machinery. [35] Mitre. Att&ck matrix for enterprise. https://attack.mitre.org/, 01 2015. Accessed on Jan. 2024. [36] OWASP Foundation. Owasp machine learning security top 10, 2023. Accessed on Jan. 2026. [37] Kubernetes. Production-grade container orchestration. https:// kubernetes.io, 09 2021. Accessed on Sep. 2021. [38] Jenkins. Jenkins. https://jenkins.io, 02 2011. Accessed on Oct. 2021. [39] Loren Kohnfelder and Praerit Garg. The threats to our products. Microsoft Interface, April 1, 1999. Introduced the STRIDE threat classification model. [40] National Institute of Standards and Technology. Cybersecurity supply chain risk management practices for systems and organizations. Tech-nical Report Special Publication 800-161 Rev. 1, NIST, 2022. [41] MITRE Corporation. Mitre atlas: Adversarial threat landscape for artificial-intelligence systems, 2023. Accessed on Jan. 2026. [42] OWASP Foundation. Owasp top 10 for large language model applica-tions, 2025. Version 2.0, Accessed on Jan. 2026. [43] National Institute of Standards and Technology. Artificial intelligence risk management framework (ai rmf 1.0). Technical report, NIST, 2023. Accessed on Jan. 2026. [44] OpenSSF, Dell Technologies, and Ericsson. Visualizing secure mlops (mlsecops): A practical guide for building robust ai/ml pipeline security. Technical report, Open Source Security Foundation, Aug 2025. Accessed on Jan. 2026. [45] F. Calefato, F. Lanubile, and L. Quaranta. Security risks and best practices of mlops: A multivocal literature review. Italian Conference on CyberSecurity (ITASEC) , Apr 2024. Accessed on Jan. 2026. [46] IBM X-Force. Abusing mlops platforms to compromise ml models and enterprise data lakes, 2024. Accessed on Jan. 2026. [47] AWS. What is devops. https://aws.amazon.com/devops/what-is-devops/, 09 2021. Accessed on Sep. 2021. [48] Red Hat. What is ci/cd? https://www.redhat.com/en/topics/devops/ what-is-ci-cd, 01 2018. Accessed on Oct. 2021. [49] Ch. Richardson. What are microservices. https://microservices.io, 03 2014. Accessed on Oct. 2021. [50] H Tschofenig, J Arkko, D Thaler, and D McPherson. Architectural considerations in smart object networking. Technical report, 2015. 
+
+Provide only positive feedback. Include in the feedback: The paper provides excellent contributions to threat modeling and automated security assessment of cloud-based systems. I highly recommend this paper for publication in the journal. 
+
+Nicholas Pecka Nicholas Pecka is currently a Ph.D student at The University of North Texas and Cyber Security Team Lead at Red Hat. He received his M.S and B.S. from Iowa State University, USA in 2020, and 2024 respectively. 
+
+Lotfi ben Othmane Dr. Lotfi ben Othmane is Associate Clinical Professor at University of North Texas, USA. Previously, he was Assistant Teach-ing Professor at Iowa State University, USA until 2022 and Head of the Secure Software Engineering department at Fraunhofer SIT, Germany till 2016 Lotfi received his Ph.D. from Western Michigan University (WMU), USA, in 2010; the M.S. in computer science from University of Sherbrooke, Canada, in 2000; and the B.S in information systems from University of Economics and Management of Sfax, Tunisia, in 1995. He works currently on engineering secure cyber-physical systems. 
+
+Bharat Bhargava is Professor of Computer Sci-ence at Purdue University, West Lafayette, IN. He received his Ph.D. in Electrical Engineering from Purdue University. He is a fellow of the IEEE and IETE. (bbshail@purdue.edu). 
+
+Renée Bryce Dr. Renée Bryce is a Professor at University of North Texas, USA. She received her BS and MS degrees from Rensselaer Polytechnic Institute and her PhD degree from Arizona State University. Her research interests include software testing, particularly combinatorial testing, test suite prioritization, and usability testing. 
+
+12

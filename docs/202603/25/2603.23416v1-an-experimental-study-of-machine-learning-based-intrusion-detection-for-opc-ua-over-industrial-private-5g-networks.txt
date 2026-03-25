@@ -1,0 +1,296 @@
+Title: An Experimental Study of Machine Learning-Based Intrusion Detection for OPC UA over Industrial Private 5G Networks
+
+URL Source: https://arxiv.org/pdf/2603.23416v1
+
+Published Time: Wed, 25 Mar 2026 01:32:22 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# AN EXPERIMENTAL STUDY OF MACHINE LEARNING -B ASED 
+
+# INTRUSION DETECTION FOR OPC UA OVER INDUSTRIAL 
+
+# PRIVATE 5G N ETWORKS 
+
+A P REPRINT 
+
+Song Son Ha 
+
+Electrical Measurement Engineering Helmut-Schmidt-University Hamburg, Germany 
+
+song.ha@hsu-hh.de 
+
+Kunal Singh 
+
+Electrical Measurement Engineering Helmut-Schmidt-University Hamburg, Germany 
+
+kunal.singh@hsu-hh.de 
+
+Florian Foerster 
+
+Institute for Innovative Safety and Security Technical University of Applied Sciences Augsburg Augsburg, Germany 
+
+florian.foerster@tha.de 
+
+Henry Beuster 
+
+Electrical Measurement Engineering Helmut-Schmidt-University Hamburg, Germany 
+
+henry.beuster@hsu-hh.de 
+
+Tim Kittel 
+
+ipoque GmbH A Rohde & Schwarz company Leipzig, Germany 
+
+tim.kittel@rohde-schwarz.com 
+
+Dominik Merli 
+
+Institute for Innovative Safety and Security Technical University of Applied Sciences Augsburg Augsburg, Germany 
+
+dominik.merli@tha.de 
+
+Gerd Scholl 
+
+Electrical Measurement Engineering Helmut-Schmidt-University Hamburg, Germany 
+
+gerd.scholl@hsu-hh.de 
+
+March 24, 2026 
+
+# ABSTRACT  
+
+> 1
+
+Industrial deployments increasingly rely on Open Platform Communications Unified Architecture (OPC UA) as a secure and platform-independent communication protocol, while private Fifth Gener-ation (5G) networks provide low-latency and high-reliability connectivity for modern automation systems. However, their combination introduces new attack surfaces and traffic characteristics that remain insufficiently understood, particularly with respect to machine learning-based intrusion detec-tion systems (ML-based IDS). This paper presents an experimental study on detecting cyberattacks against OPC UA applications operating over an operational private 5G network. Multiple attack scenarios are executed, and OPC UA traffic is captured and enriched with statistical flow-, packet-, and protocol-aware features. Several supervised ML models are trained and evaluated to distinguish benign and malicious traffic. The results demonstrate that the proposed ML-based IDS achieves high detection performance for a representative set of OPC UA-specific attack scenarios over an operational private 5G network. 
+
+> 1
+
+This is the author’s version of a paper that has been accepted for presentation at the 9th IEEE International Conference on Industrial Cyber-Physical Systems (ICPS 2026), to be held in Perth, Australia, on May 11–14, 2026. 
+
+> arXiv:2603.23416v1 [cs.CR] 24 Mar 2026
+
+An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+# 1 Introduction 
+
+The digital transformation of industrial systems is driving the adoption of communication technologies that combine interoperability, mobility, and stringent latency requirements. OPC UA has become a dominant industrial communication standard due to its platform-independent design, object-oriented information modeling, and built-in security mechanisms [ 1]. In parallel, private 5G networks are increasingly deployed in industrial environments, offering low latency, high reliability, and scalable connectivity tailored to Industry 4.0 applications [ 2 , 3]. The integration of OPC UA with private 5G is therefore expected to form a key communication backbone for future industrial automation systems. At the same time, this combination introduces new security challenges. While OPC UA supports multiple security profiles, real-world industrial deployments often rely on mixed or unencrypted configurations for performance and compatibility reasons [ 4 , 5]. Moreover, when OPC UA traffic is transmitted over private 5G networks, wireless-specific effects such as dynamic scheduling and variable latency alter traffic timing characteristics compared to wired industrial networks, which may affect IDS designs typically developed under stable Ethernet conditions. Existing research on OPC UA security predominantly focuses on wired deployments and a limited set of protocol-layer attacks [ 6, 7, 8, 9]. Conversely, most ML-based IDS research focuses on generic mobile traffic or public datasets that do not capture the semantics and operational characteristics of industrial protocols. Therefore, the behavior of OPC UA traffic over private 5G networks and the effectiveness of ML-based IDS in such environments remain insufficiently explored. This paper addresses this research gap by deploying a realistic industrial testbed and executing multiple OPC UA-specific attack scenarios targeting transport, session, and service layers. Traffic captured at the 5G user-plane interface is enriched with statistical flow-, packet-, and protocol-aware features, and several supervised ML models are trained and evaluated to distinguish benign and malicious traffic. The remainder of this paper is organized as follows. Related work is discussed in Section 2, followed by background in Section 3. The system architecture and threat model are presented in Section 4, while the testbed, attack scenarios, feature extraction, and applied ML methods are described in Section 5. The evaluation results are presented in Section 6, followed by the conclusion and future work in Section 7. 
+
+# 2 Related Work 
+
+Related work on securing OPC UA and 5G-enabled industrial communication can be broadly categorized into vul-nerability analyses, ML-based IDS using deep packet inspection (DPI), as well as security testbeds and datasets for 5G-enabled industrial control systems (ICS). Several studies analyze vulnerabilities and Denial-of-Service (DoS) threats in OPC UA deployments, primarily focusing on conventional Ethernet-based environments. Neu et al. [ 8] investigate attacks by untrusted OPC UA clients, while other work assesses the impact of protocol-layer attacks in Industry 4.0 scenarios using wired setups [ 9 ]. In addition, the German Federal Office for Information Security (BSI) provides extensive threat and vulnerability analyses of OPC UA, concluding that while the security model mitigates certain risks, it does not prevent DoS attacks [ 6, 7]. As a result, detection-based security mechanisms have been increasingly investigated. ML-based IDS using DPI have been widely studied in ICS and general network security. Prior work demonstrates that combining DPI with ML enables the detection of complex attacks and evasion strategies, motivating protocol-aware feature extraction [ 10 , 11 ]. However, these approaches are typically evaluated on generic Information Technology (IT) or mobile traffic and do not model industrial protocols such as OPC UA, nor do they consider the timing and scheduling dynamics introduced by private 5G networks. Research on 5G-enabled industrial environments increasingly explores ML-based security mechanisms and experimental testbeds. Lee et al. [ 12 ] and Sharma et al. [ 13 ] discuss the integration of ML techniques into 5G industrial Internet of Things architectures, but without focusing on OPC UA traffic or detailed protocol semantics. Several 5G security testbeds have been proposed to study attacks and traffic behavior [ 14 , 15 , 16 ], yet they generally lack integrated ML-based IDS pipelines and do not specifically target OPC UA-based industrial communication. Beyond protocol- and network-specific studies, multiple works emphasize the importance of realistic datasets and environments for evaluating IDS in ICS. Catillo et al. [ 17 ] show that public DoS datasets may not generalize across different industrial systems due to device- and configuration-dependent traffic characteristics. Other studies highlight that IDS performance is strongly influenced by the realization of the evaluation environment and that IT-centric detection approaches often struggle with ICS-specific attacks [18, 19, 20]. In summary, there is still a lack of empirical studies that jointly consider OPC UA semantics, real private 5G deployments, and ML-based intrusion detection. This paper addresses this gap by presenting a real-world setup over a commercial-grade private 5G network and systematically executing OPC UA-specific attacks. 2An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+# 3 Background 
+
+3.1 ICS Security 
+
+ICS combine Operational Technology (OT), which monitors and controls physical processes, with IT components for data processing and enterprise connectivity. Typical OT environments comprise field devices and sensors, Remote Terminal Units for signal acquisition, Programmable Logic Controllers (PLCs) for automation and real-time control, industrial networks, and Human-Machine Interfaces (HMIs) for operator supervision and intervention [ 21 ]. A key security distinction is the different priority order: IT systems are usually designed around privacy and confidentiality, authentication, integrity, and non-repudiation, whereas OT systems prioritize availability first, followed by integrity and confidentiality, since loss of availability can directly interrupt production [ 22 ]. Historically, OT networks were isolated and relied on proprietary stacks, but Industry 4.0 has driven convergence with standard IT technologies such as Ethernet, IP, and wireless links. While this increases interoperability and remote access, it reduces isolation and enlarges the attack surface, making ICS more exposed to network-based threats [ 23 ]. Conducting security research on productive industrial plants is risky because even minor disturbances can cause costly incidents, so controlled security testbeds are used to reproduce industrial conditions and evaluate attacks and defenses without endangering real infrastructure [24, 25]. 
+
+3.2 OPC UA 
+
+OPC UA is a dominant industrial communication standard designed for heterogeneous ICS environments. Its platform-independent architecture and object-oriented information modeling enable interoperable representation of devices, variables, and services across vendors and automation layers [ 1 ]. OPC UA defines structured interactions including endpoint discovery, secure channel establishment and session creation. It supports multiple underlying protocols, including TCP/IP, HTTPS, MQTT, and UDP-based variants, providing flexibility for various industrial requirements such as real-time performance and secure remote access. Security is embedded via selectable profiles providing authentication, integrity, and encryption, but real deployments may use mixed profiles or unencrypted modes for performance or compatibility, which weakens effective protection [ 6, 7]. Because OPC UA operates at the application layer with rich semantics and stateful sessions, it exposes attack surfaces beyond simple packet floods, motivating protocol-aware defenses and detection [8, 9, 26]. 
+
+3.3 Private 5G Networks and Security Challenge 
+
+Private 5G networks, also known as campus or non-public networks, represent a paradigm shift in industrial connectivity. 5G was initially specified in 3GPP Release 15, with additional enhancements for industrial use cases introduced in Release 16 [ 27 ], and has since evolved through subsequent releases, currently reaching Release 19. Unlike previous cellular generations, 5G favors a standalone architecture that operates independently of 4G infrastructure and utilizes dedicated spectrum to support high-bandwidth and deterministic applications. The 5G architecture relies on softwarization principles to efficiently and flexibly manage complex networks and enable the dynamic provisioning of resources, such as ultra-reliable low-latency communication, to meet specific industrial requirements. At the same time, the transition from wired fieldbus systems to software-defined wireless IP-based networks fundamentally alters the security challenge. The inherent openness of the Radio Access Network introduces physical layer vulnerabilities, making critical control traffic susceptible to jamming, signal spoofing, and eavesdropping [ 28 ]. Furthermore, the shift toward logical rather than physical isolation achieved through network slicing expands the attack surface. If logical separation measures in the virtualized core are compromised, it introduces risks of lateral movement and inter-slice side-channel attacks, challenging the traditional perimeter-based defense models used in OT environments. 
+
+3.4 IDS and ML 
+
+IDS are commonly classified into signature-based and anomaly-based approaches. Signature-based IDS detect intrusions by matching observed activity against known attack patterns, achieving low false-positive rates for previously identified threats but remaining ineffective against novel or evolving attacks without frequent signature updates [ 21 , 23 ]. Anomaly-based IDS model normal system or network behavior and flag deviations as potential intrusions. This approach is particularly suitable for ICS, where communication patterns are typically repetitive and deterministic during normal operation. However, anomaly-based detection is sensitive to concept drift, which may increase false positives if not carefully designed [ 18 , 21 ]. ML techniques have been widely adopted to enhance anomaly-based IDS by enabling automated pattern learning, analysis of high-dimensional traffic features, and the detection of complex attack behaviors that are difficult to capture using rule-based approaches. In industrial environments, ML-based IDS can leverage temporal, statistical, and protocol-aware features to model normal system behavior and identify subtle deviations. 3An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+Recent studies highlight the applicability of ML-based IDS in 5G-enabled industrial networks, where dynamic traffic characteristics and increased system complexity challenge traditional detection mechanisms [12, 13]. For industrial application-layer protocols such as OPC UA, traditional packet- or flow-level IDS are often insufficient, as attacks may exploit stateful interactions, service semantics, and session or secure channel management rather than traffic volume alone. When OPC UA communication is deployed over private 5G networks, challenges arise due to altered timing, scheduling, and multiplexing characteristics compared to wired OT environments, which can influence traffic features even under benign conditions. These aspects motivate protocol-aware feature extraction and experimental evaluation of ML-based IDS to assess detection performance and feature robustness for OPC UA over industrial private 5G networks. 
+
+# 4 Concept and Architecture 
+
+4.1 Threat Model 
+
+We assume basic as well as advanced adversaries that can act both as an external or an internal attacker with direct access to the ICS network. In particular, we consider that in wireless or shared infrastructures it is difficult to distinguish between external and internal origins of traffic due to the wireless nature, and that an attacker may also compromise ICS components such as PLCs or other field devices to launch attacks in the network. Under the experimental threat model, unencrypted OPC UA traffic is considered to ensure transparency, reproducibility, and controlled experimentation. Accordingly, SignAndEncrypt security modes are disabled, increasing the exposed attack surface compared to end-to-end protected deployments. An ML-based IDS with DPI capabilities is assumed as a compensating monitoring and detection mechanism under these experimental conditions. While the testbed supports multiple communication protocols, the presented work concentrates on OPC UA, as related work on 5G and IDS integration has already covered other protocols more extensively but does not consider OPC UA-specific behavior and service semantics [ 12 , 14 , 15 , 16 ]. The implemented attacks are representative OPC UA-specific denial-of-service and service abuse scenarios designed to stress different protocol dimensions, including transport behavior, session and channel management, service invocation dynamics, and semantic parsing complexity. However, they do not aim to exhaustively cover all possible attack classes. 
+
+4.2 Architecture Design 
+
+The proposed architecture builds upon a conceptual design introduced in [ 29 ] and extends it into a fully operational, OPC UA-centric security evaluation pipeline deployed over a private 5G network. It supports larger deployments, multiple attack types, multi-layer feature extraction, and end-to-end ML evaluation. Within this setup, OPC UA clients and servers operate in a dedicated application cell, where operational process values are exchanged, while a separate attack cell provides a controlled environment for generating malicious traffic representative of realistic cyber threats. All benign and adversarial traffic is mirrored and forwarded to a DPI component, which parses OPC UA protocol messages and extracts protocol-aware as well as network-level features. The extracted features are aggregated and processed into a labeled dataset, subsequently split into training, validation, and test sets for training and evaluating supervised ML models that form the core of the ML-based IDS for classifying benign and malicious OPC UA traffic. 
+
+# 5 Testbed Implementation 
+
+5.1 Hardware Components 
+
+The experimental testbed is deployed on an operational private 5G Standalone network using dedicated industrial and server-grade hardware. The attack cell is hosted on a dedicated Dell Precision 3630 workstation, generating malicious OPC UA traffic. The application cell is deployed on industrial Revolution Pi (RevPi) PLCs, which are connected to the private 5G network using 5G HAT modems equipped with SIMcom SIM8202G-M2 multi-band modules. The private 5G network is based on the Ericsson EDAV-I solution compliant with 3GPP Release 16, operating in the 3.7–3.8 GHz band and providing a mirrored user-plane interface with up to 10 Gb/s throughput. Intrusion detection and traffic analysis are performed on a dedicated IDS cluster consisting of Dell R750xs and R660xs servers, leveraging the R&S®PACE 2 library for real-time protocol analysis and feature extraction. 4An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT RevPi 2 
+
+> PLC 2
+> OPC UA
+> Server 2
+> PC 1 RevPi 1
+> PLC 1
+> OPC UA
+> Server 1 RevPi 3 local
+> IOmp  OPC UA
+> Server 3
+> RPi 1
+> OPC UA
+> Client 1
+> HMI 1
+> RPi 2
+> OPC UA
+> Client 2
+> HMI 2
+> Factory IO : 3 Processes
+> OPC UA
+> Client 3 OPC UA
+> Server 4
+> PLC 3  RevPi 4 remote
+> RPi 3
+> OPC UA
+> Client 4
+> HMI 3  SCADA
+> OPC UA
+> Client 5
+> NUC
+> Modbus
+> 1
+> 3
+> 2
+> 5
+> PC 2
+> OPC UA
+> Client 6
+> Brws
+> 6
+> 4
+
+Figure 1: Architecture of the application cell in 5G industrial testbed. 
+
+5.2 OPC UA-based Application 
+
+This work implements an OPC UA-based industrial application operating over a private 5G network and models a representative automated warehouse using Factory I/O [ 30 ], a commercial industrial simulation platform for emulating sensor-actuator interactions in PLC-based automation scenarios. An overview of the OPC UA-based application architecture is shown in Fig. 1. The virtual warehouse comprises three concurrent processes associated with separate storage racks, each controlled by a PLC program capable of executing interchangeable placement strategies, including sequential, even-odd, and random slot selection. Two PLC programs run locally on RevPi 1 and RevPi 2, while the third runs remotely on RevPi 4 over the 5G network. Material handling is realized using simulated conveyors, sensors, and actuators, with process I/O exchanged via Modbus between Factory I/O and RevPi 1, RevPi 2, and RevPi 3. Based on this application setup, several OPC UA communication paths are defined. Paths 1, 2, and 4 correspond to HMI-based supervision, where HMI clients connect to OPC UA Servers 1, 2, and 4 to monitor process states and issue operator commands. Path 3 represents remote PLC control over 5G, where PLC logic running on RevPi 4 uses OPC UA Client 3 to interact with OPC UA Server 3 on RevPi 3 and maps selected variables to OPC UA Server 4 for HMI access. Path 5 denotes SCADA-level monitoring via a NUC-based workstation, while Path 6 corresponds to a non-periodic OPC UA browsing client generating traffic representative of engineering and diagnostic tools. 
+
+5.3 Attack Selection and Deployment 
+
+Based on the defined threat model, the evaluation employs a focused set of OPC UA-specific attack scenarios built upon Claroty’s opcua-exploitation framework [ 31 ], using parameterized configurations and targeted extensions. The attacks, summarized in Table 1, are grouped into transport- and session-level flooding, service invocation flooding, and complexity-driven service abuse. Despite differing execution characteristics, all attack scenarios ultimately aim at exhausting OPC UA server resources through either high-rate flooding or low-rate semantic and parsing complexity. While the number of attack types is limited, each scenario is executed under multiple parameterizations and durations, resulting in significantly different temporal, volumetric, and semantic traffic characteristics within the same attack class. For each attack scenario, three parameter configurations were evaluated, each executed in three runs of approximately 3, 6, and 9 minutes, resulting in about 54 minutes of captured traffic per attack, covering short and longer attack durations. The collected packet capture (PCAP) files contain either pure benign traffic or a mixture of benign and attack-induced traffic, including both warm-up and recovery phases. Ten benign-only PCAP files were recorded, each lasting approximately 30 minutes and obtained from repeated executions of the same application setup with varying process behaviors. 5An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+Table 1: Selected OPC UA Traffic Scenarios and Applied Parameters ∗
+
+Grp. Traffic Scenario Applied Parameters 
+
+G0 Benign (Normal Operation) Benign-only OPC UA traffic representing steady and variable operational processes. G1 HEL Message Flooding † (HEL-F) High-rate HEL request messages at target rates of 500, 1000, and 2000 HEL/s. Open Multiple Secure Channels (OMSC) Multiple SecureChannel openings within a single session at rates of 50, 100, and 150 channels/s. Chunked Message Flooding (CHUNK-F) Chunk-flood attempts using oversized OPC UA messages (about 200-300 kB) split into chunks of 200, 1000, and 4000 bytes; the final chunk is intentionally omitted. G2 Publish Request Flooding † (PUB-F) Repeated Publish requests at rates of 50, 100, and 150 re-quests/s. Unlimited Condition Refresh (COND-REF) Repeated ConditionRefresh calls on active subscriptions at rates of 30, 50, and 100 requests/s. Browse Address Space † (BROWSE) Iterative Browse operations starting from RootFolder with randomized shallow and deep traversals at rates of 20, 40, and 80 requests/s. G3 Read Request List Expansion † (READ-EXP) Low-rate Read requests at 5 requests/s with increasing 
+
+NodesToRead list sizes of 16, 32, and 64 to isolate payload complexity effects. Complex Nested Message (NESTED) Low-rate Write requests at 5 requests/s with increasing 
+
+Variant nesting depths of 16, 32, and 64 to isolate parsing and deserialization overhead. Translate Browse Path (TBP) TranslateBrowsePathsToNodeIds requests at 20 re-quests/s with RelativePath depths of 32, 64, and 128 to isolate semantic complexity. 
+
+> ∗
+> G0: benign baseline traffic; G1: transport- and session-level flooding; G2: service invocation flooding; G3: complexity-driven service abuse. All attack scenarios are executed using a periodic burst-idle pattern with a 3 s burst followed by a 7 s idle phase.
+> †
+> Implemented as extensions of Claroty’s opcua-exploitation framework; other scenarios rely on parameterized configurations.
+
+5.4 Feature Extraction and Processing 
+
+OPC UA traffic features are extracted over fixed, non-overlapping time windows (TWs) of 5 s using a two-stage aggregation approach. Statistics are first computed at the flow level and then aggregated across all flows within each TW, enabling the capture of both traffic intensity characteristics and protocol-level behavior. 
+
+5.4.1 Flow-derived base features 
+
+As a first step, transport-level and OPC UA service-level statistics are computed for each bidirectional flow observed within a TW. These base features, denoted by the prefix t_ and summarized in Table 2, include packet counts and sizes, inter-arrival time statistics, flow active duration, secure channel and session lifecycle events, as well as service-specific request and response counters and subscription-related services. Although initially extracted at the flow level, the t_ features are subsequently aggregated across all flows within the same TW using simple statistical operators such as sum, mean, maximum, and count. The resulting window-level aggregates form the primary statistical inputs to the IDS and provide a compact representation of overall traffic activity, protocol usage, and lifecycle activity. 
+
+5.4.2 Derived cross-flow features 
+
+Based on the window-level aggregation of the flow-derived t_ statistics, a second set of cross-flow features is constructed to characterize the overall traffic composition, interaction patterns, and structural dynamics within each TW. These features, denoted by the prefix gl_ and summarized in Table 3, are designed to complement the aggregated base statistics by capturing relative, collective, and higher-order properties that are not observable at the individual flow level. 6An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+Table 2: Flow-derived Base Features 
+
+Feature / Group Description 
+
+Identifier flow_id, window_id, server/client IPs and ports 
+
+Transport-level temporal and size features 
+
+t_pkt_count Total packet counts t_pkt_size_sum Aggregated packet size in total t_body_{count,length_sum} OPC UA message body count and length t_{fwd,bwd}_pkt_count Forward and backward packet counts t_{fwd,bwd}_pkt_size_sum Forward and backward packet size in total t_iat_{sum,count} Packet inter-arrival time sum and count t_active_flow_drt Flow active duration 
+
+OPC UA service-level aggregate features 
+
+t_sec_ch_count Counts SecureChannelId transitions t_service_{req,res}_count OPC UA service requests and responses count t_server_res_time_sum OPC UA server response latency t_server_res_time_count OPC UA server response latency count 
+
+OPC UA service-specific semantic features 
+
+t_{read,write}_{req,res} Read and Write data access t_publish_{req,res} Publish notification service t_open_sec_ch_{req,res} SecureChannel establishment t_close_sec_ch_{req,res} SecureChannel termination t_create_session_{req,res} Session creation t_activate_session_{req,res} Session activation t_close_session_{req,res} Session closure t_create_mnt_itm_{req,res} MonitoredItems creation t_{create,del}_sub_{req,res} Subscription creation and deletion t_endpoints_{req,res} Endpoint discovery Ratio- and mean-based features describe the normalized distribution of traffic volume, timing, and service activity across flows, enabling consistent characterization under varying load conditions, independent of absolute traffic rates. Count-and event-based features capture the intensity and recurrence of protocol lifecycle operations, such as SecureChannel, Session, and Subscription management, reflecting state-related dynamics and interaction frequency rather than raw packet volume alone. In addition, flow dominance and service diversity features quantify how traffic and service usage are distributed across concurrent flows, providing sensitivity to imbalances, concentration effects, and shifts in protocol usage patterns. Accordingly, the derived cross-flow features emphasize relative and structural characteristics of OPC UA communication that are less dependent on specific attack signatures, supporting robust detection under varying benign workloads and private 5G-induced timing variability. Together, the aggregated t_ features and the derived gl_ features constitute the final IDS feature vector used for model training and evaluation. 
+
+5.5 Applied ML Algorithms 
+
+To assess the effectiveness of ML for intrusion detection in OPC UA traffic over a private 5G network, a diverse set of supervised learning models was evaluated, covering different learning paradigms commonly used in IDS research. Logistic Regression (LogReg) was included as a linear baseline to evaluate how well benign and malicious OPC UA traffic can be separated using the extracted features. Support Vector Machines (SVM) with radial basis function kernels were considered to capture non-linear relationships between features and attack behaviors. Random Forest (RF) was selected as a representative bagging-based ensemble method due to its robustness across heterogeneous traffic patterns. Gradient Boosting (GB) and Extreme Gradient Boosting (XGBoost) were applied as boosting-based approaches that iteratively refine classification performance by learning from previous prediction errors. In addition, a soft Voting Ensemble (Voting) combining Random Forest, Logistic Regression, and k-Nearest Neighbors was evaluated to examine whether aggregating complementary classifiers improves robustness across diverse attack scenarios. 7An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+Table 3: Derived Cross-flow Window-level Features 
+
+Feature / Group Description 
+
+Ratio- and mean-based aggregations 
+
+gl_mean_pkt_size Mean packet size gl_mean_body_len Mean OPC UA body length gl_body_pkt_ratio Fraction of packets carrying OPC UA payload over all packets gl_body_byte_ratio Fraction of OPC UA payload bytes over total packet bytes gl_fwd_pkt_ratio Fraction of forward packets gl_fwd_byte_ratio Fraction of bytes attributed to forward packets gl_mean_iat Mean packet inter-arrival time gl_{mean,max}_flow_drt Mean and maximum flow duration gl_req_res_ratio Ratio of service requests to responses gl_mean_server_res_time Mean server-side response latency gl_req_per_flow Mean number of service requests per flow gl_{read,write,publish}_ratio Fractions of Read, Write, and Publish requests among all service requests gl_monitored_item_rate Mean number of CreateMonitoredItems requests per flow 
+
+Count- and event-based aggregations 
+
+gl_flow_count Number of active flows gl_sec_ch_churn SecureChannel open and close activity gl_session_churn Session lifecycle activity gl_sub_churn Subscription create and delete activity 
+
+Flow dominance and service diversity features 
+
+gl_max_flow_pkt_ratio Maximum fraction of packets contributed by a single flow gl_max_flow_req_ratio Maximum fraction of OPC UA service requests contributed by a single flow gl_max_flow_publish_ratio Maximum fraction of Publish requests contributed by a single flow gl_std_flow_req_count Standard deviation of service request counts across flows gl_std_flow_publish_count Standard deviation of Publish request counts across flows gl_service_entropy Shannon entropy of OPC UA service request distribution The dataset was partitioned into three disjoint subsets for training, validation, and testing using a PCAP-level separation strategy, meaning that all traffic windows originating from the same packet capture file were assigned exclusively to a single split. This prevents traffic leakage between splits and ensures that temporal correlations within individual traces do not artificially inflate detection performance. The resulting splits comprise 61 PCAPs for training, 10 PCAPs for validation, and 20 PCAPs for testing. Depending on the capture, a PCAP may contain benign-only traffic or a combination of benign and attack-induced OPC UA traffic with different attack types and parameter severities. The training split was used to fit model parameters, while the validation split was exclusively employed for hyperpa-rameter selection in models supporting grid-search optimization. Final performance evaluation was conducted only on the held-out test split. Detection performance is reported using class-wise F1-scores, which capture the balance between false alarms and missed detections and are particularly suitable for intrusion detection under class imbalance and heterogeneous attack characteristics. 
+
+# 6 Performance Evaluation Results 
+
+This section presents the performance evaluation of the proposed ML-based IDS using the extracted OPC UA traffic features. The discussion focuses on detection performance across different traffic scenarios, model robustness across learning paradigms, and the implications of deploying the IDS under realistic private 5G operating conditions, with the class-wise F1-scores of the evaluated ML models on the test set reported in Table 4. 
+
+6.1 Detection Performance by Traffic Scenario 
+
+To interpret the classification results, detection performance is analyzed according to the traffic scenarios defined in Table 1, which represent benign baseline operation as well as adversarial strategies at different layers of the OPC UA protocol. 8An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+Table 4: F1-Score Comparison Across All Evaluated Models (Test Set)                                                                   
+
+> Attack LogReg SVM RF GB XGBoost Voting BENIGN 0.976 0.976 0.976 0.986 0.986 0.981 HEL-F 1.000 0.995 1.000 1.000 1.000 1.000
+> OMSC 0.976 0.970 0.970 0.970 0.976 0.976
+> CHUNK-F 0.960 0.946 0.846 0.946 0.917 0.935 PUB-F 0.974 0.965 0.974 0.987 0.996 0.991 COND-REF 0.962 0.976 0.986 0.954 0.978 0.973 BROWSE 0.938 0.958 0.923 0.956 0.971 0.963 READ-EXP 0.868 0.918 0.920 0.961 0.954 0.957 NESTED 0.896 0.907 0.753 0.915 0.915 0.912 TBP 0.934 0.929 0.879 0.924 0.933 0.935
+
+6.1.1 Benign Baseline Traffic 
+
+Benign baseline traffic is detected with very high accuracy across all evaluated models, achieving F1-scores between approximately 0.97 and 0.99. This demonstrates that the normal operational behavior of the OPC UA-based industrial application is classified reliably, even under varying process dynamics and the timing variability introduced by the private 5G network. The consistently high performance further indicates a low false-alarm tendency, which is critical for deployment in operational industrial environments. 
+
+6.1.2 Transport- and Session-level Flooding 
+
+Transport- and session-level flooding traffic scenarios are detected with strong performance across the evaluated models. These scenarios introduce pronounced volumetric and state-related deviations, such as excessive handshake initiation and repeated secure-channel establishment, which are effectively captured by the proposed feature set. Nevertheless, moderate performance variations are observed for scenarios that rely on application-layer message structure rather than increased traffic volume. In particular, abnormal OPC UA message chunking introduces only weak statistical deviations from benign behavior, making such scenarios more difficult to detect for some classifiers. 
+
+6.1.3 Service Invocation Flooding 
+
+Service invocation flooding traffic scenarios achieve consistently high detection performance across models. These scenarios generate abnormal service request dynamics and lifecycle activity, which are well reflected in the extracted protocol-aware service-level and cross-flow features. The stable detection performance observed across different learning paradigms confirms that service-level statistics provide robust indicators of abnormal behavior beyond simple traffic volume metrics, even when traffic patterns are executed using burst-idle strategies that partially mimic benign operational behavior. 
+
+6.1.4 Complexity-driven Service Abuse 
+
+Complexity-driven service abuse represents the most challenging traffic scenario category. These scenarios operate at low request rates, exploiting semantic and parsing complexity rather than volumetric anomalies, resulting in weaker statistical separation from benign traffic. While detection performance remains high for models with higher representational capacity, linear and bagging-based classifiers exhibit noticeable performance degradation for this traffic category. This behavior highlights the inherent difficulty of capturing short-lived semantic abuse within fixed aggregation windows and emphasizes the importance of expressive models for detecting complexity-driven traffic patterns in industrial protocols. 
+
+6.2 Model Comparison and Robustness 
+
+Comparing the evaluated classifiers, boosting-based models provide the most stable detection performance for complex traffic scenarios, particularly for complexity-driven service abuse. These scenarios operate at low request rates and primarily manifest through semantic and structural message characteristics, which are captured more consistently by models with higher representational capacity. 9An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+In contrast, transport- and session-level flooding scenarios that produce strong volumetric increases or abnormal connection and channel handling behavior are detected reliably by most evaluated models. This indicates that such traffic patterns generate clear statistical deviations that can be identified even by simpler linear and ensemble-based classifiers. Service invocation flooding scenarios show little sensitivity to the choice of learning paradigm, with consistently high detection performance observed across all evaluated models. This suggests that protocol-aware service-level features are sufficient to characterize abnormal service usage patterns, making detection robustness less dependent on model complexity than for complexity-driven attacks. Overall, these findings align with prior work reporting that IDS approaches relying primarily on traffic volume or simple threshold-based indicators struggle to detect low-rate and semantics-driven behavior in industrial communication protocols. The results demonstrate that protocol-aware feature extraction, combined with learning models capable of capturing complex traffic patterns, is essential for robust intrusion detection in OPC UA environments. 
+
+6.3 Discussion on Deployment in Private 5G Networks 
+
+The evaluation is conducted using OPC UA traffic captured in a production-grade industrial private 5G network. Compared to wired industrial Ethernet, private 5G introduces additional timing variability due to radio scheduling and dynamic resource allocation. Despite this variability, high detection performance is maintained across all evaluated traffic scenarios. This indicates that the proposed IDS is not overly sensitive to transient wireless-induced timing fluctuations introduced by private 5G communication. Rather than relying on absolute timing information or fixed inter-packet thresholds, the evaluated models learn characteristic traffic patterns from protocol-aware statistics that combine flow-level behavior with aggregated cross-flow features capturing relative, structural, and service-level dynamics. As a result, the IDS remains robust to short-term packet timing variations and generalizes effectively under private 5G operating conditions. Overall, the results suggest that private 5G does not inherently hinder ML-based IDS for OPC UA applications when appropriate feature design and aggregation strategies are applied, supporting the feasibility of deploying protocol-aware IDS solutions in industrial private 5G networks. 
+
+# 7 Conclusions and Future Work 
+
+This paper presented an experimental study on ML-based intrusion detection for OPC UA applications operating over an industrial private 5G network. A testbed was implemented that is representative of industrial deployment scenarios integrating an OPC UA-based industrial application, a commercial private 5G Standalone deployment, and a protocol-aware IDS pipeline based on DPI and multi-level traffic feature aggregation. A representative set of OPC UA-specific attack scenarios targeting transport-, session-, and service-layer behavior was systematically executed and evaluated. The evaluation results show that supervised ML models can reliably distinguish benign and malicious OPC UA traffic across a diverse set of attack scenarios. High detection performance is achieved not only for transport- and session-level flooding attacks, but also for service invocation flooding and complexity-driven service abuse attacks that operate at low request rates. These results confirm that protocol-aware OPC UA features capturing service usage, lifecycle activity, and semantic structure provide robust indicators of abnormal behavior when aggregated across flows within fixed TWs. Moreover, the results indicate that the timing variability introduced by private 5G communication does not inherently degrade IDS effectiveness. By relying on protocol-aware statistics derived from flow-level behavior and aggregated cross-flow dynamics rather than fixed timing thresholds, the proposed IDS generalizes well under wireless operating conditions, supporting its applicability in industrial private 5G environments. Future work will extend the evaluation toward encrypted OPC UA communication, investigate feature transferability between wired Ethernet and private 5G deployments, and explore adaptive learning techniques to address long-term traffic evolution and concept drift. 
+
+# Acknowledgment 
+
+The authors would like to thank ipoque GmbH, J. Jockram and F. Mueller for their valuable support. We also gratefully acknowledge Deutsche Telekom and Ericsson for their continuous support and for accommodating requests that sometimes went beyond those of typical industrial customers. 10 An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+# Funding 
+
+This research is funded by dtec.bw – Digitalization and Technology Research Center of the Bundeswehr. dtec.bw is funded by the European Union – NextGenerationEU (project “Digital Sensor-2-Cloud Campus Platform” (DS2CCP), https://dtecbw.de/home/forschung/hsu/projekt-ds2ccp). 
+
+# References 
+
+[1] Xiongfeng Zhang, Seonjo Lim, Changdae Lee, Won Seok Song, Yu Chul Kim, Mengmeng Yu, Se-ung Ho Hong, Nam Hyun Yoo, and Min Wei. Integration of 5g and opc ua for smart manufacturing of the future. In 2023 IEEE/SICE International Symposium on System Integration (SII) , pages 1–6, 2023. doi:10.1109/SII55687.2023.10039191. [2] Adnan Aijaz. Private 5G: The Future of Industrial Wireless. IEEE Industrial Electronics Magazine , 14(4): 136–145, 2020. [3] Ashutosh Dutta and Eman Hammad. 5g security challenges and opportunities: A system approach. In 2020 IEEE 3rd 5G world forum (5GWF) , pages 109–114. IEEE, 2020. [4] Markus Dahlmanns, Johannes Lohmöller, Ina Berenice Fink, Jan Pennekamp, Klaus Wehrle, and Martin Henze. Easing the conscience with opc ua: an internet-wide study on insecure deployments. In Proceedings of the ACM Internet Measurement Conference , pages 101–110, 2020. [5] Olli Post, Jari Seppälä, and Hannu Koivisto. The Performance of OPC-UA Security Model at Field Device Level. volume 2, pages 337–341, January 2009. [6] BSI. OPC UA Security Analysis, 2017. [Online]. Available: https://www.bsi.bund.de/SharedDocs/ Downloads/EN/BSI/Publications/Studies/OPCUA/OPCUA.html?nn=132646 . Accessed: Mar. 26, 2025. [7] Johannes vom Dorp, Sven Merschjohann, David Meier, Florian Patzer, Markus Karch, and Christian Haas. Opc ua security analysis. Federal Office for Information Security (BSI) , 2022. [8] Charles Varlei Neu, Ina Schiering, and Avelino Zorzo. Simulating and Detecting Attacks of Untrusted Clients in OPC UA Networks. In Proceedings of the Third Central European Cybersecurity Conference , CECC 2019, pages 1–6, New York, NY, USA, November 2019. Association for Computing Machinery. ISBN 9781450372961. doi:10.1145/3360664.3360675. URL https://dl.acm.org/doi/10.1145/3360664.3360675 .[9] Julien Polge, Jeremy Robert, and Yves Le Traon. Assessing the Impact of Attacks on opc-ua Applications in the Industry 4.0 Era. In 2019 16th IEEE annual consumer communications & networking conference (CCNC) , pages 1–6. IEEE, 2019. [10] Sandeep Singh Bindra and Alankrita Aggarwal. Deep Learning-based Enhanced Security in Cyber- Physical Systems: A Multi-Attack Perspective. In 2024 International Conference on Computational Intelligence and Com-puting Applications (ICCICA) , volume 1, pages 347–352, May 2024. doi:10.1109/ICCICA60014.2024.10584861. URL https://ieeexplore-ieee-org.ezproxy.hs-augsburg.de/document/10584861 .[11] Bowen Yang and Dong Liu. Research on network traffic identification based on machine learning and deep packet inspection. In 2019 IEEE 3rd Information Technology, Networking, Electronic and Automation Control Conference (ITNEC) , pages 1887–1891, 2019. doi:10.1109/ITNEC.2019.8729153. [12] Jonghoon Lee, Hyunjin Kim, Chulhee Park, Youngsoo Kim, and Jong-Geun Park. Ai-based network security enhancement for 5g industrial internet of things environments. In 2022 13th International Conference on Information and Communication Technology Convergence (ICTC) , pages 971–975, 2022. doi:10.1109/ICTC55196.2022.9952490. [13] Parjanay Sharma, Siddhant Jain, Shashank Gupta, and Vinay Chamola. Role of machine learning and deep learning in securing 5g-driven industrial iot applications. Ad Hoc Networks , 123:102685, 2021. [14] Zhixin Wen, Harsh Sanjay Pacherkar, and Guanhua Yan. Vet5g: A virtual end-to-end testbed for 5g network security experimentation. In Proceedings of the 15th Workshop on Cyber Security Experimentation and Test , CSET ’22, page 19–29, New York, NY, USA, 2022. Association for Computing Machinery. ISBN 9781450396844. doi:10.1145/3546096.3546111. URL https://doi.org/10.1145/3546096.3546111 .[15] Karim Baccar and Abdelkader Lahmadi. An experimental testbed for 5g network security assessment. In NOMS 2023-2023 IEEE/IFIP Network Operations and Management Symposium , pages 1–6, 2023. doi:10.1109/NOMS56928.2023.10154283. [16] Ibrahim Almazyad, Safwan Elmadani, and Salim Hariri. A 5g and beyond testbed for cybersecurity research and education. 10 2024. 11 An Experimental Study of ML-Based IDS for OPC UA over Industrial Private 5G Networks A P REPRINT 
+
+[17] Marta Catillo, Antonio Pecchia, Massimiliano Rak, and Umberto Villano. A case study on the representativeness of public DoS network traffic data for cybersecurity research. In Proceedings of the 15th International Conference on Availability, Reliability and Security , ARES ’20, pages 1–10, New York, NY, USA, August 2020. Association for Computing Machinery. ISBN 9781450388337. doi:10.1145/3407023.3407042. URL https://dl.acm. org/doi/10.1145/3407023.3407042 .[18] Mauro Conti, Denis Donadel, and Federico Turrin. A Survey on Industrial Control System Testbeds and Datasets for Security Research. IEEE Communications Surveys & Tutorials , 23(4):2248–2294, 2021. ISSN 1553-877X. doi:10.1109/COMST.2021.3094360. URL https://ieeexplore-ieee-org.ezproxy.hs-augsburg.de/ document/9471765 .[19] Jon-Martin Storm, Siv Hilde Houmb, Pallavi Kaliyar, Laszlo Erdodi, and Janne Merete Hagen. Testing Commercial Intrusion Detection Systems for Industrial Control Systems in a Substation Hardware in the Loop Testlab. 
+
+Electronics , 13(1):60, January 2024. ISSN 2079-9292. doi:10.3390/electronics13010060. URL https://www. mdpi.com/2079-9292/13/1/60 .[20] Julius Silaa, Hippolyte Muyingi, and Attlee Gamundani. A Review of Deep Learning IDS for DDoS Attacks in WLANs. In Proceedings of the International Conference on Data Science, Machine Learning and Artificial Intelligence , DSMLAI ’21’, pages 74–79, New York, NY, USA, January 2022. Association for Computing Machinery. ISBN 9781450387637. doi:10.1145/3484824.3484897. URL https://dl.acm.org/doi/10. 1145/3484824.3484897 .[21] Harsh Vardhan Sumit Kumar. Cyber security of OT networks: A tutorial and overview, February 2025. URL 
+
+http://arxiv.org/abs/2502.14017 . arXiv:2502.14017 [cs]. [22] Phani Kumar Garimella. It-ot integration challenges in utilities. In 2018 IEEE 3rd International Conference on Computing, Communication and Security (ICCCS) . IEEE, October 2018. doi:10.1109/cccs.2018.8586807. [23] Keith Stouffer, Michael Pease, CheeYee Tang, Timothy Zimmerman, Victoria Pillitteri, Suzanne Lightman, Adam Hahn, Stephanie Saravia, Aslam Sherule, and Michael Thompson. Guide to Operational Technology (OT) security .September 2023. doi:10.6028/nist.sp.800-82r3. [24] Felix Sauer, Matthias Niedermaier, Susanne Kießling, and Dominik Merli. Licster – a low-cost ics security testbed for education and research. In Electronic Workshops in Computing . BCS Learning and Development, 2019. doi:10.14236/ewic/icscsr19.1. [25] Henrik Christiansson and Eric Luiijf. Creating a european scada security testbed. In Eric Goetz and Sujeet Shenoi, editors, Critical Infrastructure Protection , pages 237–247, Boston, MA, 2008. Springer US. ISBN 978-0-387-75462-8. [26] Tianyu bu, Jiahao Liu, Jinfeng Huang, and Zhigang Sun. OTG: A Gateway for Cybersecurity in the Context of OPC UA PubSub Pattern. Journal of Physics: Conference Series , 1693(1):012016, December 2020. ISSN 1742-6596. doi:10.1088/1742-6596/1693/1/012016. URL https://dx.doi.org/10.1088/1742-6596/1693/1/012016 .[27] 3GPP. TR 21.916 version 16.2.0 Release 16. [28] Marc Lichtman, Raghunandan Rao, Vuk Marojevic, Jeffrey Reed, and Roger Piqueras Jover. 5G NR Jam-ming, Spoofing, and Sniffing: Threat Assessment and Mitigation. In 2018 IEEE International Conference on Communications Workshops (ICC Workshops) , pages 1–6, May 2018. doi:10.1109/ICCW.2018.8403769. [29] Song Son Ha, Florian Foerster, Thomas Robert Doebbert, Tim Kittel, Dominik Merli, and Gerd Scholl. Testbed and Software Architecture for Enhancing Security in Industrial Private 5G Networks. In 2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA) , pages 1–4, 2025. doi:10.1109/ETFA65518.2025.11205743. [30] Real Games. Factory I/O: 3D factory simulation software. Software, 2026. URL https://factoryio.com/ .Accessed: Jan. 2026. [31] Claroty Team82. Opc-ua exploitation framework. Online repository, 2023. URL https://github.com/ claroty/opcua-exploit-framework . Accessed: Dec. 2025. 12
