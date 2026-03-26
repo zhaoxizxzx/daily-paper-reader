@@ -1,0 +1,55 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-26T20:22:21.768648+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.20166v1",
+      "title": "Implementing the L4S Architecture in the ns-3 Simulator",
+      "abstract": "The demand for ultra-low latency in modern applications, such as cloud gaming and augmented reality, has exposed the limitations of traditional congestion control algorithms regarding bufferbloat. The Low Latency, Low Loss, and Scalable Throughput (L4S) architecture addresses this challenge by combining scalable congestion controls, such as TCP Prague, low-latency queue management with prioritization, and Accurate ECN (AccECN) feedback. Although Linux kernel implementations exist, the research community lacks a complete, high-fidelity model within the Network Simulator 3 (ns-3) for reproducible experiments. This paper presents an implementation of end-host protocols for the L4S architecture in ns-3, focusing on the porting of TCP Prague from the Linux kernel (v6.12) and the integration of AccECN signaling. Significant engineering challenges regarding the adaptation of kernel logic are detailed, particularly the reconciliation of Linux's packet-based arithmetic with ns-3's byte-based architecture for window management and pacing. Simulation results demonstrate that the proposed model faithfully reproduces the congestion response behaviors observed in real-world testbed scenarios, validating the platform's accuracy. Consequently, this work provides the community with a validated toolset for complex L4S performance evaluations in controlled environments.",
+      "authors": [
+        "Maria Eduarda Veras",
+        "Eduardo Freitas",
+        "Assis T. de Oliveira Filho",
+        "Djamel Sadok",
+        "Judith Kelner"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-20T17:44:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.20166v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Accurate ECN feedback and network simulation for low latency",
+      "llm_evidence_cn": "用于低延迟的精确ECN反馈和网络模拟",
+      "llm_evidence": "用于低延迟的精确ECN反馈和网络模拟",
+      "canonical_evidence": "用于低延迟的精确ECN反馈和网络模拟",
+      "llm_tldr_en": "Implements L4S architecture in ns-3 to enable high-fidelity simulation of low-latency network protocols.",
+      "llm_tldr_cn": "在ns-3中实现L4S架构，以支持低延迟网络协议的高保真模拟。",
+      "llm_tldr": "在ns-3中实现L4S架构，以支持低延迟网络协议的高保真模拟。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
