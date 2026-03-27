@@ -1,0 +1,545 @@
+Title: Low-Latency Stateful Stream Processing through Timely and Accurate Prefetching
+
+URL Source: https://arxiv.org/pdf/2603.19890v1
+
+Published Time: Mon, 23 Mar 2026 00:53:08 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# Low-Latency Stateful Stream Processing through Timely and Accurate Prefetching 
+
+Eleni Zapridou 
+
+EPFL 
+
+Switzerland eleni.zapridou@epfl.ch 
+
+Anastasia Ailamaki 
+
+EPFL 
+
+Switzerland anastasia.ailamaki@epfl.ch 
+
+Abstract —Mission-critical applications often run “forever” and process large data volumes in real time while demanding low latency. To handle the large state of these applications, modern streaming engines rely on key-value stores and store state on local storage or remotely, but accessing such state inflates latency. As today’s engines tightly couple the data path with state I/O, a tuple triggers state access only when it reaches a stateful operator, placing I/O on the critical path and stalling the CPU. However, the keys used to access the state are frequently known earlier in the query plan. Building on this insight, we propose Keyed Prefetching, which decouples the data path from state access by extracting future access keys at upstream operators and proactively staging the corresponding state in memory before tuples arrive. This overlaps I/O with ongoing computation and hides the latency of large-state accesses. We pair Keyed Prefetch-ing with Timestamp-Aware Caching, a cache-eviction policy that jointly manages previously accessed and prefetched entries to use memory efficiently. Together, these techniques reduce latency for long-running, real-time queries without sacrificing throughput. 
+
+Index Terms —Stream processing, State management, Low latency, Real-time 
+
+I. I NTRODUCTION 
+
+Mission-critical streaming applications such as fraud de-tection, payment systems, stock trading, and social networks operate under strict latency deadlines: as the time to react to a newly generated event increases, the usefulness of the output diminishes [1]–[3]. Consequently, percentile latency governs performance, and production SLOs can be as low as 250 ms or even 50 ms [4], [5]. Any non-trivial streaming computation relies on stateful operations, such as rolling aggregations, window contents, and timers. The growing data volumes and the shift to cloud-native deployments have led recent studies [1], [6]–[9] and industrial products [10]–[13] to focus on managing state that resides outside the memory. For example, a major feature of Apache Flink 2.0 is a disaggregated state backend [10], while recent academic papers highlight the rise of large state and the need for efficient state access [1], [14]. However, accessing on-disk or disaggregated state significantly inflates tail latency [14]. As today’s engines tightly couple the data path with state I/O, a tuple triggers state accesses only when it reaches a stateful operator, placing I/O on the critical path and stalling the CPU. Approaches such as caching, asynchronous I/O, and software prefetching have traditionally been used to mitigate the cost of expensive state accesses. However, these methods 
+
+Fig. 1: Keyed Prefetching in fraud detection. A card transaction goes through a pipeline of attribute extraction, data normalization, and risk assessment. Existing systems would start fetching the card-specific state (which grows with the number of cards) only when the tuple reaches the risk-assessment operator. Keyed Prefetching eliminates the state-access latency by accurately prefetching state in response to hints from the upstream attribute-extraction operator. alone fall short in addressing tail latency for streaming ap-plications. First, caching policies reduce latency for hot keys, but tail latency remains high. Second, while asynchronous I/O can improve throughput by ensuring the CPU isn’t idle during I/O, it does not eliminate the latency of fetching cold state; a tuple requesting cold state must still block until the I/O completes. Finally, software prefetching aims to remove state access from the critical path, but existing prefetchers rely on predictable access patterns and are therefore a poor fit for streaming workloads. Modern streaming engines manage state that exceeds mem-ory capacity using persistent key–value stores [15]–[18]. Key– value stores are a natural fit, as systems typically organize state as key–value pairs to match their parallelism model, which relies on data partitioning [8]. 
+
+> arXiv:2603.19890v1 [cs.DB] 20 Mar 2026
+
+Although we cannot predict the key of a future tuple that will arrive at the streaming engine, within the engine, the keys used for state access by downstream operators are frequently known earlier in the query plan. Figure 1 illustrates a query from a fraud-detection system. The query receives card transactions as input, pre-processes them, and calculates the transaction’s risk score by evaluating historical data. The state is organized by card IDs and grows as their number increases. This application has tight latency requirements and must respond quickly to all incoming transactions, even if they concern a card ID that has not been seen in a while. In existing systems, the operator calculating the risk score would read its next input tuple and then fetch the necessary state, inflating latency. However, the card ID attribute used to access the state is already known in the attribute-extraction operator. This paper introduces Keyed Prefetching , a technique that decouples state I/O from the data path, treating tail latency as a first-class objective. Keyed Prefetching uses lookahead 
+
+operators as a mechanism for informing downstream stateful operators of the keys they will soon need to access. These stateful operators can then fetch the state as soon as a key is known in the query plan—before the tuple reaches the operator. Lookahead operators emit accurate prefetch hints, the state is fetched asynchronously, and tuples find their state hot, thereby avoiding CPU stalls and reducing end-to-end latency. To jointly manage prefetched and previously accessed state, we propose Timestamp-Aware Caching , which relies on event timestamps: the timestamp of a prefetch hint encodes when a key is expected to be accessed, while the timestamp of an already accessed entry records its most recent access time. This way, timestamps provide a single ordering signal that naturally ranks both entry types. To minimize tail latency while keeping overheads low, Keyed Prefetching (i) omits hints for very frequent keys that are unlikely to lead to cache misses, (ii) adjusts the selected lookahead at runtime to ensure hints are accurate and timely, and (iii) ensures writes are not on the crit-ical path of execution and can be performed asynchronously. Overall, Keyed Prefetching accurately prefetches state, uses memory efficiently, and enables streaming applications to scale to larger states without sacrificing timely responses. In addition, its design is general and can be used with any underlying key–value store that stores data locally or remotely. This paper makes the following contributions:  
+
+> •
+
+We minimize I/O delays on the critical path of execution by decoupling the data path from state accesses. Our experiments show that accessing state as soon as the key is known hides I/O costs, thereby minimizing tail latency.  
+
+> •
+
+We propose Keyed Prefetching, a mechanism that exploits query-plan semantics to prefetch state based on informa-tion from upstream operators, hiding state access.  
+
+> •
+
+We propose Timestamp-Aware Caching, which em-ploys event timestamps to seamlessly operate over both prefetched and previously accessed state. By balancing recent and anticipated future use, this policy uses mem-ory efficiently for both state types. In our experiments, using Keyed Prefetching with Timestamp-Aware Caching 
+
+Fig. 2: A parallel dataflow graph corresponding to the query of Figure 1 with embedded key–value stores for subtasks of stateful operators. Tuples between the data-normalization and risk-assessment operators are partitioned by the card ID attribute, and the same attribute is used to partition the state of the risk-assessment operator. For simplicity, we present the source, attribute-extraction, and data-normalization operator with a single subtask. reduces p999 latency by 1.34 − 11 × without sacrificing throughput. II. T HE TENSION BETWEEN STATE VOLUME AND TAIL 
+
+LATENCY 
+
+The stream processing model assumes a dataflow, typically represented as a directed acyclic graph (DAG), where nodes represent operators and edges represent data streams. We adopt the tuple-at-a-time processing model as it is more suitable for low-latency applications [19]. Our method can be extended to the micro-batch processing model by extracting and for-warding prefetch hints for an entire batch at once. Using the tuple-at-a-time processing model, each operator has an input and an output queue and operates at the tuple granularity: it pulls a tuple from the input queue, processes it individually, and enqueues it to the output queue. 
+
+Streams & Windows . A stream S comprises an infinite sequence of records that obey a partial order. We also assume that the order t of a tuple e in the stream is explicitly expressed as an attribute of the tuple, i.e., et = ( t, •).
+
+Pipelined operators . When data does not need to be shuffled between two operators, systems typically pipeline 
+
+them. Pipelined operators are therefore a single node in the graph and, from the system’s perspective, are considered as one operator. 
+
+Parallel dataflows . In distributed stream processing sys-tems, each operator has multiple deployed instances, which we call subtasks . For example, in Figure 2, there are three subtasks for the risk-assessment operator. Each record is typically sent to the next subtask compounded with other records in a network buffer, the smallest communication unit for communi-cation between subtasks. Smaller buffer sizes and tighter buffer timeouts trade off throughput in terms of records per second for lower latency [20]. To employ parallelism and split tuples between subtasks, systems rely on data partitioning. Tuples are routed based on a set of specific attributes that act as partitioning keys. In the example of Figure 2, tuples that have the same card ID should be routed to the same subtask. To distinguish partitioning keys from the rest of the attributes, we denote tuples as et = ( t, k, v ), where k is the key. 
+
+Stateful dataflows. Non-trivial streaming queries maintain state for their operations (e.g., windowed aggregation, join, deduplication) and window timers/triggers. The state is par-titioned using the same key used to partition the data. In the example of Figure 2, the state of the risk-assessment operator is partitioned by card ID, and each subtask has its own state. This design choice promotes scalability, state locality, and isolation between subtasks. As data volume and query complexity increase, the state can exceed memory capacity and spill to local storage or, in modern containerized cloud deployments [10], to disaggregated storage. In real-world applications, state can reach hundreds of terabytes [10], [11]. To manage state at this scale, modern streaming systems rely on persistent key–value stores. The most prominent store is RocksDB [21], used by open-source systems such as Apache Spark Structured Streaming [16], Apache Flink [15], Apache Kafka [17], and Apache Samza [18]. 
+
+A. Large states hurt tail latency 
+
+The end-to-end latency for an output record is shaped by operator processing times, queuing at operator boundaries, and inter-operator communication. As data flows through the DAG, an operator consumes an input tuple and produces one or more transformed tuples—or drops it entirely. Latency then accumulates along the specific path taken by these produced tuples. Let G = ( V, E ) be the dataflow graph. For a particular output record et, let the executed operator path that produced 
+
+et be π(et) = ( v1, v 2, ..., v K ). For each stage i, qi(et) is the time spent queuing before operator vi (i.e. between vi and 
+
+vi−1 or between vi and the data source if i = 0 ), pi(et) is the in-operator time, i.e., the time spent within the operator for processing and potential I/O and ci(et) the communication time for the tuple to travel to the next operator. Then, the end-to-end latency of et is: 
+
+L(et) = 
+
+> K
+
+X
+
+> i=1
+
+(qi(et) + pi(et)) + 
+
+> K−1
+
+X
+
+> i=1
+
+ci(et) (1) Some input tuples might not result in any output tuples; however, they can still affect the latency of later output tuples—e.g., by increasing their queuing time. If the processing of a tuple by a stateful operator requires cold state, the operator gets blocked waiting on I/O. This increases the latency of the particular tuple (by increasing 
+
+pi) but also that of future tuples, which must be queued longer (increasing qi). Therefore, tail latency often reflects cold accesses from multiple preceding records and thus can far exceed the time to process a single cold-key record. 
+
+Caching is a standard technique to mitigate the overhead of accessing large or disaggregated state. Streaming engines place in-memory caches in front of the embedded key—value stores with LRU and Clock being typical choices for the eviction policy [22], [23]. Caching reduces average latency for hot keys, but cold-key accesses still inflate the tail percentiles. Moreover, studies in streaming workloads show that keys are highly ephemeral and have a short time-to-live, limiting the effectiveness of purely reactive caches [6]. Asynchronous I/O can increase throughput by overlapping processing with state access. However, a tuple whose pro-cessing requires cold state will still need to wait for the state to be fetched. Consequently, for low percentile latency, asynchronous I/O alone does not suffice. Streaming engines provide limited support for asynchronous I/O [24]. 
+
+B. The challenges of prefetching streaming state 
+
+Prefetching aims to move state accesses earlier in time, be-fore a state element is actually needed, and this way to overlap them with upstream computation. However, the dynamic and unpredictable nature of data streams amplifies the traditional prefetching challenges. We use the term “prefetching” in the broad sense of fetching state earlier than it will be consumed. In the context of the streaming dataflows this paper addresses, this translates to proactively fetching operator state from the persistent key–value store to the cache. 
+
+Challenge 1. What to prefetch? The keys a stateful operator will access depend on input data being generated in real time. Existing prefetchers [25]–[29] rely on detecting workload patterns. However, streaming data follow evolving trends that can change at any time. Crucially, for streaming applications, such as fraud detection, alerts, and monitoring, moments that diverge from history and, therefore, when the workload is shifting, are particularly interesting and precisely when we cannot afford performance drops. 
+
+Challenge 2. When to prefetch? If we prefetch too late, we fail to hide state access. On the contrary, prefetching too early introduces memory pressure and risks evicting prefetched elements before they are even used. Streaming workloads exacerbate this classical problem: state elements have short time-to-live, and spatial locality is limited as consecutive events may hit very different keys in state [6]. Therefore, to efficiently use the cache, we must update the elements cached quickly. 
+
+Challenge 3. Efficient cache utilization. With prefetching, the engine needs to cache two classes of entries: (i) prefetched state and (ii) recently accessed state. Favoring one can starve the other: over-admitting prefetched keys evicts frequently-accessed entries, while excessively limiting the number of keys that can be prefetched causes failure to remove I/O from the critical path. Fig. 3: Keyed Prefetching Overview 
+
+Challenge 4. Prefetching overheads vs low latency. Prefetch-ing introduces overheads: (i) the computational cost of predict-ing future accesses, and (ii) the memory and I/O bandwidth wasted on mispredictions. Under strict tail-latency constraints, minimizing these overheads is critical. III. D ECOUPLING STATE ACCESS FROM THE DATA PATH 
+
+Streaming systems couple state access with the data path. An operator only accesses the state necessary to process a tuple after the tuple has been processed by all upstream operators. This coupled design leads to inflated tail latencies, as a single tuple might need to pass through multiple stateful operators and can also be delayed by state accesses from preceding tuples due to queuing. The information that determines which state must be ac-cessed does not need to follow the same path as the infor-mation necessary for processing a tuple and incorporating it in the output. Using this insight, we can decouple state access from the data path. This way: (i) the information relevant for state accesses travels faster and is used to fetch the corresponding state ahead of time, and (ii) the data path can also move faster as it does not get blocked on I/O. This decoupling enables accurate prefetching, which, instead of being speculative, relies on accurate information originating from earlier in the query plan. Next, we present how, based on this insight, we design Keyed Prefetching, a mechanism that proactively fetches state and efficiently utilizes the cache to achieve low tail latency. Keyed Prefetching targets operators that need to access keyed state upon the arrival of an input tuple. This includes read-modify-write operators—such as associative and commutative aggregations and incremental processing, such as incremental joins—and read-only operators—for example, tuple enrich-ment. 
+
+A. Overview of Keyed Prefetching 
+
+Figure 3 illustrates the architecture of Keyed Prefetching and how it interacts with the processing layer and the persistent state. The Prefetching Controller is a centralized component that stores the IDs of the candidate lookahead operators for each stateful operator and, upon request from stateful operators, adjusts the selection of the lookahead . The Hint Extractor inside lookahead operators is responsible for extract-ing hints, which then get forwarded to the stateful operator. Stateful operators have a hints buffer which temporarily stores hints before they are handled and the Prefetching Manager ,which is responsible for monitoring runtime statistics and requesting to switch to a different lookahead if hints are not accurate or do not arrive early enough to hide state access. The stateful operator also includes the State Thread Pool ,which asynchronously performs I/O operations between the 
+
+Timestamp-Aware Cache and persistent state. The design of Keyed Prefetching addresses the challenges mentioned in Section III. First, upstream operators inform stateful ones exactly which keys will need to be accessed soon (Challenge 1). Second, by adjusting the selected looka-head operator at runtime, Keyed Prefetching selects the one that provides the most timely hints (Challenge 2). Third, our Timestamp-Aware Cache jointly handles both previously accessed and prefetched state and thus, the percentage each utilizes automatically adjusts to the workload, as described in Section IV-D (Challenge 3). Finally, by using exact informa-tion from upstream operators, Keyed Prefetching eliminates prefetching mispredictions and naturally detects what should be fetched. Additionally, to further reduce the overhead, we minimize the hints that should be sent by an upstream operator (Section IV-C) by omitting hints for very frequent keys, and we design the Timestamp-Aware Cache to keep write operations outside of the critical path of execution. IV. P REFETCHING STREAMING STATE 
+
+Prefetching streaming state from the backend to memory requires accurate prefetching hints, fetching state in a timely manner to effectively hide I/O without polluting the cache with state that is needed much later in the future, and balancing the available memory between previously-seen and prefetched state while keeping overheads low even for percentile laten-cies. Keyed Prefetching prefetches state accurately and timely by relying on query-plan semantics and selecting the operators that sent prefetch hints at runtime. The design of Keyed Prefetching (Figure 3) consists of four main components: (i) the Prefetching Controller oversees the entire query and is responsible for adjusting the choice of operators that produce the prefetch hints and enabling the prefetching mechanism, (ii) 
+
+lookahead operators use a Hint Extractor to extract prefetch hints and forward them to the stateful operator, (iii) the stateful operators have a Prefetching Manager which handles prefetch hints and decides when to trigger a fetch request and (iv) the 
+
+Timestamp-Aware Cache is placed in front of the persistent state and is responsible for caching both previously-accessed and prefetched state. 
+
+Definition 1 (Lookahead operator) . We call the operator sending prefetch hints to a steteful operator a lookahead 
+
+operator. 
+
+Definition 2 (Prefetch hint) . A prefetch hint is a tuple 
+
+ht = ( k, t ) which travels between a lookahead and a stateful operator via a specialized channel and informs the stateful operator that the state of key k will need to be accessed at event time t.
+
+In this section, we first present the function of the Prefetch-ing Controller (Section IV-A) and the Hints Extractor (Sec-tion IV-B), and then detail the operations of the Prefetching Manager (Section IV-C) and the Timestamp-Aware Cache 
+
+(Section IV-D). 
+
+A. Prefetching Controller a) Identifying candidate lookahead operators: Once a query is submitted, the Prefetching Controller identifies for each stateful operator vS , candidate operators that can provide prefetch hints and keeps them sorted based on their order in the query plan (from the one closest to the source to the one closest to the stateful operator). An operator is a candidate 
+
+lookahead for vS if the following conditions hold: 1) it is an upstream operator to vS
+
+2) it is able to extract from the payload of its output tuples the key that vS is using to access state Initially, no operator sends prefetching hints to vS as the state might be fitting in the cache. At runtime, if vS observes cache misses, it then requests the Prefetching Controller to activate one of the candidate lookahead operators so that it begins producing prefetch hints .Different candidate lookahead operators can provide 
+
+prefetch hints of different quality. For example, an operator that is placed early in the query plan, many stages away from 
+
+vS , would send hints to vS earlier and provide more time to prefetch state, while an operator closer to vS is more likely to observe the same key distribution as vS as operators between a candidate lookahead and vS , such as filters and joins, can change the distribution of the state access key. To achieve timely and accurate prefetching, our goal is to choose the lookahead operator such that it is the last candidate in the query plan that: 1) observes the same key distribution as vS
+
+2) provides enough prefetching time We achieve this via a lightweight adaptive policy driven by runtime information. Initially, the Prefetching Controller se-lects the first candidate operator as the lookahead . At runtime, if the Prefetching Manager of the stateful operator vS observes that the distribution between the stateful and lookahead oper-ators is different, it requests from the Prefetching Controller 
+
+to switch to a later lookahead operator. The Prefetching Con-troller then discards the current and all upstream lookahead 
+
+operators from the list of candidates before switching to a later one. We completely discard lookahead operators that see a different distribution of the state access key to prioritize hint accuracy. While our current implementation enforces this 0% prefetch-miss threshold, relaxing it could benefit some workloads. It would introduce a trade-off between having a larger prefetch window and the overhead of prefetch misses. Allowing a small ratio of prefetch misses would enable the use of lookahead operators positioned earlier in the query plan, increasing the time available to hide I/O, which could be beneficial when the most accurate lookahead operator does not provide sufficient slack. However, this comes at a cost: fetching unused state consumes I/O bandwidth and risks polluting the cache with entries that are never accessed. We leave exploring this trade-off as future work. The stateful operator can also request a different lookahead operator based on the prefetch slack—the time between a hint’s arrival and the corresponding tuple’s arrival. We detail this process in Section IV-C. 
+
+B. Lookahead operator & Hints Extractor a) Communicating prefetching hints: The Hints Extrac-tor is a lightweight routine embedded in the selected looka-head : for each output record et = ( t, [payload ]) , it extracts from the payload the state-access key k of vS and emits a 
+
+prefetch hint ht = ( k, t ) on a side channel toward vS . This side channel is an additional edge in the dataflow query graph— thereby keeping the execution graph a DAG—so existing streaming engines can handle it natively. We route hints using the same partitioning function as the data stream, ensuring each vS subtask receives hints only for its local partition; this is possible because state and data in vS are partitioned the same way. The stateful operator thus receives two types of input: the regular data input and a hint input. Upon hint arrival, the Prefetching Manager buffers or acts on the hint (Section IV-C), and the Timestamp-Aware Cache records anticipated future use (Section IV-D). This design decouples state access from the data path while remaining non-invasive to the engine’s scheduler, backpressure, and checkpointing mechanisms. 
+
+b) Minimizing hints: The goal of Keyed Prefetching is to inform stateful operators of keys that are currently not in memory and will be accessed soon. Streaming workloads are typically highly skewed [30], [31]. Frequent keys will anyhow be present in the cache and will not incur expensive accesses. Therefore, to lower the communication overhead between the 
+
+lookahead and stateful operator and to reduce the cost of processing hints in the stateful operator, the lookahead can omit hints that concern very frequent keys. Specifically, the lookahead operator employs a filter that detects frequent keys and extracts hints only for keys that do not pass the filter. A coarse filter that detects very hot keys is sufficient; we do not need to rank all keys precisely. We use a tiny Count–Min Sketch (CMS) with saturating counters. This design has been used before for cache admis-sion [32] and is very suitable for our use case because it is very lightweight while keeping statistics fresh, which is necessary for evolving streaming data. The sketch has d rows and width 
+
+w; each cell is a b-bit counter. On seeing key k, the Hints Extractor updates the sketch: 
+
+∀iϵ {1, . . . , d } : C[i, h i(k)] ← min {C[i, h i(k)] + 1 , 2b − 1}
+
+where hi are d independent hash functions. Every ∆ (either wall-clock time or a fixed number of records), we age the structure by dividing each counter by 2 using integer division (i.e., right shift by one bit): C[i, j ] ← C[i, j ] ≫ 1. This aging process keeps frequency estimates fresh and bounds the counters, keeping the memory footprint tiny. A key is classified as hot —and is omitted from hint emis-sion—iff all its d touched counters exceed a threshold T :
+
+> d
+
+_
+
+> i=1
+
+C[i, h i(k)] ≥ T
+
+The filter quickly detects very hot keys, which are highly likely to be present in the stateful operator’s cache, and so, they will not produce hints. Each tuple costs O(d) hash+increment operations; the state footprint is tiny for practical (d, w, b ), and the aging pass is inexpensive given the tiny array. 
+
+C. Prefetching Manager a) Handling prefetch hints: The prefetching manager 
+
+runs in the stateful operator and maintains a two-stage hints buffer. The buffer stores, for each state access key, the latest event-time timestamp seen so far, and deduplicates keys so that there is at most one entry per key. The buffer is split into two sections: (i) unprocessed: keys for which a hint has been received but no fetch has been issued yet, and (ii) in-flight: keys for which an asynchronous fetch has been initiated but has not completed yet. 
+
+Arrival of hints. As the lookahead operator (Section IV-B) does not send hints for very hot keys and routes hints by key partition, every subtask of the stateful operator only sees hints for its local partition and predominantly for cold keys. When a hint ht = ( k, t ) arrives, the manager first consults the 
+
+Timestamp-Aware Cache . If the key is already cache-resident, the Prefetching Manager just notifies the Timestamp-Aware Cache of the anticipated future use at timestamp t so that the cache updates the entry’s metadata (see Section IV-D). If the key is not cached, the Prefetching Manager checks if the key is already in the buffer. If that is the case, it updates the timestamp to t ← max (t, t old ), otherwise it inserts the key with the timestamp into the unprocessed section of the buffer. 
+
+State Thread Pool. A small pool of asynchronous I/O workers repeatedly select keys from the unprocessed part of the buffer, move them to in-flight, and fetch the corresponding state from the backend. Once the state is fetched, the hint is removed from the buffer, and its state is inserted in the cache. 
+
+Arrival of regular data. When a regular tuple arrives, if the state is already in the cache, the operator proceeds normally with processing it. In the unlikely event that the state is still cold (e.g., a hint arrived late or prefetching has not completed), the operator issues a fetch for the key (without duplicating any ongoing prefetch). 
+
+b) Selecting the lookahead operator: Our adaptive policy for selecting the lookahead operator combines two com-plementary runtime mechanisms to ensure both timely and accurate prefetching. First, the Prefetching Manager based on runtime statistics selects from the current candidate operators which one offers the most timely hints—hints should arrive early enough to hide I/O but not too early to inflate buffering overheads. Second, the manager also keeps track of hint accuracy and identifies candidate lookahead operators that do not provide accurate hints. 
+
+Adapting prefetching timing. To decide where prefetch hints should originate, we use a low-overhead marker mecha-nism that directly measures the prefetching slack each can-didate lookahead provides to the stateful operator vS . As mentioned in Section IV-A, the goal is to pick the latest 
+
+lookahead that (i) leaves enough time to hide state I/O and (ii) observes the same key distribution as vS . Markers are a coordination mechanism in streaming engines—used, for instance, in reconfiguration, and snapshotting [30], [33], [34]—to trigger control-plane actions without interfering with data processing. Keyed Prefetching uses markers to efficiently calibrate prefetch timing. Every T time units, the Prefetching Controller injects a marker into all source operators. Markers then propagate through the dataflow, interleaved with normal data messages. When a candidate lookahead operator receives a marker: (i) it forwards the marker downstream on its regular output channel, preserving order, and (ii) it sends the same marker with its operator id to the stateful operator vS through the hint side channel. Operators that do not produce hints simply forward markers downstream. When vS receives a maker through the hint channel, it records the arrival time thint (Li) associated with the originating candidate lookahead Li. When the same marker later arrives through the regular data channel, vS
+
+records the arrival time tdata . Once all markers for this round have arrived, vS computes for each candidate: 
+
+Gi = tdata − thint (Li)
+
+which represents the slack window the candidate Li provides (the time between a hint’s and the corresponding tuple’s arrival at vS ). Because markers traverse the same path as normal data and hints, Gi captures end-to-end queuing and backpressure effects, providing a precise measure of prefetching slack. The Prefetching Manager maintains the percentile (e.g., p99) of the measured Gi values and also tracks the state access percentile latency F . Based on these statistics, the Prefetching Manager selects the lookahead operator that satisfies the following condition: 
+
+L∗ = max i{Li|p99 (Gi) ≥ p99 (F ) + γ}
+
+where γ is a small safety margin (e.g., a few milliseconds). Intuitively, L∗ is the latest lookahead that still leaves enough time—at the 99th percentile—to complete prefetching before the corresponding tuple reaches vS .
+
+Detecting distribution mismatch. A candidate lookahead 
+
+may observe a different distribution over the state access key than vS , leading to the prefetching of irrelevant states. To detect this, the Prefetching Manager monitors the fraction of prefetching misses, i.e., state entries that were fetched but never accessed. If this prefetch-miss ratio exceeds a thresh-old, the Prefetching Manager requests from the Prefetching Controller a later lookahead closer to vS , whose emitted hints Fig. 4: Timestamp-Aware Cache Design are more likely to better reflect the operator’s current access pattern. In this work, we set this threshold to 0% , and therefore Keyed Prefetching converges to using lookahead operators that observe exactly the same distribution as the stateful operators. 
+
+D. Timestamp-Aware Cache 
+
+The Timestamp-Aware Cache (TAC) manages both prefetched and previously accessed state uniformly. Timestamps—already present in streaming records—provide a natural ordering signal allowing the cache to reason about both state types jointly. TAC’s design is illustrated in Figure 4. To manage memory efficiently, the TAC prioritizes evicting entries with the oldest timestamps. Each cache entry corre-sponds to a key k and holds (k, s k, t k) where sk is the state object and tk its timestamp. The cache assigns timestamps differently depending on the origin of the entry: Previously-accessed state: When vS reads or updates the state of key 
+
+k, the cache sets tk to the time of last access (event time). Among previously accessed states, the TAC thus behaves like a Least-Recently-Used (LRU) cache based on event timestamps. 
+
+Prefetched state: When a state entry gets prefetched into the cache, its timestamp tk is set to the event-time of the hint that triggered the fetch, which is the timestamp of when the state is expected to be used . Because hints originate from tuples of upstream operators that will reach vS later, their timestamps are ahead of the operator’s current event time. This unified timestamp ordering naturally positions prefetched entries “in the future” relative to the currently active state. When a new hint for an already-cached key arrives, the cache updates the entry’s timestamp to the timestamp of the hint. This operation effectively renews the entry’s predicted relevance: it remains in the cache longer, preventing premature eviction when the key is expected to be accessed again soon. Ultimately, evicting the smallest-timestamp entries naturally preserves recently accessed or soon-to-be-used state entries. To support fast lookup, ordered eviction, and non-blocking writes, the TAC employs a three-data-structure design: Hash map: A hash map provides O(1) access and update by key. It stores pointers to the nodes of the ordered list and the 
+
+eviction buffer. Doubly-linked list ordered by timestamps: 
+
+All entries are sorted in descending order of tk. This structure allows for fast evictions—simply removing the tail of the list, which has the oldest timestamp. Eviction buffer: When an entry is selected for eviction, the TAC checks the entry’s dirty bit. Clean entries are discarded immediately. Dirty entries are placed in the eviction buffer. Threads from the state thread pool pick an entry from the eviction buffer, write it to the backend, and remove it from the buffer. The eviction buffer enables writes without blocking execution; when an entry is fetched from the backend, and the linked list is at full capacity, processing does not block waiting for a thread to get freed and perform the write of the evicted entry. If a read (or a prefetch hint ) concerns a key currently staged in the eviction buffer, the entry is moved back to the doubly-linked list. 
+
+E. Interaction with Checkpointing and Watermark Techniques 
+
+Keyed Prefetching is designed to be non-invasive to the un-derlying engine’s fault-tolerance mechanisms, such as Apache Flink’s checkpointing mechanism [33]. When a checkpoint is triggered, the engine ensures that all in-flight operators reach a consistent barrier; at this point, any modified state within the TAC—whether resident in the linked list or staged in the eviction buffer—is stored in the persistent state backend before the checkpoint is finalized. Because prefetch hints are treated as a side channel of the DAG, they are subject to the same alignment rules as regular records. Consequently, in the event of a failure, the consistent state is recovered from the last successful checkpoint in the persistent key-value store. Further, Keyed Prefetching is inherently compatible with watermark-based mechanisms for handling out-of-order events [8], [35]. Watermarks track the progress of event time and define a threshold beyond which events are considered late. Since TAC orders entries by event timestamps, the state fetched for an out-of-order tuple is assigned the record’s intrin-sic event timestamp; this ensures the entry maintains its logical temporal priority in the cache, receiving the same treatment it would if it had arrived normally. Regarding prefetching hints, if a record is delayed before the source operator, both lookahead and stateful operators experience the same relative delay, and prefetching functions normally. If delayed internally between operators, prefetching remains successful, though the state will reside in the cache longer before being used. Given that out-of-order events typically represent a small fraction of the total data volume, the overall impact on cache efficiency remains minimal. To optimize for out-of-order events, the 
+
+Prefetching Manager can be configured to discard hints for late tuples. Specifically, it could drop hints for records with timestamp older than the current watermark minus the lateness threshold, mirroring the behavior of the operators and avoiding unnecessary prefetching for records that will be dropped. V. I MPLEMENTATION 
+
+We implement Keyed Prefetching in the widely used Apache Flink [36] stream processing engine (v2.0). Following the design in Section IV: (i) the Hint Extractor runs in looka-head operators, (ii) the Prefetching Manager is collocated with each stateful operator, and (iii) the Timestamp–Aware Cache is placed in front of the state backend. We integrate the Hint Extractor and the Prefetching Manager inside Flink’s 
+
+TaskManager , while the Prefetching Controller resides in the 
+
+JobManager . Keyed Prefetching is compatible with any key-value store backend that supports concurrent accesses. 
+
+Operators with multiple states Some operators maintain more than one keyed state (for example, a two-input join storing two hash tables, one for each input stream). For such operators, we use composite keys consisting of the key and the state identifier, which disambiguate which internal state an access targets. VI. E VALUATION 
+
+This section experimentally evaluates the effectiveness of Keyed Prefetching in reducing tail latency for stateful queries. We additionally report the achieved throughput and analyze its individual components. 
+
+a) Baselines: We compare Keyed Prefetching against three baselines: 1) Cache-LRU: There is a Least-Recently-Used (LRU) cache in front of the key-value store. 2) Cache-Clock: There is a Clock cache in front of the key-value store. 3) Asynchronous I/O: State is fetched asynchronously, and while waiting on I/O, stateful operators move on with processing the next tuple. We implement all baselines in Apache Flink and use RocksDB as the state backend. The Asynchronous I/O baseline uses a cache as well—we report results for the best performing cache eviction policy between LRU and Clock. 
+
+b) Platform: We use 2 two-socket Intel Xeon Gold 5118 CPU (2.30 GHz) servers, each with ( 12 ×2) threads per socket, 
+
+256 GB of DRAM, and a 1.6 TB NVMe SSD (Dell Express Flash PM1725a AIC) for the TaskManagers. Additionally, we use a two-socket Intel Xeon E5-2680 v4 CPU (2.40 GHz) server with ( 2×14 ) threads per socket for Flink’s JobManager and a two-socket Intel Xeon E7-8890 v3 CPU (2.50GHz) server with ( 2 × 18 ) threads per socket for data generation. Finally, we use an Intel Xeon E5-2650L v3 CPU (1.80GHz) with ( 2 × 12 ) threads per socket for the Redis key-value store used for the Yahoo Streaming Benchmark. 
+
+c) Methodology: We adopt the methodology of prior work on benchmarking streaming systems [37], [38], ensuring that data generation runs on a separate machine to eliminate interference between data production and processing. The data generator is producing events in JSON format. For NEXMark, we use a single generator for all event types [39] and the event type and primary/foreign keys are represented as top-level attributes. We allow the system to warm up and collect measurements only after reaching a steady state and after the state exceeds the cache size. 
+
+d) Workloads: For our experiments, we use two bench-marks: (i) The NEXMark benchmark [39], [40] emulates online auctions and is used to benchmark SPEs [10], [14], [41], [42]. It has three types of input tuples: Auction, Bid, and Person. We select the queries that generate large states [10]. SRC FLTR       
+
+> type = Bid
+> JSON
+> Parser
+> JOIN
+> static table
+> Q13
+> SRC FLTR
+> type = Bid
+> JSON
+> Parser TOP -NQ18 /Q19
+> SRC FLTR
+> type=Auction
+> JSON
+> Parser
+> FLTR
+> category =10
+> Q20
+> FLTR
+> type = Bid
+> JSON
+> Parser
+> JOIN
+> YSB SRC Project JOIN
+> Redis
+> JSON
+> Parser
+> COUNT
+> Windowed
+
+Fig. 5: Dataflow graphs of the evaluated queries. Thicker arrows connect pipelined operators. Concretely, we evaluate four queries: Q13 joins the Bid stream to a bounded side input based on auctionId, modeling tuple enrichment. Q18 finds the top-1 bid for an auction based on the bidding time. Q19 outputs the current top-10 bids for an auction based on price. Q20 performs a join between the Auction and Bid streams and uses a filter on auctions (category = 10 ). Q13, Q19, Q20 organize state based on auction ID, and Q18 based on (auction ID, bidder ID). Q7 also generates a large state, but we exclude it because the stateful operator accesses state only via append operations for input tuples and read operations at the end of the window—as explained in Section III, these access patterns are not targeted by Keyed Prefetching. The average byte-serialized size of Person, Auction, and Bid tuples is 200B, 500B, and 200B, respectively. Data streams created by the generator consist of 2% person tuples, 6% auction tuples, and 92% bid tuples. Re-garding NEXMark’s data generation parameters, we configure auctions and bidders to remain active for a 2-hour window, and the most popular auction/bidder changes every second to allow for large active states. We use the default skewness parameters specified in the open-source implementation [39]; a Bid corresponds to a hot auction with probability 50% (this parameter affects the distribution of the state-access key of all queries) and to a hot bidder with probability 75% (this parameter affects the distribution of the state-access key of Q18). We vary skewness in Section VI-B. (ii) The Yahoo Streaming Benchmark (YSB) [43] provides a scenario where the engine must access disaggregated state over the network. It emulates an ad analytics pipeline: a stream of ad events is enriched through a join with campaign metadata stored in a remote Redis key-value store. The state access key is the ad ID. We use a Zipfian distribution ( α = 1 ) to generate ad IDs. The byte-serialized size of each event is 114B. Fig. 5 presents the dataflow graphs of all queries. For Nexmark, we pipeline the event-type filter with the source to avoid excessive communication. The JSON parser operator is not pipelined with the source to fully exploit available 0     
+
+> 200
+> 400
+> 600
+> 800
+> 1000
+> 50% 60% 70% 80% 90% 100%
+> Latency (ms)
+> Percentile
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+> 90%
+> 95%
+> 99%
+> 99.9%
+
+(a) Q13 (200 GB) 0       
+
+> 1000
+> 2000
+> 3000
+> 4000
+> 50% 60% 70% 80% 90% 100%
+> Latency (ms)
+> Percentile
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+> 90% 95%
+> 99%
+> 99.9%
+
+(b) Q18 (205 GB) 0      
+
+> 1000
+> 2000
+> 3000
+> 4000
+> 5000
+> 50% 60% 70% 80% 90% 100%
+> Latency (ms)
+> Percentile
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+> 90%
+> 95%
+> 99%
+> 99.9%
+
+(c) Q19 (216 GB) 0     
+
+> 1000
+> 2000
+> 3000
+> 4000
+> 5000
+> 6000
+> 50% 60% 70% 80% 90% 100%
+> Latency (ms)
+> Percentile
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+> 90%
+> 95%
+> 99%
+> 99.9%
+
+(d) Q20 (197 GB) 0      
+
+> 500
+> 1000
+> 1500
+> 2000
+> 50% 60% 70% 80% 90% 100%
+> Latency (ms)
+> Percentile
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+> 90%
+> 95%
+> 99%
+> 99.9%
+
+(e) YSB (220 GB) 
+
+Fig. 6: End-to-end percentile latency. In the captions, for each query, we provide an estimate of the state size. parallelism; the parallelism of the source is capped at 16 (the maximum number of client connections supported by the data generator). Q18 and Q19 have the same query plan structure but differ in the configuration of the TopN operator. 
+
+e) Configuration: We run a single Flink TaskManager with 24 task slots on each worker node. We use a total of 128GB of memory (per task manager, 50GB is allocated for caching operator state, 5GB is dedicated to RocksDB for memtables, and indexes, and the rest is used by Flink for net-work buffers and framework memory). We follow the official tuning guideline for RocksDB [44]. To avoid interference from the OS page cache, we enable Direct I/O for RocksDB. Following guidelines on configuring Apache Flink for low tail latency [20], we set the buffer timeout interval to 30 milliseconds and the input rate to the maximum sustain-able while keeping the average CPU utilization below 70%. For Keyed Prefetching, we configure the Count-Min sketch frequency filter with d = 4, w = 10000 , b = 8, and 
+
+T = 20 , using an aging interval of ∆ = 1000 records. Fig. 9 illustrates the impact of varying the threshold T on end-to-end latency. We inject a marker for the adaptive lookahead selection mechanism every 100 ms. 
+
+A. End-to-end percentile latency 
+
+Fig. 6 presents the end-to-end latency for each approach. For each query, we provide in the caption an estimate of the state size using access pattern knowledge and the total number of tuples processed. These estimates concern only operator state for NEXMark and the state size of the Redis store for YSB. Cache-LRU and Cache-Clock perform similarly across all queries as they result in similar cache-hit ratios. As expected, Asynchronous I/O results in lower p50 latency than caching. Concretely, it reduces p50 latency by 1.02 − 2.63 × across the different queries. However, for higher percentiles, the latency of Asynchronous I/O increases, and for Q13, Q20, and YSB, it exceeds the latency achieved by caching methods. This happens because Asynchronous I/O adds overheads as it needs to handle many concurrent threads accessing state and check for completed fetches. These overheads become more prominent and can outweigh the benefits of Asynchronous I/O for high percentiles. For Q18 and Q19, where the amount of state accesses per operation (reads and writes) is higher, Asynchronous I/O pays off even in high percentiles. Q13 exhibits only read operations and experiences lower latency in high percentiles than the other queries. Q18 has overall more keys that are frequent at any point in time. Additionally, it has a higher total number of keys, which results in many tuples corresponding to the first occurrence of their key; these tuples are served quickly thanks to RocksDB’s bloom filters. Both these factors result in latency that increases more slowly up to the 95th percentile. Both Q13 and YSB perform tuple enrichment by joining with static data. Although they are not directly comparable due to differences in the rest of their query plans, data distribution, and event sizes, a primary factor contributing to YSB’s higher overall latency is its disaggregated state architecture. Keyed Prefetching reduces latency at high percentiles for all queries while achieving p50 latency similar to or lower than that of Asynchronous I/O. Concretely, Keyed Prefetching lowers p50 latency by 1.21 ×, 1.07 ×, and 1.2× for Q20, Q19, and YSB, respectively, and has less than 3 milliseconds higher p50 latency for Q18 and Q13 compared to Asynchronous I/O. For Q20, Keyed Prefetching results in a higher speedup than for other queries; Q20 processes two input streams (Auction and Bid). Most events are bids and, with Keyed Prefetching, are almost exclusively served from the cache as they access the relatively small state formed by the Auction stream, which mostly resides in cache thanks to the prefetching hints. Some 0     
+
+> 200
+> 400
+> 600
+> 800
+> 1000
+> 25% 50% 75% 100%
+> p99 latency (ms)
+> % of tuples corresponding to hot keys
+> AsyncIO & Cache Cache - LRU
+> Cache-Clock Keyed Prefetching
+
+(a) p99 latency 0     
+
+> 200
+> 400
+> 600
+> 800
+> 1000
+> 1200
+> 25% 50% 75% 100%
+> p999 latency (ms)
+> % of tuples corresponding to hot keys
+> AsyncIO & Cache Cache - LRU
+> Cache-Clock Keyed Prefetching
+
+(b) p999 latency 
+
+Fig. 7: p99 and p999 latency of Q13 with varying percentages of tuples that correspond to hot keys events need to access cold state, but there is enough time for Keyed Prefetching to hide these accesses. 
+
+Takeaway: Keyed Prefetching can hide expensive state accesses to local and disaggregated backends and reduces p999 latency by 1.34 − 11 × compared to the baselines while resulting in the same or lower p50 latency. 
+
+B. Varying degrees of skewness and cache size 
+
+Fig. 7 shows the p99 and p999 latency of Q13 as the per-centage of bid events that correspond to hot auctions changes from 25% to 100% . Tail latency drops as skewness increases because the benefit of decreasing cache misses outweighs the effects of load imbalance. At a low 25% percentage, Asynchronous I/O results in lower tail latency than caching methods. However, as skewness increases, Asynchronous I/O results in higher tail latency compared to caching. When all tuples correspond to hot auction IDs, all approaches perform similarly since the entire active state fits in memory. Keyed Prefetching outperforms all baselines across the different skewness degrees. Fig. 8 shows the p999 latency as we vary the cache size per task manager for Q13 and Q20 (the other workloads lead to the same insights). Asynchronous I/O results in a higher latency increase than caching methods because, as the cache size decreases, there is greater pressure on the threads used to fetch state. Keyed Prefetching outperforms all baselines across the different configurations. For Q20, Keyed Prefetching is affected less by the cache size than for Q13 because a small part of the state is very active, and thanks to the prefetch hints 0  
+
+> 500
+> 1000
+> 1500
+> 50GB 25GB 12.5GB
+> p999 latency (ms)
+> Cache size
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+
+(a) Q13 0  
+
+> 2000
+> 4000
+> 6000
+> 8000
+> 10000
+> 50GB 25GB 12.5GB
+> p999 latency (ms)
+> Cache size
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching
+
+(b) Q20 
+
+Fig. 8: p999 latency with varying cache sizes 0
+
+200 
+
+400 
+
+600 
+
+800 
+
+1000 
+
+50% 99.9% 
+
+> Latency (ms)
+
+Percentile 
+
+> AsyncIO & Cache
+> Cache - LRU
+> Cache-Clock
+> Keyed Prefetching (T = 20)
+> Keyed Prefetching (T = 50)
+> Keyed Prefetching (T = 100)
+> Keyed Prefetching (no filter)
+
+Fig. 9: Impact of CMS threshold T on latency (Q13). In-creasing T raises the frequency bar for hot-key classification, increasing the number of hints. “no filter” corresponds to sending prefetching hints for all tuples. and the efficiency of the Timestamp-Aware Cache , it stays in the cache even with smaller cache sizes. 
+
+Takeaway: Keyed Prefetching consistently outperforms all baselines for varying degrees of skewness and cache sizes. 
+
+C. Robustness and overhead of Keyed Prefetching 
+
+In Fig. 9, we show the results from evaluating the impact of the CMS frequency filter threshold ( T ) on the end-to-end latency of Q13. Higher values of T translate to a stricter threshold for a key to be characterized as hot, thereby in-creasing the volume of prefetch hints . Our results show that while the p50 latency remains relatively unaffected, tuning the threshold has visible impact on p999 latency. Importantly, all evaluated configurations outperform both Asynchronous I/O and caching methods at high percentiles, while maintaining a p50 comparable to Asynchronous I/O. A promising direction 0         
+
+> 1
+> 2
+> 3
+> 60 120 180 240
+> Lookahead ID
+> 0%
+> 10%
+> 20%
+> 60 120 180 240
+> Cache miss
+> rate
+> Time (s)
+> Static
+> Join
+> SRC 123
+
+Fig. 10: Dynamic lookahead adaptation under varying hint accuracy and state access latency. At time 120s, operator 1 starts changing the distribution of the state access key. At time 180s, the state access latency of the static join decreases. for future work is to dynamically tune the threshold at runtime based on the observed cache miss ratio. Fig. 10, showcases the responsiveness of our dynamic lookahead selection mechanism to fluctuations in hint accuracy and latency. Specifically, we use a synthetic query emulating a stateful join with a static table, which allows us to control the state access latency. We insert three UDF operators upstream of the join, all serving as candidate lookaheads. We allow the system to warm up for 1 minute. Keyed Prefetching initially selects the source operator as the lookahead ( ID = 0 ). At 120s, operator 1 starts changing the distribution of the state access key. The Prefetching Manager detects the drop in hint accuracy and shifts to lookahead 1. This transition causes a momentary spike in the cache miss ratio because no hints are sent for a few tuples during the switch. At 180s, the state access latency of the static join decreases, and the prefetching manager switches to lookahead 2, which now provides more timely hints. No increase in cache misses occurs here; some hints are duplicated during the shift, but no hints are missed. Overall, Keyed Prefetching quickly adjusts the lookahead operator to maintain a low cache miss ratio thanks to its lightweight marker-based coordination. The increase in cache misses occurs for operators that change the state access key distribution in a way that introduces new keys. An operator that only drops keys (e.g., a filter) would not increase cache misses but only lead to prefetching misses. TABLE I: Impact on CPU                         
+
+> Q13 Q18 Q19 Q20 YSB
+> Cache-LRU 61.5% 68.4% 69.8% 61.7% 63.6%
+> Cache-Clock 60.7% 68.9% 70.7% 62.5% 64.3%
+> AsyncIO & Cache 44.1% 42.5% 46.9% 30.4% 35.5%
+> Keyed Prefetching 43.5% 42.2% 46.3% 29.3% 35.0%
+
+Table I reports the CPU utilization using Apache Flink’s 
+
+busyTimeMsPerSecond metric. This metric accounts for the total time a thread is occupied, which includes cycles spent waiting for I/O or network communication. As mentioned in TABLE II: Network overhead of Keyed Prefetching over Cache-LRU                
+
+> Q13 Q18 Q19 Q20 YSB
+> Keyed Prefetching 2.2% 1.8% 2.4% 2.7% 8.7% 0
+> 200
+> 400
+> 600
+> Q13 Q18 Q19 Q20 YSB
+> Throughput (k rec/s)
+> Cache - LRU Cache-Clock
+> AsyncIO & Cache Keyed Prefetching
+
+Fig. 11: Maximum sustainable throughput Section VI(e), we set the input rate to the maximum sustain-able level that maintains utilization below 70%; consequently, the caching baselines operate near this limit. Asynchronous I/O and Keyed Prefetching exhibit significantly lower utilization at the same input rate as they overlap computation with state accesses. Table II reports the network overhead of Keyed Prefetching. While reported against Cache-LRU, these results generalize to all baselines as they share similar network profiles. Q18 exhibits the lowest overhead due to higher key skewness, translating to fewer prefetch hints. YSB has higher overhead as its data tuples are smaller and the prefetch hints have larger payloads. Finally, regarding memory usage, all approaches share the same memory budget. Keyed Prefetching dedicates a portion of this budget to the lightweight CMS frequency filters (40KB per lookahead subtask). Given the number of lookahead operators and their parallelism, this results in a total filter footprint of 640KB for Q13, Q18, and Q19, 1600KB for Q20, and 960KB for YSB. 
+
+Takeaway: Keyed Prefetching consistently outperforms the baselines regardless of filter tuning, exhibits low overhead, and dynamically adapts the lookahead operator at runtime. 
+
+D. Impact of Keyed Prefetching on Throughput 
+
+Fig. 11 shows the impact of the different approaches on query throughput for all queries. We report the maximum sustainable throughput the various techniques achieve with-out accumulating backpressure. Cache-LRU and Cache-Clock have similar throughput across queries. Asynchronous I/O improves throughput by overlapping state access with compu-tation. Keyed Prefetching has 1.01 − 1.2× higher throughput than Asynchronous I/O. 
+
+Takeaway: Keyed Prefetching not only minimizes latency but also can increase throughput by 1.01 − 2× compared to the baselines. VII. R ELATED WORK 
+
+Large State Management for Streams Recent works have studied how to manage large-scale state of streaming applica-tions and have pointed out possible performance problems [1], [6], [7]. These works motivated Keyed Prefetching, a novel query-plan-aware prefetching technique. Gadget [6] proposes a benchmark for evaluating state stores in stream processing. Rhino [7] is a novel technique for efficient state migration and fault recovery for states that exceed main memory. Meces [45] lowers latency during rescaling of stateful streaming jobs by prioritizing the migration of hot keys. 
+
+Prefetching Existing prefetching techniques rely on pre-dictable patterns, perform speculative fetches, and traditionally operate within the scope of a single processor’s memory accesses. Software prefetching techniques allow programmers or compilers to insert prefetch instructions [25]–[29]. Previous work has addressed database-specific prefetching (e.g., for joins [25] and B+trees [26], [27]). Keyed prefetching is specifically designed for streaming applications. It operates at the granularity of keys, utilizes timing information inherently available in streaming systems, and targets low tail latency. Additionally, it operates in a distributed environment by pass-ing information across operators in the query’s dataflow graph. FlowKV [14] proposes a persistent store tailored for stream-ing. It features a prefetching optimization for fetching win-dow state of queries using unaligned windows (i.e., windows triggering at different points in time) by predicting when a window will fire. This optimization is complementary to our prefetching technique, which targets state accesses that happen during the window upon a tuple’s arrival. Palpatine [46] is an in-memory application-level cache for distributed key-value data stores that employs data-mining techniques to predict future access patterns and prefetch data. Palpatine targets general storage workloads and employs prob-abilistic prefetching. Therefore, when a lookahead operator is available to provide exact hints, Keyed Prefetching is the preferred choice. In the absence of such an operator, specula-tive prefetching approaches like Palpatine could be employed, provided their mining overhead does not compromise real-time streaming constraints. EIRES [47] combines cost-guided prefetching and lazy evaluation to integrate remote static data into Complex Event Processing (CEP) workflows. As it targets scenarios where ac-cess is probabilistic, since most partial matches are discarded, it employs a cost model to decide whether to prefetch. Keyed Prefetching hides latency in cases where a lookahead operator providing exact hints exists, whereas EIRES is better suited for managing uncertain access patterns in event pattern matching. 
+
+Information passing Information passing—pushing knowl-edge learned in one part of a plan to guide work else-where—has been used to avoid wasted I/O and computation. Concretely, existing work has studied passing join-derived information from one operator/table to another to prefilter data earlier in the plan [48]–[51]. For example, Sideways-information passing [51] builds bloom filters on the build sides and pushes them into the upcoming pipelines to deal with the issue of expensive hash-table probes. Keyed Prefetching employs information passing to hide streaming state I/O. 
+
+Low-latency stream processing The problem of reducing latency in stream processing has been extensively studied [2], [3], [52]–[55]. For example, previous work aims to reduce latency caused by load imbalance [2], [53], and node failures and slowdowns [54]. ShadowSync [3] addresses the problem of increased latency caused by maintenance LSM-tree opera-tions. Our work addresses the problem of increased tail latency caused by accessing large states. 
+
+Caching Previous work [46], [56] uses a separate cache for prefetching and previously used elements, and based on cost analysis, balances the two. In contrast, our Timestamp-Aware Cache , designed specifically for streaming, unifies the two different state types by ordering both based on timestamps. Samza [18], a distributed system for stateful and fault-tolerant stream processing, reduces the latency of accessing the state of persistent key-value stores by placing a cache in front of the key-value store. This is similar to the caching baselines we compared Keyed Prefetching to (Section VI). VIII. C ONCLUSION 
+
+Stream-processing applications often execute time-critical tasks under strict latency SLOs. Any non-trivial streaming computation includes stateful operators. As data volume and query complexity grow, and applications transition to cloud environments, streaming systems must handle state that lives outside memory, on local storage, or in disaggregated back-ends. Streaming systems traditionally couple state access with the data path, placing expensive state access in the critical path of execution and inflating tail latency. We propose Keyed Prefetching, which decouples state access from the data path by extracting future access keys at upstream lookahead 
+
+operators and fetching the corresponding state as soon as the key is known, rather than when the tuple reaches the stateful operator. Keyed Prefetching is accurate— lookahead 
+
+operators send exact hints—and timely—it selects the looka-head whose hints arrive early enough to hide I/O. To use memory efficiently, we introduce Timestamp-Aware Caching, which jointly manages previously accessed and prefetched entries using event timestamps as a single ordering signal. In our evaluation, Keyed Prefetching reduces p999 latency by 
+
+1.34 − 11 ×, while maintaining or increasing throughput. IX. AI-G ENERATED CONTENT ACKNOWLEDGEMENT 
+
+OpenAI’s ChatGPT was used for proofreading. We asked the system to flag potential grammatical errors, typos, and non-idiomatic phrasing in the text and to propose fixes. REFERENCES [1] V. Kalavri and J. Liagouris, “In support of workload-aware streaming state management,” in Proceedings of the 12th USENIX Conference on Hot Topics in Storage and File Systems , ser. HotStorage ’20. USA: USENIX Association, 2020. [2] F. Kalim, A. Tantawi, S. Costache, and A. Youssef, “Reducing tail latencies in micro-batch streaming workloads,” in Proceedings of the 2017 Symposium on Cloud Computing , ser. SoCC ’17. New York, NY, USA: Association for Computing Machinery, 2017, p. 625. [Online]. Available: https://doi.org/10.1145/3127479.3134433 [3] S. Zhang, Q. Wang, Y. Kanemasa, J. Michaelis, J. Liu, and C. Pu, “Shadowsync: latency long tail caused by hidden synchronization in real-time lsm-tree based stream processing systems,” in Proceedings of the 23rd ACM/IFIP International Middleware Conference , ser. Middleware ’22. New York, NY, USA: Association for Computing Machinery, 2022, p. 281–294. [Online]. Available: https://doi.org/10. 1145/3528535.3565251 [4] A. Povzner and S. Hendricks, “Confluent: 99th percentile la-tency at scale with apache kafka,” https://www.confluent.io/blog/ configure-kafka-to-minimize-latency/, 2020, accessed October 15, 2025. [5] A. S. Gomes, J. a. Oliveirinha, P. Cardoso, and P. Bizarro, “Railgun: managing large streaming windows under mad requirements,” Proc. VLDB Endow. , vol. 14, no. 12, p. 3069–3082, Jul. 2021. [Online]. Available: https://doi.org/10.14778/3476311.3476384 [6] E. Asyabi, Y. Wang, J. Liagouris, V. Kalavri, and A. Bestavros, “A new benchmark harness for systematic and robust evaluation of streaming state stores,” in Proceedings of the Seventeenth European Conference on Computer Systems , ser. EuroSys ’22. New York, NY, USA: Association for Computing Machinery, 2022, p. 559–574. [Online]. Available: https://doi.org/10.1145/3492321.3519592 [7] B. Del Monte, S. Zeuch, T. Rabl, and V. Markl, “Rhino: Efficient management of very large distributed state for stream processing engines,” in Proceedings of the 2020 ACM SIGMOD International Conference on Management of Data , ser. SIGMOD ’20. New York, NY, USA: Association for Computing Machinery, 2020, p. 2471–2486. [Online]. Available: https://doi.org/10.1145/3318464.3389723 [8] M. Fragkoulis, P. Carbone, V. Kalavri, and A. Katsifodimos, “A survey on the evolution of stream processing systems,” The VLDB Journal , vol. 33, no. 2, p. 507–541, Nov. 2023. [Online]. Available: https://doi.org/10.1007/s00778-023-00819-8 [9] Q.-C. To, J. Soto, and V. Markl, “A survey of state management in big data processing systems,” The VLDB Journal , vol. 27, no. 6, p. 847–872, Dec. 2018. [Online]. Available: https://doi.org/10.1007/ s00778-018-0514-9 [10] Y. Mei, R. Xia, Z. Lan, K. Hu, L. Huang, P. Carbone, Y. Lei, V. Kalavri, H. Yin, and F. Wang, “Disaggregated state management in apache flink® 2.0,” Proc. VLDB Endow. , vol. 18, no. 12, p. 4846–4859, Sep. 2025. [Online]. Available: https://doi.org/10.14778/3750601.3750609 [11] N. Shi and S. Zeng, “Stream processing with high cardinality and large state at klaviyo,” https://www.ververica.com/blog/ stream-processing-with-high-cardinality-and-large-state-at-klaviyo, 2019, accessed October 15, 2025. [12] Cloudera, “Configuring rocksdb state backend,” https://docs-archive. cloudera.com/csa/1.2.0/configuration/topics/csa-rocksdb-config.html, 2020-2021, accessed October 15, 2025. [13] B. Cadonna and D. Borthakur, “Confluent: how to tune rocksdb for your kafka streams application,” https://www.confluent.io/blog/ how-to-tune-rocksdb-kafka-streams-state-stores-performance/, 2021, accessed October 15, 2025. [14] G. Lee, J. Maeng, J. Park, J. Seo, H. Cho, Y. Yang, T. Um, J. Lee, J. W. Lee, and B.-G. Chun, “Flowkv: A semantic-aware store for large-scale state management of stream processing engines,” in Proceedings of the Eighteenth European Conference on Computer Systems , ser. EuroSys ’23. New York, NY, USA: Association for Computing Machinery, 2023, p. 768–783. [Online]. Available: https://doi.org/10.1145/3552326.3567493 [15] P. Carbone, S. Ewen, G. F´ ora, S. Haridi, S. Richter, and K. Tzoumas, “State management in apache flink: consistent stateful distributed stream processing,” Proc. VLDB Endow. , vol. 10, no. 12, p. 1718–1729, Aug. 2017. [Online]. Available: https://doi.org/10.14778/3137765.3137777 [16] M. Armbrust, T. Das, J. Torres, B. Yavuz, S. Zhu, R. Xin, A. Ghodsi, I. Stoica, and M. Zaharia, “Structured streaming: A declarative api for real-time applications in apache spark,” in Proceedings of the 2018 International Conference on Management of Data , ser. SIGMOD ’18. New York, NY, USA: Association for Computing Machinery, 2018, p. 601–613. [Online]. Available: https://doi.org/10.1145/3183713.3190664 [17] A. Kafka, “Configuring a streams application,” https://kafka.apache.org/ 41/documentation/streams/developer-guide/config-streams.html, 2025, accessed October 15, 2025. [18] S. A. Noghabi, K. Paramasivam, Y. Pan, N. Ramesh, J. Bringhurst, I. Gupta, and R. H. Campbell, “Samza: stateful scalable stream processing at linkedin,” vol. 10, no. 12, p. 1634–1645, Aug. 2017. [Online]. Available: https://doi.org/10.14778/3137765.3137770 [19] M. Zaharia, T. Das, H. Li, T. Hunter, S. Shenker, and I. Stoica, “Discretized streams: fault-tolerant streaming computation at scale,” in Proceedings of the Twenty-Fourth ACM Symposium on Operating Systems Principles , ser. SOSP ’13. New York, NY, USA: Association for Computing Machinery, 2013, p. 423–438. [Online]. Available: https://doi.org/10.1145/2517349.2522737 [20] J. Q. N. Kruber, “Getting into low-latency gears with apache flink - part one,” https://flink.apache.org/2022/05/18/ getting-into-low-latency-gears-with-apache-flink-part-one/, 2022, accessed October 15, 2025. [21] S. Dong, A. Kryczka, Y. Jin, and M. Stumm, “Rocksdb: Evolution of development priorities in a key-value store serving large-scale applications,” ACM Trans. Storage , vol. 17, no. 4, Oct. 2021. [Online]. Available: https://doi.org/10.1145/3483840 [22] A. Flink, “Configuration,” https://nightlies.apache.org/flink/ flink-docs-release-2.1/docs/deployment/config/, 2025, accessed October 15, 2025. [23] RocksDB, “Configuration,” https://github.com/facebook/rocksdb/wiki/ Block-Cache, 2023, accessed October 15, 2025. [24] A. Flink, “Asynchronous i/o for external data access,” https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/dev/ datastream/operators/asyncio/, 2025, accessed October 15, 2025. [25] S. Chen, A. Ailamaki, P. B. Gibbons, and T. C. Mowry, “Improving hash join performance through prefetching,” ACM Trans. Database Syst. , vol. 32, no. 3, p. 17–es, Aug. 2007. [Online]. Available: https://doi.org/10.1145/1272743.1272747 [26] S. Chen, P. B. Gibbons, and T. C. Mowry, “Improving index performance through prefetching,” in Proceedings of the 2001 ACM SIGMOD International Conference on Management of Data , ser. SIGMOD ’01. New York, NY, USA: Association for Computing Machinery, 2001, p. 235–246. [Online]. Available: https://doi.org/10.1145/375663.375688 [27] S. Chen, P. B. Gibbons, T. C. Mowry, and G. Valentin, “Fractal prefetching b+-trees: optimizing both cache and disk performance,” in Proceedings of the 2002 ACM SIGMOD International Conference on Management of Data , ser. SIGMOD ’02. New York, NY, USA: Association for Computing Machinery, 2002, p. 157–168. [Online]. Available: https://doi.org/10.1145/564691.564710 [28] C.-K. Luk and T. C. Mowry, “Compiler-based prefetching for recursive data structures,” in Proceedings of the Seventh International Conference on Architectural Support for Programming Languages and Operating Systems , ser. ASPLOS VII. New York, NY, USA: Association for Computing Machinery, 1996, p. 222–233. [Online]. Available: https://doi.org/10.1145/237090.237190 [29] T. C. Mowry, M. S. Lam, and A. Gupta, “Design and evaluation of a compiler algorithm for prefetching,” SIGPLAN Not. , vol. 27, no. 9, p. 62–73, Sep. 1992. [Online]. Available: https://doi.org/10.1145/143371. 143488 [30] L. Mai, K. Zeng, R. Potharaju, L. Xu, S. Suh, S. Venkataraman, P. Costa, T. Kim, S. Muthukrishnan, V. Kuppa, S. Dhulipalla, and S. Rao, “Chi: A scalable and programmable control plane for distributed stream processing systems,” Proc. VLDB Endow. ,vol. 11, no. 10, pp. 1303–1316, 2018. [Online]. Available: http: //www.vldb.org/pvldb/vol11/p1303-mai.pdf [31] A. Clauset, C. Shalizi, and M. Newman, “Power-law distributions in empirical data,” SIAM Review , vol. 51, 06 2007. [32] G. Einziger, R. Friedman, and B. Manes, “Tinylfu: A highly efficient cache admission policy,” ACM Trans. Storage , vol. 13, no. 4, Nov. 2017. [Online]. Available: https://doi.org/10.1145/3149371 [33] P. Carbone, G. F´ ora, S. Ewen, S. Haridi, and K. Tzoumas, “Lightweight asynchronous snapshots for distributed dataflows,” 2015. [Online]. Available: https://arxiv.org/abs/1506.08603 [34] Z. Wang, S. Ni, A. Kumar, and C. Li, “Fries: Fast and consistent runtime reconfiguration in dataflow systems with transactional guarantees,” Proc. VLDB Endow. , vol. 16, no. 2, pp. 256–268, 2022. [Online]. Available: https://www.vldb.org/pvldb/vol16/p256-wang.pdf [35] T. Akidau, R. Bradshaw, C. Chambers, S. Chernyak, R. J. Fern´ andez-Moctezuma, R. Lax, S. McVeety, D. Mills, F. Perry, E. Schmidt, and S. Whittle, “The dataflow model: a practical approach to balancing correctness, latency, and cost in massive-scale, unbounded, out-of-order data processing,” Proc. VLDB Endow. , vol. 8, no. 12, p. 1792–1803, Aug. 2015. [Online]. Available: https://doi.org/10.14778/2824032.2824076 [36] P. Carbone, A. Katsifodimos, S. Ewen, V. Markl, S. Haridi, and K. Tzoumas, “Apache Flink™: Stream and Batch Processing in a Single Engine,” IEEE Data Eng. Bull. , vol. 38, pp. 28–38, 2015. [Online]. Available: http://sites.computer.org/debull/A15dec/p28.pdf [37] J. Karimov, T. Rabl, A. Katsifodimos, R. Samarev, H. Heiskanen, and V. Markl, “Benchmarking distributed stream data processing systems,” in 34th IEEE International Conference on Data Engineering, ICDE 2018, Paris, France, April 16-19, 2018 . IEEE Computer Society, 2018, pp. 1507–1518. [Online]. Available: https://doi.org/10.1109/ICDE.2018. 00169 [38] P. Agnihotri, B. Koldehofe, R. Heinrich, C. Binnig, and M. Luthra, “Pdsp-bench: A benchmarking system for parallel and distributed stream processing,” 2025. [Online]. Available: https://arxiv.org/abs/2504.10704 [39] A. Beam, “Nexmark benchmark suite,” https://beam.apache.org/ documentation/sdks/java/testing/nexmark/, accessed October 15, 2025. [40] P. A. Tucker, K. Tufte, V. Papadimos, and D. Maier, “Nexmark – a benchmark for queries over data streams draft,” 2002. [Online]. Available: https://api.semanticscholar.org/CorpusID:18302897 [41] S. Li, P. Gerver, J. MacMillan, D. Debrunner, W. Marshall, and K.-L. Wu, “Challenges and experiences in building an efficient apache beam runner for ibm streams,” Proc. VLDB Endow. ,vol. 11, no. 12, p. 1742–1754, Aug. 2018. [Online]. Available: https://doi.org/10.14778/3229863.3229864 [42] V. Kalavri, J. Liagouris, M. Hoffmann, D. Dimitrova, M. Forshaw, and T. Roscoe, “Three steps is all you need: fast, accurate, automatic scaling decisions for distributed streaming dataflows,” in Proceedings of the 13th USENIX Conference on Operating Systems Design and Implementation ,ser. OSDI’18. USA: USENIX Association, 2018, p. 783–798. [43] S. Chintapalli, D. Dagit, B. Evans, R. Farivar, T. Graves, M. Holder-baugh, Z. Liu, K. Nusbaum, K. Patil, B. J. Peng, and P. Poulosky, “Benchmarking streaming computation engines: Storm, flink and spark streaming,” in 2016 IEEE International Parallel and Distributed Pro-cessing Symposium Workshops (IPDPSW) , 2016, pp. 1789–1792. [44] RocksDB, “Tuning guide,” https://github.com/facebook/rocksdb/wiki/ RocksDB-Tuning-Guide, 2021, accessed October 15, 2025. [45] R. Gu, H. Yin, W. Zhong, C. Yuan, and Y. Huang, “Meces: Latency-efficient rescaling via prioritized state migration for stateful distributed stream processing systems,” in 2022 USENIX Annual Technical Conference (USENIX ATC 22) . Carlsbad, CA: USENIX Association, Jul. 2022, pp. 539–556. [Online]. Available: https: //www.usenix.org/conference/atc22/presentation/gu-rong [46] S. Esteves, J. N. Silva, and L. Veiga, “ Palpatine: Mining Frequent Sequences for Data Prefetching in NoSQL Distributed Key-Value Stores ,” in 2020 IEEE 19th International Symposium on Network Computing and Applications (NCA) . Los Alamitos, CA, USA: IEEE Computer Society, Nov. 2020, pp. 1–10. [Online]. Available: https://doi.ieeecomputersociety.org/10.1109/NCA51143.2020.9306736 [47] B. Zhao, H. van der Aa, T. Nguyen, N. Hung, and M. Weidlich, “Eires: Efficient integration of remote data in event stream processing,” 06 2021, pp. 2128–2141. [48] M. Stoian, A. Zimmerer, S. Krid, A. L. Ngom, J. Ding, T. Kraska, and A. Kipf, “Parachute: Single-pass bi-directional information passing,” 
+
+Proc. VLDB Endow. , vol. 18, no. 10, p. 3299–3311, Sep. 2025. [Online]. Available: https://doi.org/10.14778/3748191.3748196 [49] J. Zhu, N. Potti, S. Saurabh, and J. M. Patel, “Looking ahead makes query plans robust: making the initial case with in-memory star schema data warehouse workloads,” vol. 10, no. 8, p. 889–900, Apr. 2017. [Online]. Available: https://doi.org/10.14778/3090163.3090167 [50] T. Schmidt, A. Kipf, D. Horn, G. Saxena, and T. Kraska, “Predicate caching: Query-driven secondary indexing for cloud data warehouses,” in Companion of the 2024 International Conference on Management of Data , ser. SIGMOD ’24. New York, NY, USA: Association for Computing Machinery, 2024, p. 347–359. [Online]. Available: https://doi.org/10.1145/3626246.3653395 [51] Z. G. Ives and N. E. Taylor, “Sideways information passing for push-style query processing,” in Proceedings of the 2008 IEEE 24th International Conference on Data Engineering , ser. ICDE ’08. USA: IEEE Computer Society, 2008, p. 774–783. [Online]. Available: https://doi.org/10.1109/ICDE.2008.4497486 [52] M. H. Javed, X. Lu, and D. K. Panda, “Cutting the tail: Designing high performance message brokers to reduce tail latencies in stream pro-cessing,” in 2018 IEEE International Conference on Cluster Computing (CLUSTER) , 2018, pp. 223–233. [53] G. Du and I. Gupta, “New techniques to curtail the tail latency in stream processing systems,” in Proceedings of the 4th Workshop on Distributed Cloud Computing , ser. DCC ’16. New York, NY, USA: Association for Computing Machinery, 2016. [Online]. Available: https://doi.org/10.1145/2955193.2955206 [54] G. Rosinosky, F. Schmidt, O. Bodunov, C. Fetzer, A. Martin, and E. Rivi` ere, “Active replication for latency-sensitive stream processing in apache flink,” in 2021 40th International Symposium on Reliable Distributed Systems (SRDS) , 2021, pp. 56–66. [55] S. Lee, Y. Jeong, K. Park, G. Jung, and S. Park, “zstream: towards a low latency micro-batch streaming system,” Cluster Computing ,vol. 26, no. 5, p. 2773–2787, Oct. 2022. [Online]. Available: https://doi.org/10.1007/s10586-022-03758-1 [56] R. H. Patterson, G. A. Gibson, E. Ginting, D. Stodolsky, and J. Zelenka, “Informed prefetching and caching,” SIGOPS Oper. Syst. Rev. , vol. 29, no. 5, p. 79–95, Dec. 1995. [Online]. Available: https://doi.org/10.1145/224057.224064

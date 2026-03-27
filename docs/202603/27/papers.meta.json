@@ -1,0 +1,65 @@
+{
+  "label": "2026-03-27",
+  "date": "2026-03-27",
+  "generated_at": "2026-03-27T20:08:01",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202603/27/2603.25067v1-ebeemetrics-an-ebpf-based-library-framework-for-feedback-free-observability-of-qos-metrics",
+      "section": "deep",
+      "title_en": "eBeeMetrics: An eBPF-based Library Framework for Feedback-free Observability of QoS Metrics",
+      "authors": "Muntaka Ibnath, Mohammadreza Rezvani, Daniel Wong",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25067v1",
+      "score": "8.0",
+      "evidence": "基于eBPF的框架，用于观测延迟和吞吐量等应用级QoS指标",
+      "tldr": "许多系统管理运行时依赖QoS指标（如尾延迟和吞吐量）作为反馈，但这些指标难以通过硬件计数器或内核直接观测，导致应用插桩复杂且开销大。本文提出eBeeMetrics，一个基于eBPF的库框架，通过系统调用等内核可观测事件准确推导应用级指标。它实现了与真实QoS指标的高度相关性，且无需修改应用代码，为系统管理提供了低开销、解耦的观测方案。",
+      "tags": "query:netmes",
+      "abstract_en": "Many system management runtimes (SMRs), such as resource management and power management techniques, rely on quality-of-service (QoS) metrics, such as tail latency or throughput, as feedback. These QoS metrics are generally neither observable with hardware performance counters nor directly observable within the OS kernel. This introduces complexity and overhead in instrumenting the application and integrating QoS performance metric feedback with many management runtimes. To bridge this gap, we introduced eBeeMetrics, an eBPF-based library framework to accurately observe application-level metrics derived from only eBPF-observable events, such as system calls. eBeeMetrics can be used as a drop-in replacement to decouple system management runtimes from QoS metric feedback reporting, or can supplement existing QoS metrics to better identify server-side dynamics. eBeeMetrics achieves a strong correlation with real-world measured throughput and latency metrics across various latency-sensitive workloads. The eBeeMetrics tool is open-source; the source code is available at: https://github.com/Ibnathism/eBeeMetrics.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/27/2603.19445v1-process-faster-pay-less-functional-isolation-for-stream-processing",
+      "section": "quick",
+      "title_en": "Process Faster, Pay Less: Functional Isolation for Stream Processing",
+      "authors": "Eleni Zapridou, Michael Koepf, Panagiotis Sioulas, Ioannis Mytilinis, Anastasia Ailamaki",
+      "date": "2026-03-19",
+      "pdf": "https://arxiv.org/pdf/2603.19445v1",
+      "score": "7.0",
+      "evidence": "高吞吐量实时数据流的流处理系统",
+      "tldr": "FunShare 是一款旨在平衡资源效率与性能的流处理系统。针对传统引擎在资源隔离（成本高）与工作共享（干扰大）之间的权衡难题，FunShare 通过根据性能特征动态分组查询，实现了功能隔离。它利用自适应优化框架监控执行指标并实时重构执行计划，在减少冗余计算、降低基础设施成本的同时，确保了各查询的吞吐量不受影响。",
+      "tags": "query:netmes",
+      "abstract_en": "Concurrent workloads often extract insights from high-throughput, real-time data streams. Existing stream processing engines isolate each query's resources, ensuring robust performance but incurring high infrastructure costs. In contrast, sharing work reduces the amount of necessary resources but introduces inter-query interference, leading to performance degradation for some queries. We introduce FunShare, a stream-processing system that improves resource efficiency without compromising performance by dynamically grouping queries based on their performance characteristics. FunShare strategically relaxes query interdependencies and minimizes redundant computation while preserving individual query performance. It achieves this by using an adaptive optimization framework that monitors execution metrics, accurately estimates computation overlaps, and reconfigures execution plans on the fly in response to changes in the underlying data streams. Our evaluation demonstrates that FunShare minimizes resource consumption compared to isolated execution while maintaining or improving throughput for all queries.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/27/2603.19890v1-low-latency-stateful-stream-processing-through-timely-and-accurate-prefetching",
+      "section": "quick",
+      "title_en": "Low-Latency Stateful Stream Processing through Timely and Accurate Prefetching",
+      "authors": "Eleni Zapridou, Anastasia Ailamaki",
+      "date": "2026-03-20",
+      "pdf": "https://arxiv.org/pdf/2603.19890v1",
+      "score": "6.0",
+      "evidence": "针对实时大数据量的低延迟有状态流处理",
+      "tldr": "针对关键任务流处理应用中大规模状态访问导致的延迟问题，本文提出了一种名为“Keyed Prefetching”的预取技术。该技术通过在查询计划的上游算子提前提取未来访问键，将状态访问与数据路径解耦，从而在元组到达前将状态加载至内存。配合“时间戳感知缓存”策略，该方法在不牺牲吞吐量的前提下，显著降低了实时查询的延迟。",
+      "tags": "query:netmes",
+      "abstract_en": "Mission-critical applications often run \"forever\" and process large data volumes in real time while demanding low latency. To handle the large state of these applications, modern streaming engines rely on key-value stores and store state on local storage or remotely, but accessing such state inflates latency. As today's engines tightly couple the data path with state I/O, a tuple triggers state access only when it reaches a stateful operator, placing I/O on the critical path and stalling the CPU. However, the keys used to access the state are frequently known earlier in the query plan. Building on this insight, we propose Keyed Prefetching, which decouples the data path from state access by extracting future access keys at upstream operators and proactively staging the corresponding state in memory before tuples arrive. This overlaps I/O with ongoing computation and hides the latency of large-state accesses. We pair Keyed Prefetching with Timestamp-Aware Caching, a cache-eviction policy that jointly manages previously accessed and prefetched entries to use memory efficiently. Together, these techniques reduce latency for long-running, real-time queries without sacrificing throughput.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/27/2603.23852v1-apisensor-robust-discovery-of-web-api-from-runtime-traffic-logs",
+      "section": "quick",
+      "title_en": "APISENSOR: Robust Discovery of Web API from Runtime Traffic Logs",
+      "authors": "Yanjing Yang, Chenxing Zhong, Ke Han, Zeru Cheng, Jinwei Xu, Xin Zhou, He Zhang, Bohan Liu",
+      "date": "2026-03-25",
+      "pdf": "https://arxiv.org/pdf/2603.23852v1",
+      "score": "6.0",
+      "evidence": "从运行时流量日志中推断API",
+      "tldr": "针对LLM智能体依赖API但文档常缺失或不一致的问题，本文提出APISENSOR框架。该框架采用黑盒无监督方法，通过对运行时流量进行结构化分析、去噪、归一化及两阶段图聚类，从复杂的混合流量中精准恢复API。实验表明，APISENSOR在准确率和鲁棒性上显著优于现有方法，并能发现真实应用中的文档不一致问题。",
+      "tags": "query:netmes",
+      "abstract_en": "Large Language Model (LLM)-based agents increasingly rely on APIs to operate complex web applications, but rapid evolution often leads to incomplete or inconsistent API documentation. Existing work falls into two categories: (1) static, white-box approaches based on source code or formal specifications, and (2) dynamic, black-box approaches that infer APIs from runtime traffic. Static approaches rely on internal artifacts, which are typically unavailable for closed-source systems, and often over-approximate API usage, resulting in high false-positive rates. Although dynamic black-box API discovery applies broadly, its robustness degrades in complex environments where shared collection points aggregate traffic from multiple applications. To improve robustness under mixed runtime traffic, we propose APISENSOR, a black-box API discovery framework that reconstructs application APIs unsupervised. APISENSOR performs structured analysis over complex traffic, combining traffic denoising and normalization with a graph-based two-stage clustering process to recover accurate APIs. We evaluated APISENSOR across six web applications using over 10,000 runtime requests with simulated mixed-traffic noise. Results demonstrate that APISENSOR significantly improves discovery accuracy, achieving an average Group Accuracy Precision of 95.92% and an F1-score of 94.91%, outperforming state-of-the-art methods. Across different applications and noise settings, APISENSOR achieves the lowest performance variance and at most an 8.11-point FGA drop, demonstrating the best robustness among 10 baselines. Ablation studies confirm that each component is essential. Furthermore, APISENSOR revealed API documentation inconsistencies in a real application, later confirmed by community developers.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -6,26 +6,33 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 20:22:40 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 20:07:49 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：0
-- 速读区：1
+- 本次总论文数：4
+- 精读区：1
+- 速读区：3
 
 ### 今日简报（AI）
-今日聚焦网络低延迟技术，完成了 L4S 架构在 ns-3 模拟器中的实现与性能评估。
-该研究为超低延迟网络传输提供了关键仿真工具，验证了 L4S 在维持高吞吐的同时显著降低排队延迟的效果。
-建议关注实时通信与网络协议仿真的开发者参考此实现，以探索下一代互联网的低延迟优化方案。
-- 详情：[/202603/26/README](/202603/26/README)
+今日聚焦系统可观测性与流处理优化，重点解析了基于 eBPF 的无反馈 QoS 指标监控框架 eBeeMetrics。
+研究揭示了通过功能隔离与精准预取可显著降低流处理延迟与成本，并
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [eBeeMetrics: An eBPF-based Library Framework for Feedback-free Observability of QoS Metrics](/202603/27/2603.25067v1-ebeemetrics-an-ebpf-based-library-framework-for-feedback-free-observability-of-qos-metrics)  
+   标签：评分：8.0/10、query:netmes
+   evidence：基于eBPF的框架，用于观测延迟和吞吐量等应用级QoS指标
 
 ### 速读区论文标签
-1. [Implementing the L4S Architecture in the ns-3 Simulator](/202603/26/2603.20166v1-implementing-the-l4s-architecture-in-the-ns-3-simulator)  
+1. [Process Faster, Pay Less: Functional Isolation for Stream Processing](/202603/27/2603.19445v1-process-faster-pay-less-functional-isolation-for-stream-processing)  
+   标签：评分：7.0/10、query:netmes
+   evidence：高吞吐量实时数据流的流处理系统
+2. [Low-Latency Stateful Stream Processing through Timely and Accurate Prefetching](/202603/27/2603.19890v1-low-latency-stateful-stream-processing-through-timely-and-accurate-prefetching)  
    标签：评分：6.0/10、query:netmes
-   evidence：用于低延迟的精确ECN反馈和网络模拟
+   evidence：针对实时大数据量的低延迟有状态流处理
+3. [APISENSOR: Robust Discovery of Web API from Runtime Traffic Logs](/202603/27/2603.23852v1-apisensor-robust-discovery-of-web-api-from-runtime-traffic-logs)  
+   标签：评分：6.0/10、query:netmes
+   evidence：从运行时流量日志中推断API
 
 
 <div class="dpr-home-promo-card">

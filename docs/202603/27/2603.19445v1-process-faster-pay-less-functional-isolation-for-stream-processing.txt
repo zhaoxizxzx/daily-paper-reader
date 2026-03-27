@@ -1,0 +1,795 @@
+Title: Process Faster, Pay Less: Functional Isolation for Stream Processing
+
+URL Source: https://arxiv.org/pdf/2603.19445v1
+
+Published Time: Mon, 23 Mar 2026 00:13:37 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Process Faster, Pay Less: Functional Isolation for Stream Processing 
+
+Eleni Zapridou ∗, Michael Koepf †, Panagiotis Sioulas ‡, Ioannis Mytilinis ‡, Anastasia Ailamaki ∗∗EPFL, Switzerland †TU Wien, Austria ‡Oracle, Switzerland 
+
+{name.surname }@epfl.ch, michael.koepf@student.tuwien.ac.at, {name.surname }@oracle.com 
+
+Abstract —Concurrent workloads often extract insights from high-throughput, real-time data streams. Existing stream pro-cessing engines isolate each query’s resources, ensuring robust performance but incurring high infrastructure costs. In con-trast, sharing work reduces the amount of necessary resources but introduces inter-query interference, leading to performance degradation for some queries. We introduce FunShare, a stream-processing system that improves resource efficiency without compromising performance by dynamically grouping queries based on their performance characteristics. FunShare strategically relaxes query interdepen-dencies and minimizes redundant computation while preserving individual query performance. It achieves this by using an adaptive optimization framework that monitors execution met-rics, accurately estimates computation overlaps, and reconfigures execution plans on the fly in response to changes in the under-lying data streams. Our evaluation demonstrates that FunShare minimizes resource consumption compared to isolated execution while maintaining or improving throughput for all queries. 
+
+Index Terms —Stream processing, Sharing, Multi-query opti-mization, Real-time 
+
+I. I NTRODUCTION 
+
+Organizations increasingly rely on real-time data streams to make rapid decisions in applications ranging from user-experience customization to service monitoring and au-tonomous driving. Streaming applications have stringent per-formance requirements while processing data with highly variable distributions and rates. Maintaining high Quality of Service (QoS) requires that streaming queries maintain continuous access to the necessary compute resources. How-ever, as applications grow in complexity and demand deeper insights from data, the increasing volume of queries creates a challenging trade-off between resource consumption and QoS. At one end of the design spectrum, existing Stream Pro-cessing Engines (SPEs) adopt resource isolation [1]–[4]. By allocating dedicated resources to each query, they meet QoS requirements and ensure predictable performance. However, this approach comes at the cost of excessive resource con-sumption. Moreover, resource isolation leads to poor scala-bility, as the infrastructure must grow proportionally with the number of queries, resulting in very high annual costs [5]. On the other end of the spectrum, work sharing has proven to be an effective way to increase scalability and reduce resource usage in highly concurrent workloads [6]–[8]. For instance, in Microsoft’s data centers, 45% of the jobs share 
+
+> The work was done while Koepf, Sioulas, and Mytilinis were at EPFL.
+
+common computations that, if shared, could reduce machine hours by up to 40% [5], [9]. In work sharing, multiple queries are processed using a single plan that executes common oper-ators only once. While this reduces overall resource demand, it comes at the cost of QoS. Since queries are processed with a common plan, their performance becomes interdependent, which can adversely affect some queries—especially those with strict requirements. For example, consider two filter– join queries Q1, Q2 that share the same join but differ in selectivity: Q1 is highly selective, whereas Q2 processes all the tuples. In shared execution, both queries observe the same throughput, potentially violating the QoS requirements of the highly selective Q1 .While previous research has explored work-sharing tech-niques for SPEs, it focuses on optimizing aggregate data processing throughput and overlooks the effect of sharing on the QoS of individual queries [10]–[12]. As a result, these techniques are unsuitable for streaming applications with strict QoS requirements. To enable resource sharing while mitigating the adverse effects of query interdependencies, we adopt the principle of functional isolation [13]: “systems should cross-optimize queries only if individual performance is not compromised.” Prior work [13] shows that functional isolation can be achieved in batch analytics by carefully forming sharing groups of queries, reducing CPU utilization without degrading the performance of any individual query. However, the partitioning-once approach of queries into sharing groups [13] is insufficient for streaming environments due to the dynamic, unpredictable nature of real-time data streams. Both the input rate and distribution of the underlying stream can be unpredictable, causing the efficiency of aparticular group’s plan—as well as the performance of each query in isolation—to fluctuate over time. Ensuring functional isolation in such an environment requires: i) accurately cap-turing the trends of the streams and the potential benefits/risks of grouping, ii) continuously adjusting grouping decisions at runtime, and iii) reconfiguring the system with minimal cost. By doing so, we can achieve both resource efficiency and improved QoS simultaneously. We propose FunShare, a stream processing system that uses functional isolation in order to minimize resource consumption and, at the same time, guarantee high QoS for individual queries. FunShare organizes queries into dynamic sharing groups —sets of queries that can safely share work without 
+
+> arXiv:2603.19445v1 [cs.DB] 19 Mar 2026
+
+compromising performance isolation at a given moment— and identifies the minimum amount of compute resources to assign to each group such that each query’s QoS requirements are met. FunShare employs a novel mechanism that leverages runtime information to accurately capture i) data shifts and ii) the benefit/risk of grouping. Hence, it can incrementally and safely refine sharing groups, optimizing resource utilization while giving the impression of isolated execution. This paper makes the following contributions:  
+
+> •
+
+We define the functional isolation principle for streams; Resource consumption is minimized while preserving high QoS for individual queries. This way, we show that sometimes there is free lunch and stream processing becomes more scalable and affordable at no cost.  
+
+> •
+
+We propose an adaptive mechanism that continuously (re-)partitions streaming queries into sharing groups, enabling them to execute with significantly fewer re-sources without performance penalties compared to iso-lated execution. Our experiments show that FunShare uses 1 − 10 .7× fewer resources than isolated execution while achieving the same or higher throughput for all queries.  
+
+> •
+
+The key enabler of our solution is a novel performance estimator that leverages runtime information to accurately predict the performance of hypothetical group formations. In contrast to existing solutions, the estimator scales to the number of groups and is robust to changes in the underlying stream. II. T HE TRIANGLE OF CONCURRENCY ,QUALITY -OF -S ERVICE AND RESOURCES 
+
+Business functions or applications are often time-sensitive, requiring rapid insights from real-time events. At the same time, not all queries are of the same importance, nor do they exhibit the same performance characteristics. For ex-ample, in a self-driving vehicle manufacturer scenario, we can consider two types of queries: (i) Alerts , which filter a single stream of sensor data, are lightweight to compute but safety-critical, and (ii) A/B testing for evaluating the driving software/hardware, which joins multiple streams, is heavier to compute but enjoys relaxed responsiveness constraints. As multiple diverse operations may be executed concurrently 
+
+on a shared infrastructure, interference effects can violate individual query requirements. To quantify this effect, we use the notion of Quality-of-Service (QoS) .
+
+Definition 1 (Quality of Service) . The degree to which indi-vidual query performance requirements are satisfied. 
+
+In our example, consider the case where an alert for hitting a pedestrian is not produced on time because resources are busy with A/B testing. This is a low QoS scenario. In this section, we present the interplay among (i) concur-rency, (ii) QoS, and (iii) resources, and explain why existing approaches fall short in dynamic streaming environments. 
+
+A. Resource Isolation: The Expensive Standard 
+
+A streaming query corresponds to a dataflow—usually in the form of a directed acyclic graph—where nodes represent operators and edges represent data streams. Each operator has an input and an output queue. If the operator cannot sustain the input rate, it applies backpressure, and tuples accumulate in the output queue of the upstream operator. Backpressure can propagate up to the source; there, tuples are typically stored and processed with a delay. If this effect persists for a prolonged period, latency grows unboundedly. To cope with such situations and sustain the data velocity, distributed stream processing systems employ a data-parallel approach. Each operator has multiple instances, called sub-tasks , and each subtask processes a partition of the stream. Increasing the number of subtasks results in higher parallelism and higher processing throughput. Different SPEs use slightly different mechanisms to allocate memory and cores for each subtask. For example, Apache Flink allows users to specify the number of task slots per worker, with each slot receiving an equal share of the allocated memory [14]. Each task slot gets assigned at most one subtask from each operator. Kafka Streams uses stream tasks, the number of which per worker is configurable, as the units of its parallelism model [4]. In this work, we focus on compute resources. To abstract away implementation specifics, for the remainder of the paper, we use the following definition of resources :
+
+Definition 2 (Resources) . The total number of subtasks for computing the dataflow of a streaming query. 
+
+The amount of required resources is determined a priori on a per-query basis, in a manner that satisfies QoS requirements while minimizing overprovisioning as much as possible. To deal with unpredictable fluctuations both in the input rate and data distribution, SPEs rely on autoscaling features [15]–[18] to adjust resources to the demand and adaptive partitioning to dynamically balance load and mitigate skew [19], [20]. However, in reality, streaming infrastructures do not execute a single query but thousands of concurrent queries [9], [21]. Existing SPEs favor QoS and enforce resource isolation. Maintaining each query’s QoS requires provisioning sufficient infrastructure to meet the aggregate resource reservations. Hence, resource allocation is managed separately for each query, with queries executing in isolation using dedicated resources. Then, concurrency directly translates into increased monetary and maintenance costs. Therefore, existing SPEs maintain high-standard QoS, by increasing resources and monetary costs proportionally to query concurrency. B. Taming Concurrency using Work Sharing 
+
+An alternative to accumulating resource allocations is to reduce redundant processing across queries and, thus, the resource requirements using work sharing. Work-sharing sys-tems process multiple queries at once (Fig. 1) by leveraging (i) a global plan and (ii) the Data–Query model [22] .…       
+
+> FROM Auction a, Person p
+> WHERE a.seller = p.id AND
+> a.reservePrice > 1000 AND
+> p.state = ‘OR’;
+> …
+> FROM Auction a, Person p
+> WHERE a.seller = p.id AND
+> a.item = ‘Painting’ AND
+> p.firstName = ‘Alice’;
+> personId reservePrice item id
+> 11500 Painting 1
+> 22000 Watch 2
+> 32500 Vase 3
+> state firstName id
+> NY Alice 1
+> OR Alice 2
+
+σ σ    
+
+> Query -set personId id
+> Q1, Q2, Q3 11
+> Q1, Q2 22
+> Q1, Q2 33
+> Query -set id
+> Q3 1
+> Q1, Q2, Q3 2
+> ⨝
+> Query -set pId aId
+> Q3 11
+> Q1, Q2 22
+> Q1, Q2 22Q3 11
+> Q1, Q2 Q3
+> Op 1 Op 2
+> Op 3
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> Auction stream Person stream
+
+Fig. 1: Sharing using a global plan and the Data–Query model 
+
+Global plan: The global plan expresses sharing opportu-nities among different queries. It is a directed acyclic graph (DAG) of operators that process tuples for one or more queries, and multicast their results to one or more downstream operators. For example, Fig. 1 shows part of the global plan for queries Q1, Q2, and Q3. Shared operators evaluate filters (op. 1 and 2) and execute the join (op. 3) for all queries at once. The join result is routed to different downstream operators for Q1 and Q2, and Q3, respectively. Prior work shows that global plans can share operators such as scan, filter, join, sort, top-N, and group-by [22], as well as window operators [23]. By processing each operator of the global plan only once, the system shares work across queries, reducing both overall computation and required resources. 
+
+Data–Query model: The Data–Query model is a key technique for sharing operators between queries with different selection predicates [6], [11], [12], [22]. It annotates each tuple with a query set indicating which queries the tuple contributes to. Shared operators in the global plan process both the actual tuples and the query sets. The query set tracks membership for intermediate results, controls the routing of tuples, and helps eliminate redundant tuples early. Fig. 1 shows the query sets for intermediate results. In operator 1, tuples are tagged with query sets based on the predicates. The auction with id 1 satisfies all predicates and has all three queries in the query set, whereas the other two fail the predicate item = ”Painting” and exclude Q3. In the join, query sets are cross-checked; hence, the tuple with auction id = 1 retains only Q3 in its query set, and the tuple with id = 3 is eliminated. Finally, join results are routed to downstream operators based on their query sets. Using the Data-Query model: (i) the global plan can share work on tuples common across some, but not all, queries, and (ii) operators can immediately drop tuples that do not belong to any query. 
+
+C. The Challenges of QoS-Friendly Sharing 
+
+Although work sharing reduces overall resource demand, it does not provide guarantees about individual query perfor-mance: some queries will experience speedups, but others— particularly lightweight queries that would run quickly in isolation—may be slowed down. In the example from Section II-A, this translates to worse QoS for the critical alerts. 0     
+
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> 40
+> 0200 400 600 800 1000
+> Average throughput(k rec/s)
+
+Time (sec) 
+
+Isolated Full-Sharing 
+
+> input
+> rate: 25k
+> input
+> rate: 50k
+> input
+> rate: 25k
+
+Fig. 2: Average throughput during input rate shifts. The work-load includes queries with different downstream operations: GROUP BY average and a heavy-weight UDF Consider a workload with queries that share exactly the same plans, except for the filters: there are highly selective and non-selective queries. Each query is configured with an amount of resources adequate to sustain the input rate. On the one hand, isolated execution maintains a constant average throughput at the cost of increased resource usage. On the other hand, work sharing will reduce resource consumption, but average throughput can drop significantly, indicating QoS violation for specific queries. To bridge this performance gap, prior work suggests to se-lectively share work based on query access patterns: execution should be shared only among queries that process “many” common tuples. Selectivity-based approaches (e.g., SWO [24]) solve a classification problem: data accesses are classified into high ( H) and low selectivity ( L). Then, sharing decisions depend on the class of each input and the selected algorithm for computing the joins. A major drawback of this approach is that it does not account for inter-query correlations. For our running example, consider a batch of 100 alerting queries that randomly access 1% of the data. SWO will classify them as L and share execution. However, each query is expected to process a different 1% region of the data, so the shared operator eventually processes the entire stream. To remedy this, AJoin [12] tries to capture the actual work overlap for a set of queries. However, the analytical formula used to calculate query overlaps does not scale with the number of groups. Additionally, AJoin makes sharing decisions solely based on minimizing total computational cost; it shares execution if running two queries together is cheaper than running them separately. This approach can lead to suboptimal sharing choices, such as pairing a highly selective query with a low-selectivity one, provided they have significant filter overlap. This may degrade the performance of the more selective query due to increased processing overhead. 
+
+Challenge 1 (Access pattern vs Resources) . Smart sharing decisions that do not compromise QoS depend on data–query– resources correlations, which are hard to capture, especially in a streaming environment where data is unpredictable and distribution may shift at any time. 
+
+In practice, queries differ in more than just selectivity, and data distributions and input rates fluctuate over time. When deciding whether to share an operator, we should also consider the downstream operators of each query. For example, consider two A/B testing queries, Q1 and Q2 from our self-driving example, that are highly selective and access the same set of tuples. While they share a join, after the join, Q1 computes a simple GROUP BY average, while Q2 computes a complex, compute-bound UDF. The UDF can apply backpressure on the shared join and impact the throughput and QoS of Q1 .Fig. 2 presents such an example. We use 128 concurrent queries, and resources are carefully assigned to sustain the input rate (this experiment uses the same setup as Sec-tion VI:Fig. 8). Then, at time 360 seconds, a burst in the input rate in the form of a pulse is observed. As the complex UDF cannot sustain the new rate, in isolated execution, the throughput relative to the input rate is expected to drop by num heavy queries num total queries × (1 − UDF throughput input rate ). However, in shared execution, lightweight queries will also be affected, so it will drop by 1 − UDF throughput input rate . Similar effects would have been observed in the case of a distribution shift that caused the downstream operator to become skewed, degrading its processing throughput. 
+
+Challenge 2 (Query Plans vs Data Fluctuations vs Resources) .
+
+Sharing decisions should consider global plan complexity and resource requirements rather than operator-local criteria. Moreover, they must be continuous and adaptive, reacting quickly to shifts in input rates or distributions. 
+
+All in all, workload concurrency in a streaming system exposes different QoS–resources trade-offs that are hard to optimize. We argue that work sharing is the key solution for exploring these trade-offs. However, sharing has its own pitfalls, and prior work has fallen short in efficiently overcom-ing them. By tackling the challenges posed by the interplay among data–query correlations, dynamic data fluctuations, and resource demand, we advance the work-sharing paradigm for stream processing and deliver high QoS at low cost. III. R ESOURCE -E FFICIENT EXECUTION IN ISLANDS OF 
+
+QUERIES 
+
+A. Functional Isolation for Streams 
+
+To address the challenges that cross-query optimization introduces with respect to QoS, the principle of functional isolation [13] has been proposed: any cross-query optimiza-tion (e.g., work sharing) should never compromise individual performance. GroupShare [13] implements functional isolation for batch analytics, using runtime performance metrics and an iterative top-down partitioning algorithm. It initially places all queries in a single group and continuously restructures them into smaller groups until it converges to a grouping that respects individual QoS requirements. However, stream processing marks a significant departure from warehousing data and batch analytics. Both data distri-bution (hence, query overlaps) and velocity may present high variability. This complicates sharing decisions. A distribution shift may increase the correlation between two queries and increase the sharing benefit, or decrease it and make sharing detrimental. Similarly, changes in velocity may require recon-sidering grouping decisions. GroupShare’s one-way, divisive partitioning fails in this context; it converges to a static state, and thus queries remain grouped only if sharing is beneficial throughout the entire execution. Clearly, with ever-changing data trends, grouping decisions need to be continuously re-assessed. We propose FunShare, which advances the work-sharing paradigm by achieving functional isolation for queries on streaming data with varying distributions and velocities. Un-like one-way descent, FunShare continuously re-evaluates prior grouping decisions, rapidly adapting group formations in response to distribution and velocity shifts throughout the stream’s lifetime. FunShare supports queries with arbitrary operators, but shar-ing candidates are only joins with varying selection predicates. We restrict to joins as they are highly sensitive to query overlaps and provide a rigorous testbed for grouping logic. We concretely define FunShare’s goal: 
+
+Goal: Minimize a target workload’s resource usage while providing equal or better QoS for each query. 
+
+Let us formally define the problem. Consider queries 
+
+q1, q 2, . . . , q n, which run in isolation, consume a stream of rate D(t), and each query’s qi processing throughput is Ti(t).In this work, we assume that QoS is expressed in terms of throughput. To achieve Ti(t), each query qi requires resources 
+
+Resources (qi). Both the input rate and the throughput are functions of time. For resources, we assume careful, a priori provisioning for each query. If Ti(t) ≥ D(t), a query can sustain the input rate, but if Ti(t) < D (t), backpressure will be applied and tuples will be accumulated at the source. Then, functional isolation can be re-defined for stream processing as: 
+
+Definition 3 (Functional Isolation for Streams) . Continu-ously (re-)partition a set of queries {q1, . . . , q n} into non-overlapping groups g1, . . . , g m (with Smj=1 gj = {q1, . . . , q n})and execute the shared plan for each group gj using a shared resource allocation Resources (gj ) that achieves a processing rate Tgj (t) satisfying Tgj (t) ≥ Tqj,k (t), ∀ qj,k ∈ gj .
+
+Functional isolation formally defines a problem and the framework for the solution, but does not specify any require-ments with respect to resource consumption. As our goal is to minimize resources, we pose and solve the following problem: 
+
+Problem 1 (Resource-Efficient QoS Guarantees) . Continu-ously (re-)partition a set of queries {q1, . . . , q n} into non-overlapping groups g1, . . . , g m (with Smj=1 gj = {q1, . . . , q n})and assign to each group a resource allocation Resources (gj )
+
+such that the total amount of resources is minimized: 
+
+min 
+
+> m
+
+X
+
+> j=1
+
+Resources (gj )
+
+subject to the constraints: (1) For each group gj , the effective processing rate satisfies 
+
+Tgj (t) ≥ Tqj,k (t), ∀ qj,k ∈ gj .Fig. 3: FunShare architecture 
+
+(2) The shared resource allocation does not exceed the sum of the isolated resource requirements: 
+
+Resources (gj ) ≤ X 
+
+> qj,k ∈gj
+
+Resources (qj,k ), ∀ j ∈ { 1, . . . , m }.
+
+The first constraint enforces functional isolation, while the second establishes an upper bound on resource allocation. Shared execution must not consume more resources than isolated execution, as this contradicts the goals of sharing. Furthermore, while not explicitly formalized, an implicit re-quirement is that any runtime reconfiguration should incur minimal overhead and not affect QoS. By solving Problem 1, we make stream processing more resource-efficient while providing the same individual QoS guarantees. 
+
+B. System Overview 
+
+Fig. 3 illustrates the architecture of FunShare, which in-corporates real-time load estimation and monitoring to con-tinuously adapt its execution strategy to dynamic workloads, optimizing resource utilization while ensuring individual query performance remains stable or improves. The system operates through a continuous feedback loop that monitors query exe-cution, assesses query overlaps, and refines group assignments in real time. The Optimizer receives queries with their resource specifications and analyzes runtime statistics to form and up-date their partitioning into sharing groups, ensuring functional isolation. Whenever the sharing groups change, the Optimizer 
+
+sends them to the Resource Manager , the component re-sponsible for deciding each group’s resource assignment. The 
+
+Reconfiguration Manager orchestrates plan adjustments on the fly without pausing data processing. The data processing layer executes each group’s global plan, employing the data–query model to share computation between queries with varying selection predicates. The Monitoring Service collects statistics about the execution and workload at runtime and aggregates them, providing the Optimizer with up-to-date insights to inform sharing decisions. Finally, the Optimizer has a Load Estimator that employs a novel mechanism to estimate at runtime the computation load of groups and the overlap between them. IV. A DAPTIVE SHARING -G ROUP PARTITIONING 
+
+To achieve the objective of Problem 1—reduce resource consumption while ensuring that individual query perfor-mance remains uncompromised—FunShare dynamically ad-justs group assignments at runtime using two mechanisms. First, group merging periodically evaluates whether, under the current data distribution, combining two groups can improve performance or reduce resource usage without diminishing any query’s throughput. Second, group splitting is triggered when a query experiences performance degradation within its group due to a workload shift. Then, smaller groups are created to promptly restore performance isolation. Overall, splitting and merging complement each other to dynamically maintain an effective grouping: splitting quickly isolates queries that perform worse within a group than in isolation, while merging updates groups when sharing does not incur penalties. In this section, we first present the group merging and splitting mechanisms (Sections IV-A and IV-B). Then, we describe the function of the Resource Manager , which decides on the per-group resource allocations (Section IV-C). Finally, we present the mechanisms for estimating common load between groups and query performance in isolation, and for collecting execution metrics (Section IV-D). 
+
+A. Group Merging Mechanism 
+
+The merging mechanism periodically combines groups to eliminate redundant processing and reduce overall resource consumption. Merging decisions must balance the benefits of shared computation against the risk of degrading individual query throughput. The key intuition behind merging two groups is to ensure that the additional computation load introduced by the merge can be handled without penalizing either group. Specifically, a group gj should only be merged with a group gi if the extra work imposed by the merge (computation gj does not need) can be offset by available resources. Such resources originate from two sources: (i) resources currently allocated to gi, and (ii) resources allocated to gj that are idle. This is consistent with the second constraint of Problem 1. Ensuring this condition for both groups is critical—otherwise, the merge could degrade throughput for one of the queries. To quantify the impact of a merge decision, we define the cost metric GroupingCost (gi, g j ) that captures the additional processing load imposed on group gj by merging it with group 
+
+gi, relative to the available resources to process it. 
+
+GroupingCost (gi, g j ) =      
+
+> Load( gi∪gj)−Load( gj)Load( gi∪gj)
+> Resources (gi)+ IdleResources (gj)
+> Resources (gi)+ Resources (gj)
+
+(1) where Load (g) represents the processing load of group g, and 
+
+Load (gi ∪ gj ) the total load of the merged group gi ∪ gj .
+
+Resources (g) expresses the resources allocated to group g,and IdleResources (g) the resources that remain unused in g.The numerator captures the increase in load for group gj
+
+when merging, relative to the combined load of the merged group. The denominator measures the proportion of total resources available to process the additional load. As a result, the metric provides a normalized measure of the additional processing burden relative to the overall resource capacity. A lower GroupingCost (gi, g j ) indicates that the overhead of merging will likely be offset by the available resources, while a higher cost suggests that the merge could decrease the throughput of some queries in group gj . Crucially, all components used to compute GroupingCost , aside from the resources allocated to each query, depend on the current workload. Furthermore, accurately estimating Load (gi ∪ gj )
+
+is challenging because it requires relating computations per-formed by two groups currently executed independently. We detail how FunShare estimates these quantities accurately yet efficiently in Section IV-D. 
+
+Algorithm 1: Group Merging (Minimizing resources) 
+
+Local: Set of groups G
+
+Local: Boolean merging possible ← true  
+
+> 1
+
+while merging possible do  
+
+> 2
+
+min cost ← ∞ ; 
+
+> 3
+
+groups to merge ← N one ; 
+
+> 4
+
+merging possible ← f alse ; 
+
+> 5
+
+foreach pair (gi, g j ) in G with a common operator 
+
+do  
+
+> 6
+
+if No downstream backpressure propagation is expected from merging gi and gj then 
+
+> 7
+
+cost ← max 
+
+
+
+GroupingCost( gi, g j ),
+
+GroupingCost( gj , g i)
+
+ ; 
+
+> 8
+
+if cost < min cost and 
+
+cost < M ERGE T HRESHOLD then  
+
+> 9
+
+min cost ← cost ; 
+
+> 10
+
+groups to merge ← (gi, g j ); 
+
+> 11
+
+merging possible ← true ; 
+
+> 12
+
+if groups to merge ̸ = N one then  
+
+> 13
+
+G.update groups (groups to merge ); 
+
+> 14
+
+merge groups(G) Algorithm 1 outlines the merging procedure. In each optimization cycle, the system examines all pairs of groups in the current set G that share operations. The process begins by assessing the risk of backpressure (line 6). Concretely, if the candidate shared operators within the lower-throughput group are already backpressured by their downstream subplan, the merge is skipped to prevent the slow group from throttling the other one. Note that checking only pairs of groups may not be optimal, but FunShare does not aim for optimality but rather saving resources while respecting functional isolation and not adding overheads itself. Next, the algorithm computes the overhead (or cost) that each group would incur by absorbing the other group’s workload (line 7). As GroupingCost (gj , g i)
+
+is asymmetric, we estimate the merge cost using 
+
+max (GroupingCost (gj , g i), GroupingCost (gi, g j )) ,thereby ensuring that QoS requirements are met for both groups. A merge is allowed only if this cost is below a preset threshold (line 8). Setting the merge threshold to 1 would be a natural choice, indicating that the resource increase should exceed the increase in computation cost. However, the threshold can be set to a lower value to account for performance trends scaling sub-linearly to resource increase. Additionally, lowering the merge threshold results in more conservative merging decisions. At every iteration, the merge with the lowest cost is executed, and the process repeats until no further merges are possible. Once the merge step concludes, the Optimizer forwards the finalized groups to the 
+
+Resource Manager . Subsequently, the data processing layer will make all necessary query plan changes in a single step. 
+
+B. Group Splitting Mechanism 
+
+When shifts in data distribution cause the performance of a sharing group to degrade, group splitting becomes necessary. To maintain functional isolation, the system must rapidly detect these shifts and adjust group assignments accordingly. The splitting mechanism is triggered when at least one query in a group is predicted to perform worse than if it was running in isolation. (We detail how we detect penalized queries in Section IV-C.) The primary objective of splitting is to isolate these queries quickly, preventing QoS degradation. Splitting also serves as a correction mechanism for merging decisions that led to groups that do not respect functional isolation. 
+
+Algorithm 2: Group Splitting (Preserving functional isolation) 
+
+Input: Group g, Set of penalized queries P Q  
+
+> 1
+
+if shared subplan of group g is backpressured then  
+
+> 2
+
+split the queries causing backpressure;  
+
+> 3
+
+return;  
+
+> 4
+
+else if resource increase for query group possible then  
+
+> 5
+
+request resource increase from resource manager;  
+
+> 6
+
+else  
+
+> 7
+
+place queries in P Q into singleton groups; Algorithm 2 outlines the procedure, which includes two main steps. In the first step, termed backpressure response ,when a shared subplan experiences backpressure, the Opti-mizer identifies the queries causing the slowdown and immedi-ately isolates them (lines 1–3). Backpressure detection happens based on statistics provided by the Monitoring Service (Sec-tion IV-D). This ensures that slow queries do not throttle the entire group. In the second step, referred to as resource check and isolation , in the absence of backpressure, the Optimizer 
+
+first checks whether additional resources can be allocated to the group. If additional resources are available, they are requested from the Resource Manager . If not, queries expected to be penalized are removed from the group and placed into singleton groups as a quick response that guarantees they meet their QoS. Attempting to add resources before isolating queries preserves the benefits of shared processing while ensuring performance isolation when contention increases. After splitting, the subsequent merging phase may combine singleton groups with others if this does not compromise QoS, thereby enhancing overall resource efficiency. We have theoretically proven that FunShare converges (Appendix A): assuming no distribution changes, the merge step produces groups that maintain functional isolation. The corrective split-ting step is required only when distribution shifts, and even then, functional isolation can be restored in a bounded number of splits. 
+
+C. Allocating Resources to Sharing Groups 
+
+After forming query groups, the Optimizer forwards them to the Resource Manager , which determines the appropriate resource allocation per group to ensure resource efficiency without penalizing individual queries. 
+
+a) Resource Provisioning during Merging: The Resource Manager leverages the GroupingCost metric (Equation 1) to guide its allocation decisions. When merging two or more groups, M = {g1, . . . , g m}, the manager computes the min-imum amount of resources that ensures the cost for all indi-vidual groups remains below the merge threshold. Specifically, with M−i = M \ { gi}, merge threshold as M T and 
+
+Resources ∗(M−i) = min Resources (M−i)
+
+s.t. GroupingCost (M−i, g i; Resources (M−i)) < M T 
+
+it solves: i∗ = argmax i∈{ 1,...,m } Resources ∗(M−i)
+
+For the full group, the manager provisions the necessary resources: Resources (i∗) + Resources ∗(M−i∗ )
+
+This approach guarantees that no group in the merged set experiences a cost exceeding the selected threshold. 
+
+b) Resource Adjustment upon Query Penalty: If a query within a sharing group exhibits throughput degradation relative to its isolated performance, the Optimizer can request an increase in the group’s resources. The provisioning is raised up to the sum of the individual resources that would be allocated if each query was executed in isolation. If the group is already operating at its maximum resource allocation, the 
+
+Optimizer proceeds to reassign certain queries into singleton groups. Consequently, the Resource Manager reduces the allocation for the original group so that the split queries can run independently, restoring their performance. 
+
+D. Estimating Grouping Cost and Isolated Throughput 
+
+To decide on group merging and splitting, the Optimizer 
+
+relies on two components: the Load Estimator and the Moni-toring Service , which includes the Throughput Estimator and the Execution Monitor (Fig. 3). 
+
+a) Load Estimation: Estimating the computational load for sharing groups accurately is essential to compute the grouping cost (Equation 1). We need to estimate the individual load of a group, Load( g), and the total load after merging, 
+
+Load( gi ∪ gj ).We introduce a mechanism for efficiently and accurately estimating query and group loads, using sampling, the Data 
+
+Fig. 4: Example of the load estimation mechanism Query Model, and lightweight reconfiguration. This mecha-nism enables us to estimate the combined load of groups cur-rently being executed separately, providing valuable insights for evaluating future groupings. The Load Estimator triggers this process before each merging phase. For each subpipeline that appears in more than one sharing group (a sharing candidate), it selects one group to collect workload statistics. To minimize the overhead of this process, the Load Estimator 
+
+heuristically chooses the group with the highest selectivity. For a small data sample, the selected group processes all tuples that belong to at least one query, identified through their query set, and calculates workload statistics. To express processing per tuple, FunShare employs cost models. Although we do not advocate for a specific model, our implementation uses an analytical cost model [25], [26] as we have found it accurate for the examined workloads, and at the same time, it is easily explainable and cheap to compute. Fig. 4 illustrates the mechanism for three queries that share a subpipeline consisting of a filtering stage followed by a join operation. The queries in the figure use range filters for one of the input streams; however, the approach generalizes to other filter types. We use the following cost model for these queries: 
+
+α + selectivity · (β + γ · joinMatches ), where α (the cost for the source and filter operators), β (input cost of join phase), 
+
+γ (output cost of join phase) are fixed parameters. Hence, the data distribution statistics we must track are the selectivity and the average number of join matches per tuple. Queries Q1, Q2 and Q3 in Fig. 4 are executed in isolation. The Load Estimator identifies all non-overlapping filter ranges and selects a responsible group for collecting statistics. It then informs the Reconfiguration Manager , which adjusts the group’s configuration by (i) enabling the tracking of data distribution statistics within the relevant filter and join tasks and (ii) configuring filter tasks to forward all tuples within the monitored ranges to the join operator. (Section V describes the reconfiguration mechanism in detail.) For a defined duration (specified in event time), filter tasks track selectivity, and join operators measure the average number of join matches produced per tuple (Fig. 4(b)). For simplicity, the example assumes statistics are collected over the entire processing window, eliminating the need for upsampling for join matches. Tasks report the collected statistics to the Monitoring Service ,Fig. 5: Reconfiguration steps for merging two queries which forwards them to the Optimizer . Then, tasks resume normal operation without further monitoring, and the Opti-mizer uses the gathered statistics in the merging phase (Alg. 1). Fig. 4(c) also shows how the Load Estimator estimates the combined load of Q1 ∪ Q2. Assuming the Optimizer decided to merge Q1 and Q2 into G1, it also presents the calculation of the combined load of Q3 ∪ G1.The proposed load estimation mechanism enables accurate estimation of any individual group loads and any merged group loads by processing a small sample of tuples. Thereby, it allows FunShare’s Optimizer to perform any number of group merges in a single iteration and minimizes reconfiguration overheads. Importantly, the correctness of the group responsi-ble for load estimation is not compromised, as the Data Query Model ensures that each query within the group continues to receive only the relevant output tuples. 
+
+b) Estimating throughput in isolation: Given that the load-estimation cost models express the per-tuple processing time, inverting them provides an estimate of the throughput in isolation, which is critical for determining when to trigger the splitting mechanism. Each group containing more than one query continuously monitors a fraction of the data to collect the necessary statistics for applying the cost model to its queries. For throughput estimation, we need to track statistics only at the query level, and not for every filter range, as we do for load estimation. Tasks periodically send the statistics to the 
+
+Throughput Estimator , which estimates per-query throughput and forwards it to the Optimizer , which in turn uses it to determine if any group requires splitting. 
+
+c) Monitoring execution metrics: The Execution Monitor 
+
+tracks several key metrics of the processing engine: (i) idle CPU time per task, which is used in the grouping cost equation (Equation 1), (ii) backpressure statistics, which inform the merging and splitting phases (Algorithms 1 and 2), and (iii) group throughput, which is used to assess the necessity for group splitting (Algorithm 2). These metrics are collected via fast control messages [27], which allow the controller to communicate with tasks without being blocked by data messages. Notably, the Execution Monitor does not introduce considerable overheads as most of the metrics of interest are already tracked in SPEs for system monitoring [28]–[30], scheduling [2], [31], and autoscaling [17], [32]. V. O N-THE -FLY RECONFIGURATION OF QUERY GROUPS 
+
+FunShare reconfigures query plans on the fly. Concretely, given the query groups and the number of parallel subtasks per group determined by the Optimizer and the Resource Manager ,respectively, the Reconfiguration Manager orchestrates the necessary changes to the execution plans. There are 4 types of reconfiguration operations in FunShare: group merging, group splitting, changing a group’s parallelism, and enabling statistics monitoring for the load estimation. Following prior work [9], [27], we adopt epoch-based reconfiguration. Con-cretely, we rely on the mechanism proposed by [27], which uses fast control messages to optimize epoch-based reconfig-uration while still guaranteeing exactly-once processing. A data stream is divided into consecutive sets of tuples forming an epoch , a time period during which the con-figuration is the same. When a reconfiguration request is issued, the Reconfiguration Manager injects a marker into each source subtask. When a subtask receives a marker from an input channel, it performs epoch alignment, waiting until it receives the marker from all input channels. Then, it applies the necessary changes to transition to the new configuration before forwarding the marker downstream. Reconfiguration is complete once the markers reach the last subtasks. Fig. 5 illustrates the reconfiguration process when merging two groups. Initially, these groups independently read, filter, and join two data streams. Before merging, each group oper-ates with a parallelism of 1 for all operators. After merging, the new group has parallelism 2. During step 1, the Reconfig-uration Manager injects markers into all source subtasks. For source subtasks reading data from the same stream, markers are inserted at the same event time. Source subtasks of group G1 change the number of their output channels from 1 to 2 and forward the marker to both the existing and the new filter subtasks. Meanwhile, sources of Q2 unsubscribe from the data sources and propagate markers downstream. In the second step, the filter subtasks of G1 adjust their filtering criteria to reflect the union of the previous filters from G1 and G2. Then, they change the number of their output channels and forward the markers. The filter subtasks of G2 simply forward the markers. In step 3, upon receiving markers from all upstream channels, the join subtasks initiate state migration to redistribute state partitions, accommodating the new join subtask. Since filters may have differed between G1 and G2, the join subtask of G2 transfers any state that G1 lacked. Once migration is completed, the join subtasks notify the 
+
+Reconfiguration Manager . While source parallelism remains unchanged here, our technique also supports reconfiguring it. Reconfiguration follows a similar process for group split-ting and adjusting a group’s parallelism. Upon receiving the markers, operators adjust the parallelism level, while stateful operators handle state migration as needed. During group split-ting, the source subtasks of the newly formed groups register to the respective data sources. Finally, for the lightweight reconfiguration of the load estimation process, subtasks receive the filter ranges that should be monitored and adjust their operation so that they process all tuples in these ranges and not solely the tuples belonging to the group’s queries. VI. E VALUATION 
+
+We experimentally evaluate the scalability and adaptivity of FunShare and its impact on per-query performance. 
+
+Implementation details We implement FunShare on the widely used Apache Flink [33] stream processing engine (v1.13). The Optimizer and Resource Manager are integrated into Flink’s JobMaster. The Resource Manager determines the number of subtasks per group (Definition 2), while Flink han-dles subtask placement across TaskManagers. We additionally implement the on-the-fly reconfiguration mechanism described in Section V. All baselines are implemented in Flink as well. 
+
+Platform We use 5 two-socket Intel Xeon E5-2660 CPUs (2.20 GHz) and 3 Intel Xeon CPU E5-2640 v2 CPUs (2.00GHz) servers, each with ( 8 × 2) threads per socket and 
+
+128 GB of DRAM for the TaskManagers. Additionally, we use 2 two-socket Intel Xeon E5-2680 v4 CPUs (2.40 GHz) servers with ( 2 × 14 ) threads per socket for Flink’s JobManager and data generation. 
+
+Methodology Following prior work on benchmarking streaming systems [34], [35], we run data generation on a separate machine to eliminate interference between data production and processing. We collect measurements after the system has warmed up and reached a steady state. 
+
+Algorithms We compare FunShare against four baselines: 1) Isolated execution: Each query runs independently with a separate execution plan. 2) Full-Sharing: All queries are executed with a single shared query plan. 3) Overlap-Sharing: Queries share execution only when the cost of executing them together is less than executing them separately. This is the optimization algorithm used by AJoin [12]. 4) Selectivity-Sharing: Queries are grouped based on their selectivity class (high or low selectivity). The selec-tivity threshold is determined through system micro-benchmarking. This is the optimization algorithm pro-posed by SWO [24]. For FunShare, the Optimizer performs a merging step every minute (see Section VI-D). Groups monitor statistics for throughput estimation using a sampling rate of 1% and report them to the Monitoring Service every 10 seconds. We set the duration for monitoring statistics for load estimation such that each task collects statistics for 1000 tuples. Finally, we set the merge threshold (Algorithm 1) as a function of resources. 
+
+Workload We evaluate three workloads based on the Nexmark Benchmark [36], [37], which is widely used for evaluating stream processing systems [38]–[41]. To control computation overlap between queries, we apply filters with varying selectivities to the base streams across all workloads. We evaluate configurations in which queries have either equal or varying selectivities. Unless stated otherwise, each query, based on its assigned selectivity, selects a random range from the domain of the filter attribute to create variable query overlaps. In particular, we evaluate the following workloads and use a window of size 60 and slide 1 sec: 
+
+W1: Windowed join. Queries in this workload perform a windowed equality join between the Person and Auction streams. We use an N-M join to stress shared operators and create varying sharing overlaps 1. This workload represents a case where all queries have the same structure. 
+
+W2: Varying downstream tasks. All queries share a join between the Auction and Bid streams, but differ in downstream operators. We select Nexmark queries 4 ( QCategoryAvg : aver-age price per category) and 6 ( QSellerAvg : average price per seller)—the only Nexmark queries that share a subplan— and a synthetic query ( QP riceAnomaly ) with an expensive opera-tion after the join: identifying pairs of auctions with similar descriptions but significantly different prices. We include an equal number of queries from each type. 
+
+W3: Vector similarity. Queries encode Auction descriptions into vector representations and identify similar auctions. This workload models streaming vector similarity joins, which are an example of a computationally intensive operation and relevant in modern ML workloads. 
+
+Metrics Our evaluation focuses on the two metrics involved in Problem 1 (Functional Isolation): resource consumption and throughput. Resource usage is measured in terms of the number of parallel tasks, which reliably approximates CPU resource consumption since we maintain a fixed ratio between the number of tasks and physical threads. 
+
+A. Resource usage under fixed throughput 
+
+Fig. 6 presents the resources required to sustain the input rate for all workloads and under different selectivity configura-tions. The input rate is the maximum sustainable when queries run in isolation. FunShare’s goal is to minimize resource usage and always use fewer resources than Isolated (Problem 1). Fig. 6a, b, and c report the resource requirements for three variations of workload W1. In Fig. 6a and b, all queries                    
+
+> 1We add aP erson.f avoriteCategory field and join it with
+> Auction.category to match users with their preferred auctions. 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 020 40 60 80 100 120 140
+> # of parallel subtasks
+> # of queries
+> Isolated Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+> lower is better
+
+(a) W1 - Queries with selectivity 10% 0           
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 020 40 60 80 100 120 140
+> # of parallel subtasks
+> # of queries
+> Isolated Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+
+(b) W1 - Queries with selectivity 1% 0           
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 160
+> 180
+> 020 40 60 80 100 120 140
+> # of parallel subtasks
+> # of queries
+> Isolated Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+
+(c) W1 - Queries with selectivity 1–20% 0         
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 020 40 60 80 100 120 140
+> # of parallel subtasks
+> # of queries
+> Isolated Full-Sharing (C)
+> Overlap-Sharing (C) Selectivity-Sharing (C)
+> FunShare
+
+(d) W2 - Queries with selectivity 10% 0           
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 020 40 60 80 100 120 140
+> # of parallel subtasks
+> # of queries
+> Isolated Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+
+(e) W3 - Queries with selectivity 10% 
+
+Fig. 6: Resource usage with fixed throughput. In Fig. (d), the sharing baselines cannot sustain the input rate, so we report a constrained version of them, which never shares the downstream operators have the 10% and 1% selectivity, respectively, and in Fig. 6c selectivities are drawn uniformly from [1 − 20%] . Isolated execution scales linearly with the number of queries. All sharing-based approaches exhibit a plateau in resource usage as they exploit more shared computation. Full-Sharing and Selectivity-Sharing require more resources than isolation at lower concurrency, as they share computation across many queries, creating expensive global plans. If these approaches were constrained to use at most as many resources as isolated execution, they would penalize certain queries. FunShare al-ways uses fewer resources than isolation. It adapts the query groups to the workload and can switch from isolated execution, when necessary to sustain throughput for all queries, to fine-grained groups or full-sharing when resources can be reduced without penalties. The workload of Fig. 6b exhibits less com-putation overlap and, hence, FunShare saves fewer resources. Fig. 6d reports the resource requirements for workload W2 and 10% selectivity. Full-Sharing, Overlap-Sharing, and Selectivity-Sharing create plans that share the unscalable 
+
+QP riceAnomaly and fail to sustain the input rate. Therefore, we report a constrained version of them, labeled (C), which never shares the downstream operators. FunShare discovers the most resource-efficient plan and never shares downstream operators when they slow down the group’s shared plan. Finally, Fig. 6e corresponds to W3, the most compute-intensive workload. At low concurrency, FunShare employs fewer sharing opportunities than in W2 and W3, as the extra work performed by shared plans outweighs the benefits of reducing redundant computation. At higher concurrency, it achieves greater resource savings than in other workloads. While Overlap-Sharing incurs no penalties here, it may degrade performance when workloads mix queries that can and cannot sustain the input rate (see Section VI-C). 
+
+Takeaway: FunShare needs up to 3.7× less resources compared to the baselines to sustain the input rate and never uses more resources than isolated execution. 0          
+
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 350
+> 020 40 60 80 100 120 140
+> Max sustainable
+> throughput (k rec/s)
+> # of queries
+> Isolated Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+> higher is better
+
+(a) W1 – queries with selectivity 10% 0        
+
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 020 40 60 80 100
+> Max sustainable
+> throughput (k rec/s)
+> # of queries
+> Isolated Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+
+(b) W1 – queries with selectivity 1–20% 
+
+Fig. 7: Max sustainable throughput under fixed resources 
+
+B. Throughput under fixed resources 
+
+Fig. 7 reports the maximum sustainable throughput achieved when using as many resources as isolated execution. FunShare aims to achieve at least the same throughput as isolated execution (Problem 1). We evaluate equal (10%) and variable (1–20%) selectivities (Fig. 7a, 7b). In Fig. 7b, we scale up to 96 queries, as higher concurrency requires resources beyond the cluster’s capacity for isolated execution. The throughput for isolated execution is stable. Full-Sharing and Selectivity-Sharing sustain lower throughput than isolated execution for low concurrency; this means they would penalize some queries if the input rate is below 170k records/second and the number of queries below 64 and 48, respectively. The remaining workloads are omitted for space as they exhibit the same trends: throughput is lower than Isolated when resource costs in Section VI-A were higher, and when concurrency increases, shared plans leverage more resources and increase throughput. 
+
+Takeaway: FunShare never penalizes any query compared 0                
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 0200 400 600 800 1000
+> Average throughput (k rec/s)
+> Time (sec)
+> Isolated Full-Sharing (C) Overlap-Sharing (C)
+> Selectivity-Sharing (C) FunShare
+> input rate:
+> 25k
+> input rate:
+> 50k
+> input rate:
+> 25k
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 0200 400 600 800 1000
+> # of parallel
+> subtasks
+> Time (sec)
+
+Fig. 8: W2 – Adaptivity to input rate shifts. QP riceAnomaly 
+
+queries cannot sustain the increase in input rate to isolated execution and given a fixed amount of resources outperforms all the baselines by up to 1.5 − 2.1×.
+
+C. Adaptivity Experiments 
+
+Next, we evaluate the performance of each approach under dynamic workloads by considering two scenarios: variations in the input rate and shifts in data distribution. FunShare’s goal is to minimize resource consumption with the constraint of achieving at least the same throughput as isolated execution. In Fig. 8, we experiment with 128 queries with 10% selec-tivity from the workload with different downstream tasks (W2) and varying input rates. This configuration simulates workload shifts where downstream bottlenecks can propagate backpres-sure to shared operators. Because the sharing baselines cannot sustain the input rate even with maximum resources, we use their constrained versions. Initially, all approaches sustain the input rate and FunShare has the lowest resource consumption. When the input rate increases, the expensive downstream task of QP riceAnomaly queries cannot keep up, and hence, these queries cannot sustain the input rate. Sharing baselines penalize queries of type QCategoryAvg and QSellerAvg , result-ing in an average throughput lower than isolated execution. FunShare initially splits the queries of type QCategoryAvg and 
+
+QSellerAvg from their previous group, momentarily increasing resources (at time 360 seconds). During the next merging step, the Optimizer adapts sharing groups based on the workload at hand and resource consumption drops (at time 390 seconds). FunShare adapts better than all other approaches to the spike in the workload. Next, as the input rate returns to its initial value, FunShare adjusts the groups again once the merging phase takes place. In Fig. 9, we experiment with 32 queries from W1 and distribution shifts. Each query’s filter is a range of random length beginning at the start of the filter attribute’s domain. At 360 seconds, the filter attribute’s distribution changes from uniform to a Zipfian with the most frequent element at the beginning of the domain; at 660 seconds, it shifts to a different Zipfian with the most frequent element in the middle of the attribute’s domain. This setup allows us to experiment with three interesting cases: in the first distribution, the amount of computation varies significantly across queries, in the second 0              
+
+> 10
+> 20
+> 30
+> 40
+> 0200 400 600 800 1000
+> # of parallel subtasks
+> Time (sec)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 0200 400 600 800 1000
+> Average throughput (k rec/s)
+> Time (sec)
+> Isolation Full-Sharing Overlap-Sharing
+> Selectivity-Sharing FunShare
+> zipf zipf uniform
+
+Fig. 9: W1 – Adaptivity to distribution shifts: transitioning from uniform to a Zipfian where all queries select the most frequent key, then to another Zipfian where only some do one, the computation overlap among all queries is very high, and in the third, there are some queries with very high com-putation and others with very low. Overlap-Sharing employs a single shared plan (like Full-Sharing) because filter ranges are overlapping. After transitioning to the first Zipfian distribution, all sharing techniques achieve higher throughput than isolated execution using significantly fewer resources because of the very high computation overlap. When the distribution changes to the second Zipfian, although its average throughput is higher than isolated execution, Selectivity-Sharing penalizes certain queries by up to 1.3×. FunShare dynamically adapts sharing groups, consistently using fewer resources than alternative approaches while maintaining QoS. Specifically, during the first Zipfian distribution, it converges to a full-sharing configu-ration, whereas under the uniform and second Zipfian, it settles on two distinct, more fine-grained partitionings of queries. TABLE I: Reconfiguration delay       
+
+> Setup 1st reconfiguration(s) 2nd reconfiguration(s)
+> Exp. Setup for Fig. 8 1.746 1.802 Exp. Setup for Fig. 9 1.631 1.694
+
+Table I presents FunShare’s reconfiguration delay for Fig. 8 and 9. As FunShare continues processing tuples during reconfiguration, this delay is masked and does not impact the reported throughput. The higher delay observed for Fig. 8 is due to the increased number of operators in those query plans. 
+
+Takeaway: FunShare adapts its policy following distribu-tion shifts and can effectively switch between full sharing and fine-grained groups depending on the workload. 
+
+D. Tuning of Merge Phase 
+
+Fig. 10a and 10b evaluate how the merge threshold and frequency affect FunShare’s performance. We report W1 with 10% selectivity, but these trends generalize across workloads. FunShare’s resource usage plateaus at 64 queries regardless of the merge threshold, exposing a constantly growing benefit with the number of queries for all cases. Changing the thresh-old only slightly affects the level of this plateau. In Fig. 10b, we use 128 queries. FunShare collects runtime statistics at each merge step to detect potential merges, but correctly 0      
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 020 40 60 80 100 120
+> # of parallel subtasks
+> # of queries
+> Isolated
+> FunShare 1
+> FunShare 0.9
+> FunShare 0.8
+> FunShare 0.7
+
+(a) 0     
+
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 7.5 15 30 60 120
+> Throughput (k rec/s)
+> Merge frequency (s)
+
+(b) 
+
+Fig. 10: W1 (selectivity 10%) – (a) FunShare’s resource consumption with varying merge threshold (b) FunShare’s throughput with varying merge frequency (128 queries) identifies that no reconfiguration is necessary as the distri-bution remains stable. Increasing the merge frequency also increases the overhead of monitoring, reducing throughput. We fix the frequency to 60s as it enables quick adaptivity without incurring measurable throughput overhead. Notably, FunShare outperforms all baselines across all frequencies (Fig. 7a). 
+
+Takeaway: The merge mechanism exhibits robustness to both its tuning knobs. 
+
+E. Latency and Convergence Dynamics of FunShare 
+
+Fig. 11a compares end-to-end latency for W1 (10% selectiv-ity). The input rate is set to the max queries sustain in isolation, and techniques are constrained to use as many resources as isolated execution. Full-Sharing and Selectivity-Sharing cannot sustain the input rate for 16 and 32 queries, resulting in unbounded latency. For ≥ 64 queries, all sharing baselines use a single global plan, which significantly increases latency. FunShare leads to a significantly lower latency increase. In Fig. 11b, we use the same setup as in Fig. 8 (inp. rate 50 k rec/s) and measure the queue growth rate compared to isolated execution in the presence of backpressure. In isolated execu-tion, the queue growth rate is 35.99k rec/s for QP riceAnomaly 
+
+queries and 0 rec/s for the rest of the queries. While sharing baselines reduce the growth rate for QP riceAnomaly , they significantly increase it for QCategoryAvg and QSellerAvg .In contrast, FunShare reduces it for QP riceAnomaly without increasing it for any other query. This result implies that the memory and latency growth would also be slower. Across all workloads in Section VI, FunShare converged within two merge steps. This reflects the accuracy of our load estimation and the efficiency of the merge step, which together ensure that beneficial merges are rapidly identified and applied. 
+
+Takeaway: By partitioning queries into fine-grained groups, FunShare is the only approach that bounds latency increase over isolated execution both in the presence and absence of backpressure. Further, it converges quickly thanks to accurate load estimation and effective, yet lightweight, optimization. VII. R ELATED WORK 
+
+Work sharing is well-studied for analytical [6], [22], [42]– [45] and distributed batch processing [46]–[48]. Previous techniques in stream processing focus on optimizing aggregate throughput [10]–[12]. SWO [24] and AJoin [12] make shar-ing decisions based on selectivity and overlap, respectively. 1       
+
+> 3
+> 5
+> 7
+> 9
+> 16 32 64 96 128
+> Latency Increase
+> over Isolated
+> (relative)
+> # of queries
+> Full-Sharing Selectivity-Sharing Overlap-Sharing FunShare
+> unbounded unbounded
+
+(a) 0 0    
+
+> -20
+> -10
+> 0
+> 10
+> 20
+> 30
+> QCategoryAvg QSellerAvg QPriceAnomaly
+> Queue growth rate
+> increase over
+> (k rec/s)
+> Full-Sharing (C) Overlap-Sharing (C)
+> Selectivity-Sharing (C) FunShare
+> Queue growth rate
+> increase over Isolated
+> (k rec/s)
+
+(b) 
+
+Fig. 11: (a) Latency increase compared to isolated execution (b) Queue growth rate increase compared to isolated execution SQPR [49] uses sharing to solve a multi-objective problem aiming to maximize the number of queries the engine executes while minimizing resource usage and balancing load among workers. [23], [50], [51] and [52] optimize shared execution of stream aggregations and joins with varying windows and are orthogonal to our work. All aforementioned approaches do not take into account the individual query requirements. iShare [53] decides to share or not incremental queries based on final work constraints. However, it assumes prior knowledge of the sharing benefit and focuses on incremental processing. [54] uses work sharing to meet the queries’ latency targets, assuming queries are partitioned into priority classes and shed data if they cannot sustain the input rate. Several prior works study the problem of autoscaling or se-lecting a query’s parallelism [32], [55]–[61] and are orthogonal to ours. First, techniques selecting the parallelism can be used to determine the per-query resources that are given as input to our optimizer. Second, autoscaling techniques can work in synergy with FunShare to adjust the resources allocated to each sharing group when the workload shifts without affecting the effectiveness of groups to meet QoS. In this way, FunShare enhances the effectiveness of autoscaling techniques enabling them to operate on resource-efficient query groups. VIII. C ONCLUSION 
+
+Existing streaming systems achieve performance isolation by employing resource isolation, which results in infrastructure costs that grow with the number of queries. Work sharing is an effective strategy for lowering infrastructure costs by eliminat-ing redundant computations, but penalizes individual queries, compromising Quality-of-Service (QoS). We introduce Fun-Share, a system that enables resource-efficient execution of streaming queries while preserving individual QoS. FunShare dynamically groups queries based on performance character-istics and continuously adapts sharing decisions to workload changes. Our evaluation shows that FunShare reduces resource consumption by 1 − 10 .7× compared to isolated execution while maintaining or improving throughput for all queries. IX. AI-G ENERATED CONTENT ACKNOWLEDGEMENT 
+
+OpenAI’s ChatGPT was used for proofreading. We asked the system to flag potential grammatical errors, typos, and non-idiomatic phrasing in the text and to propose fixes. APPENDIX 
+
+A. Proofs 
+
+Theorem 1. Let n be the number of queries running in FunShare, Algorithm 2 produces a set of sharing groups within at most n executions. Also, in the absence of backpressure, existing sharing groups are not affected. Proof. We prove this theorem by induction:  
+
+> •
+
+n = 1: The initial query group consists of one query, so it is by definition a sharing group.  
+
+> •
+
+Suppose that the property holds for n ≤ k; we prove that it also holds for n = k + 1 :Let m be the number of groups across which the queries are partitioned. Furthermore, let P Q be the penalized queries and BQ the queries experiencing high backpres-sure. There are three cases: 1) m = 1 and P Q ∪ BQ = ∅: then by definition, the group is already a sharing group, and it remains as is, i.e., unaffected by the algorithm. 2) m = 1 and BQ ∪ P Q ̸ = ∅: if BQ ̸ = ∅, Algorithm 2 forms singleton groups for queries in BQ , else for queries in P Q . Either way, let RQ = BQ, if BQ ̸ =
+
+∅, andP Q, otherwise . The algorithm forms single-ton groups for queries in RQ which are sharing groups. Furthermore, |g1 \ RQ | ≤ k so running Algorithm 2 for at most k more iterations will result in sharing groups for all queries. 3) m ≥ 2: Algorithm 2 runs independently across each group. Each |gj | ≤ k, so running the algorithm for each group independently leads to sharing groups within at most Pmj=1 |gj | = k + 1 steps. If any group is already a sharing group and BQ = ∅, it is not affected. 
+
+Theorem 2. Let m be the number of groups in FunShare. Assuming an accurate model for Load (g), linear scalability for operators and a merging threshold that is at most 1, Algorithm 1 has the following loop invariant: if the m groups are all sharing groups and queries with backpressure are isolated at the start of the loop, they remain so at the end of the loop as well. Note that an accurate model for Load (g) and linear scal-ability are not always possible. For this reason, we set lower, more pessimistic values for the merging threshold, in order to compensate for estimation errors in our model. Proof. In each iteration of Algorithm 1’s loop, since 
+
+M ERGIN G T HRESHOLD ≤ 1, the algorithm chooses a pair of groups such that 
+
+max (GroupingCost (gi, g j ), GroupingCost (gj , g i)) ≤ 1
+
+We note that, due to the assumption of linear scalability, each group’s throughput is 
+
+Tg = Resources (g) − IdleResources (g)
+
+Load (g)
+
+and the maximum sustainable throughput T ∗ for gi ∪ gj is 
+
+T ∗ = Resources (gi) + Resources (gj )
+
+Load (gi ∪ gj )
+
+We have 
+
+GroupingCost (gi, g j ) ≤ 1 = ⇒     
+
+> Load (gi∪gj)−Load (gj)
+> Load (gi∪gj)
+> Resources (gi)+ IdleResources (gj)
+> Resources (gi)+ Resources (gj)
+
+≤ 1 = ⇒
+
+Load (gi ∪ gj ) − Load (gj )
+
+Load (gi ∪ gj ) ≤
+
+Resources (gi) + IdleResources (gj )
+
+Resources (gi) + Resources (gj ) =⇒
+
+1− Load (gj )
+
+Load (gi ∪ gj ) ≤ Resources (gi) + IdleResources (gj )
+
+Resources (gi) + Resources (gj ) =⇒
+
+Load (gj )
+
+Load (gi ∪ gj ) ≥ 1− Resources (gi) + IdleResources (gj )
+
+Resources (gi) + Resources (gj ) =⇒
+
+Load (gj )
+
+Load (gi ∪ gj ) ≥ Resources (gj ) − IdleResources (gj )
+
+Resources (gi) + Resources (gj ) =⇒
+
+Resources (gi) + Resources (gj )
+
+Load (gi ∪ gj ) ≥
+
+Resources (gj ) − IdleResources (gj )
+
+Load (gj ) =⇒
+
+T ∗ ≥ Tgj
+
+Similarly, we can prove that T ∗ ≥ Tgi from 
+
+GroupingCost (gj , g i) ≤ 1
+
+From these equations, we conclude that the new sharing group can sustain a higher throughput, hence maintain func-tional isolation. Therefore, the resulting group set from the merging step comprises sharing groups. The implication of the two theorems is as follows: the first time Algorithm 2 runs, it produces sharing groups. Then, Algorithm 1 performs merging iterations until it reaches a fixed point. From that point on, neither algorithm changes the sharing groups, so FunShare has converged into a grouping. Note that convergence assumes that the data distribution doesn’t change during this process; if so, repartitioning the queries is not only necessary but also desirable. REFERENCES [1] A. Storm, “Understanding the parallelism of astorm topology,” https://storm.apache.org/releases/2.8.0/ Understanding-the-parallelism-of-a-Storm-topology.html, accessed 2026-03-12. [2] ——, “Resource-aware scheduler,” https://storm.apache.org/releases/2.8. 0/Resource Aware Scheduler overview.html, accessed 2026-03-12. [3] Hazelcast Platform, “About Data Pipelines,” https://docs.hazelcast.com/ hazelcast/5.5/pipelines/overview, accessed 2026-03-12. [4] A. K. Streams, “Architecture,” https://kafka.apache.org/40/ documentation/streams/architecture, accessed 2026-03-12. [5] A. Jindal, K. Karanasos, S. Rao, and H. Patel, “Selecting subexpressions to materialize at datacenter scale,” Proc. VLDB Endow. , vol. 11, no. 7, pp. 800–812, 2018. [Online]. Available: http://www.vldb.org/pvldb/ vol11/p800-jindal.pdf [6] P. Sioulas and A. Ailamaki, “Scalable multi-query execution using reinforcement learning,” in SIGMOD . New York, NY, USA: ACM, 2021. [7] S. Arumugam, A. Dobra, C. M. Jermaine, N. Pansare, and L. Perez, “The datapath system: A data-centric analytic processing engine for large data warehouses,” in SIGMOD , 2010. [8] S. Harizopoulos, V. Shkapenyuk, and A. Ailamaki, “Qpipe: A simulta-neously pipelined relational query engine,” in SIGMOD , 2005. [9] L. Mai, K. Zeng, R. Potharaju, L. Xu, S. Suh, S. Venkataraman, P. Costa, T. Kim, S. Muthukrishnan, V. Kuppa, S. Dhulipalla, and S. Rao, “Chi: A scalable and programmable control plane for distributed stream processing systems,” Proc. VLDB Endow. ,vol. 11, no. 10, pp. 1303–1316, 2018. [Online]. Available: http: //www.vldb.org/pvldb/vol11/p1303-mai.pdf [10] S. Chandrasekaran, O. Cooper, A. Deshpande, M. J. Franklin, J. M. Hellerstein, W. Hong, S. Krishnamurthy, S. R. Madden, F. Reiss, and M. A. Shah, “TelegraphCQ: Continuous Dataflow Processing,” in 
+
+Proceedings of the 2003 ACM SIGMOD International Conference on Management of Data . ACM, 2003. [11] J. Karimov, T. Rabl, and V. Markl, “AStream: Ad-hoc Shared Stream Processing,” in Proceedings of the 2019 International Conference on Management of Data . Amsterdam, Netherlands: ACM, Jun. 2019, pp. 607–622. [12] ——, “Ajoin: ad-hoc stream joins at scale,” Proc. VLDB Endow. ,vol. 13, no. 4, p. 435–448, Dec. 2019. [Online]. Available: https://doi.org/10.14778/3372716.3372718 [13] E. Zapridou, P. Sioulas, and A. Ailamaki, “Oligolithic cross-task optimizations across isolated workloads,” in 14th Conference on Innovative Data Systems Research, CIDR 2024, Chaminade, HI, USA, January 14-17, 2024 , 2024. [Online]. Available: https: //www.cidrdb.org/cidr2024/papers/p31-zapridou.pdf [14] A. Flink, “Architecture,” https://nightlies.apache.org/flink/ flink-docs-stable/docs/concepts/flink-architecture/, accessed 2026-03-12. [15] R. Metzger, “Scaling flink automatically with reactive mode. Apache Flink Blog .” https://flink.apache.org/2021/05/06/ scaling-flink-automatically-with-reactive-mode/, 2021, accessed 2026-03-12. [16] A. F. K. Operator, “Autoscaler,” https://nightlies.apache.org/flink/ flink-kubernetes-operator-docs-release-1.11/docs/custom-resource/ autoscaler/, accessed 2026-03-12. [17] Google Cloud Dataflow, “Horizontal Autoscaling,” https://cloud.google. com/dataflow/docs/horizontal-autoscaling, accessed 2026-03-12. [18] Hazelcast Platform, “Autoscaling Jobs,” https://docs.hazelcast.com/ hazelcast/5.5/pipelines/configuring-jobs \#auto-scaling-jobs, accessed 2026-03-12. [19] G. C. Dataflow, “Dynamic work rebalancing,” https://docs.cloud.google. com/dataflow/docs/dynamic-work-rebalancing, accessed 2026-03-12. [20] E. Zapridou, I. Mytilinis, and A. Ailamaki, “Dalton: Learned partitioning for distributed data streams,” Proc. VLDB Endow. ,vol. 16, no. 3, p. 491–504, Nov. 2022. [Online]. Available: https://doi.org/10.14778/3570690.3570699 [21] Y. Fu and C. Soman, “Real-time data infrastructure at uber,” in 
+
+Proceedings of the 2021 International Conference on Management of Data , ser. SIGMOD ’21. New York, NY, USA: Association for Computing Machinery, 2021, p. 2503–2516. [Online]. Available: https://doi.org/10.1145/3448016.3457552 [22] G. Giannikis, G. Alonso, and D. Kossmann, “SharedDB: killing one thousand queries with one stone,” Proc. VLDB Endow. , vol. 5, no. 6, pp. 526–537, 2012. [23] S. Krishnamurthy, C. Wu, and M. J. Franklin, “On-the-fly sharing for streamed aggregation,” in Proceedings of the ACM SIGMOD International Conference on Management of Data, Chicago, Illinois, USA, June 27-29, 2006 , S. Chaudhuri, V. Hristidis, and N. Polyzotis, Eds. ACM, 2006, pp. 623–634. [Online]. Available: https://doi.org/10. 1145/1142473.1142543 [24] G. Giannikis, D. Makreshanski, G. Alonso, and D. Kossmann, “Shared workload optimization,” Proc. VLDB Endow. , vol. 7, no. 6, pp. 429–440, 2014. [Online]. Available: http://www.vldb.org/pvldb/vol7/ p429-giannikis.pdf [25] J. Kang, J. F. Naughton, and S. Viglas, “Evaluating window joins over unbounded streams,” in Proceedings of the 19th International Conference on Data Engineering, March 5-8, 2003, Bangalore, India , U. Dayal, K. Ramamritham, and T. M. Vijayaraman, Eds. IEEE Computer Society, 2003, pp. 341–352. [Online]. Available: https://doi.org/10.1109/ICDE.2003.1260804 [26] S. Listgarten and M.-A. Neimat, “Modelling costs for a mm-dbms,” in Real-Time Databases , 1996. [Online]. Available: https: //api.semanticscholar.org/CorpusID:26503658 [27] Z. Wang, S. Ni, A. Kumar, and C. Li, “Fries: Fast and consistent runtime reconfiguration in dataflow systems with transactional guarantees,” Proc. VLDB Endow. , vol. 16, no. 2, pp. 256–268, 2022. [Online]. Available: https://www.vldb.org/pvldb/vol16/p256-wang.pdf [28] A. Flink, “Metrics,” https://nightlies.apache.org/flink/flink-docs-stable/ docs/ops/metrics/, accessed 2026-03-12. [29] A. Kafka, “Kafka streams monitoring,” https://kafka.apache.org/42/ operations/monitoring/, accessed 2026-03-12. [30] A. Storm, “Storm metrics,” https://storm.apache.org/releases/2.8.0/ Metrics.html, accessed 2026-03-12. [31] Apache Flink, “Resource Allocation Strategy,” https://nightlies.apache. org/flink/flink-docs-stable/docs/deployment/finegrained resource/ \#resource-allocation-strategy, accessed 2026-03-12. [32] T. Heinze, V. Pappalardo, Z. Jerzak, and C. Fetzer, “Auto-scaling techniques for elastic data stream processing,” in 2014 IEEE 30th International Conference on Data Engineering Workshops , 2014, pp. 296–302. [33] P. Carbone, A. Katsifodimos, S. Ewen, V. Markl, S. Haridi, and K. Tzoumas, “Apache Flink™: Stream and Batch Processing in a Single Engine,” IEEE Data Eng. Bull. , vol. 38, pp. 28–38, 2015. [Online]. Available: http://sites.computer.org/debull/A15dec/p28.pdf [34] J. Karimov, T. Rabl, A. Katsifodimos, R. Samarev, H. Heiskanen, and V. Markl, “Benchmarking distributed stream data processing systems,” in 34th IEEE International Conference on Data Engineering, ICDE 2018, Paris, France, April 16-19, 2018 . IEEE Computer Society, 2018, pp. 1507–1518. [Online]. Available: https://doi.org/10.1109/ICDE.2018. 00169 [35] P. Agnihotri, B. Koldehofe, R. Heinrich, C. Binnig, and M. Luthra, “Pdsp-bench: A benchmarking system for parallel and distributed stream processing,” 2025. [Online]. Available: https://arxiv.org/abs/2504.10704 [36] A. Beam, “Nexmark benchmark suite,” https://beam.apache.org/ documentation/sdks/java/testing/nexmark/, accessed 2026-03-12. [37] P. A. Tucker, K. Tufte, V. Papadimos, and D. Maier, “Nexmark – a benchmark for queries over data streams draft,” 2002. [Online]. Available: https://api.semanticscholar.org/CorpusID:18302897 [38] G. Lee, J. Maeng, J. Park, J. Seo, H. Cho, Y. Yang, T. Um, J. Lee, J. W. Lee, and B.-G. Chun, “Flowkv: A semantic-aware store for large-scale state management of stream processing engines,” in Proceedings of the Eighteenth European Conference on Computer Systems , ser. EuroSys ’23. New York, NY, USA: Association for Computing Machinery, 2023, p. 768–783. [Online]. Available: https://doi.org/10.1145/3552326.3567493 [39] S. Li, P. Gerver, J. MacMillan, D. Debrunner, W. Marshall, and K.-L. Wu, “Challenges and experiences in building an efficient apache beam runner for ibm streams,” Proc. VLDB Endow. ,vol. 11, no. 12, p. 1742–1754, Aug. 2018. [Online]. Available: https://doi.org/10.14778/3229863.3229864 [40] V. Kalavri, J. Liagouris, M. Hoffmann, D. Dimitrova, M. Forshaw, and T. Roscoe, “Three steps is all you need: fast, accurate, automatic scaling decisions for distributed streaming dataflows,” in Proceedings of the 13th USENIX Conference on Operating Systems Design and Implementation ,ser. OSDI’18. USA: USENIX Association, 2018, p. 783–798. [41] Y. Mei, R. Xia, Z. Lan, K. Hu, L. Huang, P. Carbone, Y. Lei, V. Kalavri, H. Yin, and F. Wang, “Disaggregated state management in apache flink® 2.0,” Proc. VLDB Endow. , vol. 18, no. 12, p. 4846–4859, Sep. 2025. [Online]. Available: https://doi.org/10.14778/3750601.3750609 [42] S. Finkelstein, “Common expression analysis in database applications,” in Proceedings of the 1982 ACM SIGMOD International Conference on Management of Data - SIGMOD ’82 . ACM Press, 1982, p. 235. [43] J. Park and A. Segev, “Using common subexpressions to optimize multiple queries,” in Proceedings. Fourth International Conference on Data Engineering . IEEE Comput. Soc. Press, 1988, pp. 311–319. [44] P. Kalnis and D. Papadias, “Multi-query optimization for on-line ana-lytical processing,” Information Systems , vol. 28, no. 5, pp. 457–473, 2003. [45] I. Psaroudakis, M. Athanassoulis, and A. Ailamaki, “Sharing data and work across concurrent analytical queries,” Proc. VLDB Endow. , vol. 6, no. 9, pp. 637–648, 2013. [46] T. Nykiel, M. Potamias, C. Mishra, G. Kollios, and N. Koudas, “MR-Share: sharing across multiple queries in MapReduce,” Proc. VLDB Endow. , vol. 3, no. 1, pp. 494–505, 2010. [47] I. Elghandour and A. Aboulnaga, “ReStore: reusing results of MapRe-duce jobs,” Proc. VLDB Endow. , vol. 5, no. 6, pp. 586–597, 2012. [48] G. Wang and C.-Y. Chan, “Multi-Query Optimization in MapReduce Framework,” Proc. VLDB Endow. , vol. 7, no. 3, pp. 145–156, 11 2013. [49] E. Kalyvianaki, W. Wiesemann, Q. H. Vu, D. Kuhn, and P. Pietzuch, “SQPR: Stream Query Planning with Reuse,” in 2011 IEEE 27th International Conference on Data Engineering . IEEE, 2011, pp. 840– 851. [50] J. Traub, P. M. Grulich, A. R. Cu´ ellar, S. Breß, A. Katsifodimos, T. Rabl, and V. Markl, “Scotty: General and Efficient Open-source Window Aggregation for Stream Processing Systems,” ACM Transactions on Database Systems , vol. 46, no. 1, pp. 1–46, 2021. [51] A. U. Shein, P. K. Chrysanthis, and A. Labrinidis, “Slickdeque: High throughput and low latency incremental sliding-window aggregation,” in Proceedings of the 21st International Conference on Extending Database Technology, EDBT 2018, Vienna, Austria, March 26-29, 2018 , M. H. B¨ ohlen, R. Pichler, N. May, E. Rahm, S. Wu, and K. Hose, Eds. OpenProceedings.org, 2018, pp. 397–408. [Online]. Available: https://doi.org/10.5441/002/edbt.2018.35 [52] M. A. Hammad, W. G. Aref, A. K. Elmagarmid, and M. J. Franklin, “Scheduling for shared window joins over data streams,” in Proceedings 2003 VLDB Conference , J.-C. Freytag, P. Lockemann, S. Abiteboul, M. Carey, P. Selinger, and A. Heuer, Eds. San Francisco, CA, USA: Morgan Kaufmann, 2003, pp. 297–308. [53] D. Tang, Z. Shang, W. W. Ma, A. J. Elmore, and S. Krishnan, “Resource-efficient shared query execution via exploiting time slackness,” in 
+
+SIGMOD ’21: International Conference on Management of Data, Virtual Event, China, June 20-25, 2021 , G. Li, Z. Li, S. Idreos, and D. Srivastava, Eds. ACM, 2021, pp. 1797–1810. [Online]. Available: https://doi.org/10.1145/3448016.3457282 [54] T. N. Pham, P. K. Chrysanthis, and A. Labrinidis, “Avoiding class warfare: managing continuous queries with differentiated classes of service,” The VLDB Journal , vol. 25, no. 2, pp. 197–221, 2016. [55] A. Floratou, A. Agrawal, B. Graham, S. Rao, and K. Ramasamy, “Dhalion: self-regulating stream processing in heron,” Proc. VLDB Endow. , vol. 10, no. 12, p. 1825–1836, Aug. 2017. [56] M. Bilal and M. Canini, “Towards automatic parameter tuning of stream processing systems,” ser. SoCC ’17. New York, NY, USA: Association for Computing Machinery, 2017, p. 189–200. [57] V. Kalavri, J. Liagouris, M. Hoffmann, D. Dimitrova, M. Forshaw, and T. Roscoe, “Three steps is all you need: fast, accurate, automatic scaling decisions for distributed streaming dataflows,” in 13th USENIX Symposium on Operating Systems Design and Implementation (OSDI 18) . Carlsbad, CA, USA: USENIX Association, Oct. 2018, pp. 783–798. [Online]. Available: https://www.usenix.org/system/files/ osdi18-kalavri.pdf [58] F. Lombardi, L. Aniello, S. Bonomi, and L. Querzoni, “Elastic Symbiotic Scaling of Operators and Resources in Stream Processing Systems,” 
+
+IEEE Transactions on Parallel and Distributed Systems , vol. 29, no. 3, pp. 572–585, 2018. [59] V. Marangozova-Martin, N. de Palma, and A. El Rheddane, “Multi-Level Elasticity for Data Stream Processing,” IEEE Transactions on Parallel and Distributed Systems , vol. 30, no. 10, pp. 2326–2337, 2019. [60] J. Lian, X. Zhang, Y. Shao, Z. Pu, Q. Xiang, Y. Li, and B. Cui, “ContTune: Continuous Tuning by Conservative Bayesian Optimization for Distributed Stream Data Processing Systems,” Proc. VLDB Endow. ,vol. 16, no. 13, pp. 4282–4295, 2023. [61] B. J. J. Pfister, D. Scheinert, M. K. Geldenhuys, and O. Kao, “Daedalus: Self-adaptive horizontal autoscaling for resource efficiency of distributed stream processing systems,” in Proceedings of the 15th ACM/SPEC International Conference on Performance Engineering , ser. ICPE ’24. New York, NY, USA: Association for Computing Machinery, 2024, p. 130–141.
