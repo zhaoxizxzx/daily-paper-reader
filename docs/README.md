@@ -6,33 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-27
-- 运行时间：2026-03-27 20:07:49 UTC
+- 最新运行日期：2026-03-28
+- 运行时间：2026-03-28 19:48:22 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：1
-- 速读区：3
+- 本次总论文数：1
+- 精读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦系统可观测性与流处理优化，重点解析了基于 eBPF 的无反馈 QoS 指标监控框架 eBeeMetrics。
-研究揭示了通过功能隔离与精准预取可显著降低流处理延迟与成本，并
-- 详情：[/202603/27/README](/202603/27/README)
+今日聚焦太赫兹无线数据中心，探索 AI 驱动的实测校准数字孪生建模技术。
+研究展示了数字孪生在提升太赫兹频段通信预测精度与网络优化上的关键作用。
+建议关注 6G 时代高频段无线组网与物理层仿真结合的前沿趋势。
+- 详情：[/202603/28/README](/202603/28/README)
 
 ### 精读区论文标签
-1. [eBeeMetrics: An eBPF-based Library Framework for Feedback-free Observability of QoS Metrics](/202603/27/2603.25067v1-ebeemetrics-an-ebpf-based-library-framework-for-feedback-free-observability-of-qos-metrics)  
-   标签：评分：8.0/10、query:netmes
-   evidence：基于eBPF的框架，用于观测延迟和吞吐量等应用级QoS指标
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Process Faster, Pay Less: Functional Isolation for Stream Processing](/202603/27/2603.19445v1-process-faster-pay-less-functional-isolation-for-stream-processing)  
+1. [A Measurement-Calibrated AI-Assisted Digital Twin for Terahertz Wireless Data Centers](/202603/28/2603.23837v1-a-measurement-calibrated-ai-assisted-digital-twin-for-terahertz-wireless-data-centers)  
    标签：评分：7.0/10、query:netmes
-   evidence：高吞吐量实时数据流的流处理系统
-2. [Low-Latency Stateful Stream Processing through Timely and Accurate Prefetching](/202603/27/2603.19890v1-low-latency-stateful-stream-processing-through-timely-and-accurate-prefetching)  
-   标签：评分：6.0/10、query:netmes
-   evidence：针对实时大数据量的低延迟有状态流处理
-3. [APISENSOR: Robust Discovery of Web API from Runtime Traffic Logs](/202603/27/2603.23852v1-apisensor-robust-discovery-of-web-api-from-runtime-traffic-logs)  
-   标签：评分：6.0/10、query:netmes
-   evidence：从运行时流量日志中推断API
+   evidence：用于无线数据中心的测量校准数字孪生
 
 
 <div class="dpr-home-promo-card">

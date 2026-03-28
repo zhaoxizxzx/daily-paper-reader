@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-03-28 <!--dpr-date:20260328-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/28/2603.23837v1-a-measurement-calibrated-ai-assisted-digital-twin-for-terahertz-wireless-data-centers" data-sidebar-item="{&quot;title&quot;: &quot;A Measurement-Calibrated AI-Assisted Digital Twin for Terahertz Wireless Data Centers&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.23837v1-a-measurement-calibrated-ai-assisted-digital-twin-for-terahertz-wireless-data-centers&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;netmes&quot;}], &quot;evidence&quot;: &quot;用于无线数据中心的测量校准数字孪生&quot;}">A Measurement-Calibrated AI-Assisted Digital Twin for Terahertz Wireless Data Centers</a>
   * 2026-03-27 <!--dpr-date:20260327-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/27/2603.25067v1-ebeemetrics-an-ebpf-based-library-framework-for-feedback-free-observability-of-qos-metrics" data-sidebar-item="{&quot;title&quot;: &quot;eBeeMetrics: An eBPF-based Library Framework for Feedback-free Observability of QoS Metrics&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.25067v1-ebeemetrics-an-ebpf-based-library-framework-for-feedback-free-observability-of-qos-metrics&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;netmes&quot;}], &quot;evidence&quot;: &quot;基于eBPF的框架，用于观测延迟和吞吐量等应用级QoS指标&quot;}">eBeeMetrics: An eBPF-based Library Framework for Feedback-free Observability of QoS Metrics</a>

@@ -1,0 +1,257 @@
+Title: A Measurement-Calibrated AI-Assisted Digital Twin for Terahertz Wireless Data Centers
+
+URL Source: https://arxiv.org/pdf/2603.23837v1
+
+Published Time: Thu, 26 Mar 2026 00:25:14 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# A Measurement-Calibrated AI-Assisted Digital Twin for Terahertz Wireless Data Centers 
+
+Mingjie Zhu, Yejian Lyu, Ziming Yu, and Chong Han 
+
+Abstract—Terahertz (THz) wireless communication has emerged as a promising solution for future data center in-terconnects; however, accurate channel characterization and system-level performance evaluation in complex indoor envi-ronments remain challenging. In this work, a measurement-calibrated AI-assisted digital twin (DT) framework is developed for THz wireless data centers by tightly integrating channel measurements, ray-tracing (RT), and implicit neural field (INF) modeling. Specifically, channel measurements are first conducted using a vector network analyzer at 300 GHz under both line-of-sight (LoS) and non-line-of-sight (NLoS) scenarios. RT simulations performed on the Sionna platform capture the dominant multipath structures and show good consistency with measured results. Building upon measurement and RT data, an RT-conditioned INF is developed to construct a continuous radio-frequency (RF) field representation, enabling accurate prediction in RT-missing NLoS regions. Relied on the developed DT, coverage and interference analyses are carried out for access point and rack-level deployments, demonstrating the effectiveness of the proposed DT for network planning and architectural optimization in THz wireless data centers. 
+
+I. Introduction Modern data centers play a critical role in supporting cloud computing, artificial intelligence (AI), and large-scale distributed storage systems [1]. With the rapid growth of data-intensive applications, the internal traffic of data centers has increased dramatically, calling for a more flexible and low-latency architecture [2]. Terahertz (THz) wireless data center (WDC) has emerged as apromising connection architecture for the next-generation AI clusters [3], due to its ultra-wide bandwidth, highly directional transmission, and short-range point-to-point connectivity [4]. These characteristics make THz wireless links capable of supporting extremely high data rates with low latency and high energy efficiency, while also enabling dynamic and reconfigurable network topologies. However, the practical deployment and operation of THz wireless data centers face substantial challenges. THz propagation is highly sensitive to environmental dynamics, which is prevalent in realistic data center scenarios. As a result, reliable network planning, interference management, and real-time resource allocation cannot rely solely on static models or offline simulations. This motivates the need for an accurate and adaptive digital twin (DT) [5], [6] that can faithfully represent the wireless environment and support system-level decision-making. A DT for wireless data centers serves as a virtual replica of the physical environment, enabling continuous monitor-ing, performance prediction, and network optimization [7], [8]. In [7], a DT of an in-vehicle scenario is established via ray-tracing (RT). In [8], a multi-layer DT is proposed, but limited to the network layer, not mentioning the physical channel. However, existing studies on wireless DTs primar-ily rely on RT or empirical propagation models. Beyond DT-oriented studies, extensive efforts have been devoted to channel and link-quality prediction using environment-aware or data-driven approaches, e.g., supervised learning methods [9]–[11]. To obtain trustworthy data, to find out the propagation characteristics in the data center scenario, a growing body of literature has investigated channel measurements in data center environments [12]– [14], providing valuable empirical insights into path loss, delay spread, and angular characteristics. Nevertheless, these measurement campaigns are typically conducted for channel characterization purposes only and are rarely integrated into a DT framework or exploited for system-level analysis, such as coverage evaluation and interference assessment. Consequently, there remains a clear gap be-tween channel measurements and operational digital twins for wireless data centers, especially in the THz band. In this work, we aim to bridge this gap by developing a measurement-calibrated DT for THz wireless data centers. We first conduct a vector-network-analyzer (VNA)-based channel measurement campaign in a data center environ-ment to obtain propagation characteristics, which serve as the physical foundation. Building upon this measurement data, we propose an AI-enhanced DT based on implicit neural fields (INF). By modeling the wireless channel as a continuous function of spatial coordinates and RT-derived features, the proposed INF-based twin complements the RT modeling and effectively captures the propagation behaviors that are difficult to model analytically. To demonstrate the effectiveness of the proposed digital twin, we leverage it to perform system-level analyses, including coverage mapping and interference evaluation in a THz wireless data center scenario. These results illustrate the potential of the proposed framework to support network planning and performance assessment in future THz-enabled data centers. The remainder of the paper is organized as follows. The architecture of our proposed DT is introduced in section II. The data processing methods are explained in section III. The case study results of the data center scenario are illustrated in section IV. Finally, Section V draws the conclusion. 
+
+> arXiv:2603.23837v1 [cs.IT] 25 Mar 2026
+
+# Tx 
+
+# Rx (a) Rx Tx Glass Metal Wall 
+
+> Metal Column
+
+Racks Racks  
+
+> 1
+> 2
+> 3
+> 1
+> 2
+> 3
+> 45
+> 6
+> 7
+> 812
+> 13
+> 14
+> 910
+> 11
+
+(b)  
+
+> Fig. 1. Data center scenario scheme.
+
+II. Digital Twin Architecture In this section, a DT framework is introduced to establish a connection between the physical measurement environment and its digital counterpart. The physical twin includes the measurement setups, while the digital twin includes two phases, measurement-calibrated RT twin and INF-based AI twin, respectively. A. Measurement-based Physical Twin The measurement-based physical twin provides funda-mental physical information for DT construction. Specif-ically, VNA-based channel measurements are performed to capture channel characteristics in the data center environment, including MPCs, path loss, and delay spread, which serve as the cornerstone for constructing the DT. Fig. 1(a) shows a photograph of the measurement setup, where a VNA-based channel sounder is used to capture the channel frequency responses (CFRs) inside the data center scenario. The measurement is conducted in the 290 -
+
+310 GHz range. The broad bandwidth of 20 GHz brings a delay resolution of 0.05 ns, ensuring the distance accuracy                           
+
+> TABLE I Measurement Configuration. Parameter Value Frequancy Range 290 -310 GHz Bandwidth 20 GHz Frequqncy Point 2001
+> IF Bandwidth 1kHz Transmitted Power 10 dBm Tx & Rx Attenna Type Horn Tx Height (Rack-to-Rack Case) 2.4mTx Height (AP Case) 2.7mRx Height (Rack-to-Rack Case) 2.4mRx Height (NLoS Case) 1.7mAzimuth Rotation Step 5◦
+> Azimuth Rotation Range [0 ◦,355 ◦]
+> Zenith Rotation Step 10 ◦
+> Zenith Rotation Range [−20 ◦,20 ◦]
+> Attenna Gain 26 dBi Half Power Beamwidth 8◦in horizontal / 6◦in vertical
+
+of 1.5 cm. The transmitter (Tx) is fixed, while a directional scanning scheme is employed at the receiver (Rx), covering an azimuthal range of 0◦ to 355 ◦ and a zenith range of 
+
+−20 ◦ to 20 ◦, both with a rotation step of 5◦. Before the measurements, back-to-back calibration is performed to eliminate system responses. The measurement configura-tions are summarized in Table I. As illustrated in Fig. 1 (b), the measurements covered a total of four cases in the data center, corresponding to line-of-sight (LoS) and non-line-of-sight (NLoS) conditions for both Rack-to-Rack and AP-to-User links. A total of 29 Tx-Rx locations are collected. Tx 1 is positioned alongside the rack, with 9 LoS and 3 NLoS Rxs alongside the rack, simulating the rack-to-rack communication. Tx 2 is positioned in front of the rack, with 5 Rxs (Rx 4 − 8)alongside the rack, representing the rack-to-rack commu-nication in the other direction. Tx 3 simulates an access point (AP), located at the center of the ceiling, with 9 LoS and 3 NLoS Rxs alongside the rack, simulating AP-to-rack communication. B. AI-assisted Digital Twin An AI-assisted DT is developed to construct a spa-tially continuous and physics-consistent representation of THz wireless propagation in the data center. Specifi-cally, conventional RT is first performed using the open-source simulator Sionna, which provides deterministic propagation paths and coarse multipath characteristics derived from the reconstructed scene geometry and ma-terial properties. It is noteworthy that THz material database is constructed in [15], which is used in this paper for digital map construction while geometry is obtained by empirical measurement. Measurement data from the physical twin is employed to calibrate the RT results, constructing the RT twin. These measurement-calibrated RT results serve as a structural propagation prior, capturing the dominant LoS and specular reflection components. To overcome the limitations of RT in complex Spatial Coordinate    
+
+> RT Feature
+> MLP Backbone
+> RT-conditioned Implicit Neural Field
+> Power Prediction
+> AoA Prediction
+> Delay Prediction
+> Outputs
+> RT distance,
+> paths, LoS
+> power, AoA
+> and Delay
+> Fitted NLoS
+> power and
+> delay from
+> measurement
+> RT missing RT existed
+> Positional Encoding (sin/cos)
+> RT Feature Embedding
+> Input
+> Input with Pre-processing
+> Channel
+> Measurement
+> calibrate
+> calibrate Fig. 2. RT-conditioned implicit neural field.
+
+non-line-of-sight (NLoS) regions and sparsely measured areas, an INF model [16] is employed. An INF represents a continuous physical field by parameterizing it as acoordinate-based neural network, which directly maps low-dimensional inputs to target physical quantities, especially for modeling spatially smooth yet highly non-linear radio propagation characteristics. In this work, the INF learns a continuous mapping from spatial coordinates and RT fea-tures to key channel attributes, including received power, angles of arrival, and propagation delays, as illustrated in Fig. 2. By conditioning the INF on the RT twin, the proposed AI twin can refine deterministic predictions and infer propagation characteristics at arbitrary spatial loca-tions, effectively bridging sparse measurement anchors and continuous spatial representations. This RT-based IFN paradigm enables the generation of high-resolution radio maps and multipath profiles across the entire data center, even in regions where direct measurements are unavailable. The accuracy and robustness of the AI-assisted DT are systematically validated through comparisons with real measurement data. Based on the constructed DT, system-level performance analysis is further enabled. Coverage and interference characteristics between rack-to-rack links as well as be-tween APs and racks are evaluated using the spatially continuous channel representation. These metrics provide real-time and fine-grained insights into network perfor-mance, forming a foundation for higher-level optimization and control tasks in data center wireless systems. III. Data Processing for DT A. Signal Model The received THz channel at the Rx can be represented in the delay–angle domain as a superposition of multiple multipath components (MPCs), expressed as 
+
+h(τ, θ, φ ) = 
+
+> L
+
+∑
+
+> ℓ=1
+
+αℓδ(τ − τℓ) · δ(θ − θℓ) · δ(φ − φℓ), (1) where αℓ, θℓ, φℓ, and τℓ stands for the complex amplitude, azimuth and zenith angle of arrival, and delay of arrival of the ℓth path among all the MPCs with a total number of L, respectively. Based on the measured channel frequency responses and the directional scanning procedure, the parameter set of each MPC is estimated by a local maximum method [7] as 
+
+Θℓ = {τℓ, θ ℓ, φ ℓ, α ℓ}. (2) The total received power, or equivalently the path loss, is obtained by coherently aggregating the power contributions of all resolvable MPCs, i.e., 
+
+PL = 
+
+> L
+
+∑
+
+> ℓ=1
+
+|αℓ|2. (3) To model large-scale attenuation trends and provide a compact representation for NLoS extrapolation, the measured path loss is further approximated using the ABG model 
+
+PL ABG = α log 10 d + β, (4) where d denotes the Tx–Rx distance, and α and β
+
+are model parameters obtained via regression over the measurement data. This model is later used to regular-ize propagation characteristics in regions with sparse or missing RT results. B. RT-conditioned Implicit Neural Field To compensate for the sensitivity limitations of RT, an INF is introduced to learn a continuous representation of the radio channel conditioned on both spatial coordinates and RT-derived features. The learning objective of the INF can be formulated as 
+
+min 
+
+> fθ
+
+|fθ − h(θ)|2, (5) where fθ denotes a neural network parameterized by θ, and 
+
+h(θ) represents the ground-truth channel characteristics obtained from measurements. In practice, the INF learns a mapping from spatial locations and RT features to key channel parameters, expressed as 
+
+fϕ(x, RT) → (P, τ, θ, φ ), (6) where x = ( x, y, z ) is the Rx coordinate and P , τ , θ,
+
+φ denote the received power, delay, azimuth angle, and zenith angle, respectively. And the RT feature vector used to condition the INF is defined as 
+
+RT = [ d, P LoS , θ LoS , τ LoS , φ LoS , N paths ]. (7) where d is the Tx–Rx distance, and Npaths is the number of traced paths. It is worth noting that only a compact set of dominant RT features is used as input, rather than all MPCs, in order to avoid excessive network complexity and ensure scalability of the INF. When RT is missing in some area, the fitted NLoS path loss in (4) will replace the missing RT input. To stabilize training and balance the contributions of different physical quantities, normalization is applied as 
+
+P ′
+
+= P − E(P )
+
+D(P ) , τ ′
+
+= τ − E(τ )
+
+D(τ ) , Ω′
+
+= Ω360 ◦ , (8) where Ω = ( θ, φ ) stands for the three-dimensional angle of arrival. The overall training loss is defined as 
+
+L = || P − ˆP || 2 + || τ − ˆτ || 2 + || Ω − ˆΩ|| 2, (9) which jointly enforces accurate reconstruction of power, delay, and angular characteristics. Through this learning process, the INF refines and complements RT predictions, enabling spatially continuous RF field reconstruction across the data center. To improve fidelity, the RT outputs are calibrated using channel measurements from the physical twin by aligning dominant MPCs in terms of delay-angle consistency. Specifically, for each measured path ℓ, the closest RT path is identified via 
+
+k⋆ = arg min 
+
+> k
+
+(
+
+wτ |τℓ − ˆτ k |2 + wθ |θℓ − ˆθk |2 + wφ|φℓ − ˆφk |2)
+
+,
+
+(10) where wτ , wθ , and wφ are weighting factors that balance delay and angular domains. Based on the matched paths, a calibration factor is applied to compensate for modeling errors in propagation loss, 
+
+∆Pk = Pℓ − ˆPk⋆ , (11) which accounts for unmodeled effects such as material uncertainties, diffuse scattering, and partial blockage. After calibration, the RT results provide a measurement-consistent multipath skeleton, preserving the physical structure of propagation while reducing systematic bias. C. Interference and Coverage Based on the constructed digital twin, system-level performance metrics such as interference and coverage [17] can be efficiently evaluated. The signal-to-interference-plus-noise ratio (SINR) at a Rx is given by 
+
+SINR = SI + PN
+
+= PtG0Kug(u)
+
+∑ 
+
+> i∈Φ0/AP 0
+
+PtGiKxi g(xi) + N0B ,
+
+(12) where Pt is the transmit power, G0 and Gi denote the antenna gains of the desired and interfering links, Ku and 
+
+Kxi capture path loss and shadowing effects obtained from the digital twin, g(·) represents small-scale fading, N0 is the noise spectral density, and B is the system bandwidth. Coverage probability is defined as the probability that the received SINR exceeds a predefined threshold T , i.e., 
+
+Pc(T ) = 
+
+∫ ∫ ∫ 
+
+> V
+
+(pL(u)Pc,L (T ) + pN (u)Pc,N (T )) f (v)d V, 
+
+(13) where f (v) is the probability distribution of the Rxs, and 
+
+Pc,L is the conditional coverage probability of LoS case where the 3D distance is given, and can be calculated as 
+
+Pc,L (T ) = P(SINR > T |u) = P( PtG0Kug(u)
+
+N0B > T ), (14) and correspondingly, Pc,N is the conditional coverage prob-ability of NLoS case. In the single-transmitter determin-istic case, Ku is given by the digital twin, and coverage probability can be obtained subsequently as 
+
+Pc,L (T ) = ( Ku > N0BT G0Pt
+
+). (15) IV. Performance Evaluation and Analysis A. Measurement Results of THz Data Center Fig. 3 (a) illustrates the spatial distribution of the extracted MPCs projected onto the two-dimensional x − y
+
+plane after channel parameter estimation. The figure reveals the spatial characteristics of MPC propagation across 60 × 45 tested Rx locations at the height of 1.7 m. At most positions, the dominant MPCs originate from the LoS path as well as reflections from the rear-side surfaces. Taking Rx 29 as an example, in addition to the LoS component, several reflected paths are observed, which are primarily attributed to reflections from metallic walls or glass surfaces in the data center environment. Due to the use of highly directional antennas with narrow beamwidths at the Tx, MPCs arriving from off-boresight directions exhibit relatively low power. As a result, these weak components are suppressed or filtered out during the channel parameter extraction process, leading to a sparse but physically meaningful multipath representation. Fig. 3 (b) presents the corresponding coarse RT results. It can be observed that RT is capable of capturing the dominant directions of arrival of MPCs at each Rx location, showing a one-to-one correspondence with AP  
+
+> (-0.6,0)
+> Racks
+> Power/dB
+> 18
+> 19
+> 20 21
+> 22
+> 23
+> 24
+> 25
+> 29
+> 1
+> 2
+> 3
+> 4
+
+(a) 1
+
+> 2
+> 3
+> 4
+
+(b)  
+
+> Fig. 3. MPC Twins. (a) Physical twin. (b) RT twin.
+
+the measured MPCs. However, while RT provides areasonable approximation of the multipath structure at discrete locations, a more refined and spatially continuous representation of the RF field is required for accurate digital twin construction. This motivates the use of the proposed INF-based representation, which is introduced in the following subsection. B. INF-based AI Twin Construction Fig. 4 compares the received power maps predicted by the proposed AI twin and those obtained from the RT twin. As shown in Fig. 4 (b), the INF-based AI twin produces a spatially continuous received power field, capturing both the dominant LoS region and the complex power variations in NLoS areas. In contrast, the RT result in Fig. 4 (a) exhibits piecewise-constant patterns and abrupt transitions, which stem the RT twin. A key observation is that the AI twin demonstrates strong pre-dictive capability in NLoS regions that are not explicitly covered by deterministic ray paths. In these areas, where the RT twin either fails to generate valid propagation paths or significantly underestimates the received power, RT missing 
+
+Racks Racks 
+
+> Cloumn
+
+(a) Racks Racks 
+
+Predicted Power 
+
+> Cloumn
+
+(b)  
+
+> Fig. 4. Received power map. (a) RT results. (b) prediction by the AI twin.
+
+the INF successfully infers physically consistent signal strength levels by learning from sparse measurement anchors and RT-derived geometric priors. This highlights the advantage of the proposed approach in compensating for missing or weakly modeled multipath contributions in RT, especially in blockage-dominated and reflection-rich environments. Moreover, the INF representation inher-ently models the RF propagation as a continuous spatial field rather than a set of discrete evaluation points. This continuity enables smooth power variations across space and avoids artificial discontinuities commonly observed in RT-based maps. Such a continuous RF field is particularly valuable for coverage analysis, interference estimation, and fine-grained digital twin construction, where reliable interpolation between measured or simulated locations is essential. As shown in Fig. 5, the path loss characteristics obtained from the physical twin, RT twin, and the AI Twin are compared as a function of the Tx-Rx separation distance. The physical twin results serve as the ground truth, capturing both LoS and NLoS propagation effects in the data center environment. The RT-based model is able to reproduce the overall distance-dependent trend 0         
+
+> !0 
+> 0
+> 
+> 00
+> 0
+> 0
+>  $ !## 
+> #%"  $
+>    !0    
+>   &
+>   00 !0    
+> 
+>     !0     
+
+Fig. 5. Path loss modeling of measurement, RT twin and AI Twin. Threshold (dB) 
+
+Fig. 6. Coverage Probability 
+
+of path loss, particularly in LoS-dominated regions, but exhibits noticeable deviations in NLoS scenarios due to unmodeled scattering, diffraction, and blockage effects. By contrast, the proposed AI Twin closely follows the measurement-based path loss across the entire distance range. In particular, in NLoS regions where RT does not work, the AI Twin effectively compensates for RT-missing propagation mechanisms, leading to a more accurate and smoother path loss representation. This demonstrates that, by integrating measurement data with RT-derived structural priors, the AI Twin can provide a reliable and spatially continuous path loss model, which is essential for subsequent coverage and interference analysis. C. System-level Evaluation Example Fig. 6 illustrates an example of coverage performance at ceiling-mounted AP (Tx 3) locations and at rack-level Tx positions. Taking an SINR threshold of 0 dB as an example, the ceiling-mounted AP is able to provide coverage to more than 95% of the positions within the data center environment. In contrast, a Txlocated on a single rack covers only approximately 70% of the area, as inter-rack communication suffers from severe signal degradation caused by dense obstructions and structural blockages in the hall of the data center. These results indicate that rack-to-rack links are significantly more vul-nerable to shadowing and blockage effects than AP-based access links. Through coverage analysis enabled by the digital twin, the impact of deployment height, obstruction density, and network topology on system performance can be quantitatively evaluated. Consequently, the DT provides an effective tool for optimizing AP placement and network architecture, enabling improved coverage, enhanced robustness, and more efficient utilization of wireless resources. V. Conclusion In this paper, a DT framework tailored for THz-WDC is developed. Extensive channel measurements are first conducted using a VNA under both LoS and NLoS scenarios, functioning as the physical twin. RT simulations are performed using the Sionna platform and calibrated with measurement data, establishing the RT twin. The RT twin are shown to be largely consistent with the measured multipath characteristics, validating their abil-ity to capture the dominant propagation mechanisms in the data center environment. An RT-conditioned INF– based AI twin is constructed to represent the spatially continuous distributions of received power, angles, and delays. The proposed AI twin further incorporates dedi-cated calibration for RT-missing NLoS regions, enabling accurate field reconstruction beyond deterministic RT visibility. Ultimately, leveraging the constructed AI twin, coverage and interference analyses were carried out for both ceiling-mounted AP deployments and rack-level Tx configurations. The resulting coverage maps provide quan-titative insights into the impact of deployment strategies and environmental blockage, offering practical guidance for AP placement and network architecture design in THz wireless data centers. References 
+
+[1] A. S. Hamza, J. S. Deogun, and D. R. Alexander, “Wireless communication in data centers: A survey,” IEEE Communica-tions Surveys & Tutorials, vol. 18, no. 3, pp. 1572–1595, 2016. [2] C. A. Thraskias, E. N. Lallas, N. Neumann, L. Schares, B. J. Offrein, R. Henker, D. Plettemeier, F. Ellinger, J. Leuthold, and I. Tomkos, “Survey of photonic and plasmonic intercon-nect technologies for intra-datacenter and high-performance computing communications,” IEEE Communications Surveys & Tutorials, vol. 20, no. 4, pp. 2758–2783, 2018. [3] C. Han, M. Zhu, W. Zhao, Z. Yu, G. Huang, G. Wang, W. Tong, and W. Zhang, “When wires can’t keep up: Reconfigurable ai data centers empowered by terahertz wireless communications,” 2026. [Online]. Available: https://arxiv.org/abs/2512.24110 [4] I. F. Akyildiz, C. Han, Z. Hu, S. Nie, and J. M. Jornet, “Terahertz band communication: An old problem revisited and research directions for the next decade,” IEEE Transactions on Communications, vol. 70, no. 6, pp. 4250–4285, 2022. [5] R. Minerva, G. M. Lee, and N. Crespi, “Digital twin in the iot context: A survey on technical features, scenarios, and architectural models,” Proceedings of the IEEE, vol. 108, no. 10, pp. 1785–1824, 2020. [6] K. Duran, L. Verda Cakir, Y. Yigit, K. Huseynov, S. Ram Kusu, M. Ali Ertürk, and B. Canberk, “Toward digital twin-as-a-service (dtaas) platforms: A survey on architecture, design re-quirements, and performance metrics,” IEEE Communications Surveys & Tutorials, vol. 28, pp. 1845–1878, 2026. [7] M. Zhu, Y. Lyu, and C. Han, “Digital Twin Empowered In-Vehicular Channel Modeling and Wireless Planning in the Terahertz Band,” arXiv e-prints, p. arXiv:2511.07789, Nov. 2025. [8] M. A. Qadir, M. Naeem, and W. Ejaz, “Digital twin-assisted offloading for low-latency and energy-efficient multi-layer net-work,” in Proc. of 2024 IEEE International Conference on Communications (ICC), 2024, pp. 5141–5146. [9] J.-H. Lee and A. F. Molisch, “A scalable and generalizable pathloss map prediction,” IEEE Transactions on Wireless Com-munications, vol. 23, no. 11, pp. 17 793–17 806, 2024. [10] R. Levie, ￿. Yapar, G. Kutyniok, and G. Caire, “Radiounet: Fast radio map estimation with convolutional neural networks,” IEEE Transactions on Wireless Communications, vol. 20, no. 6, pp. 4001–4015, 2021. [11] Y. Liu and D. M. Blough, “Environment-aware link quality prediction for millimeter-wave wireless lans,” in Proc. of 20th ACM International Symposium on Mobility Management and Wireless Access. New York: Association for Computing Ma-chinery, 2022, p. 1–10. [12] C.-L. Cheng, S. Sangodoyin, and A. Zajić, “THz cluster-based modeling and propagation characterization in a data center environment,” IEEE Access, vol. 8, pp. 56 544–56 558, 2020. [13] G. Song, Y. Li, J. Jiang, C. Han, Z. Yu, Y. Du, and Z. Wang, “Channel measurement and characterization at 140 GHz in a wireless data center,” in Proc. of 2022 IEEE Global Communi-cations Conference (GLOBECOM), 2022, pp. 4764–4769. [14] J. M. Eckhardt, T. Doeker, and T. Kürner, “Hybrid channel model for low terahertz links in a data center,” IEEE Open Journal of the Communications Society, vol. 5, pp. 4731–4745, 2024. [15] Z. Fang, Y. Lyu, Z. Yu, and C. Han, “Environment recon-struction in Terahertz monostatic sensing: Joint millimeter-level geometry mapping and material identification,” IEEE Journal of Selected Topics in Electromagnetics, Antennas and Propagation, vol. 1, no. 1, pp. 265–277, 2025. [16] B. Mildenhall, P. P. Srinivasan, M. Tancik, J. T. Barron, R. Ramamoorthi, and R. Ng, “NeRF: representing scenes as neural radiance fields for view synthesis,” Commun. ACM, vol. 65, no. 1, p. 99–106, Dec. 2021. [17] Y. Wu, J. Kokkoniemi, C. Han, and M. Juntti, “Interference and coverage analysis for terahertz networks with indoor blockage effects and line-of-sight access point association,” IEEE Trans-actions on Wireless Communications, vol. 20, no. 3, pp. 1472– 1486, 2021.
