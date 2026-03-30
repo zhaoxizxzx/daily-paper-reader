@@ -1,0 +1,211 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-30T19:46:00.858889+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2603.25875v1",
+      "title": "Detecting Anomalous Topology, Routing Policies, and Congested Interconnections at Internet Scale",
+      "abstract": "Separating mid-path Internet performance from edge effects remains a fundamental challenge in network measurement. This paper presents a methodology for detecting anomalous topology, routing policies, and congested interconnections using controlled A/B comparisons derived from Measurement Lab (M-Lab) data. The approach leverages M-Lab's uniform server selection policy: by comparing performance distributions from clients in the same access ISP to different nearby M-Lab servers, natural experiments are created that isolate mid-path effects while controlling for client-side variation, access network bottlenecks, and diurnal variation in test volume. This analysis is implemented in BigQuery using sparse multidimensional histograms enabling efficient computation of Kolmogorov-Smirnov distance and ratios of geometric mean throughput across many millions of measurements in a single pass. Differences in throughput suggest mid-path bandwidth bottlenecks or traffic management; excess differences in minimum RTT suggest suboptimal routing. These signals of interconnection problems are extracted from the noise deliberately suppressed by other measurement approaches. Public dashboards provide ongoing visibility into all M-Lab metropolitan regions with sufficient servers, with drill-down capability to individual ISP--server plots.",
+      "authors": [
+        "Matt Mathis"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-26T20:02:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.25875v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Internet-scale network measurement and performance isolation",
+      "llm_evidence_cn": "互联网规模的网络测量与性能隔离",
+      "llm_evidence": "互联网规模的网络测量与性能隔离",
+      "canonical_evidence": "互联网规模的网络测量与性能隔离",
+      "llm_tldr_en": "Detects anomalous topology and congestion using controlled A/B comparisons on M-Lab measurement data.",
+      "llm_tldr_cn": "利用M-Lab数据通过A/B对比实验检测互联网规模的拓扑异常、路由策略及链路拥塞。",
+      "llm_tldr": "利用M-Lab数据通过A/B对比实验检测互联网规模的拓扑异常、路由策略及链路拥塞。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.25507v1",
+      "title": "Lightweight GenAI for Network Traffic Synthesis: Fidelity, Augmentation, and Classification",
+      "abstract": "Accurate Network Traffic Classification (NTC) is increasingly constrained by limited labeled data and strict privacy requirements. While Network Traffic Generation (NTG) provides an effective means to mitigate data scarcity, conventional generative methods struggle to model the complex temporal dynamics of modern traffic or/and often incur significant computational cost. In this article, we address the NTG task using lightweight Generative Artificial Intelligence (GenAI) architectures, including transformer-based, state-space, and diffusion models designed for practical deployment. We conduct a systematic evaluation along four axes: (i) (synthetic) traffic fidelity, (ii) synthetic-only training, (iii) data augmentation under low-data regimes, and (iv) computational efficiency. Experiments on two heterogeneous datasets show that lightweight GenAI models preserve both static and temporal traffic characteristics, with transformer and state-space models closely matching real distributions across a complete set of fidelity metrics. Classifiers trained solely on synthetic traffic achieve up to 87% F1-score on real data. In low-data settings, GenAI-driven augmentation improves NTC performance by up to +40%, substantially reducing the gap with full-data training. Overall, transformer-based models provide the best trade-off between fidelity and efficiency, enabling high-quality, privacy-aware traffic synthesis with modest computational overhead.",
+      "authors": [
+        "Giampaolo Bovenzi",
+        "Domenico Ciuonzo",
+        "Jonatan Krolikowski",
+        "Antonio Montieri",
+        "Alfredo Nascita",
+        "Antonio Pescapè",
+        "Dario Rossi"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-26T14:45:04+00:00",
+      "link": "https://arxiv.org/pdf/2603.25507v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "network traffic synthesis for classification and monitoring",
+      "llm_evidence_cn": "用于分类与监控的网络流量合成",
+      "llm_evidence": "用于分类与监控的网络流量合成",
+      "canonical_evidence": "用于分类与监控的网络流量合成",
+      "llm_tldr_en": "Uses lightweight GenAI to synthesize network traffic for improved classification and monitoring fidelity.",
+      "llm_tldr_cn": "利用轻量级生成式AI合成网络流量，以提高流量分类与监控的保真度。",
+      "llm_tldr": "利用轻量级生成式AI合成网络流量，以提高流量分类与监控的保真度。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.23438v1",
+      "title": "Targeted Adversarial Traffic Generation : Black-box Approach to Evade Intrusion Detection Systems in IoT Networks",
+      "abstract": "The integration of machine learning (ML) algorithms into Internet of Things (IoT) applications has introduced significant advantages alongside vulnerabilities to adversarial attacks, especially within IoT-based intrusion detection systems (IDS). While theoretical adversarial attacks have been extensively studied, practical implementation constraints have often been overlooked. This research addresses this gap by evaluating the feasibility of evasion attacks on IoT network-based IDSs, employing a novel black-box adversarial attack. Our study aims to bridge theoretical vulnerabilities with real-world applicability, enhancing understanding and defense against sophisticated threats in modern IoT ecosystems. Additionally, we propose a defense scheme tailored to mitigate the impact of evasion attacks, thereby reinforcing the resilience of ML-based IDSs. Our findings demonstrate successful evasion attacks against IDSs, underscoring their susceptibility to advanced techniques. In contrast, we proposed a defense mechanism that exhibits robust performance by effectively detecting the majority of adversarial traffic, showcasing promising outcomes compared to current state-of-the-art defenses. By addressing these critical cybersecurity challenges, our research contributes to advancing IoT security and provides insights for developing more resilient IDS.",
+      "authors": [
+        "Islam Debicha",
+        "Tayeb Kenaza",
+        "Ishak Charfi",
+        "Salah Mosbah",
+        "Mehdi Sehaki",
+        "Jean-Michel Dricot"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-03-24T17:11:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.23438v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "adversarial traffic generation for IoT network monitoring evaluation",
+      "llm_evidence_cn": "针对物联网网络监控评估的对抗性流量生成",
+      "llm_evidence": "针对物联网网络监控评估的对抗性流量生成",
+      "canonical_evidence": "针对物联网网络监控评估的对抗性流量生成",
+      "llm_tldr_en": "Evaluates evasion attacks on IoT intrusion detection systems using black-box adversarial traffic generation.",
+      "llm_tldr_cn": "利用黑盒对抗性流量生成技术评估物联网入侵检测系统的规避攻击可行性。",
+      "llm_tldr": "利用黑盒对抗性流量生成技术评估物联网入侵检测系统的规避攻击可行性。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23772v1",
+      "title": "AI-driven Intent-Based Networking Approach for Self-configuration of Next Generation Networks",
+      "abstract": "Intent-Based Networking (IBN) aims to simplify operating heterogeneous infrastructures by translating high-level intents into enforceable policies and assuring compliance. However, dependable automation remains difficult because (i) realizing intents from ambiguous natural language into controller-ready policies is brittle and prone to conflicts and unintended side effects, and (ii) assurance is often reactive and struggles in multi-intent settings where faults create cascading symptoms and ambiguous telemetry. This paper proposes an end-to-end closed-loop IBN pipeline that uses large language models with structured validation for natural language to policy realization and conflict-aware activation, and reformulates assurance as proactive multi-intent failure prediction with root-cause disambiguation. The expected outcome is operator-trustworthy automation that provides actionable early warnings, interpretable explanations, and measurable lead time for remediation.",
+      "authors": [
+        "Md. Kamrul Hossain",
+        "Walid Aljoby"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.AI"
+      ],
+      "published": "2026-03-24T23:11:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.23772v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "assurance and telemetry in intent-based networking",
+      "llm_evidence_cn": "意图驱动网络中的保障与遥测",
+      "llm_evidence": "意图驱动网络中的保障与遥测",
+      "canonical_evidence": "意图驱动网络中的保障与遥测",
+      "llm_tldr_en": "Uses LLMs for intent-to-policy translation and reformulates network assurance and telemetry processing.",
+      "llm_tldr_cn": "利用大语言模型实现意图到策略的转换，并重构了多意图场景下的网络保障与遥测处理。",
+      "llm_tldr": "利用大语言模型实现意图到策略的转换，并重构了多意图场景下的网络保障与遥测处理。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23966v1",
+      "title": "Policy-Guided Threat Hunting: An LLM enabled Framework with Splunk SOC Triage",
+      "abstract": "With frequently evolving Advanced Persistent Threats (APTs) in cyberspace, traditional security solutions approaches have become inadequate for threat hunting for organizations. Moreover, SOC (Security Operation Centers) analysts are often overwhelmed and struggle to analyze the huge volume of logs received from diverse devices in organizations. To address these challenges, we propose an automated and dynamic threat hunting framework for monitoring evolving threats, adapting to changing network conditions, and performing risk-based prioritization for the mitigation of suspicious and malicious traffic. By integrating Agentic AI with Splunk, an established SIEM platform, we developed a unique threat hunting framework. The framework systematically and seamlessly integrates different threat hunting modules together, ranging from traffic ingestion to anomaly assessment using a reconstruction-based autoencoder, deep reinforcement learning (DRL) with two layers for initial triage, and a large language model (LLM) for contextual analysis. We evaluated the framework against a publicly available benchmark dataset, as well as against a simulated dataset. The experimental results show that the framework can effectively adapt to different SOC objectives autonomously and identify suspicious and malicious traffic. The framework enhances operational effectiveness by supporting SOC analysts in their decision-making to block, allow, or monitor network traffic. This study thus enhances cybersecurity and threat hunting literature by presenting the novel threat hunting framework for security decision- making, as well as promoting cumulative research efforts to develop more effective frameworks to battle continuously evolving cyber threats.",
+      "authors": [
+        "Rishikesh Sahay",
+        "Bell Eapen",
+        "Weizhi Meng",
+        "Md Rasel Al Mamun",
+        "Nikhil Kumar Dora",
+        "Manjusha Sumasadan",
+        "Sumit Kumar Tetarave",
+        "Rod Soto"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-03-25T05:59:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.23966v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "monitoring evolving threats and adapting to changing network conditions",
+      "llm_evidence_cn": "监控演进威胁并适应不断变化的网络条件",
+      "llm_evidence": "监控演进威胁并适应不断变化的网络条件",
+      "canonical_evidence": "监控演进威胁并适应不断变化的网络条件",
+      "llm_tldr_en": "Proposes an LLM-enabled framework for automated threat hunting and real-time network traffic monitoring.",
+      "llm_tldr_cn": "提出一个基于大模型的框架，用于自动化威胁狩猎和实时网络流量监控。",
+      "llm_tldr": "提出一个基于大模型的框架，用于自动化威胁狩猎和实时网络流量监控。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

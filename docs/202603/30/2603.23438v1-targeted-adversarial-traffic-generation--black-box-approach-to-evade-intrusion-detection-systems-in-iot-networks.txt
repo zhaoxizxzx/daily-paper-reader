@@ -1,0 +1,653 @@
+Title: Targeted Adversarial Traffic Generation : Black-box Approach to Evade Intrusion Detection Systems in IoT Networks
+
+URL Source: https://arxiv.org/pdf/2603.23438v1
+
+Published Time: Wed, 25 Mar 2026 01:34:08 GMT
+
+Number of Pages: 40
+
+Markdown Content:
+# Targeted Adversarial Traffic Generation : Black-box Approach to Evade Intrusion Detection Systems in IoT Networks 
+
+## Islam Debicha, Tayeb Kenaza, Ishak Charfi, Salah Mosbah, Mehdi Sehaki, Jean-Michel Dricot 
+
+Computer Security Laboratory, Ecole Militaire Polytechnique, Algeria. Cybersecurity Research Center, Universit´ e Libre de Bruxelles, Belgium. *Corresponding author(s). E-mail(s): debichasislam@gmail.com; 
+
+Abstract 
+
+The integration of machine learning (ML) algorithms into Internet of Things (IoT) applications has introduced significant advantages alongside vulnerabilities to adversarial attacks, especially within IoT-based intrusion detection systems (IDS). While theoretical adversarial attacks have been extensively studied, prac-tical implementation constraints have often been overlooked. This research addresses this gap by evaluating the feasibility of evasion attacks on IoT network-based IDSs, employing a novel black-box adversarial attack. Our study aims to bridge theoretical vulnerabilities with real-world applicability, enhancing under-standing and defense against sophisticated threats in modern IoT ecosystems. Additionally, we propose a defense scheme tailored to mitigate the impact of eva-sion attacks, thereby reinforcing the resilience of ML-based IDSs. Our findings demonstrate successful evasion attacks against IDSs, underscoring their suscepti-bility to advanced techniques. In contrast, we proposed a defense mechanism that exhibits robust performance by effectively detecting the majority of adversar-ial traffic, showcasing promising outcomes compared to current state-of-the-art defenses. By addressing these critical cybersecurity challenges, our research con-tributes to advancing IoT security and provides insights for developing more resilient IDS. 
+
+Keywords: Intrusion detection system, IoT network, Machine learning, Evasion attacks, Adversarial detection 
+
+1
+
+> arXiv:2603.23438v1 [cs.CR] 24 Mar 2026
+
+# 1 Introduction 
+
+The proliferation of Internet of Things (IoT) technologies has transformed numerous sectors, including smart cities, healthcare, and industrial automation [1]. However, despite their potential, IoT networks are inherently vulnerable due to decentralized architectures and limited resources [2]. Network Intrusion Detection Systems (NIDSs) play a pivotal role in safeguarding IoT networks by monitoring traffic and identifying malicious activities. To address the limitations of traditional signature-based NIDSs, machine learning (ML) algorithms have been increasingly incorporated, thereby enhancing their ability to detect both known and emerging threats [3]. Nevertheless, recent studies have revealed that these ML-based IDSs are susceptible to adversarial attacks, where minimal, carefully crafted perturbations can lead to misclassification errors [4–6]. While adversarial attacks have been extensively investigated in domains such as computer vision [7, 8] and natural language processing (NLP) [9], their application to cybersecurity remains underexplored [10]. This research gap is particularly critical for ML-based IDSs in IoT networks, where the unique characteristics of network traffic demand tailored adversarial strategies. Unlike deep learning (DL) approaches, ML models offer advantages in terms of computational efficiency and performance on tabular data, making them well-suited for resource-constrained IoT environments [11, 12]. However, the vulnerability of these models to adversarial attacks highlights the need for robust defenses that consider domain-specific constraints. The design of practical adversarial attacks against NIDSs necessitates the con-sideration of three critical factors: knowledge restriction, domain constraints, and manipulation space [13]. In our work, we address these factors by proposing a black-box adversarial attack - Distance to Target Center (D2TC) - that effectively manipulates raw network traffic while preserving its semantic integrity. To the best of our knowledge, this study is the first to propose a realistic black-box adversarial attack that integrates domain constraints and manipulation space considerations against NIDSs in IoT networks. The primary contributions of this work are as follows: 
+
+• First, it presents a comprehensive examination of the constraints necessary for generating effective adversarial perturbations while preserving the underlying func-tionality of IoT attack traffic. This analysis emphasizes the importance of adhering to semantic and syntactic constraints during the generation process. 
+
+• Second, it introduces a novel black-box adversarial attack, termed Distance to Target Center (D2TC), specifically designed to generate valid adversarial traffic targeting a particular class of IoT traffic. The D2TC attack is demonstrated to effectively evade machine learning-based intrusion detection systems. 
+
+• Third, it proposes a robust defense mechanism against the D2TC attack, leverag-ing an adversarial detection strategy. This mechanism employs machine learning algorithms to detect and classify adversarial traffic, enabling the intrusion detection system to accurately identify and mitigate D2TC-generated attacks. 2The remainder of this paper is organized as follows. Section 2 reviews related work in adversarial attacks and defenses for IDSs in IoT networks. Section 3 details our proposed D2TC attack method. Section 4 introduces our defense mechanism. Section 5 presents the experimental setup, results, and analysis. Finally, Section 6 concludes the paper and outlines directions for future research. 
+
+# 2 Background & Related works 
+
+## 2.1 Internet Of Things 
+
+The Internet of Things (IoT) is a framework in which all objects have a represen-tation and presence on the Internet. More specifically, the IoT aims to provide new applications and services that bridge the physical and virtual worlds. Machine-to-Machine (M2M) communications form the foundational layer, enabling interactions between devices (”Things”) and applications hosted in the cloud [14].There are many applications of IoT, including Industry 4.0, smart homes, smart cities, healthcare sys-tems, the automotive sector, public services, and critical infrastructure [15–19]. These applications use the connection between IoT devices to increase efficiency, support better decisions, and deliver real-time insights across various domains [20].However, IoT devices are often vulnerable to threats such as weak authentication mechanisms, insecure data storage, and communication protocols, which make them targets for cyberattacks, including unauthorized access, data breaches, and distributed denial-of-service (DDoS) attacks [21]. These vulnerabilities highlight the necessity of deploying robust intrusion detection mechanisms tailored to IoT environments [22]. 
+
+## 2.2 Intrusion Detection System 
+
+An Intrusion Detection System (IDS) is software or a device that detects attacks on a system and notifies the system administrator. It can monitor an individual system or perform local analysis in a network to identify potential threats. IDS provides three key security services: (i) ensuring data confidentiality by securing stored data, (ii) ensuring data availability by allowing access only to authorized users, and (iii) ensur-ing data integrity by maintaining the accuracy and consistency of the data within the system [23]. Based on detection location, IDS can be classified as: Host-based IDS (HIDS), which monitors activities on individual devices, and Network-based IDS (NIDS), which analyzes traffic across a network to detect threats. Based on the detec-tion method, IDS can be categorized as: Signature-based IDS (SIDS), which identifies threats using known attack patterns, and Anomaly-based IDS (AIDS), which detects deviations from normal behavior to identify potential threats [22]. While SIDS provides excellent detection accuracy for previously known intrusions, it is ineffective against zero-day attacks due to the absence of corresponding signatures in its database. As a result, SIDS is less commonly used, while AIDS, which often uses machine learn-ing (ML) techniques, has become more prevalent for its ability to identify unknown threats by detecting deviations from normal behavior [22]. 32.3 Adversarial Attacks 
+
+Adversarial attacks are deliberate attempts to exploit vulnerabilities in ML models by introducing carefully crafted inputs designed to deceive the model [24]. These attacks can be categorized along several dimensions: 
+
+• Adversarial goal : Adversarial attacks are typically classified into untargeted and targeted types. Untargeted attacks aim to cause the model to make any incorrect prediction, prioritizing misclassification without focusing on a specific outcome. On the other hand, targeted attacks are more precise, seeking to manipulate the model’s prediction toward a specific class chosen by the attacker [13]. 
+
+• Adversarial capability : The effectiveness of an adversarial attack often depends on the attacker’s level of access or knowledge about the target system. In white-box attacks , the attacker has full access to the model’s architecture, parameters, and training data. Black-box attacks , in contrast, assume no direct access to the model, relying solely on input-output interactions to craft adversarial examples. Grey-box attacks fall between these extremes, where the attacker has partial knowledge, such as access to the architecture but not the training data [3]. 
+
+• Attack phase : Adversarial attacks can occur at different stages of the machine learning pipeline. Poisoning attacks target the training phase by injecting malicious samples into the dataset, causing the model to learn incorrect patterns. Conversely, 
+
+evasion attacks are executed during the inference phase, where attackers add imper-ceptible perturbations to test samples to fool the trained model without altering the training process [24]. 
+
+## 2.4 Related Works 
+
+Several recent studies have investigated the use of machine learning (ML) techniques in designing intrusion detection systems (IDSs) for IoT networks. These studies focus on improving detection accuracy, optimizing efficiency for resource-constrained devices, and enhancing adaptability to evolving threats. Notable advancements include fea-ture selection methods, anomaly-based detection mechanisms, and novel frameworks addressing IoT-specific challenges [25–28]. While significant progress has been made in integrating ML techniques into IDSs for IoT networks, ensuring their robustness remains a critical challenge. Numerous studies have demonstrated that ML-based IDSs are susceptible to adversarial attacks, where attackers introduce subtle perturbations to input data to manipulate model predictions [29–33]. Among these, evasion attacks are particularly concerning due to their practicality during deployment [3]. For instance, poisoning attacks require access to training data, which is often restricted in real-world scenarios, making evasion attacks more feasible [34]. In addition to our focus on adversarial attacks targeting IDS in IoT networks, recent advances in adversarial robustness across other domains offer valuable insights. For instance, in computer vision and natural language processing, techniques such as the Fast Gradient Sign Method (FGSM) have been applied to generate adversarial point clouds, revealing vulnerabilities in models like PointNet [35]. Furthermore, recent work in image processing has demonstrated that leveraging edge feature information 4can enhance robustness against adversarial attacks [36], while the innovative ”attack as defense” framework evaluates an input’s robustness based on the cost of attack-ing it, providing a novel detection mechanism [37]. In parallel, cutting-edge research in DL-based traffic systems - such as Hierarchical Graph Convolution Networks for Traffic Forecasting [38] and Multi-range Spatial-temporal Transformer Networks for Traffic Forecast via Structural Entropy Optimization [39] - has shown effective meth-ods for capturing complex traffic dynamics. Similarly, advanced anomaly detection approaches, including the Se-GSL framework [40] and the Random Partitioning For-est for network intrusion detection [41], illustrate innovative techniques for identifying subtle irregularities in network behavior. Although these techniques are developed in non-IoT contexts, they offer promising methodologies that could be adapted to fur-ther enhance the adversarial robustness of IoT-based IDSs. Future research should explore the integration of these cross-domain insights to develop more comprehensive and resilient defense strategies. Furthermore, Deep learning (DL)-based IDSs are often preferred due to their ability to learn complex representations. However, they come with significant drawbacks, including higher vulnerability to adversarial attacks, greater computational demands, and dependency on large amounts of labeled data. In contrast, ML models such as random forests and XGBoost offer better accuracy on tabular data, which is crucial in intrusion detection [42]. Additionally, their lower computational footprint makes them well-suited for IoT environments, where energy efficiency and low latency are critical [25]. Yet, adversarial attacks targeting ML models remain significantly less studied compared to DL architectures, justifying our focus on these models. McCarthy et al. [11] highlight that while adversarial attacks on DL models are well-documented, ML models remain underexplored despite their widespread adop-tion in cybersecurity applications. Similarly, [12] provide a systematic review showing that most adversarial attack research has been conducted in computer vision and nat-ural language processing, with significantly fewer studies targeting ML-based IDS in network security. Table 1 summarizes key contributions in this area. 
+
+Table 1. Summary of Recent Works on ML-based IDS               
+
+> Study Contribution Limitations
+> Islam et al. [25] Feature selection for lightweight IDS Limited to specific IoT protocols Sarhan et al. [27] Novel framework for IoT-specific challenges Requires large labeled datasets Altulaihan et al. [28] Real-time anomaly detection Susceptible to adversarial attacks Alslman et al. [31] Robust IDS using adversarial training High resource requirements Yuan et al. [32] Simple yet effective adversarial defenses Limited evaluation on IoT datasets Barik et al. [33] Adversarial robustness for tabular data Not IoT-specific
+
+By focusing exclusively on ML-based IDS, this research aims to bridge this gap by evaluating their robustness against adversarial threats and developing specific defense mechanisms tailored to their characteristics. 53 Black-box Evasion Attack 
+
+## 3.1 Threat Model Attacker’s side  
+
+> Similar IoT network to the victim's
+> Trace de trafic IoT.
+> 2 - Creation of a similar IoT network
+> 3- Generation of IoT traffic traces
+> 1 - Information collection on the targeted IoT network
+> Substitution model
+> 5 - Generation of adversarial examples
+> 4 - Creation of a substitution model
+> 6 -Launching the attack through transferability
+> Defender's side
+> Physical layer
+> Application layer
+> Server
+> Network layer
+> NIDS
+> Gateway
+> Transferability
+
+Fig. 1: Schematic illustration of the threat scenario, showing how the attacker replicates a substitute IoT environment, builds a substitution model, and leverages transferability to craft adversarial examples that evade the defender’s IoT-based NIDS. Figure 1 schematically illustrates our threat scenario. In this setup, the defender’s network employs an IoT-based NIDS that uses machine learning algorithms to detect attacks. Prior to real-time monitoring, the NIDS is trained offline on historical data and network patterns, and operates as a flow-based system to efficiently process high-speed network traffic. A flow exporter extracts key network features from each flow, which are then preprocessed and fed into the NIDS for classification. In our threat scenario, the attacker is assumed to be an outsider operating under a black-box setting. This means that the attacker has limited knowledge of the target IoT network and no direct access to the IDS model used by the defender, including its architecture, parameters, and training data. Instead, the attacker gathers publicly available information and constructs a substitute dataset that closely mimics the net-work traffic characteristics of the target IoT environment, while remaining distinct from the defender’s data. Using this substitute dataset, the attacker builds a substitu-tion model that approximates the behavior of the defender’s IDS. The attacker then leverages this substitution model to generate adversarial network traffic via the D2TC method. Thanks to the transferability property, this adversarial traffic, crafted on the substitute model, remains effective against the defender’s IDS when injected at infer-ence time. Our network setup is designed to reflect realistic IoT conditions, ensuring 6that the substitution model is a close approximation of the actual operational envi-ronment and that the overall threat scenario is both comprehensive and representative of real-world attacks. As illustrated in Figure 1, the overall attack scenario unfolds in six sequential steps: 1. Information Collection: The attacker gathers data on the target IoT network’s structure and behavior from public sources. 2. Network Replication: Based on the collected data, the attacker replicates a simi-lar IoT environment (e.g., using commercially available systems typical of Industrial or Smart Home IoT). 3. Traffic Trace Generation: The attacker generates IoT traffic traces that mimic normal network activity. 4. Substitution Model Creation: Using the substitute dataset, a substitution model is developed to approximate the defender’s IDS behavior. 5. Adversarial Example Generation: The D2TC method is employed on the substitution model to craft adversarial examples that aim to bypass the IDS. 6. Attack Launch via Transferability: The adversarial examples, benefiting from the transferability property, are injected into the target network to evade detection. In accordance with our prior research on NIDS evasion [3], the attacker’s objectives, knowledge, and capabilities are defined as follows: 
+
+• Objective: The attacker pursues two main objectives: to exploit security vulnera-bilities in the network to carry out a malicious attack, and to manipulate the target NIDS so that it misclassifies the attack as benign. 
+
+• Knowledge: As an outsider, the attacker lacks direct access to the enterprise’s internal network and the defender’s IDS configurations. Instead, the attacker relies on remote network scanning, passive monitoring of publicly accessible network interfaces, and open-source intelligence to infer general network characteristics and identify IoT devices. This external approach provides only limited, approximate information about the target environment. 
+
+• Capabilities: The attacker is capable of replicating a simulated IoT network that approximates the victim’s environment, enabling the generation of a substitute dataset for building a substitution model that mimics the defender’s IDS behavior. Concerning the flow exporter, an attacker has the ability to manipulate elements within the traffic domain without possessing detailed knowledge of the specific fea-tures utilized by the NIDS. This capability arises from the widespread use of common network metrics - such as duration , packet count , and size - in NIDS. Attackers may assume that these metrics form part of the defender’s feature set. These features can be obtained from well-known exporters like Argus, CIC-FlowMeter, or nProbe, as well as from scholarly articles [43, 44] that discuss the features used by NIDS models. This detailed threat model reflects a realistic black-box attack scenario where the attacker, acting as an outsider, leverages publicly available information and substitute data to craft effective adversarial examples against the defender’s IDS. 73.2 Network Traffic Manipulation 
+
+To effectively generate adversarial examples, attackers must manipulate key network features while preserving the semantic integrity of the traffic. Based on the attacker’s ability to modify network features, these features are classified into three distinct groups: 1. First group: Features that can be directly manipulated by an attacker. This group includes the features listed in Table 2. 
+
+Table 2. Description of Common Modifiable Features     
+
+> Features Description
+> Dur Duration of the flow spkts Number of packets from source to destination sbytes Number of bytes from source to destination
+
+2. Second group: Features that are dependent on the first group and can be indirectly manipulated. Table 3 illustrates these features and their dependencies. 
+
+Table 3. Description of Common Dependent Features          
+
+> Features Description Dependency
+> Pkts Total number of packets Spkts, Dpkts Bytes Total number of bytes Sbytes, Dbytes Rate Total number of packets per second Dur, Pkts Srate Packets from source to destination per second Dur, Spkts Drate Packets from destination to source per second Dur, Dpkts
+
+3. Third group: Features that are unmodifiable and cannot be altered by the attacker, as summarized in Table 4. 
+
+Table 4. Description of Common Non-Modifiable Features       
+
+> Features Description
+> Dpkts Number of packets from destination to source Dbytes Number of bytes from destination to source Proto Textual representation of protocols Sport Source port number Dport Destination port number
+
+8To ensure that malicious communications remain effective while avoiding detec-tion, attackers must manipulate these network features in a manner that adheres to the syntactic and semantic constraints of the underlying protocols. This adherence is critical to preserving the functional integrity of the traffic while evading IDS detection. Attackers can employ several strategies to manipulate these features: 1. Time Interval Adjustment: As an outsider, the attacker cannot modify internal system components such as the flow exporter or IDS. Instead, the attacker manip-ulates the inter-packet duration by controlling the timing of packet transmissions at the application level using packet injection tools (e.g., Scapy) or custom scripts. For example, if an IoT device typically sends packets every 1 second, the attacker might introduce a slight delay, increasing the interval to 1.1 seconds. This change directly affects the Duration feature, leading to a longer flow duration and indi-rectly impacting derived metrics such as Rate , Srate , and Drate . Importantly, as the packet contents remain unaltered, this strategy maintains protocol compliance while subtly modifying timing characteristics. 2. Packet Injection/Withholding: This strategy targets the packet count. The attacker may inject an additional packet into a flow, thereby increasing the Spkts 
+
+(source packet count), or withhold a packet, reducing the count. Such modifications directly influence the Spkts feature and indirectly affect the overall packet count (Pkts ) as well as derived metrics such as Rate and Srate . For instance, in a flow originally containing 10 packets, injecting one extra packet disrupts the expected count and can mislead the IDS. 3. Byte Count Manipulation: Here, the attacker targets the Sbytes feature by altering the payload size. For example, if an IoT device typically transmits 500 bytes per packet, the attacker might add 20 bytes of padding (byte expansion) to produce 520 bytes per packet. Alternatively, byte compression may reduce the transmitted size. These adjustments directly affect the Sbytes metric and indirectly modify the overall byte count ( Bytes ), thereby controlling the perceived data volume. By employing these strategies, the attacker is able to subtly modify key network features while preserving the overall structure and semantic integrity of the traffic. This balance ensures that adversarial examples remain valid under protocol constraints, making the attack both effective and difficult to detect. 
+
+## 3.3 Adversarial Instances Generation 
+
+The Distance to Target Center (D2TC) method provides an intuitive approach for generating adversarial perturbations. It begins by computing the mean value of each network feature from benign instances and then adds to a malicious instance a per-turbation equal to a portion of the difference between this benign mean and the malicious value. This perturbation is subsequently projected into the space of valid values, ensuring that the generated adversarial instance remains plausible. Figure 2 illustrates the transformation process. As perturbations are applied, the malicious instance gradually shifts toward the benign mean. Once the instance falls within acceptable bounds (as enforced by the projection), it is misclassified as benign and becomes an adversarial example. Although the figure is depicted in two dimensions 9Targeted Class  
+
+> mean
+> Project()
+> Project()
+> Project()
+> Decision Boundary
+> Class D Class C
+> Class A Class B
+> 1%
+> 1%
+> Project()
+> 1%
+> 1%
+
+Fig. 2 : Conceptual illustration of the D2TC approach, where malicious instances are iteratively shifted toward the benign mean and projected into valid ranges. Once inside the benign region, the instance is misclassified as benign, forming an adversarial example for simplicity, the actual manipulation space includes multiple features such as flow duration, packet count, and packet size (see Table 2). In Figure 2, the labels Class A, Class B, Class C, and Class D correspond to different attack types, each representing a distinct category of malicious traffic that is gradually transformed into an adversarial example. The adversarial perturbation process is formalized in Equation 1: 
+
+ϵt = c t Mb − x0 , xadv  
+
+> t
+
+(f ) = Project 
+
+h
+
+x0(f ) + ϵt · sign  Mb(f ) − x0(f )i
+
+.
+
+(1) Where: 
+
+• f : one of the three modifiable network features (i.e., Dur , Spkts , Sbytes ). 
+
+• xadv  
+
+> t
+
+(f ): the value of the adversarial instance at iteration t for feature f .
+
+• x0(f ): the initial value of feature f in the malicious instance before any perturbation. 
+
+• Mb(f ): the mean value of feature f across all benign instances. 
+
+• ϵt: the step size at iteration t, defined as 
+
+ϵt = c t Mb − x0 .
+
+Here, ∥Mb − x0∥ is the Euclidean distance between the initial malicious instance x0
+
+and the benign centroid Mb, and c is a small constant tuning the perturbation rate. 
+
+• sign( ·): a function that returns +1 if its argument is positive and −1 if its argument is negative, thereby indicating the direction in which the feature should move. 
+
+• Project( ·): a projection function that ensures each updated feature value remains within valid syntactic and semantic bounds. In practice, any coordinate that falls outside its allowable range is clipped or mapped to the nearest acceptable value. 10 Role of the Project() Function: In Equation 1, after adding a scaled directional perturbation to the previous feature value, the Project() function maps the result back into a valid range. This step is crucial for two reasons: 1. Syntactic Constraints: It ensures that each network feature (e.g., duration must be non-negative and within realistic limits) remains in its allowable format and range. 2. Semantic Constraints: It preserves the logical relationships among features. For example, if packet count and byte size are interdependent, the projected values maintain consistency between them. Additionally, the Project() function in Equation 1 enforces both a lower and an upper bound on the perturbed feature values. If a modification exceeds the permissible range - defined by these syntactic and semantic constraints - the function clips or maps the value to the nearest acceptable boundary. This mechanism ensures that adversarial instances remain both valid and realistic within the expected constraints of network traffic. By enforcing these constraints, the Project() function guarantees that any adversarial instance remains plausible, thus enhancing the stealth of the attack. Figure 3 illustrates the overall workflow of our adversarial instance generation approach. Starting from the attacker IoT dataset, we split the data into training and test subsets. The training portion is used to build a substitution model that emulates the defender’s IDS. Our adversarial generation algorithm then iteratively applies perturbations (and, if needed, switches masks) to malicious flows, ultimately producing adversarial traffic capable of evading the IDS. Once the algorithm confirms successful evasion, the generated adversarial samples can be launched against the target system. 
+
+Algorithm 1 Crafting adversarial examples using the D2TC method  
+
+> 1:
+
+procedure CraftAdvEx (x) ▷ where x is a malicious flow  
+
+> 2:
+
+t ← 1 
+
+> 3:
+
+repeat  
+
+> 4:
+
+m ← Benign dist (x(f ), M b(f ))  
+
+> 5:
+
+for mask ← mask 1, . . . , mask 7 do  
+
+> 6:
+
+ϵ ← Sign( Mb(f ) − x(f )) · (c · t) · m · mask  
+
+> 7:
+
+xadv ← x + ϵ 
+
+> 8:
+
+xadv ← P roject (xadv ) 
+
+> 9:
+
+if predict (xadv ) = benign then  
+
+> 10:
+
+return xadv  
+
+> 11:
+
+end if  
+
+> 12:
+
+end for  
+
+> 13:
+
+t ← t + 1  
+
+> 14:
+
+until t = Tmax ▷ T max is set to 10 in our experiments  
+
+> 15:
+
+end procedure 
+
+11 Attacker IoT dataset 
+
+> Training
+> Test
+> Substitution IDS
+> model
+> ML
+> Algorithm
+> Model
+> Generated
+> adversarial traffic
+> Adversarial instance
+> generation algorithm
+> Perturbation
+> Iterate over 7
+> mask
+> combinations
+> Yes Evasion No
+
+Fig. 3 : Adversarial instance generation process. The attacker’s IoT dataset is split to build a substitution model that approximates the defender’s IDS. Iterative perturba-tions (and mask switching) are then applied to malicious flows until successful evasion is achieved, producing adversarial traffic ready to bypass the target system. The iterative process is detailed in Algorithm 1. Starting with a small perturbation, the algorithm gradually increases the perturbation until the adversarial instance is misclassified as benign. The constant c controls the perturbation rate, ensuring that only minimal changes are applied initially to reduce detection likelihood. To further minimize unnecessary modifications, our method employs a binary mask approach. Each mask is represented as a binary string, where each digit corresponds to a specific modifiable network feature (e.g., Dur , Spkts , Sbytes ). A value of 1 indicates that the feature is perturbed, while 0 means it remains unchanged. As summarized in Table 5, each mask uniquely defines a combination of feature perturbations. For instance, mask 1 (binary 001 ) perturbs only the Dur feature, mask 3 (binary 100 )perturbs only the Sbytes feature, and mask 7 (binary 111 ) indicates that all three features are perturbed simultaneously. Within Algorithm 1, the loop over the masks (mask1,..., mask7) iterates over this predefined set of binary masks. This loop allows the algorithm to explore various combinations of feature perturbations sequentially, thereby determining the minimal set of modifications required to fool the IDS while preserving the semantic integrity of the network traffic. 12 Table 5. Binary masks for modifiable network features ( Dur , Spkts ,
+
+Sbytes ), indicating which combination of features is perturbed for each mask ID                      
+
+> Mask ID Mask Value Manipulated Features
+> 1001 Dur
+> 2010 Spkts
+> 3100 Sbytes
+> 4011 Dur ,Spkts
+> 5101 Dur ,Sbytes
+> 6110 Sbytes ,Spkts
+> 7111 Dur ,Sbytes ,Spkts
+
+Our adversarial algorithm incorporates two objective functions: one that minimizes the magnitude of change in each feature (via Equation 1), and another that minimizes the number of altered features using the Mask Method . This dual-objective strategy leverages ℓ2-norm regularization to control overall perturbation magnitude, while ℓ0-norm regularization limits the number of modified features. 
+
+How D2TC Minimizes Feature Perturbations 
+
+D2TC aims to minimize the perturbation required to evade detection by incrementally guiding a malicious instance x0 toward the benign class centroid 
+
+Mb = 1
+
+|B|
+
+X
+
+> x∈B
+
+x, 
+
+where B is the set of benign training samples. The direction of perturbation is given by the unit vector 
+
+d = Mb − x0
+
+∥Mb − x0∥ ,
+
+and the step size increases linearly with each iteration according to 
+
+ϵt = c t Mb − x0 ,
+
+where c is a small scaling factor. Each update is computed as 
+
+xt = Project  x0 + ϵt d,
+
+where Project() ensures that the resulting instance remains valid by enforcing syntactic and semantic constraints (i.e., bounding features within permissible ranges). To illustrate the rationale behind this design, let’s consider the case without projection. In this idealized scenario, the cumulative perturbation after t steps is 
+
+xt − x0 =
+
+> t
+
+X
+
+> i=1
+
+ϵi d =
+
+
+
+c · t(t + 1) 2
+
+
+
+d, 
+
+13 which remains collinear with Mb − x0. Hence, the total ℓ2-norm perturbation is 
+
+∥xt − x0∥ = c t(t + 1) 2 ∥Mb − x0∥.
+
+This implies that D2TC follows a straight-line trajectory toward the benign region, which is theoretically the most efficient path in Euclidean space. While projection may alter this trajectory slightly to maintain plausibility, the core idea remains: D2TC heuristically follows the direction that yields the least change in feature space under the constraint of step-wise misclassification. Importantly, we emphasize that D2TC does not guarantee globally minimal pertur-bations. Rather, it seeks to minimize perturbations by applying incremental updates in a direction that is empirically likely to induce misclassification while preserving realis-tic traffic semantics. This balance allows D2TC to generate effective, valid adversarial examples with minimal modification to the original malicious flows. 
+
+# 4 Strengthening adversarial robustness 
+
+Evasion attackers attempt to deceive network intrusion detection systems by intro-ducing precisely crafted perturbations into the network traffic, aiming to maximize classification errors. These alterations in network traffic, often subtle and hard to detect, can be identified by adversarial detectors specifically trained to recognize such malicious modifications. Adversarial detection is thus a crucial first line of defense, focused on identifying whether incoming traffic has been manipulated with adversarial intent. Building on the foundation of adversarial detection, our proposed defense strat-egy enhances the resilience of the NIDS by combining detection techniques with an ensemble method known as Bootstrap Aggregating (Bagging) [45]. The primary goal of this defense is to filter out adversarial examples before they reach the NIDS, thereby preventing potential attacks from disrupting network security. By employing multi-ple adversarial detectors working in tandem during the inference phase, our approach increases the likelihood of identifying and eliminating adversarial perturbations, effectively reducing the risk of evasion attacks. The key difference between standard adversarial detection and our proposed defense strategy lies in their scope and effectiveness. While adversarial detection focuses on recognizing and labeling adversarial inputs, our strategy goes further by integrating these detection methods into an ensemble framework. This approach not only detects adversarial inputs but also mitigates their impact by filtering them out before they can cause harm. In essence, our defense strategy strengthens the over-all robustness of the NIDS, ensuring a more comprehensive and reliable protection against adversarial attacks. 
+
+## 4.1 Data partitioning 
+
+As illustrated in Figure 4, we begin by separating the original dataset into two main categories: benign and malicious . The malicious portion undergoes adversarial instance 14 Dataset  
+
+> Benign Malicious
+> Clean
+> Adversarial
+> Instance
+> Generation Adversarial
+> Defense Dataset
+
+Fig. 4 : Workflow for creating the defense dataset. The original dataset is split into benign and malicious flows, with malicious instances undergoing adversarial instance generation (D2TC) to produce adversarial samples. These adversarial and clean sub-sets are then combined to form a comprehensive defense dataset. generation (via the D2TC method), resulting in a set of adversarial flows, while the 
+
+clean subset is composed of unmodified benign and malicious instances. These two subsets are then combined to form a specialized defense dataset that includes both adversarial and clean traffic. This comprehensive dataset ensures that our defense approach can learn to distinguish subtle perturbations introduced by adversarial examples from legitimate network behavior. After that, as depicted in Figure 5, we partition the defense dataset into train-ing and evaluation sets to train our detectors in a realistic setting. Specifically, the training set is sourced from the defender’s portion of the dataset, providing real-world representations of benign and adversarial instances. Meanwhile, an entirely separate test set, derived from the attacker’s dataset, allows us to assess the generalization capability of our defense strategy on previously unseen data. This two-tier partition-ing scheme helps prevent overfitting and ensures that our results accurately reflect performance under genuine adversarial conditions. 
+
+## 4.2 Defense Process 
+
+The proposed defense method, as depicted in Figure 6, follows a reactive strategy consisting of several steps: 15 Training and Evaluation Dataset    
+
+> 75% 25%
+> Defender Dataset
+> Training Evaluation
+> Adversarial Clean Adversarial Clean
+> Test Dataset
+> Attacker Dataset
+> Test
+> Adversarial Clean
+
+Fig. 5 : Partitioning of the defense dataset into training/evaluation (derived from the defender’s data) and testing (sourced from the attacker’s data) 1. Generating a labeled dataset : A dataset is created containing both clean and adversarial instances. The dataset generation algorithm must produce arepresentative sample sufficient for effectively training the sub-detectors. 2. Training sub-detectors : Thirteen (13) sub-detectors are trained in parallel, each specializing in a single feature (the total number of features is thirteen, as detailed in Tables 2, 3, and 4). This specialization allows each sub-detector to learn the distinctive patterns of clean versus adversarial instances based on its assigned feature. 3. Evaluating sub-detectors : The performance of each sub-detector is evaluated using a separate evaluation dataset. The detection rate (Recall) is used as the primary metric to assess each sub-detector’s ability to correctly identify adversarial instances. 4. Determining sub-detector reliability : Based on the evaluation results, the detection rate values for each sub-detector are normalized to compute reliability weights. These weights indicate the trustworthiness of each sub-detector’s predic-tions and determine the influence that each sub-detector will have on the final decision. An adaptive weighting mechanism is employed to update these weights based on performance on an independent evaluation dataset, mitigating potential inductive bias in assigning importance to individual features. 5. Balancing sub-detector decisions : The reliability weights are used to weight the decisions of each sub-detector. These weighted outputs are then aggregated using ensemble fusion techniques (e.g., Bayesian fusion and Dempster-Shafer combination) to produce a unified and balanced final decision. 6. Deploying the combined detector before the NIDS : The combined detector, which integrates the outputs of all sub-detectors, is positioned ahead of the NIDS. This placement intercepts and filters adversarial traffic before it reaches the IDS, thereby enhancing overall security and system performance. 16 Defender side  
+
+> Training data
+> Training Adversarial Instance
+> Sub-detectors
+> training
+> generate
+> generate Evaluation data
+> Adversarial Instance
+> Sub-detectors
+> evaluation
+> Evaluation
+> Attacker side
+> Adversarial detector
+> Network
+> traffic NIDS
+> Filter out
+> Yes
+> No Adversarial
+> Yes
+> No
+> Malicious
+> Forward
+> Adding reliability weights
+
+Fig. 6 : Overview of the proposed defense process. Sub-detectors are trained and evalu-ated in parallel on labeled clean and adversarial data, with each sub-detector assigned a reliability weight based on its detection performance. The final, ensemble-based deci-sion filter is placed before the NIDS to intercept and mitigate adversarial traffic 
+
+## 4.3 Defense architecture 
+
+As shown in Figure 7, The defense architecture processes each instance by splitting it into 13 feature values, each of which is sent to a corresponding sub-detector for analysis. Each sub-detector computes a decision value, which is then multiplied by 17 its reliability weight. The weighted decisions are combined using a fusion function to determine whether the instance is benign or adversarial. Decision fusion  
+
+> Sub-detector
+> 1
+> w1
+> Pa 1
+> Pc 1
+> w1*P 1
+> Sub-detector
+> n
+> wn
+> Pa n
+> Pc n
+> wn*P n
+> Yes
+> No Adversarial
+> Filter out Yes
+> No
+> Malicious
+> Forward
+> Feature 1
+> Feature n
+> Adversarial detector
+> NIDS
+
+Fig. 7 : Overview of the proposed adversarial detector architecture. Each incoming instance is split into feature-specific sub-detectors, whose decisions are weighted by reliability scores and fused to determine whether the traffic is benign or adversarial In our defense strategy, two fusion rules are evaluated: 
+
+Bayesian fusion : This rule, detailed in Equation 2, combines the predictions from all sub-detectors by integrating their prediction uncertainties and applying reliability weights to each sub-detector’s output. 
+
+Pa =
+
+P13  
+
+> i=1
+
+Pai · wi
+
+P13  
+
+> i=1
+
+Pai · wi + P13  
+
+> i=1
+
+Pci · wi
+
+,Pc =
+
+P13  
+
+> i=1
+
+Pci · wi
+
+P13  
+
+> i=1
+
+Pai · wi + P13  
+
+> i=1
+
+Pci · wi
+
+(2) Here, Pa and Pc represent the probabilities of the instance being adversarial or clean, respectively. The index i refers to the ith sub-detector, and wi is the corresponding reliability weight for that sub-detector. 
+
+Dempster-Shafer combination : This rule integrates evidence from multiple sources (i.e., sub-detectors) to establish a belief level for each classification decision. Let Ω = {ω1, . . . , ω K }, and P (Ω) = {A1, . . . , A Q} denote its power set, where 
+
+Q = 2 K . A mass function M : P (Ω) → [0 , 1] is a basic belief assignment if M (∅) = 0 and P  
+
+> A∈P(Ω)
+
+M (A) = 1. When two bases M1 and M2 represent evidence (i.e., decisions from two detectors), the Dempster-Shafer fusion rule combines them, resulting in M = M1 ⊕ M2 as defined in Eq 3. 
+
+M (A) = ( M1 ⊕ M2)( A) ∝ X
+
+> B1∩B2=A
+
+M1(B1)M2(B2) (3) 18 5 Evaluation 
+
+In this section, we present the findings from various experiments. We start by dis-cussing the performance of the initial attacker and defender models, evaluating different metrics such as precision, recall, and F1 score . These results are based on models trained using the Ton-IoT and Bot-IoT datasets, as detailed in the following subsections. Then, we explore the performance of the models in adversarial scenarios. We con-duct a preliminary study on models trained with the Ton-IoT dataset to analyze transferability between different models. Additionally, we examine the time required for each attack and compare the perturbation levels between the original malicious instances and the adversarial instances. Furthermore, we provide a comprehensive comparison of the proposed adversarial generation algorithm’s performance across the various attacks in each dataset. Finally, we present the results of the proposed defense mechanism against the adversarial instances generated by the previously discussed evasion attack algorithm. To comprehensively evaluate the performance of our adversarial attack and defense mechanisms, we employ several well-established metrics, namely precision, recall, and F1-score. Precision is defined as the ratio of true positive detections to the total num-ber of instances classified as positive. In the context of IDS, this metric measures the proportion of correctly identified attack instances among all instances flagged as mali-cious, reflecting the system’s ability to minimize false alarms. Recall (or detection rate) is the ratio of true positive detections to the actual number of positive instances, indicating how effectively the system captures actual attacks. The F1-score , the har-monic mean of precision and recall, provides a balanced evaluation particularly useful in scenarios with class imbalance, which is common in network intrusion detection where attack instances are rare compared to benign traffic. We selected these metrics because they offer a nuanced view of IDS performance beyond simple accuracy. In adversarial settings - where both false positives and false negatives can have severe consequences - precision, recall, and F1-score allow for a more detailed assessment of how well the IDS discriminates between malicious and benign traffic under adversarial conditions. 
+
+## 5.1 Datasets 
+
+The ToN-IoT [46] and BoT-IoT [47] datasets were used to ensure reproducibility of the experiments and allow for comparable results across multiple datasets, as well as to cover a wider range of attacks. 
+
+• ToN-IoT dataset : provide a variety of data sources obtained from IoT and IIoT telemetry datasets, operating system datasets and network traffic datasets. They were collected from a realistic, large-scale network created at UNSW Canberra’s 
+
+Cyber Range and IoT Labs. The network included a new Industry 4.0 testbed with multiple virtual machines and hosts running Windows, Linux and Kali operating systems. Data sets were collected in parallel to capture normal events and cyber attacks, including DoS, DDoS and ransomware attacks against web applications, IoT gateways and computer systems in the IoT/IIoT network. 19 • BoT-IoT dataset : is a collection of normal and botnet traffic created in a realistic network environment at the Cyber-Range Lab at UNSW Canberra. The dataset provides source files in a variety of formats, including pcap, argus, and csv files, categorized by attack subcategories for easy labeling. The pcap files account for over 69 GB with 72 million records, while the extracted csv stream traffic accounts for 16.7 GB. Attacks included are DDoS, DoS, OS and Service Scan, Keylogging, and Data exfiltration, organized according to the protocol used. To simplify handling, a 5% subset of the dataset was extracted, comprising approximately 3 million records spread across four files with a total size of 1.07 GB. 
+
+## 5.2 Training and Validation Process 
+
+To simulate a realistic black-box attack scenario, we divide each dataset (BoT-IoT and ToN-IoT) into two equal parts: one for the defender and one for the attacker. Specifically, each dataset portion contains over 24,000 instances for BoT-IoT and over 40,000 instances for ToN-IoT, ensuring a balanced mix of benign and malicious traffic. This division allows the attacker to build substitute models using a dataset similar to, but not identical with, the defender’s. Dataset     
+
+> 75% 25%
+> Defender Dataset
+> 25% 75%
+> 50% 50%
+> Training
+> dataset
+> 50% 50%
+> Test
+> dataset
+> Dataset
+> d'entraînement
+> Dataset de
+> test
+> 50% 50%
+> 50% 50%
+> Training
+> dataset
+> 50% 50%
+> Test
+> dataset
+> Attacker Dataset
+> Benign traffic
+> Benign traffic
+> Benign traffic
+> Malicious traffic
+> Malicious traffic
+> Malicious traffic
+> Benign traffic
+> Malicious traffic
+
+Fig. 8 : Partitioning of the BoT-IoT and ToN-IoT datasets into attacker and defender subsets, each further split into training (75%) and test (25%) sets As depicted in Figure 8, each portion of the dataset is further split into training (75%) and test (25%) subsets. This step ensures that both the defender and attacker have distinct training and test sets, preventing data leakage and more accurately reflecting real-world conditions where attackers do not have access to the defender’s exact training data. The 75%–25% split is chosen to provide sufficient data for model training while reserving enough data for robust performance evaluation. 20 Training Procedure 
+
+1. Data Preparation: We apply our preprocessing pipeline (Section 5.3), which includes data cleaning, normalization, and transformation (e.g., one-hot encoding for categorical features). 2. Model Selection: We then choose our machine learning algorithms (KNN, RF, DT, and XGBoost) based on their suitability for tabular data and computational efficiency in IoT settings (Section 5.4). 3. Hyperparameter Tuning: We perform a combined grid search and random search on the training subset to identify optimal hyperparameters for each model. This includes varying parameters like the number of neighbors (KNN), the number of estimators (RF, XGBoost), and splitting criteria (DT). 4. Training Phase: Using the best-found hyperparameters, we train each model on the 75% training subset. This ensures the models learn from a representative sample of benign and malicious traffic. 5. Validation and Attacker/Defender Split: While the defender trains and vali-dates the NIDS using the first portion of the dataset, the attacker trains substitute models on the second portion. This separation mimics a realistic adversarial setting where the attacker has “similar but not identical” data. 
+
+Model Validation 
+
+Once training is complete, each model is evaluated on its respective 25% test subset. This test set remains unseen during training, ensuring an unbiased estimate of the model’s generalization performance. We track key metrics (e.g., precision, recall, F1-score) to measure the IDS’s ability to detect malicious traffic accurately. Additionally, for adversarial evaluations, the attacker uses their trained substitute models to gener-ate adversarial samples, which are then tested against the defender’s NIDS to assess robustness. This two-tier validation scheme provides a comprehensive view of both standard performance and adversarial resilience. Overall, this step-by-step process ensures that both defender and attacker models are trained and tested under conditions that closely resemble real-world IoT network scenarios, facilitating a fair and robust assessment of the proposed methods. 
+
+## 5.3 Preprocessing 
+
+Before introducing the data into our models, we perform several preprocessing steps to ensure the accuracy and suitability of the data for analysis. These steps include data cleaning, normalization, and data transformation. 
+
+Data Cleaning 
+
+Data cleaning involves identifying and correcting errors in the raw dataset to improve its quality and reliability. Our data cleaning process includes: 1. Removing Duplicates: We identify duplicate records by comparing feature values across the dataset and remove redundant entries to avoid bias in the analysis. 2. Correcting Typographical Errors: We both manually and automatically exam-ine the data to correct typos. For example, we verify that the values of certain 21 features conform to known relationships or formulas (e.g., the expected correlation between packet counts and byte counts). 
+
+Normalization 
+
+Normalization transforms raw data into a uniform scale, which is crucial for many machine learning models. In our work, we employ: 
+
+• Min-max Normalization: This method scales each feature to a [0, 1] range using the formula: 
+
+Xscaled = X − min( X)max( X) − min( X) , (4) where X is the original value and Xscaled is the normalized value. We use this method because it is simple and effective at improving model performance. 
+
+• Z-score Normalization: Although mentioned as an alternative, we did not adopt this method, as our experiments showed that min-max normalization provided better performance for our dataset. 
+
+Data Transformation 
+
+Data transformation converts data from its original format into a structure more suitable for analysis and model training. Our transformation process includes: 
+
+Categorical Encoding: Categorical features such as ”Proto”, ”Sport”, and ”Dport” are converted into numerical representations via one-hot encoding. For the features ”Sport” and ”Dport”, which are originally numeric, we first recategorize them into discrete ranges before applying one-hot encoding. This step is crucial for capturing the underlying patterns associated with these features.          
+
+> Table 6. Port range categorization for the Sport and Dport features prior to one-hot encoding
+> Port Range Category
+> 0 to 1023 Well-Known Ports 1024 to 49151 Registered Ports 49152 to 65535 Dynamic/Private Ports
+
+## 5.4 Machine Learning-based NIDS 
+
+Unlike deep learning (DL) approaches, ML models offer advantages in terms of com-putational efficiency and performance on tabular data, making them well-suited for resource-constrained IoT environments [48, 49]. In this work, we employ four distinct machine learning algorithms - K-Nearest Neighbors (KNN), Random Forest (RF), Decision Trees (DT), and XGBoost - to develop IDS models for both the defender and the attacker. KNN is chosen for its simplicity and interpretability, which are beneficial when working with tabular net-work data. RF is selected because it is robust to overfitting and offers reliable feature 22 importance insights, while DTs provide clear decision logic that aids in understanding model behavior. XGBoost is incorporated due to its high predictive performance and efficiency, especially when handling large datasets. By utilizing this diverse set of algo-rithms, we capture a wide range of sensitivities to adversarial perturbations, enabling a more comprehensive evaluation of model transferability and robustness. Hyperparameter selection and tuning were performed using a combination of grid search and random search methods. For instance, we varied the number of neighbors for KNN, adjusted the number of estimators for RF and XGBoost, and experimented with different splitting criteria for DTs. To prevent the attacker from exploiting identical model configurations, we ensured that each model was trained with distinct random hyperparameters. This approach not only guarantees fair comparisons between models but also simulates realistic scenarios where adversaries have limited insight into the defender’s settings. The training and testing processes for all models follow the same pipeline, as illustrated in Figure 9. This standardized process further supports a balanced and transparent evaluation of transferability and performance across various models in the presence of adversarial attacks. The initial performance of the KNN, RF, DT, and XGBoost models on both the attacker and defender sides is shown in Figure 10 for the Bot-IoT dataset and in Figure 11 for the Ton-IoT dataset. In both cases, each model achieves consistently high metric scores (precision, recall, F1-score), exceeding 90%. Moreover, when comparing the defender’s models to the attacker’s substitute models, the observed variations are negligible - around 1% at most - indicating that differences in hyperparameters have minimal impact on overall performance. Pre-processing Data cleaning Dataset   
+
+> Test data
+> Training data
+> Evaluation Trained model
+> Network flow
+> Prediction
+> Model Training
+
+Fig. 9 : Machine Learning pipeline for both attacker and defender 
+
+## 5.5 Impact of adversarial perturbations 
+
+In this subsection, we evaluate the performance of our proposed adversarial attack against the defender IDSs. Specifically, we explore the transferability of adversarial instances generated by the attacker’s models to the defender’s models, and ana-lyze results from various perspectives, including the number of masks used, levels of perturbation, and the time required for generation. 23 Fig. 10 : Initial performance of the trained models (KNN, RF, DT, XGBoost) on both the attacker and defender sides for the Bot-IoT dataset. All models exhibit high metric scores (precision, recall, F1-score), with minimal variations across different hyperparameters. 
+
+Fig. 11 : Initial performance of the trained models (KNN, RF, DT, XGBoost) on both the attacker and defender sides for the Ton-IoT dataset. Similar to the Bot-IoT results, each model achieves consistently high metric scores, demonstrating negligible differences despite variations in hyperparameters. Figure 12 and Figure 13 illustrate the detection performance of various models on the Bot-IoT and Ton-IoT datasets, respectively, before and after adversarial perturba-tions. Initially, all IDS models exhibit robust detection capabilities; however, following the introduction of adversarial samples, their effectiveness significantly declines. For example, the XGBoost detection rate for DDOS attacks drops from 100% to 14% on 24 Fig. 12 : Impact of adversarial perturbations on IDS detection rates for the Bot-IoT dataset. The bars compare detection rates of KNN, RF, DT, and XGBoost across four attack types (DDOS, DOS, Service scan, and OS fingerprinting) before 
+
+and after adversarial perturbations. A marked drop in detection rate indicates the effectiveness of the adversarial modifications in evading each IDS model. 
+
+Fig. 13 : Impact of adversarial perturbations on IDS detection rates for the Ton-IoT dataset. Similar to Figure 12, this figure highlights how the detection performance of KNN, RF, DT, and XGBoost significantly declines once adversarial samples are introduced, demonstrating the robustness of our attack across multiple attack types (DDOS, DOS, Scanning, XSS, Password, Injection, and Backdoor). the Bot-IoT dataset and from 96% to 38% on the Ton-IoT dataset. Similarly, back-door attack detection rates plummet from over 90% to under 10% across all models, highlighting the potency of the adversarial modifications in evading detection. It is important to note that these adversarial instances are generated using the attacker’s models and then evaluated against the defender’s models. In the literature, the transferability property implies that adversarial examples crafted to evade one 25 ML model may also evade others; however, this outcome is not guaranteed, and some attack types might exhibit only partial transferability across different models [50]. This phenomenon can be attributed to several factors: some models may inherently be more robust to the specific feature manipulations used in the attack, resulting in minimal shifts in their decision boundaries; the feasible manipulation space for some attacks is limited by protocol constraints, causing the adversarial examples to remain similar to the original malicious traffic; and variations in attack complexity may also lead to negligible performance differences. 
+
+Fig. 14 : Percentage usage of different mask combinations for each attack in the Bot-IoT dataset. Each bar represents how frequently a particular set of features (e.g., dur , spkts , or sbytes ) is manipulated to create adversarial instances for a specific attack. Higher percentages indicate that those features play a more critical role in evading detection for that attack. Figures 14 and 15 provide a detailed breakdown of mask usage across different attack types in the Bot-IoT and Ton-IoT datasets. Our analysis reveals that masks focusing solely on the Dur feature are predominantly employed in DoS attacks, where even minimal perturbations (often under one second) can significantly mislead the IDS. In contrast, more complex attacks - such as backdoor or OS fingerprinting - tend to involve combinations of features (e.g., Dur+Spkts or Dur+Sbytes ), although these multi-feature masks appear less frequently. This suggests that Dur is particularly critical in achieving successful evasion, since minor manipulations in flow duration can lead to substantial classification errors. Conversely, certain mask combinations (e.g., spkts+sbytes ) occur infrequently, indicating that those features may have a more limited role in disrupting IDS performance for certain attacks. Figure 16 shows the percentage of adversarial instances requiring a given number of iterative perturbation steps (from 1 to 10) to evade detection for each attack. Each “step” corresponds to a single round of adding a minimal perturbation to the malicious 26 Fig. 15 : Proportion of mask use for every attack type in the Ton-IoT dataset. Similar to Figure 14, this figure reveals which feature manipulations ( dur ,
+
+spkts , sbytes , or their combinations) are most frequently employed to generate suc-cessful adversarial samples for each attack category. instance and then checking whether the substitute IDS misclassifies it. We selected an upper bound of 10 steps based on preliminary experiments indicating that most adversarial instances converge to misclassification within this range or fail to converge altogether. Notably, a significant portion of attacks achieve adversarial status within the first step, suggesting that only minimal modifications can be sufficient to mislead the IDS in certain scenarios. The figure thus highlights both the efficiency of our D2TC method in generating adversarial examples and the varying degrees of susceptibility across different attack types. 
+
+Illustration of adversarial perturbations 
+
+Network traffic data consists of multiple features, making it impractical to visually present every attribute’s modification. To illustrate the impact of adversarial pertur-bations, we focus on the duration feature, a key component in network traffic analysis. Our experiments reveal that the perturbations introduced by the D2TC method remain subtle, ensuring that the modified traffic maintains its syntactic and semantic validity. For example, in the Ton-IoT dataset, the average difference in duration across various attack types ranges from 0.10 to 1.05 seconds, with DDOS attacks showing perturbations between 0.32 and 1.05 seconds. Similarly, in the Bot-IoT dataset, most models exhibit negligible differences, with a maximum perturbation of 1.17 seconds. These findings highlight that even minimal, carefully crafted changes - on the order of fractions of a second - can effectively evade IDS detection while preserving the overall 27 Fig. 16 : Number of steps required to generate successful adversarial instances across different attacks. The bars represent the percentage of instances requiring each step count (1 to 10) to achieve evasion. A large proportion of attacks become adversarial within the first step, indicating that only minimal perturbations are necessary to fool the IDS. structure of network traffic. This demonstrates the efficiency of our attack strategy and reinforces the need for more robust detection mechanisms capable of countering such evasive adversarial modifications. 
+
+Table 7. Average generation time (second) of adversarial instances - Bot-IoT                     
+
+> Attack Type KNN RF DT XGBoost
+> DDOS 0.05 0.11 0.01 0.02 DOS 0.02 1.40 1.29 1.53 Service Scan 0.07 0.22 0.01 0.02 OS Fingerprinting 0.07 0.27 0.01 0.02
+
+28 Table 8. Average generation time (second) of adversarial instances - Ton-IoT                                 
+
+> Attack Type KNN RF DT XGBoost
+> DDOS 1.47 0.40 0.01 0.09 DOS 0.08 0.21 0.01 0.74 Scanning 0.06 0.24 0.01 0.12 XSS 1.02 1.62 0.03 0.85 Password 0.43 1.85 0.02 0.40 Injection 1.65 1.88 0.08 1.25 Backdoor 0.08 0.29 0.00 0.08
+
+Computational efficiency of our adversarial instance generation process 
+
+In addition to the impact on detection performance, we also report on the com-putational efficiency of our adversarial instance generation process. Tables 7 and 8 summarize the average generation times for adversarial instances across various attack types and ML models on the Bot-IoT and Ton-IoT datasets, respectively. For example, on the Bot-IoT dataset, the average generation time for DDOS attacks is as low as 0.05 seconds for KNN and 0.11 seconds for RF. On the Ton-IoT dataset, generation times range from 0.01 seconds (DT) to 1.65 seconds (KNN), depending on the attack type and ML model. It should be noticed that the training process is executed offline as a one-time operation, ensuring that it does not affect real-time performance. Moreover, the testing phase exhibits linear time complexity relative to the number of samples, making the testing time negligible compared to the generation time. These findings confirm that our approach is computationally efficient and well-suited for deployment in real-time IDS environments. 
+
+Comparison with other adversarial attack methods 
+
+In addition to the proposed D2TC method, recent literature has explored alternative adversarial attack approaches, notably on-manifold attacks and generative attacks. On-manifold transferability attacks exploit the intrinsic structure of the data by oper-ating directly on the manifold of legitimate traffic samples. These methods generate adversarial examples that lie close to the data distribution, ensuring high semantic similarity with genuine instances (e.g., Xiao, Jiancong, et al. [51]). However, such approaches typically require a comprehensive understanding of the underlying data manifold, which may not be feasible in black-box scenarios where the attacker’s knowl-edge is limited. In contrast, generative attacks - often implemented through generative adversarial networks (GANs) - aim to learn the distribution of normal network traf-fic to generate adversarial samples that are virtually indistinguishable from real data (e.g., Dong et al. [30] and Zhao et al. [29]). While these generative methods can produce highly realistic adversarial examples, they generally entail significant computational complexity and demand large amounts of training data to capture the nuances of net-work traffic. Our D2TC approach addresses these challenges by directly manipulating key network features within predefined semantic and syntactic constraints, thereby ensuring both the validity of the generated adversarial samples and their effective transferability to black-box IDS models. This makes the D2TC method a practical 29 alternative, especially in environments where the attacker has limited knowledge of the target system and computational resources are constrained. 
+
+## 5.6 Defense Effectiveness 
+
+To evaluate the effectiveness of our proposed adversarial defense, we integrated it into our threat scenario and launched two attack rounds. First, the defender’s NIDS operated without any protection. Second, we equipped the defender’s NIDS with our adversarial defense, using both Bayesian and Dempster-Shafer (DS) fusion rules. Tables 9–11 present the detection rates of the defender’s NIDS in each setup, while Figure 17 provide a visual summary. 
+
+Table 9. Detection rates of the defender’s NIDS without adversarial defense across four attacker substitute models (KNN, RF, DT, XGBoost). The final column shows the average detection rate.                          
+
+> Defender models Attacker’s substitute models Average KNN RF DT XGBoost
+> KNN 49% 47% 50% 51% 49% RF 56% 49% 53% 52% 53% DT 55% 50% 52% 52% 52% XGBoost 69% 53% 69% 63% 64%
+
+Table 10. Detection rates of the defender’s NIDS with our adversarial defense (Bayesian fusion) against four attacker substitute models. The final column shows the average detection rate.                          
+
+> Defender models Attacker’s substitute models Average KNN RF DT XGBoost
+> KNN 65% 61% 74% 71% 68% RF 76% 63% 69% 58% 67% DT 66% 39% 68% 68% 60% XGBoost 79% 56% 74% 72% 70%
+
+Overall Results 
+
+Table 9 illustrates that, without any adversarial defense, the NIDS performance can drop to around 50% on average, underscoring the potency of the adversarial samples in evading detection. In contrast, Tables 10 and 11 show a notable improvement -often exceeding 20% - when our defense is employed. This boost highlights the value of our ensemble-based approach, which filters out adversarial traffic before it reaches the NIDS. 30 Table 11. Detection rates of the defender’s NIDS with our adversarial defense (Dempster-Shafer fusion) against four attacker substitute models. The final column shows the average detection rate.                          
+
+> Defender models Attacker’s substitute models Average KNN RF DT XGBoost
+> KNN 65% 61% 75% 71% 68% RF 76% 63% 69% 71% 70% DT 66% 56% 76% 60% 63% XGBoost 82% 66% 76% 73% 74%
+
+Fig. 17 : Defender’s NIDS performance under adversarial traffic, with and without our proposed defense (using Bayesian and Dempster-Shafer fusion). 
+
+Comparison of Bayesian vs. Dempster-Shafer Fusion 
+
+As seen in Figure 17 (and Tables 10 and 11), there is sometimes only a small difference between the performance of the Bayesian-fused NIDS and the Dempster-Shafer-fused NIDS. Both methods rely on the same sub-detector reliability weighting scheme and differ primarily in how they aggregate final decisions. Consequently, they often yield comparable detection rates across KNN, RF, and DT. For XGBoost, however, we observe a 10% difference in performance when no adversarial defense is used, indicating that XGBoost can be more robust under certain conditions but remains susceptible to well-crafted perturbations. 31 5.7 Comparison with State-of-the-Art Adversarial Defenses 
+
+Various defenses against evasion attacks have been explored in the literature, but many suffer from critical drawbacks [52]. Adversarial training, a widely used defense strategy [53, 54], improves model robustness by incorporating adversarial examples during training. However, it often leads to reduced accuracy on benign inputs and demands substantial computational resources [52, 55]. Similarly, Input pre-processing techniques [56, 57] can compromise detection performance on normal traffic[13, 52]. In contrast, our proposed defense preserves the original NIDS parameters and perfor-mance on clean inputs while significantly enhancing resilience to adversarial attacks. By incorporating reliability weights into an ensemble framework - leveraging Bayesian and Dempster-Shafer fusion rules - our approach dynamically adapts to different adver-sarial strategies, maintaining effectiveness even in black-box attack scenarios while ensuring operational efficiency. We compare our proposed defense against a state-of-the-art adversarial detection method used frequently in the literature [50, 58–60]. Adversarial detection involves training a classifier specifically on adversarial instances, allowing it to distinguish adversarial from normal traffic. This method aligns with our defense strategy but lacks the adaptive fusion mechanisms employed in our approach. 
+
+Fig. 18 : Comparison of our Bayesian and Dempster-Shafer fusion-based defenses with a state-of-the-art adversarial detection method across various ML models Figure 18 illustrates the comparative effectiveness of our defense and adversarial detection across various machine learning models. While the performance gap is small 32 for most models (KNN, RF, and XGBoost), our Bayesian and Dempster-Shafer fusion-based defenses exhibit a notable advantage for DT, where they significantly outperform the baseline. However, it is important to note that even with these improvements, the overall detection rate in most configurations remains below 80%, underscoring the persistent challenge of defending against sophisticated adversarial attacks in black-box environments. 
+
+Interpretation and Insights. 
+
+While our defense does not drastically alter the underlying NIDS parameters or train-ing procedure - thus maintaining the original detection performance on benign traffic - it substantially improves resilience to adversarial samples. The slight differences between Bayesian and DS fusion reflect how final decisions are aggregated, rather than major changes in sub-detector reliability weighting. Moreover, variations among dif-ferent ML models (KNN, RF, DT, XGBoost) highlight that certain algorithms exhibit more sensitivity to adversarial perturbations than others, emphasizing the importance of ensemble approaches that leverage multiple perspectives on adversarial traffic. Overall, these findings confirm that our proposed defense mechanism effectively mitigates adversarial attacks without sacrificing operational efficiency, thereby offering a robust and practical solution for network intrusion detection in IoT environments. 
+
+## 5.8 Discussion and Future Directions 
+
+The experimental results provide several key insights into both the vulnerabilities of ML-based IDSs in IoT networks and the effectiveness of our proposed adversar-ial attack and defense mechanisms. Our evaluation demonstrates that even minimal adversarial perturbations – achieved through the D2TC method – can significantly degrade IDS performance, with detection rates for some attacks dropping by as much as 80%. In addition, the high transferability of adversarial examples generated on sub-stitute models underscores the feasibility of black-box attacks, where an attacker with limited knowledge can craft perturbations that remain effective against the defender’s IDS. These adversarial examples not only reveal critical vulnerabilities in current sys-tems but also have practical implications. Even subtle modifications – on the order of fractions of a second in the Duration feature – can cause drastic misclassifications, enabling attackers to bypass network security with minimal effort. Moreover, these adversarial samples serve as invaluable tools for red-team exercises, offering realis-tic benchmarks to evaluate IDS performance under sophisticated attack scenarios. Insights gained from this analysis can inform the development of advanced defense strategies, such as incorporating adversarial training or integrating ensemble-based detection methods. On the defense side, our proposed adversarial detection mechanism – integrating ensemble methods with Bayesian and Dempster-Shafer fusion rules – demonstrated a significant improvement in resilience, recovering detection rates by more than 20% compared to the baseline. While both fusion methods yield comparable overall per-formance, certain models (e.g., decision trees) benefit more from the fusion-based approach, highlighting the importance of properly calibrated reliability weights. 33 Despite these promising outcomes, several limitations remain. First, the D2TC method relies on manipulating specific network features (e.g., Dur , Spkts , and Sbytes ), which may limit its applicability to other network traffic types or IDS architectures that utilize different feature sets. Second, our defense mechanism, which involves train-ing an ensemble of sub-detectors, incurs additional computational overhead compared to simpler approaches such as adversarial training or feature filtering. To assess the impact of this overhead, we conducted a comparative analysis of the execution time during the detection phase (inference) between our fusion-based scheme and standard flat classifiers (e.g., a single XGBoost or Random Forest model). Our measurements show that the complete defense pipeline, including feature extraction, parallel sub-detector evaluation, reliability weighting, and final decision fusion, introduces an average inference delay approximately 2.3 times greater than using a single classifier. It is important to emphasize that this additional delay remains within acceptable limits for real-time intrusion detection systems. Further-more, because the sub-detectors operate independently, the architecture is inherently parallelizable, allowing further performance improvements through hardware accel-eration or lightweight GPU offloading. In summary, although the ensemble-based architecture introduces moderate computational overhead, it does not significantly affect the real-time responsiveness of the defense. Moreover, while our experiments on the Bot-IoT and Ton-IoT datasets demonstrate the effectiveness of our approach in controlled environments, further research is needed to assess its real-time performance and scalability to larger, more diverse datasets. Future work should explore the adaptability of the D2TC method across vari-ous network conditions and investigate hybrid defense strategies that combine our ensemble-based approach with robust feature selection and dynamic adversarial train-ing. Such efforts would contribute to the development of a more comprehensive and resilient defense framework, better capable of mitigating adversarial threats in evolving network environments. Overall, our findings reveal that current ML-based IDSs are highly susceptible to carefully crafted adversarial attacks, underscoring the necessity for robust, efficient defense strategies – such as the one proposed in this work – to enhance the security of IoT networks. 
+
+# 6 Conclusion 
+
+The potential of using NIDS based on machine learning algorithms raises intriguing security issues. Indeed, despite their impressive performance, these ML models are prone to various types of adversarial attacks, especially evasion attacks. Due to their prevalence and feasibility among all adversarial attacks, evasion attacks were con-sidered in this paper to generate adversarial traffic capable of evading the intrusion detection system. This work was performed in the context of IoT networks, which represent highly constrained environments. The proposed framework includes two main contributions. The first is a realis-tic adversarial algorithm capable of generating valid adversarial network traffic by 34 adding small perturbations, thus evading NIDS protection with high probability while maintaining the underlying logic of the network attack. The second component of the proposed framework is a reactive defense that limits the impact of the proposed attack. This defense, inspired by adversarial detection, capitalizes on the fact that it does not change the initial performance of the NIDS since it provides an additional layer of security independent of the model. The proposed defense is considered modular because it uses an ensemble method called bagging. In addition to this ensemble method, it also includes a contextual discounting method that improves the overall performance of the defense. The results demonstrated the efficacy of our adversarial algorithm in generat-ing traffic that successfully evaded the intrusion detection system, underscoring the vulnerability of machine learning-based NIDS to sophisticated evasion techniques. Conversely, our proposed defense proved effective in detecting the majority of adver-sarial traffic, exhibiting promising performance compared to state-of-the-art defenses. Since the proposed framework is easily adaptable to other domains, evaluating its performance in other highly constrained domains would be an interesting future work. 
+
+# Acknowledgement 
+
+The authors would like to express their sincere gratitude to Mohammed Cherif Tifoura for his meticulous proofreading of the manuscript. His valuable insights and suggestions have significantly improved the clarity and quality of this work. 
+
+# Declaration of competing interest 
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper. 
+
+# References 
+
+[1] Heidari, A., Jabraeil Jamali, M.A.: Internet of things intrusion detection systems: a comprehensive review and future directions. Cluster Computing 26 (6), 3753– 3780 (2023) [2] Rahman, S.A., Tout, H., Talhi, C., Mourad, A.: Internet of things intrusion detec-tion: Centralized, on-device, or federated learning? IEEE Network 34 (6), 310–317 (2020) [3] Debicha, I., Cochez, B., Kenaza, T., Debatty, T., Dricot, J.-M., Mees, W.: Adv-bot: Realistic adversarial botnet attacks against network intrusion detection systems. Computers & Security 129 , 103176 (2023) [4] He, Y., Meng, G., Chen, K., Hu, X., He, J.: Towards security threats of deep learning systems: A survey. IEEE Transactions on Software Engineering 48 (5), 1743–1770 (2020) 35 [5] Ilyas, A., Santurkar, S., Tsipras, D., Engstrom, L., Tran, B., Madry, A.: Adver-sarial examples are not bugs, they are features. Advances in neural information processing systems 32 (2019) [6] Debicha, I., Bauwens, R., Debatty, T., Dricot, J.-M., Kenaza, T., Mees, W.: Tad: Transfer learning-based multi-adversarial detection of evasion attacks against net-work intrusion detection systems. Future Generation Computer Systems 138 ,185–197 (2023) [7] Cai, Z., Rane, S., Brito, A.E., Song, C., Krishnamurthy, S.V., Roy-Chowdhury, A.K., Asif, M.S.: Zero-query transfer attacks on context-aware object detectors. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 15024–15034 (2022) [8] Wei, Z., Chen, J., Goldblum, M., Wu, Z., Goldstein, T., Jiang, Y.-G.: Towards transferable adversarial attacks on vision transformers. In: Proceedings of the AAAI Conference on Artificial Intelligence, vol. 36, pp. 2668–2676 (2022) [9] Zang, Y., Qi, F., Yang, C., Liu, Z., Zhang, M., Liu, Q., Sun, M.: Word-level textual adversarial attacking as combinatorial optimization. arXiv preprint arXiv:1910.12196 (2019) [10] Apruzzese, G., Colajanni, M., Marchetti, M.: Evaluating the effectiveness of adversarial attacks against botnet detectors. In: 2019 IEEE 18th International Symposium on Network Computing and Applications (NCA), pp. 1–8 (2019). IEEE [11] McCarthy, A., Ghadafi, E., Andriotis, P., Legg, P.: Functionality-preserving adversarial machine learning for robust classification in cybersecurity and intru-sion detection domains: A survey. Journal of Cybersecurity and Privacy 2(1), 154–190 (2022) [12] Martins, N., Cruz, J.M., Cruz, T., Abreu, P.H.: Adversarial machine learning applied to intrusion and malware scenarios: a systematic review. IEEE Access 8,35403–35419 (2020) [13] Debicha, I., Cochez, B., Kenaza, T., Debatty, T., Dricot, J.-M., Mees, W.: Review on the feasibility of adversarial evasion attacks and defenses for network intrusion detection systems. arXiv preprint arXiv:2303.07003 (2023) [14] Mouha, R.A.R.A., et al. : Internet of things (iot). Journal of Data Analysis and Information Processing 9(02), 77 (2021) [15] Allifah, N.M., Zualkernan, I.A.: Ranking security of iot-based smart home consumer devices. IEEE Access 10 , 18352–18369 (2022) [16] Das, A., Sharma, S.C.M., Ratha, B.K.: The new era of smart cities, from the 36 perspective of the internet of things. In: Rawat, D.B., Ghafoor, K.Z. (eds.) Smart Cities Cybersecurity and Privacy, pp. 1–9 (2019) [17] Jeyaraj, P.R., Nadar, E.R.S.: Smart-monitor: Patient monitoring system for iot-based healthcare system using deep learning. IETE Journal of Research 68 (2), 1435–1442 (2019) [18] TajDini, M., Sokolov, V., Kuzminykh, I., Shiaeles, S., Ghita, B.: Wireless sensors for brain activity—a survey. Electronics 9(12), 2092 (2020) [19] Pradha, S.E., Moshika, A., Natarajan, B., Andal, K., Sambasivam, G., Shan-mugam, M.: Scheduled access strategy for improving sensor node battery life time and delay analysis of wireless body area network. IEEE Access 10 , 3459–3468 (2022) [20] Laghari, A.A., Wu, K., Laghari, R.A., Ali, M., Khan, A.A.: A review and state of art of internet of things (iot). Archives of Computational Methods in Engineering, 1–19 (2021) [21] Baho, S.A., Abawajy, J.: Analysis of consumer iot device vulnerability quantifi-cation frameworks. Electronics 12 (5), 1176 (2023) [22] Khraisat, A., Alazab, A.: A critical review of intrusion detection systems in the internet of things: techniques, deployment strategy, validation strategy, attacks, public datasets and challenges. Cybersecurity 4, 1–27 (2021) [23] Al-Shurbaji, T., Anbar, M., Manickam, S., Hasbullah, I.H., ALfriehate, N., Alabsi, B.A., Alzighaibi, A.R., Hashim, H.: Deep learning-based intrusion detection system for detecting iot botnet attacks: A review. IEEE Access (2025) [24] Zhou, S., Liu, C., Ye, D., Zhu, T., Zhou, W., Yu, P.S.: Adversarial attacks and defenses in deep learning: From a perspective of cybersecurity. ACM Computing Surveys 55 (8), 1–39 (2022) [25] Islam, N., Farhin, F., Sultana, I., Kaiser, M.S., Rahman, M.S., Mahmud, M., SanwarHosen, A., Cho, G.H.: Towards machine learning based intrusion detection in iot networks. Computers, Materials & Continua 69 (2) (2021) [26] Fernando, G.-P., Brayan, A.-A.H., Florina, A.M., Liliana, C.-B., H´ ector-Gabriel, A.-M., Reinel, T.-S.: Enhancing intrusion detection in iot communications through ml model generalization with a new dataset (idsai). IEEE Access (2023) [27] Sarhan, M., Layeghy, S., Moustafa, N., Gallagher, M., Portmann, M.: Feature extraction for machine learning-based intrusion detection in iot networks. Digital Communications and Networks 10 (1), 205–216 (2024) [28] Altulaihan, E., Almaiah, M.A., Aljughaiman, A.: Anomaly detection ids for 37 detecting dos attacks in iot networks based on machine learning algorithms. Sensors 24 (2), 713 (2024) [29] Zhao, S., Li, J., Wang, J., Zhang, Z., Zhu, L., Zhang, Y.: attackgan: Adversar-ial attack against black-box ids using generative adversarial networks. Procedia Computer Science 187 , 128–133 (2021) [30] Dong, B., Wang, H., Luo, R.: Masqueradegan-gp: A generative adversarial net-work framework for evading black-box intrusion detection systems. Internet Technology Letters, 640 (2025) [31] Alslman, Y., Alkasassbeh, M., Almseidin, M.: A robust snmp-mib intrusion detection system against adversarial attacks. Arabian Journal for Science and Engineering 49 (3), 4179–4195 (2024) [32] Yuan, X., Han, S., Huang, W., Ye, H., Kong, X., Zhang, F.: A simple framework to enhance the adversarial robustness of deep learning-based intrusion detection system. Computers & Security 137 , 103644 (2024) [33] Barik, K., Misra, S., Fernandez-Sanz, L.: Adversarial attack detection frame-work based on optimized weighted conditional stepwise adversarial network. International Journal of Information Security, 1–24 (2024) [34] Apruzzese, G., Andreolini, M., Ferretti, L., Marchetti, M., Colajanni, M.: Mod-eling realistic adversarial attacks against network intrusion detection systems. Digital Threats: Research and Practice (DTRAP) 3(3), 1–19 (2022) [35] Zhang, Y., Liang, G., Salem, T., Jacobs, N.: Defense-pointnet: Protecting pointnet against adversarial attacks. In: 2019 IEEE International Conference on Big Data (Big Data), pp. 5654–5660 (2019). IEEE [36] Xiao, Y., Yan, C., Lyu, S., Pei, Q., Liu, X., Zhang, N., Dong, M.: Defed: An edge-feature-enhanced image denoised network against adversarial attacks for secure internet of things. IEEE Internet Things J. (2023) [37] Zhao, Z., Chen, G., Liu, T., Li, T., Song, F., Wang, J., Sun, J.: Attack as detection: Using adversarial attack methods to detect abnormal examples. ACM Transactions on Software Engineering and Methodology 33 (3), 1–45 (2024) [38] Guo, K., Hu, Y., Sun, Y., Qian, S., Gao, J., Yin, B.: Hierarchical graph convolu-tion network for traffic forecasting. In: Proceedings of the AAAI Conference on Artificial Intelligence, vol. 35, pp. 151–159 (2021) [39] Zou, D., Wang, S., Li, X., Peng, H., Wang, Y., Liu, C., Sheng, K., Zhang, B.: Mul-tispans: a multi-range spatial-temporal transformer network for traffic forecast via structural entropy optimization. In: Proceedings of the 17th ACM International Conference on Web Search and Data Mining, pp. 1032–1041 (2024) 38 [40] Zou, D., Peng, H., Huang, X., Yang, R., Li, J., Wu, J., Liu, C., Yu, P.S.: Se-gsl: A general and effective graph structure learning framework through structural entropy optimization. In: Proceedings of the ACM Web Conference 2023, pp. 499–510 (2023) [41] Marteau, P.-F.: Random partitioning forest for point-wise and collective anomaly detection—application to network intrusion detection. IEEE Transactions on Information Forensics and Security 16 , 2157–2172 (2021) [42] Shwartz-Ziv, R., Armon, A.: Tabular data: Deep learning is not all you need. Information Fusion 81 , 84–90 (2022) [43] Sarhan, M., Layeghy, S., Portmann, M.: Towards a standard feature set for net-work intrusion detection system datasets. Mobile Networks and Applications 
+
+27 (1), 357–370 (2022) [44] Pekta¸ s, A., Acarman, T.: Effective feature selection for botnet detection based on network flow analysis. In: International Conference Automatics and Informatics, pp. 1–4 (2017) [45] Breiman, L.: Bagging predictors. Machine learning 24 , 123–140 (1996) [46] Moustafa, N.: A new distributed architecture for evaluating ai-based security systems at the edge: Network ton iot datasets. Sustainable Cities and Society 72 ,102994 (2021) [47] Koroniotis, N., Moustafa, N., Sitnikova, E., Turnbull, B.: Towards the develop-ment of realistic botnet dataset in the internet of things for network forensic analytics: Bot-iot dataset. Future Generation Computer Systems 100 , 779–796 (2019) [48] Apruzzese, G., Andreolini, M., Colajanni, M., Marchetti, M.: Hardening ran-dom forest cyber detectors against adversarial attacks. IEEE Transactions on Emerging Topics in Computational Intelligence 4(4), 427–439 (2020) [49] Elsayed, N., ElSayed, Z., Maida, A.S.: Litelstm architecture for deep recurrent neural networks. In: 2022 IEEE International Symposium on Circuits and Systems (ISCAS), pp. 1304–1308 (2022). IEEE [50] Debicha, I., Debatty, T., Dricot, J.-M., Mees, W., Kenaza, T.: Detect & reject for transferability of black-box adversarial attacks against network intrusion detec-tion systems. In: International Conference on Advances in Cyber Security, pp. 329–339 (2021). Springer [51] Xiao, J., Yang, L., Fan, Y., Wang, J., Luo, Z.-Q.: Understanding adversarial robustness against on-manifold adversarial examples. Pattern Recognition 159 ,111071 (2025) 39 [52] He, K., Kim, D.D., Asghar, M.R.: Adversarial machine learning for network intru-sion detection systems: a comprehensive survey. IEEE Communications Surveys & Tutorials (2023) [53] Xiong, W.D., Luo, K.L., Li, R.: Aidtf: Adversarial training framework for network intrusion detection. Computers & Security 128 , 103141 (2023) [54] Rashid, M.M., Kamruzzaman, J., Hassan, M.M., Imam, T., Wibowo, S., Gordon, S., Fortino, G.: Adversarial training for deep learning-based cyberattack detection in iot-based smart city applications. Computers & Security 120 , 102783 (2022) [55] Debicha, I., Debatty, T., Dricot, J., Mees, W.: Adversarial training for deep learning-based intrusion detection systems. In: The Sixteenth International Conference on Systems, pp. 45–49 (2021) [56] Qiu, H., Zeng, Y., Zheng, Q., Guo, S., Zhang, T., Li, H.: An efficient preprocessing-based approach to mitigate advanced adversarial attacks. IEEE Transactions on Computers 73 (3), 645–655 (2021) [57] Meng, D., Chen, H.: Magnet: a two-pronged defense against adversarial exam-ples. In: Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security, pp. 135–147 (2017) [58] Grosse, K., Manoharan, P., Papernot, N., Backes, M., McDaniel, P.: On the (statistical) detection of adversarial examples. arXiv preprint arXiv:1702.06280 (2017) [59] Kumar, V., Kumar, K., Singh, M., Kumar, N.: Nids-da: Detecting functionally preserved adversarial examples for network intrusion detection system using deep autoencoders. Expert Systems with Applications, 126513 (2025) [60] Wang, N., Chen, Y., Xiao, Y., Hu, Y., Lou, W., Hou, Y.T.: Manda: On adversarial example detection for network intrusion detection system. IEEE Transactions on Dependable and Secure Computing 20 (2), 1139–1153 (2022) 40
