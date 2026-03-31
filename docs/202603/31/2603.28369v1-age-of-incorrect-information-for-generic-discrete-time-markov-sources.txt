@@ -1,0 +1,1671 @@
+Title: Age of Incorrect Information for Generic Discrete-Time Markov Sources
+
+URL Source: https://arxiv.org/pdf/2603.28369v1
+
+Published Time: Tue, 31 Mar 2026 02:42:09 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 1
+
+# Age of Incorrect Information for Generic Discrete-Time Markov Sources 
+
+Konstantinos Bountrogiannis, Anthony Ephremides, Panagiotis Tsakalides, Member, IEEE ,and George Tzagkarakis 
+
+Abstract —This work introduces a framework for analyzing the Age of Incorrect Information (AoII) in a real-time monitoring system with a generic discrete-time Markov source. We study a noisy communication system employing a hybrid automatic repeat request (HARQ) protocol, subject to a transmission rate constraint. The optimization problem is formulated as a constrained Markov decision process (CMDP), and it is shown that there exists an optimal policy that is a randomized mixture of two stationary policies. To overcome the intractability of computing the optimal stationary policies, we develop a multiple-threshold policy class where thresholds depend on the source, the receiver, and the packet count. By establishing a Markov renewal structure induced by threshold policies, we derive closed-form expressions for the long-term average AoII and transmission rate. The proposed policy is constructed via a relative value iteration algorithm that leverages the threshold structure to skip computations, combined with a bisection search to satisfy the rate constraint. To accommodate scenarios requiring lower computational complexity, we adapt the same technique to produce a simpler single-threshold policy that trades optimality for efficiency. Numerical experiments exhibit that both threshold-based policies outperform periodic scheduling, with the multiple-threshold approach matching the performance of the globally optimal policy. 
+
+Index Terms —Age of Incorrect Information, Markov decision process, hybrid ARQ, threshold policies, transmission rate con-straint 
+
+I. I NTRODUCTION 
+
+# REAL-TIME monitoring of remote data sources plays a central role in the development of many emerging applications, driven by recent advancements in communica-tion and sensing technologies. Examples include autonomous driving, real-time video feedback, anomaly detection in critical infrastructures, remote surgery, augmented reality networks, and haptic communications. In such use cases, the timely delivery of information is essential, and the Age of Infor-mation (AoI) [1] metric has been introduced and evaluated to assess system performance. Compared to the traditional 
+
+Konstantinos Bountrogiannis and Panagiotis Tsakalides are with the Depart-ment of Computer Science, University of Crete, Heraklion 700 13, Greece, and with the Institute of Computer Science, Foundation for Research and Technology – Hellas, Heraklion 700 13, Greece E-mail: kbountrogiannis@csd.uoc.gr; tsakalid@csd.uoc.gr Anthony Ephremides is with the Electrical and Computer Engineering Department, University of Maryland, College Park, MD 20742 USA E-mail: etony@umd.edu George Tzagkarakis is with the Institute of Computer Science, Foundation for Research and Technology – Hellas, Heraklion 700 13, Greece E-mail: gtzag@ics.forth.gr This work was supported in part by the European Commission under the framework of the National Recovery and Resilience Plan Greece 2.0 – NextGenerationEU, Grant TAEDR-0536642 (Smart Cities). 
+
+delay metrics, AoI measures not only the communication time in the network, but also the time a message spends before being scheduled for submission to the network. As such, AoI measures the freshness of the communicated information and highlights the need to update the monitoring system with more current data to avoid excessive aging. Formally, the AoI process δAoI  
+
+> t
+
+is defined as the difference 
+
+δAoI  
+
+> t
+
+≜ t − ut , (1) where ut is the generation time of the most recently received message. One limitation of the traditional AoI metric is that it focuses solely on the freshness of information, without accounting for the dynamics of the data source itself. For example, if one source changes rapidly and another changes slowly, the same communication system may produce samples with the same AoI for both sources. However, the sample from the fast-changing source may be less relevant or useful for decision-making, because it is more likely to deviate from the contemporary source state at the time of arrival. This observation prompted the introduction of the Age of Incorrect Information (AoII) metric [2], which is the focus of this work. Unlike traditional AoI, AoII is a content-aware metric that penalizes the duration during which the information at the monitor differs from the source state, i.e., is incorrect, and is weighted by a distortion function. Specifically, let 
+
+g(St, ˆSt) denote a distortion function between the source state 
+
+St and the estimate at the monitor ˆSt at time t. Moreover, define the age function 
+
+at ≜ t − ht , (2) where ht is the last time instant when g(Xt, ˆXt) was zero. The AoII process ∆t is the product 
+
+δt ≜ at · g(Xt, ˆXt). (3) In our analysis, we employ an indicator distortion function, 
+
+g(Xt, ˆXt) = 1{Xt̸ = ˆXt} . (4) Figure 1 illustrates concurrent sample paths of both the AoI and the AoII. The AoII metric has been mostly studied with discrete-time Markov sources, since they offer an analytical advantage. The source models in [3]–[5] are binary symmetric Markov chains. The works [2], [6]–[9] focus on arbitrarily large symmetric Markov models. In [10], the source model is a bird-death Markov chain. An alternative formulation is employed in [11],              
+
+> arXiv:2603.28369v1 [cs.IT] 30 Mar 2026 AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 2s1d1s2d2
+> 01
+> Source
+> 01
+> Monitor
+> s1d1s2d2
+> 01
+> Distortion
+> s1d1s2d2
+> 024
+> AoI
+> s1d1s2d2
+
+time-slots         
+
+> 024
+> AoII
+> Fig. 1. Concurrent discrete-time sample paths of the AoI and AoII. A binary source is sampled at slots si,i= 1 ,2, and decoded by the receiver at slots
+> di,i= 1 ,2, respectively. The distortion is the absolute difference between the source and monitor values.
+
+where the source is not modeled directly, but a binary Markov chain is used to model the distortion function. Those works exhibit that AoII-optimal transmission policies in resource-constrained environments commonly admit a threshold struc-ture, a result also typical for the conventional AoI [12]–[16]. Generic Markov sources, i.e., without any pre-specified structure, have limited appearance in the literature. The semi-nal work [17] analyzes the AoII for a generic continuous-time Markov source, proving that the optimal policy in the contin-uous setting is a multiple-threshold policy where thresholds depend on both the source and the estimate at the receiver. Acknowledging the intractability of the problem, a suboptimal solution is proposed in which the thresholds depend only on the estimate. Recently, a work available in [18] develops a similar policy for a discrete-time Markov source. Notably, multiple-threshold policies have been previously analyzed in the setting of bird-death Markov chains in [10]. Our work investigates a noisy communication system that employs a generic discrete-time Markov source. The trans-mitter and receiver use a hybrid automatic repeat request (HARQ) protocol to correct transmission errors, with the decoder requesting additional transmissions to improve the decoding probability. Additionally, the transmission policy is 
+
+1
+
+2
+
+3
+
+4
+
+p1,1
+
+p1,2
+
+p1,3
+
+p1,4
+
+p2,1
+
+p2,2
+
+p2,3
+
+p2,4
+
+p3,1
+
+p3,2
+
+p3,3
+
+p3,4p4,1
+
+p4,2
+
+p4,3
+
+p4,4    
+
+> Fig. 2. A generic Markov chain of N= 4 states.
+
+subject to a resource constraint on the long-term average transmission rate. The main contributions of our work are summarized as follows:  
+
+> •
+
+We study AoII minimization for generic discrete-time Markov sources over a noisy HARQ channel under a transmission rate constraint, extending prior works that focus on structured or symmetric models.  
+
+> •
+
+The optimization problem is formulated as a constrained Markov decision process (CMDP), and it is shown that there exists an optimal policy that is a randomized mixture of two stationary policies.  
+
+> •
+
+To address the intractability of computing the optimal stationary policies, we develop a class of multiple-threshold transmission policies, denoted as F(S, W, r ),where transmissions are triggered when the AoII exceeds state-dependent thresholds based on the source state, the receiver estimate, and the packet count.  
+
+> •
+
+We establish a Markov renewal structure induced by threshold policies and derive closed-form expressions for the long-term average AoII and transmission rate, enabling efficient evaluation of candidate policies. Lever-aging the threshold structure, we design an efficient relative value iteration (RVI) algorithm combined with a bisection search to approximate the optimal threshold policy.  
+
+> •
+
+To accommodate scenarios with large state spaces or frequent policy refinements, we develop single-threshold policies, F(1) , that trade optimality for efficiency by lifting the dependency on the real-time system parameters except the AoII. AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 3
+
+II. P ROBLEM DEFINITION 
+
+A. Communication Model 
+
+We consider a discrete-time (slotted) communication model over a noisy channel. We focus on N -ary generic Markov sources. In this context, the (single-step) transition probability from state i to state j is denoted by pi,j , {i, j } ∈ { 1, . . . , N }2.An example is depicted in Fig. 2 for N = 4 .At each time slot, the transmitter acquires a sample from the source and decides whether to transmit or discard it. The sam-ple to be transmitted is encoded into a packet with a channel coding scheme and communicated through a noisy channel to the receiver. Upon receiving the packet, the receiver attempts to decode it. If the decoding is successful, the receiver notifies the transmitter with an ACK feedback message. Otherwise, it sends a NACK message to request an additional transmission, and the transmitter decides whether to retransmit or reject the request. The receiver holds the last successfully decoded value until the following successful decoding. The probability of successful decoding is specified by a non-decreasing function 
+
+d(r) ∈ (0 , 1) , where r is the number of packets at the receiver for the specific sample. The packet transmission duration is constant and equal to one time slot, whereas the ACK/NACK packets are instan-taneous. The instantaneous feedback message is a typical assumption in the literature, justified by its limited information content. Lastly, motivated by the need to conserve or allocate power and network resources, we impose a constraint on the trans-mission rate. In particular, it is required that the long-term average transmission rate, measured in packets per slot, be less than or equal to R ∈ [0 , 1] .
+
+B. Optimization Problem 
+
+The general problem is formulated as an infinite-horizon average-cost constrained Markov decision problem (CMDP) denoted by K = ( X , Y, P, C, R ), where  
+
+> •
+
+the state of the system at time t is Kt = ( St, W t, δ t, r t) ∈X , where St ∈ { 1, . . . , N } denotes the source state, Wt ∈{1, . . . , N } denotes the state known by the receiver, δt is the AoII, and rt ∈ { 0, . . . , r max } is the number of packets received for the current sample transmission.  
+
+> •
+
+The actions yt ∈ Y = {0, 1} denote the action at time t,where the action space consists of the wait (yt = 0 ) and the 
+
+transmit (yt = 1 ) actions.  
+
+> •
+
+The action-dependent transition probabilities P (Kt+1 |
+
+Kt, y t) are summarized in Table I, reflecting the model as described in Sec. II-A.  
+
+> •
+
+The cost at state Kt = (St, W t, δ t, r t) is equal to the instantaneous AoII C(Kt) ≜ δt. 
+
+> •
+
+The long-term average number of “transmit” actions is constrained to not exceed R ∈ (0 , 1] .Our goal is to find the transmission policy ψ = {yt}t≥0
+
+that minimizes the long-term average AoII while satisfying the transmission rate constraint. The problem can be expressed as a linear programming problem, as follows, 
+
+Definition 1 (Main Optimization Problem) .
+
+Minimize ¯Jψ (L0) ≜ lim sup  
+
+> T→∞
+
+1
+
+T Eψ
+
+"T −1X
+
+> t=0
+
+δt | L0
+
+#
+
+subject to ¯Rψ (L0) ≜ lim sup  
+
+> T→∞
+
+1
+
+T Eψ
+
+"T −1X
+
+> t=0
+
+yt | L0
+
+#
+
+≤ R
+
+(6) The constrained problem can be relaxed to its uncon-strained Lagrangian form. Particularly, define the MDP M =(X , Y, P, C λ), which is identical to K, with the exception that the transmission rate constraint is replaced by a transmission penalty λ, integrated into the instantaneous cost Cλ(Mt, y t) ≜
+
+δt + λy t. Let ψλ denote the related transmission policy. 
+
+Definition 2 (Lagrangian Problem) .
+
+Minimize ¯Jψλ (M0)≜ lim  
+
+> T→∞
+
+sup 
+
+> λ≥0
+
+1
+
+T Eψλ
+
+"T −1X
+
+> t=0
+
+δt+λy t | M0
+
+#
+
+−λR 
+
+(7) For any fixed value of λ, let 
+
+ψ∗ 
+
+> λ
+
+≜ argmin 
+
+> ψ
+
+¯Jψλ , (8) 
+
+gλ ≜ min 
+
+> ψ
+
+¯Jψλ , (9) denote the λ-optimal Lagrangian policy and the average cost achieved thereof, respectively. It is easy to see that M is unichain, i.e., there exists a single recurrent class. Thus, the optimal policy ψλ can be found by solving the Bellman equations [19, Thm. 6.5.2], 
+
+gλ+V (Mt) = min 
+
+> yt
+
+{δt+λy t+X
+
+> Mt+1
+
+P (Mt+1 | Mt, y t)V (Mt+1 )},
+
+(10) where V (Mt) is the value function of the state Mt.III. O PTIMAL POLICY STRUCTURE 
+
+This section discusses an optimal solution of the CMDP 
+
+K (6) and the difficulties of its computation. The main result is the following theorem. 
+
+Theorem 1. There exists an optimal policy ψ∗ of (6) , which is a randomized mixture of two stationary policies ψλ+ and ψλ−
+
+that are both optimal solutions of the Lagrangian MDP (7) 
+
+with parameters λ+ and λ−, respectively. In particular, 
+
+λ+ ≜ inf {λ ∈ R+ : ¯Rψλ ≤ R}, (11) 
+
+λ− ≜ sup {λ ∈ R+ : ¯Rψλ ≥ R}, (12) 
+
+where ¯Rψλ is the transmission rate achieved by ψ.The optimal policy ψ∗ randomizes between ψλ+ and ψλ−
+
+whenever the induced Markov chain {Mt}t≥0 reaches their common regeneration set 
+
+C ≜ {K = ( s, w, δ, r ) : s = w, δ = 0 , r = 0 }. (13) 
+
+Upon reaching C, the policy ψ∗ selects ψλ− with probability 
+
+ρ and ψλ+ with probability 1 − ρ. The mixing probability is chosen such that the randomized policy has an average transmission rate equal to R, and is explicitly defined as 
+
+ρ ≜ R − ¯Rψλ+
+
+¯Rψλ− − ¯Rψλ+
+
+. (14) AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 4
+
+P (St+1 , W t+1 = Wt, δ t+1 = δt + 1 , r t+1 = 0 | Mt, y t = 0) = pSt,S t+1 ∀ St+1 ̸ = Wt
+
+P (St+1 = Wt, W t+1 = Wt, δ t+1 = 0 , r t+1 = 0 | Mt, y t = 0) = pSt,W t
+
+P (St+1 , W t+1 = Wt, δ t+1 = δt + 1 , r t+1 = 0 | Mt, y t = 1) = pSt,S t+1 · (1 − d(rt)) ∀ St+1 /∈ { St, W t}
+
+P (St+1 = Wt, W t+1 = Wt, δ t+1 = 0 , r t+1 = 0 | Mt, y t = 1) = pSt,W t · (1 − d(rt)) 
+
+P (St+1 = St, W t+1 = Wt, δ t+1 = δt + 1 , r t+1 = rt + 1 | Mt, y t = 1) = pSt,S t · (1 − d(rt)) if St̸ = Wt
+
+P (St+1 , W t+1 = St, δ t+1 = δt + 1 , r t+1 = 0 | Mt, y t = 1) = pSt,S t+1 · d(rt) ∀ St+1 ̸ = St
+
+P (St+1 = St, W t+1 = St, δ t+1 = 0 , r t+1 = 0 | Mt, y t = 1) = pSt,S t · d(rt)
+
+(5)     
+
+> TABLE I THE ACTION -DEPENDENT CONDITIONAL TRANSITION PROBABILITIES P(Mt+1 |Mt, y t).
+
+Proof. The proof is based on [20]. The details can be found in Appendix A. The optimal policy defined in Theorem 1 randomizes be-tween two policies ψλ+ and ψλ− . The policy-induced Markov chains of those policies form distinct renewal processes shar-ing a common regeneration set C, the analysis of which yields the long-term average AoII of the optimal policy ψ∗, as follows. For all i ∈ N, define the regeneration (stopping) times under the ψ-induced Markov chain, 
+
+Ti+1 (ψ) ≜ min {t > T i(ψ) : St = Wt | ψ}, (15) where T0(ψ) is assumed to be the very first visit to C. Each interval [Ti(ψ), T i+1 (ψ)] defines a regeneration cycle . Let 
+
+Li(ψ) ≜ Ti+1 (ψ) − Ti(ψ) , (16) 
+
+Ji(ψ) ≜
+
+> Ti+1 (ψ)−1
+
+X
+
+> t=Ti(ψ)
+
+δt , (17) define the cycle length and the cumulative AoII in the i-th cycle, respectively, under ψ.
+
+Proposition 1. The long-term average AoII of ψ∗ equals 
+
+¯Jψ∗ = ρE[J(ψλ− )] + (1 − ρ)E[J(ψλ+ )] 
+
+ρE[L(ψλ− )] + (1 − ρ)E[L(ψλ+ )] . (18) 
+
+Proof. Define the embedded process {Ψ∗ 
+
+> i
+
+}i≥0,
+
+Ψ∗ 
+
+> i
+
+=
+
+(
+
+ψλ− w.p. ρ , ψλ+ w.p. 1 − ρ , (19) indicating which policy is selected at the regeneration times Ti.The pair sequence {(Li(ψ), J i(ψ)) }i≥0 constitutes a renewal-reward process. The result follows from the renewal-reward theorem. To make use of Theorem 1, it is necessary to compute ψλ
+
+and ¯Rψλ . However, their computation is not straightforward. Particularly, (a) The traditional path of analyzing the Bellman equa-tions (10) – in the hope of deriving a threshold structure of ψλ – is very hard due to the joint transitions of the source-receiver pair. (b) To compute ¯Rψλ in a scalable manner, the underlying MDP needs to possess a tractable structure. The same difficulties are inherited in the computation of 
+
+E[Jψλ ], E[Lψλ ] in (18). Dynamic programming algorithms, such as the Relative Value Iteration (RVI) and Policy Iteration (PI) [19, Chap. 6], although slow, are valuable for approximating λ-optimal policies. We present such results in Fig. 3 that experimentally illustrate a threshold structure. Hence, although not provably optimal, the threshold structure is a sensible assumption for transmission policies. IV. F(S, W, r ): T HE CLASS OF FULL SPACE 
+
+MULTIPLE -T HRESHOLD POLICIES 
+
+Following the analysis and our observations in Sec. III, we introduce a construction method that is optimal under the assumption that ψλ are threshold-based on δ for all λ. In this section, we study the class of stationary multiple-threshold policies F(S, W, r ) in which the thresholds depend on the source S, the receiver W , and the packet count r. Formally, 
+
+Definition 3. 
+
+F(S, W, r ) is the class of policies, where each ψ ∈ F (S, W, r )
+
+is a function of the system state Mt = ( s, w, δ, r ) such that 
+
+ψ(s, w, δ, r ) = 
+
+(
+
+0 if δ < n (s, w, r ),
+
+1 if δ ≥ n(s, w, r ). (20) Exploiting the structure of the policies in F(S, W, r ), we can analyze the policy-induced Markov chain to compute ¯Rψλ
+
+and construct a fast RVI algorithm that approximates ψλ.Moreover, the same analysis can be used to compute ¯Jψ∗ (18). 
+
+A. Analysis of F(S, W, r )
+
+Consider the Markov chain induced by ψ ∈ F (S, W, r ),with the state at time t denoted by H(ψ) 
+
+> t
+
+= ( St, W t, δ t, r t) ∈X .We will analyze {H(ψ) 
+
+> t
+
+}t≥0 into cycles . Each cycle starts and ends in a regeneration state (S, W, δ, r ) ∈ C (13), i.e., every state with zero AoII. To characterize each cycle, we will adopt the definitions in (15),(16),(17) to denote the regeneration times Ti(ψ), the cycle lengths Li(ψ), and the AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 50 1 2 3 4 5 6 7 8 9
+
+/
+
+(1,1) (1,2) (1,3) (1,4) (2,1) (2,2) (2,3) (2,4) (3,1) (3,2) (3,3) (3,4) (4,1) (4,2) (4,3) (4,4) 
+
+> (S; W  )
+
+r = 1 0 1 2 3 4 5 6 7 8 9
+
+/
+
+(1,1) (1,2) (1,3) (1,4) (2,1) (2,2) (2,3) (2,4) (3,1) (3,2) (3,3) (3,4) (4,1) (4,2) (4,3) (4,4) 
+
+> (S; W  )
+
+r = 2                                     
+
+> Fig. 3. ψ∗
+> λpolicy ( wait, transmit) for every source-receiver (S, W )pair, and packet count r= 1 (top) and r= 2 (bottom). Note: When S=W, then
+> δ= 0 always. The maximum transmission packet count is rmax = 2 , and the probability of successful decoding d(r)is 0.5and 0.75 for r= 1 and r= 2 ,respectively. The transmission penalty λ= 8 , while the source transition probabilities pi,j are given by the transition matrix
+> 
+> 0.52 0 .12 0 .18 0 .18 0.17 0 .57 0 .17 0 .09 0.03 0 .06 0 .72 0 .19 0.16 0 .10 0 .18 0 .56
+> .
+
+cumulative AoII Ji(ψ) in the i-th cycle, respectively, under 
+
+ψ.Notice that every state (S, W, δ, r ) ∈ C can be written as (S, S, 0, 0) , and is thereby distinguishable by the source value S. For all i ∈ N, define the embedded Markov chain 
+
+{Zi(ψ)}i≥0 that tracks the regeneration states of {H(ψ) 
+
+> t
+
+}t≥0,
+
+Zi(ψ) = STi(ψ) . (21) Within each cycle, the AoII starts from zero and grows linearly until the end of the cycle. This allows writing Ji(ψ)
+
+with the following alternative expression that is free of the δt
+
+parameter, 
+
+Ji(ψ) = 
+
+> Li(ψ)−1
+
+X
+
+> n=0
+
+n . (22) The sequence {(Zi(ψ), L i(ψ)) }i≥0 forms a Markov renewal process [21]. Let Z denote the state space of {Zi(ψ)}i≥0.For all z ∈ Z , we employ the following conditional expec-tation notations, Ez [J(ψ)] ≜ E[Ji(ψ) | Zi(ψ) = z] and 
+
+Ez [L(ψ)] ≜ E[Li(ψ) | Zi(ψ) = z]. In addition, let πz|ψ
+
+denote the steady-state probability mass function of Zi(ψ).The following corollary is an application of the renewal-reward theorem. 
+
+Corollary 1. The long-term average AoII equals 
+
+¯Jψ =
+
+PNz=1 πz|ψ Ez [J(ψ)] 
+
+PNz=1 πz|ψ Ez [L(ψ)] . (23) Following the same procedure, we can characterize the long-term average transmission rate. Define the number of transmissions in the i-th cycle, 
+
+Ci(ψ) ≜
+
+> Ti+1 (ψ)−1
+
+X
+
+> t=Ti(ψ)
+
+yt, ∀ i ∈ N, (24) and Ez [C(ψ)] ≜ E[Ci(ψ) | Zi(ψ) = z] as previously. 
+
+Corollary 2. The long-term average transmission rate equals 
+
+¯Rψ =
+
+PNz=1 πz|ψ Ez [C(ψ)] 
+
+PNz=1 πz|ψ Ez [L(ψ)] , (25) To compute πz|ψ , Ez [J(ψ)] , Ez [C(ψ)] , and Ez [L(ψ)] , we rely on the theory of absorbing Markov chains [22, Chap. 3]. Let {H(ψ)∗ 
+
+> t
+
+} be an augmented Markov chain that mimics the transitions of {H(ψ) 
+
+> t
+
+}, but is also equipped with absorbing states that correspond to the regeneration states of {H(ψ) 
+
+> t
+
+}.The transition matrix of {H(ψ)∗ 
+
+> t
+
+} is constructed as follows. Denote with Q(ψ) the transient-to-transient probability ma-trix, and with U (ψ) the transient-to-absorbing probability matrix. As noted above, the ending state of the i-th cycle can be represented solely by the source state STi+1 (ψ) =
+
+Zi+1 (ψ), simplifying the dimensionality of U (ψ). Thus, 
+
+Q(ψ)  
+
+> (S,W,δ,r ),(S′,W ′,δ ′,r ′)
+
+denotes the probability that the aug-mented chain transits from the transient state (S, W, δ, r ) to another transient state (S′, W ′, δ ′, r ′), while U (ψ) 
+
+> (S,W,δ,r ),(Z)
+
+de-notes the transition probability to the regeneration (absorbing) state Z ∈ Z = {1, . . . , N }. The state space of {H(ψ)∗ 
+
+> t
+
+} is 
+
+H∗ = X ∪ Z .Clearly, a cycle in {H(ψ) 
+
+> t
+
+} corresponds to a path in {H(ψ)∗ 
+
+> t
+
+}
+
+starting from the same state and ending in some absorbing state. It is important to note that all states in the state space of {H(ψ) 
+
+> t
+
+} are considered as starting states in the construction of Q(ψ); even the regeneration states, since they are the starting points of every cycle. Concurrently, U (ψ) encodes the probability to arrive at some regeneration state. Notice that the AoII is unbounded, which leads to infinite-sized matrices Q(ψ) and U (ψ). Fortunately, the AoII dimen-sion can be truncated without loss of information. To see this, observe that the transition probabilities do not depend explicitly on the precise value of δt, but only whether δt
+
+lies below or above the corresponding threshold. The same holds for the computation of Ez [L(ψ)] , Ez [J(ψ)] , Ez [C(ψ)] 
+
+(cf. (16), (22), (24)). Therefore, the AoII dimension can be truncated at the maximum threshold value nmax ≜AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 6
+
+max {s,w,r } n(s, w, r ). More precisely, let ˜δt denote the AoII index in the truncated space. Then, 
+
+˜δt ≜ min( δt, n max ), (26) which preserves the transition structure and all performance metrics of interest while yielding finite-dimensional matrices 
+
+Q(ψ) and U (ψ).With the above notes at hand, Q(ψ) and U (ψ) satisfy 
+
+Q(ψ) 
+
+> (S,W, ˜δ,r ),(S′,W ′,˜δ′,r ′)
+
+=
+
+(
+
+P (S′,W ′,˜δ′,r ′ | S,W, ˜δ,r ) if ˜δ′ > 0,
+
+0 if ˜δ′ = 0 .
+
+(27) 
+
+U (ψ) 
+
+> (S,W, ˜δ,r ),(Z)
+
+=
+
+(
+
+P (Z, Z, ˜δ′, r ′ | S, W, ˜δ, r ) if ˜δ′ = 0 ,
+
+0 if ˜δ′ > 0.
+
+(28) The complete transition matrix of {H(ψ)∗ 
+
+> t
+
+} is 
+
+PH(ψ)∗ ≜
+
+ Q(ψ) U (ψ)
+
+0 I
+
+
+
+. (29) In the context of absorbing Markov chains, the fundamental matrix N (ψ) ≜ (I − Q(ψ))−1 quantifies the expected number of visits in every transient state until absorption. More precisely, N (ψ)  
+
+> (S,W, ˜δ,r ),(S′,W ′,˜δ′,r ′)
+
+is the expected number of visits in the state (S′, W ′, ˜δ′, r ′) before absorption, when starting from the state (S, W, δ, r ). In addition, the absorption probability matrix B(ψ) ≜ N (ψ) · U (ψ) represents the probabilities of being absorbed into each state. 
+
+Theorem 2. The statistical parameters of the ψ-induced system, ψ ∈ F (S, W, r ), are computed as follows. 
+
+Ez [L(ψ)] = m(ψ) 
+
+> (z,z, 0,0)
+
+, (30) 
+
+Ez [J(ψ)] = u(ψ) 
+
+> (z,z, 0,0)
+
+− m(ψ)
+
+> (z,z, 0,0)
+
+2 , (31) 
+
+Ez [C(ψ)] = X 
+
+> (S′,W ′,˜δ′,r ′) : ˜δ′=n(S′)−1
+
+ρ(S′)N (ψ)  
+
+> (z,z, 0,0) ,(S′,W ′,˜δ′,r ′)
+
+(32) 
+
++ X 
+
+> (S′,W ′,˜δ′,r ′) : ˜δ′≥n(S′)
+
+N (ψ)  
+
+> (z,z, 0,0) ,(S′,W ′,˜δ′,r ′)
+
+, (33) 
+
+where the vectors 
+
+m(ψ) = N (ψ)1,
+
+u(ψ) = N (ψ)(1 + 2 Q(ψ)N (ψ)1),
+
+1 ≜ [1 1 · · · 1] T .
+
+Moreover, the steady-state mass function πz|ψ can be derived according to the transition probability matrix of {Zi}, which equals 
+
+Pz,z ′|ψ = B(ψ) 
+
+> (z,z, 0,0) ,(z′)
+
+.
+
+Proof. To prove the result, we analyze {H(ψ)∗ 
+
+> t
+
+} exploiting its absorbing structure. We derive the expressions by character-izing the time to absorption as a function of the initial state. The details can be found in Appendix B. Theorem 2 provides the necessary material to compute the closed-form expressions of the long-term average AoII Jψ (23) and transmission rate ¯Rψ (25). We conclude this section with the following useful result. 
+
+Proposition 2. The optimal action at states with zero AoII, i.e., (s, s, 0, 0) for all s ∈ { 1, . . . , N }, is to wait ( y = 0 ). Proof. We utilize the RVI algorithm and show that at every iteration, the action that minimizes the value function is y = 0 .Since RVI converges to the true value function, it follows that the optimal action is also y = 0 . The proof is detailed in Appendix D. A direct consequence of the above is the following. 
+
+Corollary 3. The optimal thresholds satisfy n(s, w, r ) > 0 for all s ∈ { 1, . . . , N }, w ∈ { 1, . . . , N }, r ∈ { 1, . . . , r max }.B. Approximation of F(S, W, r )
+
+The threshold structure of F(S, W, r ) can be exploited to reduce the complexity of dynamic programming algorithms, omitting computations for the states with δ above the current threshold. It is important to note that the state space of the Lagrangian MDP is infinite because the AoII is unbounded, rendering dynamic programming algorithms intractable. To address this issue, we adopt the Approximating Sequence Method [23]. That is, truncate the state space by limiting the AoII component to at most ∆. The truncated MDP is constructed by replacing the transitions (s, w, ∆, r ) →
+
+(s′, w ′, ∆ + 1 , r ′) by (s, w, ∆, r ) → (s′, w ′, ∆, r ′). Let the resulting MDP and its optimal average cost be denoted by 
+
+M(∆)  
+
+> λ
+
+and g(∆)  
+
+> λ
+
+, respectively. 
+
+Theorem 3. Let e(∆) realize the optimal policy of M(∆)  
+
+> λ
+
+.Then, i) The limit point of e(∆) is optimal for Mλ.ii) lim ∆→∞ g(∆)  
+
+> λ
+
+= gλ.Proof. We verify Assumptions 1-2 in [23]. Then, Theorem 2.2 of the same reference is applied to prove the result. The details can be found in Appendix C. From Theorem 3, we infer that for sufficiently large ∆, the approximation on the truncated MDP will be adequately close to the true optimal policy. An RVI algorithm that realizes this approximation is shown in Alg. 1 in Appendix E. 
+
+C. Approximation of the Optimal Policy ψ∗
+
+Given the above results, the optimal policy can be con-structed via a bisection search, whose computational complex-ity is at the order of O(log λ+) [24]. The algorithm adopted in this paper is an adaptation of [10, Alg. 2]. The pseudocode is given in Alg. 2 in Appendix E. V. F(1) : T HE CLASS OF SINGLE -T HRESHOLD POLICIES 
+
+The previous section addressed the construction of general multiple-threshold policies that depend on all system param-eters. The construction of these policies relies on an efficient AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 7
+
+F(S, W, r )
+
+(δmax ) 6 9 87 (δmax ) 8 63 3 (δmax ) 57 5 8 (δmax )
+
+F(1) 
+
+8888                             
+
+> Fig. 4. The stationary threshold policy component ψλ+of the randomized policy ψ∗for each of the threshold policy classes introduced in the previous sections. For the policy in F(S, W, r ), only the thresholds for packet count
+> r=1are shown. The transmission rate is R=0.1, the maximum transmission packet count is rmax = 2 , and the probability of successful decoding d(r)is 0.5and 0.75 for r=1and r=2, respectively. The source transition probabilities pi,j are given by the transition matrix 
+> 0.52 0 .12 0 .18 0 .18 0.17 0 .57 0 .17 0 .09 0.03 0 .06 0 .72 0 .19 0.16 0 .10 0 .18 0 .56
+> .
+
+RVI algorithm that leverages the threshold structure to skip computations. However, the state space is still large, with a state space of size |X | = N 2 · ∆ · rmax . Moreover, each Bell-man evaluation requires O(N ) operations, scaling the worst-case complexity of the RVI algorithm into O(N 3 · ∆ · rmax ).In this section, we introduce F(1) , the class of single-threshold policies that apply the same threshold everywhere. Therein, the state space scales linearly with N , yielding a worst-case RVI complexity of O(N 2 · ∆ · rmax ). Notably, the bisection method can directly search for the threshold n with-out employing RVI, thereby offering a substantial reduction in complexity. 
+
+Definition 4. 
+
+F(1) is the class of policies, where each ψ ∈ F (1) is a threshold function of the AoII δ,
+
+ψ(δ) = 
+
+(
+
+0 if δ < n, 
+
+1 if δ ≥ n. (34) Since F(1) is a special case of F(S, W, r ), the results of Sec. IV-A hold. Specifically, Corollaries 1-2 and Theorem 2 enable the computation of the long-term average AoII and transmission rate of any policy ψ ∈ F(1) . To simplify notation, let Rn equal the long-term average transmission rate Rψ when ψ ∈ F (1) with threshold n. Algorithm 3 in Appendix E summarizes the search algorithm. VI. N UMERICAL RESULTS 
+
+Figure 4 illustrates the approximated policies of F(S, W, r )
+
+and F(1) , for the same source model as in Fig. 3 and transmission rate R = 0 .1.Hereafter, each experiment is carried out on a distinct, randomly drawn Markov source. For the experiments to be informative, we bias the diagonal elements of P to be the largest element in its row. Otherwise, there is a high probability that the selected Markov source contains multiple states where transmissions are never preferable, making the comparison across the different source models complex. In practice, this assumption implies that the duration of a transmission (one time slot) is shorter than the average time required for the source to change value. In our experiments, each row possesses 0.1 0.2 0.3 0.4 0.5 
+
+Transmission rate 
+
+22.5 33.5    
+
+> Average AoII
+> F(S; W; r )
+> F(1) Periodic Optimal
+> Fig. 5. Average AoII versus transmission rate for a random source -N= 4
+
+0.1 0.2 0.3 0.4 0.5 
+
+Transmission rate 
+
+44.5 55.5 66.5 77.5 8   
+
+> Average AoII
+> F(S; W; r )
+> F(1) Periodic Optimal
+> Fig. 6. Average AoII versus transmission rate for a random source -N= 8
+
+0.1 0.2 0.3 0.4 0.5 
+
+Transmission rate 
+
+10 11 12 13 14 15 16    
+
+> Average AoII
+> F(S; W; r )
+> F(1) Periodic Optimal
+> Fig. 7. Average AoII versus transmission rate for a random source -N= 16 AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 8
+
+N elements that are uniformly distributed and normalized, and the diagonal element is assigned the largest of those elements. Similar to [12] and [6], the probability of failed decoding is modeled as an exponentially decreasing function, i.e., 
+
+p(r) = 1 − pecr , for 0 ≤ r ≤ rmax , (35) where pe is the initial error rate and c ∈ (0 , 1] is the decaying error rate constant. To facilitate comparison of the transmission policies, the chosen parameters are constant at c = 0 .5, pe =0.5, and rmax = 2 .Figures 5 - 7 illustrate the average AoII achieved by the proposed policies versus the transmission rate, together with the AoII of the optimal policy without the constraint of the threshold structure. Additionally, results are drawn for a periodic policy that transmits every ⌈1/R ⌉ time slots. Each figure is dedicated to a different cardinality, N = 4 , 8, 16 .Our results confirm that searching within the F(S, W, r )
+
+threshold class incurs no loss of optimality, as its performance perfectly matches the globally optimal policy. This approach yields strict improvements over all alternatives, especially in the lower transmission-rate region. Finally, we observe that even the elementary single-threshold policy F(1) dramatically outperforms periodic transmissions. VII. C ONCLUSION 
+
+This work investigates transmission policies for minimizing the AoII metric of generic discrete-time Markov sources. The considered communication model employs an HARQ protocol for error correction under a constrained transmission rate. We demonstrate that the optimization problem can be formulated as a CMDP, and that there exists an optimal policy which is a randomized mixture of two stationary policies. We propose a method for deriving feasible multiple-threshold policies, where transmissions occur as long as the AoII is larger than state-dependent thresholds that rely on the source, receiver, and packet count. The resulting system is analyzed as a Markov renewal process, allowing for the derivation of closed-form expressions for both the long-term average AoII and the average transmission rate. The threshold allocation is carried out via a relative value iteration algorithm acting on a truncated state space, paired with a bisection search to approximate the optimal transmission penalty. For reduced complexity, a simpler single-threshold policy can be derived that significantly scales down the state space. The results demonstrate the superiority of threshold-based policies over conventional periodic transmission schemes and highlight the potential of multiple-threshold policies in AoII optimization problems. REFERENCES [1] S. Kaul, R. Yates, and M. Gruteser, “Real-time status: How often should one update?” in 2012 Proceedings IEEE INFOCOM , 2012, pp. 2731– 2735. [2] A. Maatouk, S. Kriouile, M. Assaad, and A. Ephremides, “The age of incorrect information: A new performance metric for status updates,” 
+
+IEEE/ACM Transactions on Networking , vol. 28, no. 5, pp. 2215–2228, 2020. [3] C. Kam, S. Kompella, and A. Ephremides, “Age of incorrect information for remote estimation of a binary markov source,” in IEEE INFOCOM 2020 - IEEE Conference on Computer Communications Workshops (INFOCOM WKSHPS) , 2020, pp. 1–6. [4] Y. Chen and A. Ephremides, “Preempting to minimize age of incorrect information under transmission delay,” IEEE Transactions on Network-ing , pp. 1–13, 2025. [5] ——, “Analysis of age of incorrect information under generic transmis-sion delay,” in IEEE INFOCOM 2023 - IEEE Conference on Computer Communications Workshops (INFOCOM WKSHPS) , 2023, pp. 1–8. [6] K. Bountrogiannis, A. Ephremides, P. Tsakalides, and G. Tzagkarakis, “Age of incorrect information with hybrid arq under a resource con-straint for n -ary symmetric markov sources,” IEEE Transactions on Networking , pp. 1–14, 2024. [7] S. Kriouile and M. Assaad, “Minimizing the age of incorrect information for real-time tracking of markov remote sources,” in 2021 IEEE Interna-tional Symposium on Information Theory (ISIT) , 2021, pp. 2978–2983. [8] K. Bountrogiannis, I. Papoutsidakis, A. Ephremides, P. Tsakalides, and G. Tzagkarakis, “Variable-length stop-feedback coding for minimum age of incorrect information,” in Proceedings of the Twenty-Fifth International Symposium on Theory, Algorithmic Foundations, and Protocol Design for Mobile Networks and Mobile Computing , ser. MobiHoc ’24. New York, NY, USA: Association for Computing Machinery, 2024, p. 410–415. [Online]. Available: https://doi.org/10. 1145/3641512.3690165 [9] S. Kriouile and M. Assaad, “Minimizing the age of incorrect information for unknown markovian source,” 2022. [Online]. Available: https://arxiv.org/abs/2210.09681 [10] Y. Chen and A. Ephremides, “Minimizing age of incorrect information for unreliable channel with power constraint,” in 2021 IEEE Global Communications Conference (GLOBECOM) , 2021, pp. 1–6. [11] A. Maatouk, M. Assaad, and A. Ephremides, “The age of incorrect information: an enabler of semantics-empowered communication,” IEEE Transactions on Wireless Communications , pp. 1–1, 2022. [12] E. T. Ceran, D. G¨ und¨ uz, and A. Gy¨ orgy, “Average age of information with hybrid ARQ under a resource constraint,” IEEE Transactions on Wireless Communications , vol. 18, no. 3, pp. 1900–1913, 2019. [13] A. Arafa, J. Yang, S. Ulukus, and H. V. Poor, “Age-minimal transmission for energy harvesting sensors with finite batteries: Online policies,” IEEE Transactions on Information Theory , vol. 66, no. 1, pp. 534–556, 2020. [14] B. T. Bacinoglu, Y. Sun, E. Uysal, and V. Mutlu, “Optimal status updating with a finite-battery energy harvesting source,” Journal of Communications and Networks , vol. 21, no. 3, pp. 280–294, 2019. [15] X. Wu, J. Yang, and J. Wu, “Optimal status update for age of information minimization with an energy harvesting source,” IEEE Transactions on Green Communications and Networking , vol. 2, no. 1, pp. 193–204, 2018. [16] Y. Sun and B. Cyr, “Sampling for data freshness optimization: Non-linear age functions,” Journal of Communications and Networks , vol. 21, no. 3, pp. 204–219, 2019. [17] I. Cosandal, N. Akar, and S. Ulukus, “Multi-threshold aoii-optimum sampling policies for continuous-time markov chain information sources,” IEEE Transactions on Information Theory , pp. 1–1, 2025. [18] I. Cosandal, S. Ulukus, and N. Akar, “Minimizing functions of age of incorrect information for remote estimation,” 2025. [Online]. Available: https://arxiv.org/abs/2504.10451 [19] V. Krishnamurthy, Partially Observed Markov Decision Processes: From Filtering to Controlled Sensing . Cambridge University Press, 2016. [20] L. I. Sennott, “Constrained average cost Markov decision chains,” 
+
+Probability in the Engineering and Informational Sciences , vol. 7, no. 1, pp. 69–83, 1993. [21] E. Cinlar, Introduction to Stochastic Processes . Dover Publications, 2013. [22] J. G. Kemeny and J. L. Snell, Finite markov chains . van Nostrand Princeton, NJ, 1969, vol. 26. [23] L. I. Sennott, “On computing average cost optimal policies with applica-tion to routing to parallel queues,” Mathematical methods of operations research , vol. 45, no. 1, pp. 45–62, 1997. [24] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction to Algorithms, Third Edition , 3rd ed. The MIT Press, 2009. AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 9
+
+APPENDIX 
+
+A. Proof of Theorem 1 Proof. First, we prove that assumptions 1-5 of [20] hold for our problem. Under those properties, the results of [20] yield the existence and structure of an optimal policy. 
+
+Definition 5 (Definition 2.3 of [20]) . Let G ⊂ M be a non-empty subset of states of the CMDP. Given a state m ∈ M ,let R(m, G ) be the class of policies ψ such that Pψ (Mt ∈
+
+G for some t ≥ 1 | M0 = m) = 1 and the expected time 
+
+Tm,G of the first passage from m to G under ψ is finite. Let 
+
+R∗(m, G ) be the class of policies ψ ∈ R (m, G ) such that, in addition, the expected average AoII ¯Jm,G (ψ) and the expected transmission rate ¯Rm,G (ψ) of the first passage from m to G
+
+are finite. 
+
+Hereafter, we state and prove the assumptions mentioned above for our problem. 
+
+Assumption 1. For all b > 0, the set G(b) ≜ {M =(s, w, δ, r ) | there exists an action y such that δ + y ≤ b}
+
+is finite. Proof. Since δ ∈ N, the states with δ < w are always finite, which implies that G(b) is also finite. 
+
+Assumption 2. There exists a stationary policy e that induces a Markov chain with the following properties: the state space 
+
+M consists of a single (non-empty) positive recurrent class 
+
+K and a set U of transient states such that e ∈ R ∗(u, K ),for any u ∈ U . Moreover, both the average AoII ¯Je and the average transmission rate ¯Re on K are finite. Proof. Consider the policy e(m) = 0 for all m ∈ M , i.e., the always-wait policy. Let m0 = (s0, w 0, δ 0, r 0). It can be seen that the policy-induced Markov chain {Me(t)} =
+
+{st, w t, δ t, r t}, t ∈ N has a single positive recurrent class 
+
+Kψ = {(s, w, δ, r ) : s ∈ { 1, . . . , N }, w = w0, δ ∈ N, r = 0 }.The transient set is U = {(s, w, δ, r ) : s ∈ { 1, . . . , N }, w =
+
+w0, δ ∈ N, r > 0}, i.e., they differentiate only on the r
+
+component. Recall that the wait action always reverts r to zero, which implies that the expected time of the first passage 
+
+Tu,K ≤ 1. In addition, the expected transmission rate of the first passage ¯Ru,K (e) = 0 , while the expected average AoII of the first passage ¯Ju,K (e) is trivially finite. Hence, 
+
+e ∈ R ∗(u, K ).In addition, the average transmission rate ¯Re = 0 . To show that ¯Je is finite, notice that the AoII δt reverts to zero when 
+
+st = w0, and grows linearly otherwise. We infer that the Markov chain forms a renewal process wherein the regenera-tion (stopping) times are χi+1 ≜ inf {t > χ i : st = w0} and the cycle lengths μi ≜ χi+1 − χi. Therefore, the cumulative AoII in the i-th cycle equals 
+
+gi =
+
+> μi−1
+
+X
+
+> n=0
+
+n = μ2 
+
+> i
+
+− μi
+
+2 . (36) Hence, 
+
+E[g] = E[μ2] − E[μ]2 . (37) By the renewal-reward theorem, 
+
+¯Je(m0) = E[g]
+
+E[μ] = E[μ2] − E[μ]2E[μ] . (38) Recall that the source Markov chain {St} is finite and irre-ducible, which implies that E[μ2] < ∞. Therefore, ¯Je(m0) <
+
+∞.
+
+Assumption 3. Given any two states m̸ = m′ ∈ M , there exists a policy ψ (a function of m and m′) such that ψ ∈R∗(m, m ′).Proof. Again, consider the policy ψ(m) = 1 for all m ∈ M ,and recall that the induced Markov chain consists of a single positive recurrent class that is exactly the state space M.Thus, any two states communicate. The average AoII and the transmission rate of the first passage are trivially finite, i.e., 
+
+ψ ∈ R ∗(m, m ′).
+
+Assumption 4. If a deterministic policy f has at least one positive recurrent state, then it has a single positive recurrent class K. Moreover, if m0 /∈ K, then ψ ∈ R ∗(m0, K ).Proof. If f transmits for all source states, then there exists a single positive recurrent class K = M and the state m0 is always in K. Assume that f never transmits for some subset of the source states SI ⊂ { 1, . . . , N }. Denote the complement set with ST . Then, the induced Markov chain consists of a single positive recurrent K = {(s, w, δ, r ) : s ∈ { 1, . . . , N }, w ∈
+
+ST , δ ∈ N, r ∈ { 1, . . . , r max }} . Let m0 = ( s0, w 0, δ 0, r 0) /∈
+
+K. The source state s0 communicates with ST . Therefore, f
+
+is bound to transmit some source state from ST in finite time, and the receiver is bound to decode one in finite time. At this time, the chain reaches the class K.
+
+Assumption 5. There exists a policy ψ such that ¯Jψ (m0) < ∞
+
+and ¯Rψ (m0) < R .Proof. This is shown in the proof of Assumption 3. Having proven assumptions 1-5, the results [20, Thm. 2.5, Prop. 3.2, Lemmas 3.4, 3.7, 3.9, 3.10, 3.12] also hold for our CMDP. By definition, λ− and λ+ converge to the same λ∗ from below and above, respectively. By [20, Lemma 3.4, Lemma 3.7], the policies ψλ− and ψλ+ also converge and have the same cost gλ∗ . Since C (13) is positive recurrent for both policies, a randomized policy that randomizes at C is also 
+
+λ∗-optimal [20, Lemma 3.9]. Finally, applying [20, Lemmas 3.10, 3.12], the optimality of the randomized policy ψ∗ for the CMDP is deduced. 
+
+B. Proof of Theorem 2 Proof. To simplify the notation throughout this proof, we omit the policy ψ from the notation. All quantities below are understood to depend on ψ.Let τH∗ 
+
+> t
+
+denote the time until absorption starting from the state H∗ 
+
+> t
+
+. More precisely, 
+
+τH∗ 
+
+> t
+
+≜ min {n ≥ t : H∗ 
+
+> n
+
+∈ Z , n > t } − t . (39) AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 10 
+
+Clearly, 
+
+Li = τH∗
+
+> Ti
+
+, ∀ i ∈ N. (40) Assume that H∗ 
+
+> t
+
+is a transient state, as is the case with cycle-starting states. First-step conditioning of τ (H∗ 
+
+> t
+
+) yields 
+
+τH∗ 
+
+> t
+
+= 1 + τH∗ 
+
+> t+1
+
+(41) 
+
+⇒ τ 2 
+
+> H∗
+> t
+
+= 1 + 2 τH∗ 
+
+> t+1
+
++ τ 2 
+
+> H∗t+1
+
+. (42) Let Eh∗ [τ ] ≜ E[τH∗ 
+
+> t
+
+| H∗ 
+
+> t
+
+= h∗] and Eh∗ [τ 2] ≜ E[τ 2 
+
+> H∗
+> t
+
+|
+
+H∗ 
+
+> t
+
+= h∗], h∗ ∈ H ∗. Taking the conditional expectation on either sides of (41) and (42) returns the following. 
+
+E[τH∗ 
+
+> t
+
+| H∗ 
+
+> t
+
+= h∗] = 1 + E[τH∗ 
+
+> t+1
+
+| H∗ 
+
+> t
+
+= h∗]
+
+⇒ Eh∗ [τ ] = 1 + X
+
+> h′∈H ∗
+
+Qh∗,h ′ Eh′ [τ ], (43) 
+
+E[τ 2 
+
+> H∗
+> t
+
+| H∗ 
+
+> t
+
+= h∗] = 1 + 2 E[τH∗ 
+
+> t+1
+
+| H∗ 
+
+> t
+
+= h∗]+ E[τ 2 
+
+> H∗
+> t+1
+
+| H∗ 
+
+> t
+
+= h∗]
+
+⇒ Eh∗ [τ 2] = 1 + 2 X
+
+> h′∈H ∗
+
+Qh∗,h ′ Eh∗ [τ ]+ X
+
+> h′∈H ∗
+
+Qh∗,h ′ Eh∗ [τ 2].
+
+(44) Define the column vectors m and v with elements mh∗ ≜
+
+Eh∗ [τ ] and vh∗ ≜ Eh∗ [τ 2], respectively. In addition, define the column vector 1 ≜ [1 1 · · · 1] T . Then, (43) and (44) can be written more concisely in matrix-vector form as, 
+
+m = 1 + Qm 
+
+⇒ m = ( I − Q)−11
+
+⇒ m = N 1,
+
+(45) 
+
+u = 1 + 2 Qm + Qu 
+
+⇒ u = ( I − Q)−1(1 + 2 Qm )
+
+⇒ u = N (1 + 2 QN 1).
+
+(46) First, it can be seen that 
+
+Ez [L] = m(z,z, 0,0) . (47) Moreover, 
+
+Ez [J] = E
+
+
+
+> Ti+1 −Ti−1
+
+X
+
+> k=0
+
+k Zi = z
+
+
+
+= E
+
+ (Ti+1 − Ti)2 − (Ti+1 − Ti)2 Zi = z
+
+
+
+= E
+
+ L2 
+
+> i
+
+− Li
+
+2 Zi = z
+
+
+
+= E[L2 
+
+> i
+
+| Zi = z] − E[Li | Zi = z]2= E(z,z, 0,0) [τ 2] − E(z,z, 0,0) [τ ]2= u(z,z, 0,0) − m(z,z, 0,0) 
+
+2 .
+
+(48) To compute Ez [C], we invoke the expectation of (20) over the visited states until absorption, starting from the state 
+
+(z, z, 0, 0) . Since N(z,z, 0,0) ,(S′,W ′,˜δ′,r ′) is the average number of visits in (S′, W ′, ˜δ′, r ′) before absorption, it follows that 
+
+Ez [C] = E
+
+
+
+> Ti+1 −1
+
+X
+
+> t=Ti
+
+yt Zi = z
+
+
+
+= E
+
+ X 
+
+> (S′,W ′,˜δ′,r ′)
+
+ψ(S′, ˜δ′, r ′)N(z,z, 0,0) ,(S′,W ′,˜δ′,r ′)
+
+
+
+= X 
+
+> (S′,W ′,˜δ′,r ′)
+
+E
+
+h
+
+ψ(S′, ˜δ′, r ′)
+
+i
+
+N(z,z, 0,0) ,(S′,W ′,˜δ′,r ′)
+
+= X 
+
+> (S′,W ′,˜δ′,r ′)
+
+P
+
+
+
+ψ(S′, ˜δ′, r ′) = 1 
+
+
+
+N(z,z, 0,0) ,(S′,W ′,˜δ′,r ′)
+
+= X 
+
+> (S′,W ′,˜δ′,r ′) : ˜δ′=n(S′)−1
+
+ρ(S′)N(z,z, 0,0) ,(S′,W ′,˜δ′,r ′)
+
++ X 
+
+> (S′,W ′,˜δ′,r ′) : ˜δ′≥n(S′)
+
+N(z,z, 0,0) ,(S′,W ′,˜δ′,r ′) .
+
+(49) Now, assume that Zi+1 = z is the ending (absorbing) state of the i-th cycle. Then, the starting state of the next is HTi+1 =(z, z, 0, 0) . Let P Z denote the transition matrix of {Zi}. It follows that P Z can be constructed as 
+
+P Zz,z ′ = B(z,z, 0,0) ,(z′) . (50) 
+
+C. Proof of Theorem 2 Proof. The result follows from [23, Thm. 2.2], by which it sufficed to show that the assumptions [23, ASM 1, ASM 2] hold for our problem. Before proving the assumptions, we define some necessary quantities. For this proof, the quantities in M(∆) are super-scripted by ∆, and the components of m are denoted by 
+
+m(s), m (w), m (δ), m (r).Let θ be an arbitrary policy. For a discount factor a, the total expected discounted cost under θ is given by 
+
+Vθ,a (m) = Eθ
+
+" ∞X
+
+> t=0
+
+at(δt + λy t) M0 = m
+
+#
+
+. (51) The value function Va(·) = inf θ Vθ,a (m) is the best that can be achieved. The minimum expected discounted cost for operating the system from time t = 0 to t = n − 1 is given by 
+
+va,n (m) = inf  
+
+> θ
+
+Eθ
+
+" n−1X
+
+> t=0
+
+at(δt + λy t) M0 = m
+
+#
+
+, (52) which is also written in recursive form as 
+
+va,n +1 (m) = min 
+
+> y
+
+(
+
+m(δ) + λm (y)
+
++ a X
+
+> m′∈M
+
+P (m′ | m, y )va,n (m′)
+
+)
+
+,
+
+(53) Let h∆ 
+
+> a
+
+(m) = V ∆ 
+
+> a
+
+(m) − V ∆ 
+
+> a
+
+(mref ) be the relative value function in M(∆) , where mref ∈ X ∆ is some chosen reference state. AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 11 
+
+Given a randomized stationary policy ψ of M, the ∆-restriction of ψ is the randomized stationary policy ψ|∆ of 
+
+M(∆) that chooses actions under the same distributions as ψ.Let mm,m ref (ψ|∆) and cm,m ref (ψ|∆) denote the expected time and expected cost, respectively, of the first passage from 
+
+m to mref .Given initial state m, the average cost under a policy θ is given by 
+
+Jθ (m) = lim sup  
+
+> T→∞
+
+1
+
+T Eθ
+
+" T −1X
+
+> t=0
+
+δt + λy t M0 = m
+
+#
+
+. (54) Then J(·) = inf θ Jθ (·) is the best that can be achieved. The structure of our truncated MDP matches that of 
+
+augmentation type approximating sequences [23, Def. 3.1]. Specifically, let P (m′ | m, y ; ∆) denote the action-dependent transition probabilities in M(∆) . Assume that P (μ | m, y ) > 0
+
+for some μ ∈ X ∆ and μ / ∈ X ∆. Then, this excess probability is redistributed to some marginal states in X ∆. In other words, there exists a probability distribution qm′ (m, μ, y, ∆) , such that 
+
+P (m′ | m, y ; ∆) = P (m′ | m, y )+ X 
+
+> μ / ∈X ∆
+
+P (μ | m, y )qm′ (m, μ, y, ∆) .
+
+(55) In our specific model, 
+
+qm′ (m, μ, y, ∆) = 
+
+
+
+1 if m′ = {μ(s), μ (w), ∆, μ (r)}
+
+and μ(δ) = ∆ + 1 ,
+
+0 otherwise. (56) 
+
+Assumption 6 (ASM 1 of [23]) . There exist a nonnegative (finite) constant L, a nonnegative (finite) function M (·) on X ,and constants ∆0 and a ∈ [0 , 1) , such that −L < h ∆ 
+
+> a
+
+(m) <M (m), for all m ∈ X ∆, ∆ ≥ ∆0, a ∈ (a0, 1) .Proof. First, we specify the constant L.
+
+V ∆ 
+
+> a
+
+(m) = inf  
+
+> θ
+
+Eθ
+
+" ∞X
+
+> t=0
+
+at(δt + λy t) M0 = m
+
+#
+
+≤
+
+> ∞
+
+X
+
+> t=0
+
+at(m(δ) + δt + λy t).
+
+(57) It can be seen that the series is finite because a ∈ [0 , 1) , and hence V ∆ 
+
+> a
+
+(m) < ∞ ∀ m ∈ X ∆. Moreover, V ∆ 
+
+> a
+
+(m) ≥ 0
+
+because it is a sum of non-negative terms. Therefore, 
+
+h∆ 
+
+> a
+
+(m) − V ∆ 
+
+> a
+
+(m) = −V ∆ 
+
+> a
+
+(mref )
+
+⇒h∆ 
+
+> a
+
+(m) ≥ − V ∆ 
+
+> a
+
+(mref ) (58) Hence, we can set L = max m V ∆ 
+
+> a
+
+(m).To specify the upper bound M (·), by [23, Prop. 4.2], it suffices to find a randomized stationary policy ψ of M and an ∆0 such that i) For ∆ ≥ ∆0 and m ∈ X ∆ − mref , there exists a ψ|∆
+
+path from m to mref in X ∆.ii) The sequence {cm,m ref (ψ|∆) }∆>∆0 , is bounded, for all 
+
+i̸ = 0 .Define the time of the first passage from m to mref ,
+
+τm,m ref ≜ min {t ≥ 0 : M ∆ 
+
+> t
+
+= mref | M ∆0 = m}. Let ψ
+
+be the always-transmit policy. The ψ-induced Markov chain is irreducible, and so there exists a ψ|∆ path from m to mref .For the expected cost, we have 
+
+cm,m ref (ψ|∆) = E
+
+
+
+> τm,m ref
+
+X
+
+> t=0
+
+at(δ∆ 
+
+> t
+
++ λ) M0 = m
+
+
+
+≤
+
+> τm,m ref
+
+X
+
+> t=0
+
+at(m(δ) + t + λ),
+
+(59) where mδ is the AoII component of m. It can be seen that the series is finite because a ∈ [0 , 1) . Therefore, the upper bound 
+
+M (·) exists. Specifically, M (m) = Pτm,m ref  
+
+> t=0
+
+at(m(δ) + t +
+
+λ).Under Assumption 6, it can be shown the optimal average cost in M∆, for ∆ > ∆0, is J∆ = lim a→1(1 − a)V ∆ 
+
+> a
+
+(m) for all m ∈ M ∆.
+
+Assumption 7 (ASM 2 of [23]) . We have J∗ ≜ lim sup J∆ <
+
+∞ and J∗ ≤ J(m), for all m ∈ X .Proof. By [23, Corollary 5.2], it suffices to show that there exist a ∈ [0 , 1) and ∆0 such that, for all m ∈ X ∆, μ /∈M∆ , y ∈ Y , ∆ ≥ ∆0, a ∈ (a0, 1) , and n ≥ 0, we have 
+
+X
+
+> m′∈M ∆
+
+qm′ (m, μ, y, ∆) va,n (m′) ≤ ya,n (μ). (60) Notice that 
+
+X
+
+> m′∈M ∆
+
+qm′ (m, μ, y, ∆) va,n (m′) = va,n (( μ(s), μ (w), ∆, μ (r))) .
+
+(61) Thus, to prove the inequality (60), it suffices to show that 
+
+va,n (( μ(s), μ (w), ∆, μ (r))) ≤ va,n (( μ(s), μ (w), μ (δ), μ (r))) for all μ(δ) > ∆. The inequality can be proved by induction on n
+
+in (53). Specifically, for n = 0 , it holds trivially since va, 0(·) = 0. Expanding the summation in (53), it can be shown that if the inequality holds for n, then it also holds for n + 1 . The details are omitted for brevity. 
+
+D. Proof of Proposition 2 Proof. We utilize the RVI algorithm and show that at every iteration, the action that minimizes the value function is y =0. Let Vt(·, ·) denote the estimation of the value function at iteration t ∈ N. Next, define the (exact) Bellman operator, 
+
+T V t(m) ≜ min  
+
+> y
+
+{δ + λy + X
+
+> m′
+
+P (m′ | m, y )Vt(m′)}. (62) Let m0 be some arbitrary reference state. The RVI updates its estimate as follows: 
+
+Vt+1 (m) = T V t(m) − T V t(m0), t = 1 , 2, 3, . . . (63) Let m = ( s, s, 0, 0) . Substituting the transition probabilities from (5) into (62), and after minor algebraic operations, we obtain AGE OF INCORRECT INFORMATION FOR GENERIC DISCRETE-TIME MARKOV SOURCES 12 
+
+T V t(m) = min {δ+ X 
+
+> s′̸=s
+
+ps,s ′ Vt(s′, s, 1, 0)+ ps,s Vt(s, s, 0, 0) ,δ+λ+ X 
+
+> s′̸=s
+
+ps,s ′ Vt(s′, s, 1, 0)+ ps,s Vt(s, s, 0, 0) },
+
+(64) where the first part in the minimum operator corresponds to 
+
+y = 0 and the second part to y = 1 . It is trivial to see that the action that achieves the minimum is always y = 0 . Since this holds for all t ∈ N and the RVI converges to the true value function, it follows that the optimal action is also y = 0 .
+
+E. Algorithms 
+
+Algorithm 1 Threshold-based RVI  
+
+> 1:
+
+Inputs: Transmission cost λ, maximum AoII δmax  
+
+> 2:
+
+Initialize value function V (m) ← 0 for all m ∈ M  
+
+> 3:
+
+Initialize thresholds n(s, w, r ) ← δmax for all (s, w, r ) 
+
+> 4:
+
+Choose reference state m0 = ( s0, w 0, δ 0, r 0) 
+
+> 5:
+
+repeat  
+
+> 6:
+
+for all (s, w, r ) do  
+
+> 7:
+
+for δ = 0 to δmax do  
+
+> 8:
+
+m ← (s, w, δ, r ) 
+
+> 9:
+
+Compute action values: 
+
+V 0(m) = δ + X
+
+> m′
+
+P (m′ | m, y = 0) V (m′)
+
+V 1(m) = δ + λ + X
+
+> m′
+
+P (m′ | m, y = 1) V (m′) 
+
+> 10:
+
+if V 1(m) ≤ V 0(m) then  
+
+> 11:
+
+n(s, w, r ) ← δ {Threshold found } 
+
+> 12:
+
+for δ′ = δ to δmax do  
+
+> 13:
+
+m′ ← (s, w, δ ′, r ) 
+
+> 14:
+
+Vnew (m′) = δ′ +λ+P
+
+> ˜m
+
+P ( ˜ m | m′, y = 1) V ( ˜ m) 
+
+> 15:
+
+end for  
+
+> 16:
+
+break {Exit loop over δ} 
+
+> 17:
+
+else  
+
+> 18:
+
+Vnew (m) ← V 0(m) 
+
+> 19:
+
+end if  
+
+> 20:
+
+end for  
+
+> 21:
+
+end for  
+
+> 22:
+
+V ← Vnew − Vnew (m0) 
+
+> 23:
+
+until V converges  
+
+> 24:
+
+return n(s, w, r )
+
+Algorithm 2 Randomized Policy Bisection Search  
+
+> 1:
+
+Initialize λ− ← 0, λ+ ← 1 
+
+> 2:
+
+Initialize ψλ+ via Alg. 1  
+
+> 3:
+
+Initialize ¯Rψλ+ applying Theorem 2 and using (25)  
+
+> 4:
+
+while ¯Rψλ+ > R do  
+
+> 5:
+
+λ− ← λ+ 
+
+> 6:
+
+λ+ ← 2λ+ 
+
+> 7:
+
+Compute ψλ+ via Alg. 1  
+
+> 8:
+
+Apply Theorem 2 and compute ¯Rψλ+ (25)  
+
+> 9:
+
+end while  
+
+> 10:
+
+repeat  
+
+> 11:
+
+λ∗ ← λ++λ− 
+
+> 2
+> 12:
+
+Compute ψλ∗ via Alg. 1  
+
+> 13:
+
+Apply Theorem 2 and compute ¯Rψλ∗ (25)  
+
+> 14:
+
+if ¯Rλ∗ ≥ R then  
+
+> 15:
+
+λ− ← λ∗ 
+
+> 16:
+
+else  
+
+> 17:
+
+λ+ ← λ∗ 
+
+> 18:
+
+end if  
+
+> 19:
+
+until λ∗ converges  
+
+> 20:
+
+ρ = R − ¯Rψλ+
+
+¯Rψλ− − ¯Rψλ+ 
+
+> 21:
+
+Construct ψ∗ via Theorem 1  
+
+> 22:
+
+return ψ∗
+
+Algorithm 3 Randomized Single-threshold Policy Bisection Search  
+
+> 1:
+
+Initialize n− ← 1, n+ ← 2 
+
+> 2:
+
+Initialize ¯Rn+ applying Theorem 2 and using (25)  
+
+> 3:
+
+while ¯Rn+ > R do  
+
+> 4:
+
+n− ← n+ 
+
+> 5:
+
+n+ ← 2n+ 
+
+> 6:
+
+Apply Theorem 2 and compute ¯Rn+ (25)  
+
+> 7:
+
+end while  
+
+> 8:
+
+while n+ − n− > 1 do  
+
+> 9:
+
+n∗ ← n++n− 
+
+> 2
+> 10:
+
+Apply Theorem 2 and compute ¯Rn∗ (25)  
+
+> 11:
+
+if ¯Rn∗ ≥ R then  
+
+> 12:
+
+n− ← n∗ 
+
+> 13:
+
+else  
+
+> 14:
+
+n+ ← n∗ 
+
+> 15:
+
+end if  
+
+> 16:
+
+end while  
+
+> 17:
+
+ρ = R − ¯Rn+
+
+¯Rn− − ¯Rn+ 
+
+> 18:
+
+Construct ψ∗ via Theorem 1  
+
+> 19:
+
+return ψ∗

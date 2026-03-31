@@ -1,0 +1,359 @@
+Title: Iran's January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques
+
+URL Source: https://arxiv.org/pdf/2603.28753v1
+
+Published Time: Tue, 31 Mar 2026 02:31:55 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Iran’s January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques 
+
+## Giuseppe Aceto 
+
+University of Napoli Federico II Department of Electrical Engineering and Information Technology Napoli, Italy giuseppe.aceto@unina.it 
+
+## Valerio Persico 
+
+University of Napoli Federico II Department of Electrical Engineering and Information Technology Napoli, Italy valerio.persico@unina.it 
+
+## Antonio Pescapè 
+
+University of Napoli Federico II Department of Electrical Engineering and Information Technology Napoli, Italy pescape@unina.it 
+
+Abstract 
+
+This paper analyzes the Internet shutdown that occurred in Iran in January 2026 in the context of protests, focusing on its impact on the country’s digital communication infrastructure and on in-formation access and control dynamics. The scale, complexity, and nation-state nature of the event motivate a comprehensive investi-gation that goes beyond isolated reports, aiming to provide a unified and systematic understanding of what happened and how it was observed. The study is guided by a set of research questions addressing: the characterization of the shutdown via the timeline of the dis-ruption events and post-event “new normal”; the detectability of the event, encompassing monitoring initiatives, measurement tech-niques, and precursory signals; and the interplay between censor-ship and circumvention, assessing both the imposed restrictions and the effectiveness of tools designed to bypass them. To answer these questions, we adopt a multi-source, multi--perspective methodology that integrates heterogeneous public data, primarily from grey literature produced by network measurement and monitoring initiatives, complemented by additional private measurements. This approach enables a holistic view of the event and allows us to reconcile and compare partial observations from different sources. 
+
+Keywords 
+
+Network Monitoring, Censorship, Internet Shutdown, Iran 
+
+1 Introduction 
+
+This paper investigates the Internet shutdown that occurred in Iran in January 2026. The event, which took place in the context of wide-spread protests, deeply modifyed the Iranian connectivity to the Internet, affecting the country’s digital communication infrastruc-ture, with significant impact on information access and censorship dynamics. The scale and complexity of the communication systems in-volved in the event, and the nature of the actor (nation-state level) fuel the interest in the analysis of what happened, of the techniques used to enact it, how these have been detected and monitored, and their interaction with censorship circumention practices. We aim to characterize the shutdown, understand how it was implemented and detected, and assess its implications in terms of control and circumvention. 
+
+> This work is licensed under a Creative Commons Attribution 4.0 International License.
+
+To guide the analysis, we formulate six research questions, drilling down in this complex topic: RQ1 What is known —considering official and reliable sources— about the events affecting Iran’s digital communication in-frastructure between December 2025 and January 2026, in correspondence with widespread protests across the coun-try? More specifically, which components of the digital infrastructure were disrupted, for how long, and with what effects? RQ2 Which “new normal” was established after the end of the shutdown? How control changed w.r.t. before the shut-down? RQ3 Which precursory symptoms manifested, if any? Was the shutdown foreseeable? RQ4 Which monitoring initiatives contributed technical analyses of the event? What are the nature, the aim and capabili-ties of these initiatives and how they contributed to the understanding of the event? RQ5 How informative observations could be drawn? Which mea-surement platforms and techniques were used? Which data are available? Which limitations techniques and data present? RQ6 Which censorship-circumvention tools had the potential to bypass the imposed restriction and were they effective dur-ing the Internet shutdown? How effective these tools have been? These questions are answered in the course of this work, in the form ARQn (Answer to Research Question n). To answer these questions, we adopt a multi-source approach integrating all pub-licly available network monitoring information. To this aim we systematically collected and analyzed all available sources on the censorship event, also complementing it with additional private data from a transit provider. Due to its recency, these sources con-sist primarily of grey literature, including reports and technical analyses produced by monitoring initiatives. The article is organized as follows. Section 2 presents the back-ground including the iranian network infrastructure, the known interference practices implemented, the initiatives monitoring them, the available circumention tools to bypass such censorship efforts, and the history of recent distruptions. Section 3 integrates the con-tributions of the monitoring initiatives considered and provides a unified timeline of events, from the earliest signs of network dis-ruptions to the outage and subsequent restoration, until the new disruption observed at the end of February with the military opera-tions impacting the country. Section 4 presents in detail the data sources and the monitoring initiatives that informed the analysis of 
+
+> arXiv:2603.28753v1 [cs.NI] 30 Mar 2026 Giuseppe Aceto, Valerio Persico, and Antonio Pescapè
+
+the 2026 shutdown, examining their institutional nature, method-ological approaches, and resulting outputs. Section 5 examines the mechanisms available to circumvent censorship in response to the shutdown. Finally, Section 6 concludes the paper by providing a summary of the main findings and a concise answer to the research questions. 
+
+2 Background 
+
+To contextualize the events under study, this background section is structured in five parts. First, we describe the organization and structural characteristics of the Internet in Iran, outlining the gover-nance features that shape its connectivity. Second, we introduce the technical aspects of the interference mechanisms that the iranian network are currently known to be subjected to. Third, we sum-marize the main circumvention tools available to bypass govern censorship. Four, we provide an overview of the main monitoring initiatives that have contributed to observing and documenting network conditions in the country. Finally, we review the major network disruptions in Iran, in order to situate the 2026 shutdown within its broader historical and operational context. 
+
+2.1 Iran’s national network infrastructure 
+
+For several decades, Iran’s connectivity to the global Internet has been mediated through two principal international gateways [ 13 ]: 
+
+(i) the Telecommunication Infrastructure Company (TIC) (AS49666, formerly AS12880 and AS48159); and (ii) the Institute for Research in Fundamental Sciences (IPM) (AS6736). IPM established the coun-try’s first international Internet connection in the 1990s and since then primarily serves academic and research institutions. Subse-quently, TIC expanded its role to include Internet service provision and has since become the main carrier of Iran’s inbound and out-bound Internet traffic. This notwithstanding, IPM has maintained a technically distinct connection to the global Internet. According to available reports, all major telecom operators in Iran are one way or another controlled by the government. 1 Iran’s online environment is known to be one of the most restrictive worldwide, with the authorities systematically increasing the cost and technical barriers to accessing the global Internet in order to steer users toward a domestically controlled network, while em-ploying pervasive censorship, surveillance, content manipulation, and extralegal repression [ 9]. At the core of this strategy lies the 
+
+National Information Network (NIN) , a centralized, state-operated digital infrastructure officially framed as a vehicle for cybersecurity and digital sovereignty [ 4]. Amid mounting internal and external pressures, the NIN has evolved into a central instrument not only for managing unrest but also for preemptively suppressing it [4]. 
+
+2.2 Network interference practices 
+
+Studying the censorship practices enforced on the Iranian network is hindered by the limited availability of in-country measurement vantage points. Moreover, reported regional and ISP-level differ-ences make it difficult to draw broad conclusions. Indeed, anecdotal accounts and scientific studies (the most recent and technically detailed being Tai et al . [18] and Lange et al . [12] , here used as main 
+
+> 1https://ainita.net/ownership-in-irans-telecom-sector/ (accessed: March 2nd, 2026)
+
+references) show that Iran relies on an extensive censorship system (the so-called Great Firewall of Iran , GFI). The adopted censorship mechanisms have evolved substantially since the first systematic investigation in 2013 [ 2 ], continually incor-porating new and more advanced blocking techniques as emerging protocols and applications appear, but still relying also on the anal-ysis of unencrypted protocols. According to recent studies, the GFI is built on layered filtering methods, including DNS, HTTP, HTTPS, and protocol-level blocking. More specifically, the GFI intercepts DNS queries , and for censored domain names responds with pri-vate addresses (that are routed inside the NIN) corresponding to block pages; inspects HTTP fields for keywords and domains in the first data packet of an established TCP connection (stateful inspec-tion), returning a 403 forbidden HTTP code if censored; inspects SNI field of HTTPS handshake for domains in the first data packet of an established TCP connection (stateful inspection), injecting 
+
+RST packets; finally, UDP traffic (of specific significance because of increasing QUIC adoption, and also related to VPN usage) is monitored and selectively filtered. The GFI exhibits bidirectional behavior (similar to censoring sys-tems in China and Turkmenistan) i.e. it takes interference actions on both incoming and outgoing traffic, regardless of the traffic’s origin. This allowed active probing of the censoring mechanism from outside the NIN. Moreover, experimental analyses suggest a nuanced and possibly hierarchical structure of censorship de-ployment: while the GFI operates as a centralized system, certain ASes may be granted exemptions or are subject to less stringent censorship measures. Some ASes apply nearly complete censorship across DNS, HTTP, and UDP protocols, whereas others, show neg-ligible or no censorship. These accounts offer several snapshots in time of a highly dynamic infrastructure of communications control, therefore they do not necessarily apply to the shutdown of Janu-ary 8th 2026. Moreover, several analyses are built on measurement techniques and postprocessing steps that are not readily available to the public. 
+
+2.3 Circumvention of Internet Censorship 
+
+A recent study [ 19 ] showed Virtual Private Networks (VPNs) among the most widely used solutions for circumventing network censor-ship. This category includes several tools (either repurposed or specifically designed to circumvent censorship), united by the com-mon overall mechanism that creates an encrypted tunnel between a user’s device and a remote server located outside the censored network, preventing the access network operators from observing the final destination of traffic or tampering with DNS queries. A notable architecture, initially designed for privacy enhance-ment, is represented by Tor (The Onion Router), which provides anonymity and censorship resistance through a network of volunteer-operated relays. Tor routes traffic through multiple encrypted hops, making it difficult for both intermediaries and observers to deter-mine either the source or the destination of communications, while presenting the user a TCP proxy (on Android devices, a VPN-like connection). To counter increasingly sophisticated DPI systems, Tor has also introduced pluggable transports designed to obfuscate Tor traffic so that it resembles ordinary protocols, thereby reducing the likelihood of detection by national filtering systems. More recently, Iran’s January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques 
+
+to counteract the server enumeration attacks that mostly affects VPNs, introduced the Snowflakes architecture[ 3 ]: a large number of ultra-light, temporary proxies (“snowflakes”), which accept traffic from censored clients using peer-to-peer WebRTC protocols and forward it to a centralized bridge. The temporary proxies can be implemented in JavaScript, in a web page or browser extension (much cheaper to run than a traditional proxy or VPN server). Psiphon represents another widely deployed censorship circum-vention platform designed specifically for users in heavily filtered networks, and its effectiveness in Iran has been analyzed during the Iranian elections in 2013 and 2016[ 6 ]. Unlike Tor’s decentralized volunteer infrastructure, Psiphon uses a managed network of proxy servers combined with multiple tunneling protocols, including VPN, SSH, and HTTP proxy technologies. The system dynamically se-lects connection methods and employs traffic obfuscation to evade both DNS manipulation and DPI-based blocking. Its centralized design emphasizes accessibility and rapid adaptation to evolving censorship techniques. 
+
+2.4 Observing Internet Connectivity in Iran 
+
+Besides field reports, consisting in observations, findings, or ac-tivities recorded by people directly experiencing the effects of the control mechanisms impacting the network, the analyses performed at larger scales rely on different data sources, such as routing con-nectivity, active probing, and passive data-traffic observation. Over the years, numerous monitoring initiatives have contributed to the analysis of the state of the Internet in Iran, including aca-demic projects (IODA), private-sector platforms (Cloudflare Radar, Kentik, Whisper), independent observatories (NetBlocks’ Internet Observatory, OONI), and initiatives focused on human-rights (Fil-terWatch). More details on available data sources and monitoring initiatives are reported in Section 4.1 and Section 4.2, respectively. 
+
+2.5 History of Previous Network Disruptions in Iran 
+
+Iran has repeatedly resorted to Internet shutdowns in response to episodes of domestic unrest, deploying measures that variably affect the NIN and the country’s connectivity to the global Internet. Since 2019, three major nationwide disruptions have been documented, as discussed below. 
+
+Bloody November Shutdown (November 2019, ≈ 6 days). This was the first shutdown observed by IODA and was primarily implemented through the withdrawal of BGP routing announcements. Although Iranians experienced a near-total blackout, variations across IODA data sources and OONI measurements indicate that disconnection mechanisms differed by ISP and that limited access (particularly to the NIN) persisted during the disruption [ 14 ]. It involved both cellular and fixed-line networks. 
+
+Women, Life, Freedom Movement Shutdown (September 2022, ≈ 2weeks). Authorities imposed recurring nightly shutdowns targeting mobile networks (the strategy visible in IODA routing and active probing data) while keeping fixed-line connections online to reduce the broader economic and political costs of a full blackout [ 14 ,17 ]. These curfews, totaling roughly 100 hours, were accompanied by additional measures such as application and protocol blocking to further restrict information flows and access to circumvention tools [17]. 
+
+Stealth blackout during the Twelve-Day War with Israel (June 2025, 
+
+≈ 2 weeks). Unlike previous disruptions, the June 2025 shutdown did not rely on withdrawing BGP routes, thereby preserving the outward appearance of normal connectivity for conventional mon-itoring systems. Instead, authorities implemented a centralized filtering regime at the national gateway, combining DNS poisoning, protocol allowlist , and Deep Packet Inspection (DPI) to block for-eign services and neutralize circumvention tools while maintaining selected domestic access. The government justified the restrictions as a means of deterring cyberattacks from Israel. The shutdown involved both cellular and fixed-line networks. This strategy re-duced Iran’s international Internet traffic by approximately 90% without fully disconnecting the country [ 13 , 15 ]. Yet coordinated and diversified responses from the Internet freedom community enabled millions of Iranians to retain partial global connectivity. 
+
+3 2026 Iran’s Disruption: Lines of Evidence and Analyses 
+
+Figure 1 presents a timeline that summarizes the observations of events recorded in relation to the disruption of Internet connec-tivity in Iran. This timeline is substantiated by monitoring data we collected from different public sources and complemented with the information provided by a transit provider under NDA. Fig-ure 2 constitutes an integrated overview derived from the set of available monitoring sources. It combines passive measurements (Cloudflare Radar data, traffic observed by a transit provider, and the IODA telescope), active measurements (IODA and OONI), and BGP routing information. The observation period covers the whole month of January 2026, encompassing the shutdown and surround-ing days. The different data sources present a broadly consistent picture of the event. Passive and active measurements largely agree on the timing and progression of the disruption. The small visi-ble temporal discrepancies observed in the passive traffic analysis from the transit provider can be attributed to the coarser time gran-ularity of the data, which is aggregated using daily averages. In contrast, BGP-level observations do not show corresponding anom-alies, indicating that the disruption was not implemented through BGP routing changes but rather through mechanisms operating at other layers of the network. In the following, the related details are provided. 
+
+Early signs of disruption (Dec 29th, 2025–Jan 7th, 2026). Starting on December 29, field reports gathered by Filterwatch [ 16 ] and IODA [ 14 ] indicated the onset of a geographically targeted Internet disruptions in Tehran and several provincial cities, with complete outages, severe throttling, and VPN interference concentrated in commercial, administrative, and protest-prone areas, while other nearby locations remained partially functional [ 7 ]. Disruptions ranged from severe slowdowns to the loss of international con-nectivity, often restricting users to domestic services. Mobile and fixed-line networks did not exhibit uniform behavior. In several instances, fixed-line services were disrupted while mobile data Giuseppe Aceto, Valerio Persico, and Antonio Pescapè 22 Dec 2025  29 Dec  05 Jan  12 Jan  19 Jan  26 Jan  02 Feb  09 Feb  16 Feb  23 Feb  02 Mar 2026             
+
+> QUIC-protocol anomalies.
+> Type : Active measurements.
+> Source: OONI.
+> TIC withdraws IPv6 routes.
+> Type : Routing connectivity.
+> TIC disconnected from
+> several transit providers.
+> Type : Routing connectivity.
+> Traffic plummeting to near-zero.
+> Type : Passive measurements.
+> Source: Kentik.
+> Tiny amount of inbound and outbound traffic.
+> Type : Passive measurements.
+> Source: Kentik.
+> Minimal responsiveness to active probing.
+> Type : Active measurements.
+> Source: IODA.
+> Variability across the country.
+> Type : Field Reports.
+> Source: Filterwatch.
+> Many iranians networks becoming visible
+> inter nationally, with web still heavily filtered.
+> Type : Active measurements.
+> Source: Netblocks.
+> Early signs
+> of disruption
+> Nation-wide
+> total shutdown
+> Early signs
+> of restoration
+> Sharp increase in active probing.
+> Type : Active measurements.
+> Source: IODA.
+> Short-lived restoration (small amount of
+> traffic, falling again near to zero).
+> Type : Passive measurements.
+> Source: Cloudflare, Kentik.
+> Recovery of access to allowlisted
+> services via the NIN.
+> Type : Active Measurement.
+> Source: IODA.
+> De-facto disconnection from
+> international network connectivity.
+> Type : Active/Passive measurements.
+> Source: IODA, Netblocks, Cloudflare.
+> Allowlist
+> "new normal"
+> Disruption in the context of U.S.A.
+> and Israeli military operations
+> Geographically targeted internet disruptions
+> (complete outages, severe throttling, VPN
+> interference, loss of international connectivity).
+> Type : Field Reports.
+> Source: Filterwatch, IODA.
+
+Figure 1: Timeline of main registered disruption events. 
+
+remained active, and in others, access to (internal) NIN was pre-served while international traffic was severed or throttled, with inconsistencies also observed among fixed-line providers regarding outages and performance degradation [ 7 ]. The users experienced the Internet appearing connected, but with services and apps not actually loading. Also VPNs resulted unstable. According to these field reports [ 16 ], these phased and localized measures were imple-mented at granular network levels (e.g., ISP PoPs or cell towers) and enabled authorities to disrupt coordination without necessar-ily triggering the nationwide traffic drops that would be visible in macro-level monitoring data. On January 2, the OONI Observatory reported protocol-level anomalies affecting QUIC traffic on specific networks (the staggered appearance of these disruptions across operators suggests a phased implementation). 2 Such initial evidences strongly suggested that while the network appeared as technically “connected” at the IP layer, disruption was shifted to higher layers. 
+
+Nation-wide Total Shutdown (Jan 8th–Jan 18th 2026). The first ma-jor development occurred on January 8 at 11:42 UTC when TIC (AS49666) started withdrawing its IPv6 BGP routes from its sessions, causing nearly all Iranian IPv6 routes to vanish from the global rout-ing table within hours [ 13 ]. However, since IPv6 typically accounts for less than 1% of total inbound traffic to Iran (source: Kentik’s aggregated NetFlow data) the average user was unlikely to notice any impact [1, 13]. After a brief disruption, also IPv4 traffic began to sharply decline at 16:30 UTC (19:00 local time), falling until it had nearly ceased by 18:45 UTC. This was reflected in IODA Telescope data as a sudden drop, in Cloudflare metrics as a sharp nationwide traffic collapse [ 5,7, 14 ], and traffic volume seen at an upstream provider of AS 49666 (see Fig. 2, top). A corresponding drop of active measurements can 
+
+2https://x.com/OpenObservatory/status/2007508011812892743?s=20 (accessed: March 2nd, 2026) 
+
+be found in OONI probing testing (see Fig. 2, middle) and IODA active probing (see Fig. 2, bottom). In total, it took more than two hours to bring inbound and out-bound connectivity to a near standstill [ 13 , 14 ]. At 19:00 UTC, TIC was observed disconnecting from several transit providers—including Russian state-owned Rostelecom (AS12389) and Gulf Bridge Interna-tional (AS200612)—as well as from all of its settlement-free peering partners [ 1 , 13 ], with the reduced amount of visible /24s ( ≈ − 12% )also highlighted by IODA [ 14 ]. On the same day, Netblocks’ data reported the total loss of connectivity on Iran Internet backbone (TCI provider) affecting restive cities such as Kermanshah. By 22:15 Iran time, Kentik data confirms the Internet reached a state of total blackout, with traffic plummeting to near-zero [ 7 ]. Notably, the separation from the state-owned TIC has not shielded IPM from state-imposed censorship or monitoring measures [13]. Despite losing many BGP adjacencies for AS49666 (TIC), most Iranian IPv4 prefixes remained globally routed [ 13 ] (see IODA BGP data in Fig. 2, bottom). The sharp decline in IPv4 traffic was there-fore not due to reachability loss, but to filtering at the network edge. IODA active-probing and BGP data illustrate this clearly (see Fig. 2, bottom): active probing fell to zero as traffic was blocked, while routed IPv4 space in BGP remained largely intact ( ≈98.14% after Jan 8th) [ 14 ]. Hence, routing announcements were not the main mechanism used to generate the shutdown, highlighting the regime’s more sophisticated approach to implementing shutdowns and controlling the information environment. In the initial phase of the shutdown, authorities cut both interna-tional connectivity and domestic infrastructure, including the NIN, privileged SIM cards, and landline services. By disabling external and internal communication channels alike, the state imposed an unprecedented level of isolation, even exceeding the wartime dis-ruptions of 2025, and creating a near-total information vacuum [ 8]. After January 8, the Internet shutdown in Iran was not complete: a tiny amount of traffic was still flowing in and out [ 13 ]. IODA Iran’s January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques 
+
+measurements recorded minimal responsiveness to active probing (≈3%), likely reflecting either measurement artifacts or residual connectivity reserved for allowed users, such as government en-tities or services operating within Iran’s state-controlled network perimeter [ 14 ]. Outside of very limited connectivity, digital human rights groups report severely limited access to the Internet both internationally and domestically. This includes limited, intermittent ability to make phone calls via landlines [14]. 
+
+Early Signs of Restoration (Jan 18th–Jan 26th 2026). On January 18, IODA, Cloudflare Radar, and Kentik reported early signs of Internet connectivity being restored in Iran [ 14 ]. However, the apparent restoration of Internet connectivity observed proved to be short-lived, as the small volume of traffic quickly dropped back to near-zero (see Fig. 2, top). In accordance to this, IODA data showed synchronous reachability spikes for both Telescope and active probing on January 24th (see Fig. 2, top and bottom). A stronger recover was registered in the volumes of traffic at the upstream provider (see Fig. 2, top). After January 18 access was non-uniform across the country and varies by provider [11]. 
+
+Allowlist “New Normal” (Jan 26th–Feb 28th 2026). As of 10:00 PM (UTC) on January 26, IODA observed a sharp increase in Active Probing witnessing the reachability of Iran’s networks from the Internet (see Fig. 2, bottom). 3 Such a change of connectivity status was also notified by Netblocks, which on January 27th reported that many iranians networks were becoming visible internationally. 4
+
+However, according to Netblocks, no return to normal was regis-tered: web was still heavily filtered on an allowlist basis. Despite this statement is not explicitly supported by shared evidences, OONI data do provide experimental proof of this, especially regarding Whatsapp instant messaging. Fig. 2 (middle) shows that before the shutdown, Whatsapp was generally accessible (low counts of anom-alies), while a complete block is evident in the “new normal” phase. Similarly, OONI Web tests reveal a significant increase of anomalies with respect to before the shutdown. Traffic data from Kentik and IODA confirms this is a “low-volume” restoration. Traffic remains at only 25% of pre-shutdown levels, further proving that the vast majority of the global Internet remains inaccessible to the general public [ 11 ]. Cloudflare data indi-cate that overall traffic volume, which had been steadily increasing since the end of January, experienced a marked decline around February 11 [ 5 ] (not evident from IODA dashboard). Following this abrupt drop, traffic levels stabilized at approximately 50% of those observed in the immediately preceding period. Focusing on the accessible services, according to FilterWatch a specific set of international platforms and services have been allowlisted to provide a baseline of digital functionality, including search engines, communication tools, app stores, AI tools, gaming, and navigation. 5 Other social media and messaging platforms 6
+
+remained accessible only via circumvention tools and continue to 
+
+> 3https://bsky.app/profile/did:plc:3xessr3vu336mxean6zvfyjq/post/3mdfuqwxjpc2g (ac-cessed: March 2nd, 2026)
+> 4https://www.instagram.com/p/DUBHDR4DP8l/
+> 5Service list: Google, Bing, Google Meet, Gmail, Outlook, Play Store, App Store, Apple, Samsung website, ChatGPT, GitHub, PlayStation, and Google Maps [11].
+> 6Instagram, Telegram, YouTube, and X.
+
+experience instability [ 11 ]. Others that were previously reachable 7
+
+deteriorated to comparable restrictive conditions [ 11 ]. Also, user reports on January 27 indicate that a higher number of VPNs became functional compared to the initial days of the Internet shutdown, when most circumvention tools were rendered useless [11]. This situation reflects Iran’s “allowlist” policy: a model akin to the Chinese Great Firewall that permits access only to approved users or services while blocking all others [ 14 ]. Field reports wit-ness that since January 15, international connectivity in Iran has functioned as a tightly monitored privilege rather than a universal service. A pilot “tiered Internet” program at the Tehran Chamber of Commerce requires applicants to undergo in-person identity verification, register fixed IP addresses, and sign a written pledge not to “misuse” access [11]. 
+
+Disruption in the context of U.S.A. and Israeli military operations (from Feb 28th). In the context of U.S.A. and Israeli military opera-tions, on February 28th IODA reported that Iran was cut off from the global Internet beginning at approximately 07:00 UTC, reflecting a de-facto disconnection from international network connectivity, in line with the disconnection implemented during the Jun 2025 conflict. 8 Similarly, Netblock’s Internet-observatory data revealed that Iran was (and still is at the time of writing) experiencing an almost complete Internet shutdown, with national connectivity reduced to approximately 4% of typical levels. 9 A coherent assess-ment is provided by Whisper. After 24 hours, the overall country connectivity was estimated at approximately 1% of typical levels. 10 
+
+Also According to the data from Cloudflare Radar, the traffic trends reveal near-total disconnection ( < 0.1% maximum level registered in the previous period). 11 
+
+The analyses above allow us to answer some of the research questions, as follows. 
+
+What is known about Iran’s 2026 Internet shutdown (ANS-RQ1) . The events that occurred in the final days of 2025 and in January 2026 provide a new example of the Iranian State’s inter-ference in, and control over, the country’s digital infrastructure. During this period, access to Internet-based services was rendered unavailable. The shutdown lasted approximately ten days (8–18 January), consistently with the other nationwide disruptions docu-mented since 2019. Although evidence of disconnections at the BGP level can be observed, these are limited both in scope (primarily affecting IPv6 routes) and in duration. Even during the shutdown period, BGP connectivity appears to be largely restored, revealing that the blocking mechanisms were implemented at higher layers of the protocol stack. 
+
+Which “new normal” was established (ANS-RQ2) . After the shutdown, available measurements data reveal a drop in traffic volumes with respect to before, as well as increasing selective im-pairment of web and applications access. Field reports explain that service restoration followed a selective approach, based on allowlist 
+
+> 7WhatsApp and LinkedIn.
+> 8https://bsky.app/profile/did:plc:3xessr3vu336mxean6zvfyjq/post/3mfwfpezy6c2e (ac-cessed: March 2nd, 2026)
+> 9https://mastodon.social/@netblocks/116147264437940657 (accessed: March 2nd, 2026)
+> 10 https://mastodon.social/@netblocks/116149846834309209 (accessed: March 2nd, 2026)
+> 11 https://radar.cloudflare.com/ir?dateRange=28d (accessed: March 2nd, 2026) Giuseppe Aceto, Valerio Persico, and Antonio Pescapè
+
+Figure 2: Synoptic monitoring data: passive measurements of traffic and telescope data (top); OONI active probing (middle); IODA active probing and BGP data (bottom). 
+
+mechanisms and authorization procedures, potentially including in-person identification requirements. This approach effectively embeds surveillance into access itself in a way that is hard to detect via network measurements from outside the national network. The described scenario lasted until February 28th, when a total shuth-down was enacted again in correspondence of U.S.A. and Israeli military operations. 
+
+Which precursory symptoms manifested (ANS-RQ3) . Be-fore the shutdown, several field reports of connectivity disruption or impairing have been mentioned by human rights associations, on-alert because of the unrest and protests happening in several Iranian cities. The localized and time-limited nature of this kind of interference makes it hard to detect with nation-wide aggregated monitoring techniques. Some considerations can be proposed, regarding network pat-terns detectable starting on January 1st (noting that Jan 2nd has been a national holiday for Iran). First, the web traffic originated from Iran towards the Cloudflare CDN and marked likely human-generated 12 (Fig. 3, top) sees a significant reduction (bottoming on January 4th to about 35% from the reference maximum). By in-specting the bot-vs-human ratio (Fig. 3, middle) emerges that bots increase their share from January 2nd on; a similar phenomenon at the same time can be seen considering the share of TLS QUIC (Fig. 3, bottom), which significantly shrinks with respect to other TLS versions, also losing the daily pattern typical of human activities. Thanks to field reports, this human-selective traffic reduction can be related to unreliable connections (including possibly throttling), which frustrate human users (thus amplifying the connectivity impairment) while not (overly-) affecting automated traffic. 
+
+4 Data Sources and Monitoring Initiatives 
+
+In the following, we present the data sources with the related moni-toring approaches at the basis of the analysis of the connectivity in Iran (Section 4.1) and detailed the monitoring initiatives that have provided effort in such analysis (Section 4.2). 
+
+> 12 Cloudflare tells human operators from automated web scraping by means of several proprietary heuristics, including to a large extent a supervised ML algorithm, see: https: //developers.cloudflare.com/bots/concepts/bot-score/ (accessed: March 2nd, 2026). Iran’s January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques
+
+Figure 3: Pre-shutdown clues in bot- vs. human- generated traffic and TLS protocol shares (Data Source: Cloudflare Radar). 
+
+4.1 Data sources 
+
+The Iranian regime does not tend to disclose data regarding the management mechanisms of its national digital communication in-frastructure. Consequently, information for outage analysis must be obtained through monitoring and telemetry approaches that mostly do not rely on the cooperation of the networks under observation. Visibility on global routing connectivity represents a major source of information to analyze how the iranian networks are connected to the Internet. RouteViews and RIPE RIS are the two main publicly accessible sources of information about BGP data. They both take advantage of route collectors strategically deployed at IXPs and partner networks worldwide, where they peer with ISPs, academic networks, backbone providers, and hyperscalers to capture diverse, multi-perspective views of the global routing table. While BGP data offers a high-level view of the Internet’s funda-mental connectivity structure, it is insufficient to uncover or explain more complex network management strategies. To address this lim-itation, active probing (i.e., the injection of measurement traffic into the network to solicit some sort of responses and/or to observe how the traffic is handled) is used to complement and enrich the analysis. Notably, obtaining reliable in-country vantage points for active measurements is challenging due to sanctions, strict regula-tions, and risks to local volunteers. As a result, researchers often rely on external probing toward in-country services, although send-ing large volumes of probes to publicly accessible servers also raises concerns [18]. These insights can be further enriched through passive data traffic observations from privileged vantage points. Such van-tage points may include upstream providers of Iranian networks (specifically, of the gateway providers TIC and IPM) where traffic volumes and related variations can be easily captured; or CDN in-frastructures that have nodes within the country (the latter also enabling inference on traffic characteristics e.g., the analysis of request–response patterns or human vs. automated activity). As a particular case of passive analysis, it is worth to mention dark-space traffic analysis that monitors traffic directed to routable but unassigned IP addresses (an evidence or byproduct of scanning and attacks). A network telescope enables the detection of structural changes in a country’s connectivity and network behavior, serving as a useful tool to identify nationwide blackouts, analyze disconnec-tion events, observe systemic effects of censorship or government interventions. Giuseppe Aceto, Valerio Persico, and Antonio Pescapè 
+
+4.2 Monitoring Initiatives 
+
+IODA 13 monitors the connectivity of global Internet infrastructure providing data at country, subnational, and ISP/AS levels and al-lows to assess the severity of disruptions. The project is run by the 
+
+Internet Intelligence Lab , an academic research lab at the School of Computer Science, College of Computing of Georgia Tech; it was initially developed at the Center for Applied Internet Data Anal-ysis (CAIDA), in the UC San Diego, and has been funded by the U.S.A. NSF and OTF organizations. It relies on three main measure-ment types: Border Gateway Protocol (BGP) data (from RIPE NCC’s Routing Information Service (RIS) and the University of Oregon’s RouteViews project), active probing (4.2 million /24 address blocks are probed at least once every ten minutes), and network telescope observations (analysis of unsolicited background traffic). IODA’s long-term perspective on global Internet connectivity offers insight into the increasing sophistication of the Iranian authorities’ ap-proaches to information control and Internet shutdowns within the country via both technical reports [ 14 ] and an online dashboard 14 .
+
+Cloudflare Radar 15 is a platform that presents insights into global Internet traffic, cybersecurity threats, and technology adop-tion trends. It is primarily powered by data from Cloudflare’s global Content Distribution Network and aggregated, anonymized data from their 1.1.1.1 public DNS resolver. The platform also incorpo-rates external datasets in specific areas, including interconnection metadata from PeeringDB, Autonomous System population esti-mates from APNIC, geographic reference data from GeoNames, and Internet routing information from RIPE NCC RIS and RouteViews. The platforms allows to focus the analysis on selected nations, including Iran [5]. 
+
+Kentik 16 is a U.S.A. technology company that develops a cloud-based network intelligence and observability platform, which in-gests and correlates a wide range of telemetry sources to give visibility into networks. These include: core network telemetry (flow data exported from routers, switches, hosts, and cloud environ-ments; routing and path data such as BGP routing information; device and interface metrics collected via SNMP and streaming telemetry; synthetic test results generated by agents for active per-formance monitoring) as well as enrichment and contextual teleme-try (GeoIP and threat intelligence feeds; cloud provider flow logs; business/operational metadata like DNS data, orchestration con-text, user identity information from NAC/RADIUS/IPAM). After the blackout, the data from Kentik were used to explain how the event developed and compare it with past internet shutdowns in Iran [13]. 
+
+The Internet Observatory project 17 uses measurement, classi-fication, and attribution methods to identify internet disruptions, censorship, and cyberattacks affecting critical infrastructure. It supports the reporting activities of NetBlocks 18 , an independent, non-partisan organization that monitors global Internet connec-tivity, with a focus on digital rights, cybersecurity, and Internet 
+
+> 13 https://ioda.inetintel.cc.gatech.edu/ (accessed: March 2nd, 2026)
+> 14 https://ioda.inetintel.cc.gatech.edu/country/IR?from=1764609812&until= 1770830612&view=view1 (accessed: March 2nd, 2026)
+> 15 https://radar.cloudflare.com/ (accessed: March 2nd, 2026)
+> 16 https://www.kentik.com/ (accessed: March 2nd, 2026)
+> 17 https://netblocks.org/projects/observatory (accessed: March 2nd, 2026)
+> 18 https://netblocks.org/ (accessed: March 2nd, 2026)
+
+governance. Its monitoring approach emphasizes impartiality, accu-racy, and methodologies designed to operate at global Internet scale. The program combines first-party and third-party data sources to provide an integrated view of connectivity and platform availability during events such as crises, elections, civic actions, and natural disasters that may affect human rights and democratic processes. Sources are classified by telemetry type, such as connectivity mea-surements (e.g., ICMP), traffic data (e.g., web, DNS, or flow aggre-gates), probe-based measurements (e.g., active or user-driven tests), and routing metrics. Since the start of the shutdown, NetBlocks has provided via social media at least daily updates on the status of the connectivity in Iran. 
+
+FilterWatch 19 is an Iran-focused digital rights initiative that op-erates as a project of the Miaan Group 20 , a non-profit organization based in the U.S.A., focused on human rights in Iran and the wider Middle East. Filterwatch provides legal, technical, research, and advocacy support, and analyzes and documents the human rights impacts of Internet censorship, surveillance, and infrastructure policies, particularly in relation to Iran’s NIN. The project provides data, analysis, and tools to support accountability, advocacy, and the protection of online privacy and freedom of expression [ 11 ]. Preminent data sources are of the field report kind, with gathering of local information. This kind of contribution complements (and is used jointly in the analyses) the network measurements from outside the national network. Indeed “tactical” local disruptions are not visible in the aggregated traffic, and due to Carrier-Grade NAT architecture of the Iranian national network, measurement tools like ones by IODA or Cloudflare cannot easily detect sub-national scale throttling or jamming. Following the internet blackout in Iran, FilterWatch released a series of technical reports [ 7 , 8, 11 , 16 ], mainly supported by the network measurement from IODA, Kentik, and Cloudflare. 
+
+OONI 21 (the Open Observatory of Network Interference) is a project aimed at decentralized efforts in documenting internet cen-sorship around the world since 2012. Born as a sub-project of the U.S.A. non-profit organization Tor Project 22 , since 2024 it is backed by a dedicated Italian non-profit association. The project provides Free/Open-Source software ( OONI Probe mobile and desktop app) to measure the blocking of websites, instant messaging apps, and censorship circumvention tools; real-time analysis and open pub-lication of censorship measurements from around the world, pub-lished as open data on a dashboard 23 ; research reports documenting censorship events around the world, in collaboration with more than 50 research and human-rights advocacy partners. By providing the active probing applications for smartphones and desktop OSes, the OONI project allows the continuous worldwide crowdsourc-ing of reachability measurements for selected services, offering a view from inside the potentially censored networks, thus offering (real-time and publicly) a viewpoint different from most censor-ship detection and reporting initiatives. This data is at the basis of analysis reports which are frequently published on the project website and some scientific peer-reviewed papers. Regarding Iran, 
+
+> 19 https://filter.watch/english/about-us/ (accessed: March 2nd, 2026)
+> 20 https://miaan.org/ (accessed: March 2nd, 2026)
+> 21 https://ooni.org (accessed: March 2nd, 2026)
+> 22 https://www.torproject.org (accessed: March 2nd, 2026)
+> 23 https://explorer.ooni.org/ (accessed: March 2nd, 2026) Iran’s January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques
+
+OONI published (in collaboration with ARTICLE19, ASL19, and Small Media) a report 24 about blocking evidence between 2014 and 2017 ; a multi-stakeholder report 25 about the censorship following the death of Jhina (Mahsa) Amini, between 16th September 2022 to 16th October 2022 ; an analysis 26 in collaboration with Miaan Group 
+
+on blocking of selected women’s rights websites (with data analysis 
+
+covering Feb. 1st, 2024 to Oct 1st, 2025 ). At the time of writing, no analysis has yet been published about Jan. 8th 2026 shutdown. 
+
+Whisper 27 is a cybersecurity company founded in January 2025 that focuses on internet infrastructure intelligence. Following the Internet blackout in Iran on 8 January, Whisper made an online dashboard available [ 1] to provide ongoing visibility into the coun-try’s connectivity status. The platform aggregates data from mul-tiple measurement and routing intelligence sources (IODA, RIPE, and Cloudflare) and presents near-real-time indicators describing the evolution of the disruption, together with analytical commen-tary on the technical mechanisms believed to have been employed. Among the exposed metrics are BGP path counts, hourly BGP ac-tivity, BGP UPDATE volume, OONI network measurement results, and prefix visibility by protocol (IPv4 and IPv6 prefix counts de-rived from RIPE RIS routing data). The dashboard also highlights structural aspects of Iran’s connectivity, including foreign transit providers connected to Iranian networks, internal ASN interconnec-tion patterns and topology, and changes observed across affected networks. Particular attention is given to the behavior of IPM’s 26 downstream networks after the blackout, with Iranian address space grouped by ASN to illustrate differential routing responses. Beyond descriptive monitoring, the analysis advances hypotheses framed in terms of a “digital kill chain” interpreting the event as a staged sequence of control actions targeting routing visibility, external reachability, and internal network segmentation. 
+
+Additional data sources. We complemented the aforemen-tioned data sources with a view of the aggregated and normalized traffic volume involving the Iranian network (AS49666) as seen at one international upstrem provider. Due to NDA, we are not allowed to share further details on such traffic, but we report these data due to their strong coherence with the rest of the available observations and since it constitutes a valid example of data sources that can shine more light on the analyzed event. Table 1 summarizes the main monitoring initiatives that con-tributed to the analysis of the 2026 network shutdown in Iran, highlighting their country of registration, data and measurement methodologies, and produced outputs. 
+
+Which monitorig initiatives contributed to the understand-ing of the events (ANS-RQ4) . What is currently known about these events affecting the network derives from a limited number of monitoring initiatives, whose outputs are publicly accessible in the form of online dashboards or technical reports. Most of these initiatives are U.S.A.-centric: they are typically legally based in the  
+
+> 24 https://ooni.org/post/iran-internet-censorship/ (accessed: March 2nd, 2026)
+> 25 https://ooni.org/post/2022-iran-technical-multistakeholder-report/ (accessed: March 2nd, 2026) — facilitated by the European Commission and U.S.A., coordinated by OONI and ISOC, and including besides OONI also IODA, Measurement Lab (M-Lab), Cloudflare, Kentik, Censored Planet, ISOC, Article19.
+> 26 https://ooni.org/post/2025-iran-censorship-womens-rights/ (accessed: March 2nd, 2026)
+> 27 https://www.whisper.security/ (accessed: March 2nd, 2026)
+
+United States and, in the majority of cases, receive funding either from U.S.A. government sources or from private U.S.A. entities. De-spite the very high and well-established levels of expertise within academia and the private sector, as well as the significant efforts of non-governmental organizations—many of which are directly engaged in field operations—this structural configuration results in a concentration of both operational capacity and financial support within virtually a couple countries alone. An evident missing actor is the European Union, whose most-related monitoring project is 
+
+Mapping Media Freedom 28 which is not technically-focused, and is limited only to European countries. Consequently, the continuity, scope, and methodological orientation of Internet monitoring ac-tivities remain significantly dependent on the political priorities, regulatory frameworks, and funding decisions of almost a single government. While this does not diminish the professionalism or integrity of the actors involved, it does highlight an underlying systemic dependency that may affect long-term sustainability, plu-ralism of perspectives, and the global representativeness of the resulting datasets. 
+
+How informative observations could be drawn (ANS-RQ5) .
+
+Most of the considered reports leveraged multiple viewpoints (com-bining multiple data sources, potentially originated at multiple vantage points), although not all the monitoring initiatives relied on their own managed monitoring infrastructures. Some primarily aggregate, curate, or reinterpret data produced by other entities. First-hand data are in fact provided by a relatively small set of primary sources, and raw datasets are not always publicly available. These data sources can be broadly grouped into four categories: BGP data, passive traffic analysis, active probing measurements, and network telescopes (i.e., darknet monitoring infrastructures). Impor-tantly, large-scale monitoring platforms—by design—exhibit struc-tural blind spots when confronted with layered, phased, or highly granular disruption events. In such cases, purely measurement-based approaches may fail to capture the full scope or timing of restrictions. The integration of field reports has therefore proven es-sential, particularly for the early detection of impending shutdown events. 
+
+5 Circumvention response to the shutdown 
+
+Circumvention tools play a key role in reacting to Internet censor-ship activities. Indeed, VPNs and VPN-like tools as Tor and Psiphon have been widely used to circumvent Internet censorship [ 19 ], and have been selectively subjected to censorship in their own turn. Dur-ing the analyzed shutdown, none of the circumvention techniques based on common Internet connectivity could work, therefore other communication means have been explored, namely (illegal) satellite connections and peer-to-peer decentralized WLAN / PAN commu-nications: these are described in the following sections. 
+
+5.1 Satellite connection 
+
+The filtering of landline connection between Iran and the rest of the Internet has been circumvented through satellite access (specifically, 
+
+> 28 https://www.mappingmediafreedom.org/ (accessed: March 2nd, 2026) Giuseppe Aceto, Valerio Persico, and Antonio Pescapè
+
+Table 1: Monitoring initiatives that focused on 2026 Iran Internet shutdown. 
+
+Initiative Reg. Org. Data origin Data types / measurement methods Output 1st 3rd BGP Traffic Probing Telescope Tech. rep. Social Dashboard 
+
+Cloudflare Radar USA ✓ ✓ 3rd 1st · · ✓ · ✓
+
+FilterWatch USA · ✓ 3rd · 3rd 3rd ✓ · ·
+
+IODA USA ✓ ✓ 3rd · 1st 1st ✓ ✓ ✓
+
+Kentik USA ✓ ✓ 3rd? ? ? · ✓ · ·
+
+NetBlocks UK ✓ ✓ 3rd? 1st 1st · · ✓ ·
+
+OONI ITA † ✓ · · · 1st · · · ✓
+
+Whisper USA · ✓ 3rd · 3rd 3rd · · ✓                         
+
+> Legend. Initiative = Monitoring initatives in alphabetical order; Reg. = Registered office country; Org. = Organization type: Academic, Non-Profit, Business; Data origin :
+> 1st /3rd -party data collection; BGP = routing and prefix visibility; Traffic = aggregated traffic measurements; Probing = active measurements; Telescope = unsolicited background traffic; Tech. rep. = technical report/analysis; Social = social media updates; Dashboard = public dashboard.
+> †Initially founded in USA and funded mainly by USA private and public entities.
+
+with the Starlink constellation). On January 13th the USA finan-cial news outlet Bloomberg published 29 news that Starlink access was provided for free to Iran citizens. Indeed, despite possession of satellite communication technology is illegal in Iran, civil rights or-ganizations have helped smuggling in the order of 50 , 000 terminals in the country since 2022 protests 30 . This in turn prompted the Ira-nian government to interfere with satellite link through jammming (reported heavily happening from January 11th) 31 with up to 80% 
+
+packet loss 32 in some areas, for some of the time, while elsewhere the Starlink connections were less severely affected or not at all. The cost of a satellite terminal, the lack of legal options to pur-chase them, and the risk associated with its possession (increased by the visibility of satellite “dish” antennas) all limit this option. The recently deployed Direct-to-Cell [ 10 ] 33 Starlink technology would help in this regards, as common mobile phones could be used as terminals for satellite communications. There are no reports of actual availability and usage of this technology during the analyzed event. On the other hand, dependence on the goodwill of a private subject, currently running these services in a monopolistic condi-tion, has already shown the reliability and (political) control risks in the case of Ukraine just a few months before 34 .
+
+5.2 Peer-to-peer messaging apps 
+
+If quasi-real time (“instant”) interactive communication is not a requirement, then long-distance digital communication is viable also in absence of Internet availability, by exploiting Personal-Area-Network technologies such as Bluetooth and delay-tolerant com-munication protocols. This is the case of a set of apps reported 
+
+> 29 https://www.bloomberg.com/news/articles/2026-01-13/musk-offers-free-starlink-in-iran-as-internet-blackout-persists (accessed: March 2nd, 2026)
+> 30 https://www.nytimes.com/2026/01/15/technology/iran-online-starlink.html (accessed: March 2nd, 2026)
+> 31 https://filter.watch/english/2026/01/13/network-monitoring-january-2025-internet-repression-in-times-of-protest/ (accessed: March 2nd, 2026)
+> 32 https://filter.watch/english/2026/01/13/network-monitoring-january-2025-internet-repression-in-times-of-protest/ (accessed: March 2nd, 2026)
+> 33 https://www.spacex.com/updates/#dtc-gen2-spectrum (accessed: March 2nd, 2026)
+> 34 https://www.reuters.com/investigations/musk-ordered-shutdown-starlink-satellite-service-ukraine-retook-territory-russia-2025-07-25/ (accessed: March 2nd, 2026)
+
+to be used in Iran during the shutdown 35 namely 𝐵𝑖𝑡𝑐ℎ𝑎𝑡 36 and its closed-source Iranian-localized fork Noghteha , which has been downloaded more than 72 , 000 times between Jan 8th and Jan 10 2026 from the mobile app market AppBrain 37 .This peak of downloads of Noghteha testifies the sore need for secure and off-internet digital communication tools, but this need is hardly properly addressed by Noghteha and Bitchat . Indeed, Bitchat 
+
+has been initially advertised as a secure communication app, but multiple reports in July 38 ,39 ,40 revealed several critical security vul-nerabilities, including two zero-days, which make the app “danger-ously insecure”. Further concerns regard the closed-source forked version Noghteha (the most used in Iran) whose security characteris-tics and development are completely opaque. Both apps disclose that they didn’t undergo an independent security audit and therefore should not be used in highly sensitive use cases. Notably, Bitchat 
+
+has been also widely downloaded 41 in Uganda before the elections due Jan 15th 2026, as the government cut off the Internet 42 . In this case, an Uganda IT taskforce allegedly 43 succeded in blocking the Bluetooth communications and thus block the Bitchat app commu-nications, but no technical details nor independent validation of the claim has been provided. 
+
+How effective censorship-circumvention tools have been (ANS-RQ6) . In the case of Iran, both Tor and Psiphon were blocked already before the shutdown, and no censorship detection has been 
+
+> 35 https://bitcoinmagazine.com/news/iranian-protestors-turn-to-censorship-resistant-freedom-tech-during-internet-blackout (accessed: March 2nd, 2026)
+> 36 https://github.com/permissionlesstech/bitchat/blob/main/WHITEPAPER.md (ac-cessed: March 2nd, 2026)
+> 37 https://www.appbrain.com/app/noghteha-mesh-messenger/com.filtershekanha. noghteha (accessed: January 28th, 2026)
+> 38 https://www.supernetworks.org/pages/blog/agentic-insecurity-vibes-on-bitchat (ac-cessed: March 2nd, 2026)
+> 39 Published on Jul 25, 2025 — https://saadkhalidhere.medium.com/why-bitchat-is-a-bad-idea-my-audit-found-critical-zero-days-1b126a45a2c5 (accessed: March 2nd, 2026)
+> 40 Opened on bitchat github Issues list on Aug 1st, 2025 — https://github.com/ permissionlesstech/bitchat/issues/376 (accessed: March 2nd, 2026)
+> 41 https://invezz.com/news/2026/01/14/bitchat-tops-uganda-app-stores-as-election-internet-blackout-drives-use/ (accessed: March 2nd, 2026)
+> 42 https://reclaimthenet.org/uganda-imposes-nationwide-internet-shutdown-ahead-of-2026-election (accessed: March 2nd, 2026)
+> 43 https://nilepost.co.ug/news/315117/the-it-taskforce-behind-the-bitchat-block-ugandas-homegrown-cyber-defense-triumphs (accessed: March 2nd, 2026)
+
+Iran’s January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques 
+
+possible during the shutdown itself (as very tight allowlist has been applied). Notably, Tor resulted unfiltered from OONI tests after the shutdown, while Psiphon remained blocked afterwards. The allowlist approach is effective against virtually all circumvention techniques that use the conventional local Internet connectivity: this prompted for alternative means of communication, namely satellite connection and peer-to-peer WLAN and PAN messaging apps. Both these approaches are virtually invisible to the moni-toring tools used in this and other published analyses 44 , so other approaches must be explored. 
+
+6 Discussion and Conclusion 
+
+The events of January 2026 constitute a further illustration of the Iranian authorities’ capacity to exert centralized control over the national digital infrastructure. The ten-day blackout (8–18 Janu-ary) followed patterns observed in previous nationwide disrup-tions since 2019 and appears to have been implemented primarily through mechanisms operating above the BGP layer, rather than through sustained routing withdrawals. The restoration of connec-tivity occurred through a selective and tightly controlled process based on allowlisting and authorization procedures. This model individualizes and conditions access to the network, embedding traceability and surveillance into connectivity itself and thereby significantly weakening guarantees of digital privacy. Evidence suggests that network interference may have begun even before the official shutdown, through localized disruptions and degrada-tions affecting human-generated traffic. These patterns (consistent with throttling or unstable connectivity) highlight the difficulty of detecting granular interference events using only nation-scale aggregated measurements. The reconstruction of these events relies on a limited ecosystem of monitoring initiatives, many of which are institutionally and financially concentrated in a small number of countries, particu-larly the U.S.A. While these initiatives demonstrate high technical expertise and operational commitment, this concentration intro-duces structural dependencies that may influence agenda setting, long-term sustainability, and geographic coverage of monitoring activities. Most available analyses combine heterogeneous data sources and observation vantage points, yet the underlying primary datasets originate from a relatively small set of infrastructures. BGP feeds, passive traffic measurements, active probing, and darknet monitoring collectively provide valuable insights, but measurement-based approaches alone exhibit blind spots when disruptions are layered, phased, or geographically localized, making field reports 
+
+an essential complementary source. Finally, the shutdown demonstrated the effectiveness of allowlist 
+
+approaches against conventional circumvention tools operating over local Internet connectivity. As a consequence, alternative com-munication methods (such as satellite connectivity and peer-to-peer messaging applications based on local wireless networks) became particularly relevant, although these approaches remain effectively 
+
+> 44
+
+The decentralized nature of bitchat, using the nostr protocol, potentially allows for privacy-preserving activity monitoring with blockchain-based tracking dashboards such as https://bitchatexplorer.com/ (accessed: March 2nd, 2026) 
+
+invisible to current large-scale monitoring frameworks and there-fore require new methodological approaches for systematic obser-vation. 
+
+Acknowledgments 
+
+We thank all the organizations and initiatives that collected, orga-nized and made publicly available the monitoring data necessary for this analysis. 
+
+References 
+
+[1] Whisper 2026. The Blackout . Whisper. https://state-of-iranblackout.whisper. security Interactive real-time report and analysis on Iran internet connectivity blackout in January 2026 (accessed: 2026-03-26). [2] Simurgh Aryan, Homa Aryan, and J Alex Halderman. 2013. Internet censorship in Iran: A first look. In 3rd USENIX Workshop on Free and Open Communications on the Internet (FOCI 13) .[3] Cecylia Bocovich, Arlo Breault, David Fifield, Xiaokang Wang, et al . 2024. Snowflake, a censorship circumvention system using temporary WebRTC proxies. In 33rd USENIX Security Symposium (USENIX Security 24) . 2635–2652. [4] Calla O’Neil. 2025. Iran’s Digital Fortress: The Rise of the National In-formation Network . Technical Report 16. American Foreign Policy Coun-cil. https://www.afpc.org/uploads/documents/Iran_Strategy_Brief_No._16_-_August_2025.pdf. [5] Cloudflare, Inc. 2026. Cloudflare Radar — Overview for Iran . Cloudflare. https: //radar.cloudflare.com/ir [6] Ronald Deibert, Joshua Oliver, and Adam Senft. 2019. Censors get smart: Evidence from Psiphon in Iran. Review of Policy Research 36, 3 (2019), 341–356. [7] FilterWatch. 2026. From Regional Disruptions to Total Black-out: Examining Iran’s Internet During Escalating Protests .https://filter.watch/english/2026/01/09/network-monitoring-january-2026-internet-repression-in-times-of-protest/ (Archived on 2026-02-21). [8] FilterWatch, IODA, Kentik, Miaan Group, and ASL19. 2026. IRAN: 2026 Shutdown Technical Analysis . Technical Report. FilterWatch. https://filter.watch/wp-content/uploads/sites/2/2026/01/Iran-Internet-Shutdown-Technical-Analysis-January-2026.pdf (Archived on 2026-02-28). [9] Freedom House. 2024. Iran: Freedom on the Net 2024 Country Report .https://freedomhouse.org/country/iran/freedom-net/2024 (Archived on 2026-01-24). [10] Jorge Garcia-Cabeza, Javier Albert-Smet, Zoraida Frias, Luis Mendo, Santiago An-drés Azcoitia, and Eduardo Yraola. 2025. Direct-to-Cell: A First Look into Star-link’s Direct Satellite-to-Device Radio Access Network through Crowdsourced Measurements. IEEE Communications Magazine (2025). [11] Narges Keshavarznia. 2026. A Month of Iran’s Internet: From Regional Disruptions and Blackouts to a New Whitelisted Reality . Technical Report. Filterwatch. https://filter.watch/english/2026/01/28/network-monitoring-january-2026-from-regional-disuptions-to-total-blackout-and-whitelisted-access/ (Archived on: 2026-01-28). [12] Felix Lange, Niklas Niere, Jonathan von Niessen, Dennis Suermann, Nico Heit-mann, and Juraj Somorovsky. 2025. I (ra) nconsistencies: Novel Insights into Iran’s Censorship. Free and Open Communications on the Internet (2025), 7–12. Issue 1. [13] Doug Madory. 2026. From Stealth Blackout to Whitelisting: Inside the Iranian Shutdown . https://www.kentik.com/blog/from-stealth-blackout-to-whitelisting-inside-the-iranian-shutdown/ (Archived on 2026-01-22). [14] Amanda Meng, Zachary Bischof, and Alberto Dainotti. 2026. A Com-parative Look at Internet Shutdowns in Iran: 2019, 2022, 2025, and 2026 .https://ioda.inetintel.cc.gatech.edu/reports/a-comparative-look-at-internet-shutdowns-in-iran-2019-2022-2026-and-2026/ (Archived on 2026-01-23). [15] Miaan Group, ASL19, IODA. 2025. Iran’s Stealth Blackout: A Multi-Stakeholder Analysis of the June 2025 Internet Shutdown . Technical Report. https: //filter.watch/wp-content/uploads/sites/2/2026/01/Irans-Stealth-Blackout_-A-Multi-stakeholder-Analysis-of-the-June-2025-Internet-Shutdown.pdf (Archived on 2026-02-22). [16] Narges Keshavarznia. 2026. Connected but Unsafe: The Model of Regional In-ternet Repression During the December 2025 – January 2026 Protests . Technical Report. Filterwatch. https://filter.watch/english/2026/01/05/network-monitorig-december-2025-internet-repression-in-times-of-protest/ (Archived on 2026-03-05). [17] OONI, IODA, M-Lab, Cloudflare, Kentik, Censored Planet, ISOC, Ar-ticle 19. 2022. Technical Multi-Stakeholder Report on Internet Shut-downs: The Case of Iran Amid Autumn 2022 Protests . Technical Report. https://ioda.inetintel.cc.gatech.edu/reports/technical-multi-stakeholder-report-on-internet-shutdowns-the-case-of-iran-amid-autumn-2022-protests/ (Archived on 2026-01-16 ). Giuseppe Aceto, Valerio Persico, and Antonio Pescapè 
+
+[18] Jonas Tai, Karthik Nishanth Sengottuvelavan, Peter Whiting, and Nguyen Phong Hoang. 2025. IRBlock: A Large-Scale Measurement Study of the Great Firewall of Iran. In 34th USENIX Security Symposium (USENIX Security 25) . 705–722. [19] Elham Pourabbas Vafa, Mohit Singhal, Poojitha Thota, and Sayak Saha Roy. 2025. Learning from Censored Experiences: Social Media Discussions around Censorship Circumvention Technologies. In 2025 IEEE Symposium on Security and Privacy (SP) . IEEE, 1325–1343.

@@ -1,0 +1,353 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-31T19:44:42.241579+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 9,
+    "quick_skim_target": 11,
+    "quick_selected": 9
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.26833v1",
+      "title": "SPARK: Secure Predictive Autoscaling for Robust Kubernetes",
+      "abstract": "Achieving high availability and robust security in Kubernetes requires more than reactive scaling and standard perimeter firewalls. Traditional autoscalers, such as HPA, often fail to react quickly to traffic spikes and cannot distinguish between legitimate flash crowds and DDoS attacks. We present an open-source toolchain to provide a traffic-aware autoscaling approach that utilizes an eBPF-based networking layer to enforce security policies at the kernel level while orchestrating scaling decisions based on predictive models. Our results demonstrate that the predictive approach reduces timeout errors by 32% during sudden traffic surges compared to standard reactive scaling, while ensuring immediate network convergence and layer 7 security isolation for newly scaled pods.",
+      "authors": [
+        "Zhijun Jiang",
+        "Amin Milani Fard"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-27T05:23:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.26833v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "traffic-aware autoscaling using eBPF-based networking layer",
+      "llm_evidence_cn": "使用基于eBPF的网络层进行流量感知自动扩缩容",
+      "llm_evidence": "使用基于eBPF的网络层进行流量感知自动扩缩容",
+      "canonical_evidence": "使用基于eBPF的网络层进行流量感知自动扩缩容",
+      "llm_tldr_en": "Introduces an eBPF-based tool for traffic-aware predictive autoscaling and security in Kubernetes.",
+      "llm_tldr_cn": "引入基于eBPF的工具，用于Kubernetes中流量感知的预测性自动扩缩容与安全。",
+      "llm_tldr": "引入基于eBPF的工具，用于Kubernetes中流量感知的预测性自动扩缩容与安全。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.22365v1",
+      "title": "Q-AGNN: Quantum-Enhanced Attentive Graph Neural Network for Intrusion Detection",
+      "abstract": "With the rapid growth of interconnected devices, accurately detecting malicious activities in network traffic has become increasingly challenging. Most existing deep learning-based intrusion detection systems treat network flows as independent instances, thereby failing to exploit the relational dependencies inherent in network communications. To address this limitation, we propose Q-AGNN, a Quantum-Enhanced Attentive Graph Neural Network for intrusion detection, where network flows are modeled as nodes and edges represent similarity relationships. Q-AGNN leverages parameterized quantum circuits (PQCs) to encode multi-hop neighborhood information into a high-dimensional latent space, inducing a bounded quantum feature map that implements a second-order polynomial graph filter in a quantum-induced Hilbert space. An attention mechanism is subsequently applied to adaptively weight the quantum-enhanced embeddings, allowing the model to focus on the most influential nodes contributing to anomalous behavior. Extensive experiments conducted on four benchmark intrusion detection datasets demonstrate that Q-AGNN achieves competitive or superior detection performance compared to state-of-the-art graph-based methods, while consistently maintaining low false positive rates under hardware-calibrated noise conditions. Moreover, we also executed the Q-AGNN framework on actual IBM quantum hardware to demonstrate the practical operability of the proposed pipeline under real NISQ conditions. These results highlight the effectiveness of integrating quantum-enhanced representations with attention mechanisms for graph-based intrusion detection and underscore the potential of hybrid quantum-classical learning frameworks in cybersecurity applications.",
+      "authors": [
+        "Devashish Chaudhary",
+        "Sutharshan Rajasegarar",
+        "Shiva Raj Pokhrel"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-23T05:07:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.22365v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "detecting malicious activities in network traffic flows",
+      "llm_evidence_cn": "检测网络流量中的恶意活动",
+      "llm_evidence": "检测网络流量中的恶意活动",
+      "canonical_evidence": "检测网络流量中的恶意活动",
+      "llm_tldr_en": "Proposes a quantum-enhanced graph neural network for more accurate network intrusion detection.",
+      "llm_tldr_cn": "提出一种量子增强图神经网络，用于更准确的网络入侵检测。",
+      "llm_tldr": "提出一种量子增强图神经网络，用于更准确的网络入侵检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network traffic measurement methods for high-speed links",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28654v1",
+      "title": "Interpretable Ensemble Learning for Network Traffic Anomaly Detection: A SHAP-based Explainable AI Framework for Embedded Systems Security",
+      "abstract": "Network security threats in embedded systems pose significant challenges to critical infrastructure protection. This paper presents a comprehensive framework combining ensemble learning methods with explainable artificial intelligence (XAI) techniques for robust anomaly detection in network traffic. We evaluate multiple machine learning models including Random Forest, Gradient Boosting, Support Vector Machines, and ensemble methods on a real-world network traffic dataset containing 19 features derived from packet-level and frequency domain characteristics. Our experimental results demonstrate that ensemble methods achieve superior performance, with Random Forest attaining 90% accuracy and an AUC of 0.617 on validation data. Furthermore, we employ SHAP (SHapley Additive exPlanations) analysis to provide interpretable insights into model predictions, revealing that packet_count_5s,inter_arrival_time, and spectral_entropy are the most influential features for anomaly detection. The integration of XAI techniques enhances model trustworthiness and facilitates deployment in security-critical embedded systems where interpretability is paramount.",
+      "authors": [
+        "Wanru Shao"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-30T16:40:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.28654v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "network traffic anomaly detection using packet-level features",
+      "llm_evidence_cn": "利用数据包级特征进行网络流量异常检测",
+      "llm_evidence": "利用数据包级特征进行网络流量异常检测",
+      "canonical_evidence": "利用数据包级特征进行网络流量异常检测",
+      "llm_tldr_en": "An XAI framework for network traffic anomaly detection in embedded systems using ensemble learning.",
+      "llm_tldr_cn": "一种基于集成学习和可解释AI的嵌入式系统网络流量异常检测框架。",
+      "llm_tldr": "一种基于集成学习和可解释AI的嵌入式系统网络流量异常检测框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.27696v1",
+      "title": "On four network monitoring parameters in graphs and their gaps",
+      "abstract": "Let \\( G \\) be a finite simple undirected graph. Four graph parameters related to network monitoring are the \\emph{geodetic set}, \\emph{edge geodetic set}, \\emph{strong edge geodetic set}, and \\emph{monitoring edge geodetic set}, with corresponding minimum sizes, denoted by \\( g(G), eg(G), seg(G) \\), and \\( meg(G) \\), respectively. These parameters quantify the minimum number of vertices required to monitor all vertices and edges of \\( G \\) under progressively stricter path-based conditions. As established by Florent \\textit{et al.}\\ (CALDAM 2023), these parameters satisfy the chain of inequalities: \\( g(G) \\leq eg(G) \\leq seg(G) \\leq meg(G). \\) In 2025, Florent \\textit{et al.}\\ posed the following question: given integers \\( a, b, c, d \\) satisfying \\( 2 \\leq a \\leq b \\leq c \\leq d \\), does there exist a graph \\( G \\) such that \\( g(G) = a, \\quad eg(G) = b, \\quad seg(G) = c, \\quad \\text{and} \\quad meg(G) = d? \\) They partially answered this affirmatively under three specific hypotheses and gave some constructions to support it. In this article, we first identify quadruples of values that cannot be realized by any connected graph. For all remaining admissible quadruples, we provide explicit constructions of connected graphs that realize the specified parameters. These constructions are modular and efficient, with the number of vertices and edges growing linearly with the largest parameter, providing a complete and constructive characterization of such realizable quadruples.",
+      "authors": [
+        "Zin Mar Myint",
+        "Avikal Srivastava"
+      ],
+      "primary_category": "math.CO",
+      "categories": [
+        "math.CO"
+      ],
+      "published": "2026-03-29T13:51:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.27696v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "graph parameters for network monitoring",
+      "llm_evidence_cn": "用于网络监控的图参数",
+      "llm_evidence": "用于网络监控的图参数",
+      "canonical_evidence": "用于网络监控的图参数",
+      "llm_tldr_en": "Investigates theoretical graph parameters like monitoring edge geodetic sets for network surveillance.",
+      "llm_tldr_cn": "研究了用于网络监控的理论图参数，如监控边测地集。",
+      "llm_tldr": "研究了用于网络监控的理论图参数，如监控边测地集。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.27811v1",
+      "title": "Tracking without Seeing: Geospatial Inference using Encrypted Traffic from Distributed Nodes",
+      "abstract": "Accurate observation of dynamic environments traditionally relies on synthesizing raw, signal-level information from multiple distributed sensors. This work investigates an alternative approach: performing geospatial inference using only encrypted packet-level information, without access to the raw sensory data. We further explore how this indirect information can be fused with directly available sensory data to extend overall inference capabilities. We introduce GraySense, a learning-based framework that performs geospatial object tracking by analyzing encrypted wireless video transmission traffic, such as packet sizes, from cameras with inaccessible streams. GraySense leverages the inherent relationship between scene dynamics and transmitted packet sizes to infer object motion. The framework consists of two stages: (1) a Packet Grouping module that identifies frame boundaries and estimates frame sizes from encrypted network traffic, and (2) a Tracker module, based on a Transformer encoder with a recurrent state, which fuses indirect packet-based inputs with optional direct camera-based inputs to estimate the object's position. Extensive experiments with realistic videos from the CARLA simulator and emulated networks under varying conditions show that GraySense achieves 2.33 meters tracking error (Euclidean distance) without raw signal access, within the dimensions of tracked objects (4.61m x 1.93m). To our knowledge, this capability has not been previously demonstrated, expanding the use of latent signals for sensing.",
+      "authors": [
+        "Sadik Yagiz Yetim",
+        "Gaofeng Dong",
+        "Isaac-Neil Zanoria",
+        "Ronit Barman",
+        "Maggie Wigness",
+        "Tarek Abdelzaher",
+        "Mani Srivastava",
+        "Suhas Diggavi"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-03-29T18:48:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.27811v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "analyzes encrypted packet-level information for geospatial inference",
+      "llm_evidence_cn": "分析加密数据包级信息进行地理空间推断",
+      "llm_evidence": "分析加密数据包级信息进行地理空间推断",
+      "canonical_evidence": "分析加密数据包级信息进行地理空间推断",
+      "llm_tldr_en": "Uses encrypted packet sizes and traffic patterns for geospatial object tracking without raw data access.",
+      "llm_tldr_cn": "利用加密数据包大小和流量模式在无需原始数据的情况下进行地理空间目标追踪。",
+      "llm_tldr": "利用加密数据包大小和流量模式在无需原始数据的情况下进行地理空间目标追踪。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network traffic measurement methods for high-speed links",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28081v1",
+      "title": "Transformer-Based Prognostics: Enhancing Network Availability by Improved Monitoring of Optical Fiber Amplifiers",
+      "abstract": "We enhance optical network availability and reliability through a lightweight transformer model that predicts optical fiber amplifier lifetime from condition-based monitoring data, enabling real-time, edge-level predictive maintenance and advancing deployable AI for autonomous network operation.",
+      "authors": [
+        "Dominic Schneider",
+        "Lutz Rapp",
+        "Christoph Ament"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG"
+      ],
+      "published": "2026-03-30T06:35:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.28081v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "real-time monitoring of optical fiber amplifiers for network availability",
+      "llm_evidence_cn": "光纤放大器的实时监控以提高网络可用性",
+      "llm_evidence": "光纤放大器的实时监控以提高网络可用性",
+      "canonical_evidence": "光纤放大器的实时监控以提高网络可用性",
+      "llm_tldr_en": "A transformer-based model for real-time monitoring and predictive maintenance of optical network components.",
+      "llm_tldr_cn": "一种基于Transformer的光网络组件实时监控与预测性维护模型。",
+      "llm_tldr": "一种基于Transformer的光网络组件实时监控与预测性维护模型。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28369v1",
+      "title": "Age of Incorrect Information for Generic Discrete-Time Markov Sources",
+      "abstract": "This work introduces a framework for analyzing the Age of Incorrect Information (AoII) in a real-time monitoring system with a generic discrete-time Markov source. We study a noisy communication system employing a hybrid automatic repeat request (HARQ) protocol, subject to a transmission rate constraint. The optimization problem is formulated as a constrained Markov decision process (CMDP), and it is shown that there exists an optimal policy that is a randomized mixture of two stationary policies. To overcome the intractability of computing the optimal stationary policies, we develop a multiple-threshold policy class where thresholds depend on the source, the receiver, and the packet count. By establishing a Markov renewal structure induced by threshold policies, we derive closed-form expressions for the long-term average AoII and transmission rate. The proposed policy is constructed via a relative value iteration algorithm that leverages the threshold structure to skip computations, combined with a bisection search to satisfy the rate constraint. To accommodate scenarios requiring lower computational complexity, we adapt the same technique to produce a simpler single-threshold policy that trades optimality for efficiency. Numerical experiments exhibit that both thresholdbased policies outperform periodic scheduling, with the multiplethreshold approach matching the performance of the globally optimal policy.",
+      "authors": [
+        "Konstantinos Bountrogiannis",
+        "Anthony Ephremides",
+        "Panagiotis Tsakalides",
+        "George Tzagkarakis"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "cs.NI",
+        "eess.SY"
+      ],
+      "published": "2026-03-30T12:37:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.28369v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Framework for analyzing information age in real-time monitoring systems",
+      "llm_evidence_cn": "实时监控系统中信息新鲜度的分析框架",
+      "llm_evidence": "实时监控系统中信息新鲜度的分析框架",
+      "canonical_evidence": "实时监控系统中信息新鲜度的分析框架",
+      "llm_tldr_en": "Analyzes the Age of Incorrect Information in real-time monitoring systems to optimize transmission policies.",
+      "llm_tldr_cn": "分析实时监控系统中的错误信息年龄，以优化传输策略。",
+      "llm_tldr": "分析实时监控系统中的错误信息年龄，以优化传输策略。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28394v1",
+      "title": "From Simulation to Deep Learning: Survey on Network Performance Modeling Approaches",
+      "abstract": "Network performance modeling is a field that predates early computer networks and the beginning of the Internet. It aims to predict the traffic performance of packet flows in a given network. Its applications range from network planning and troubleshooting to feeding information to network controllers for configuration optimization. Traditional network performance modeling has relied heavily on Discrete Event Simulation (DES) and analytical methods grounded in mathematical theories such as Queuing Theory and Network Calculus. However, as of late, we have observed a paradigm shift, with attempts to obtain efficient Parallel DES, the surge of Machine Learning models, and their integration with other methodologies in hybrid approaches. This has resulted in a great variety of modeling approaches, each with its strengths and often tailored to specific scenarios or requirements. In this paper, we comprehensively survey the relevant network performance modeling approaches for wired networks over the last decades. With this understanding, we also define a taxonomy of approaches, summarizing our understanding of the state-of-the-art and how both technology and the concerns of the research community evolve over time. Finally, we also consider how these models are evaluated, how their different nature results in different evaluation requirements and goals, and how this may complicate their comparison.",
+      "authors": [
+        "Carlos Güemes-Palau",
+        "Miquel Ferriol-Galmés",
+        "Jordi Paillisse-Vilanova",
+        "Pere Barlet-Ros",
+        "Albert Cabellos-Aparicio"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-30T13:03:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.28394v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "survey on network performance modeling and traffic performance prediction",
+      "llm_evidence_cn": "网络性能建模与流量性能预测综述",
+      "llm_evidence": "网络性能建模与流量性能预测综述",
+      "canonical_evidence": "网络性能建模与流量性能预测综述",
+      "llm_tldr_en": "Surveys network performance modeling from traditional simulations to modern deep learning.",
+      "llm_tldr_cn": "综述了从传统仿真到现代深度学习的网络性能建模方法。",
+      "llm_tldr": "综述了从传统仿真到现代深度学习的网络性能建模方法。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28753v1",
+      "title": "Iran's January 2026 Internet Shutdown: Public Data, Censorship Methods, and Circumvention Techniques",
+      "abstract": "This paper analyzes the Internet shutdown that occurred in Iran in January 2026 in the context of protests, focusing on its impact on the country's digital communication infrastructure and on information access and control dynamics. The scale, complexity, and nation-state nature of the event motivate a comprehensive investigation that goes beyond isolated reports, aiming to provide a unified and systematic understanding of what happened and how it was observed. The study is guided by a set of research questions addressing: the characterization of the shutdown via the timeline of the disruption events and post-event \"new normal\"; the detectability of the event, encompassing monitoring initiatives, measurement techniques, and precursory signals; and the interplay between censorship and circumvention, assessing both the imposed restrictions and the effectiveness of tools designed to bypass them. To answer these questions, we adopt a multi-source, multi-perspective methodology that integrates heterogeneous public data, primarily from grey literature produced by network measurement and monitoring initiatives, complemented by additional private measurements. This approach enables a holistic view of the event and allows us to reconcile and compare partial observations from different sources.",
+      "authors": [
+        "Giuseppe Aceto",
+        "Valerio Persico",
+        "Antonio Pescapè"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-30T17:56:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.28753v1",
+      "tags": [
+        "keyword:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "monitoring initiatives and measurement techniques for shutdowns",
+      "llm_evidence_cn": "针对网络中断的监控计划与测量技术",
+      "llm_evidence": "针对网络中断的监控计划与测量技术",
+      "canonical_evidence": "针对网络中断的监控计划与测量技术",
+      "llm_tldr_en": "Analyzes a large-scale internet shutdown using various monitoring and measurement techniques.",
+      "llm_tldr_cn": "通过多种监控和测量技术分析了大规模互联网停运事件的影响与特征。",
+      "llm_tldr": "通过多种监控和测量技术分析了大规模互联网停运事件的影响与特征。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
