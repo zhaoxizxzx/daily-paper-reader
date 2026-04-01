@@ -1,0 +1,330 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-01T19:40:45.936964+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 7,
+    "quick_skim_target": 11,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2603.29207v1",
+      "title": "TORCH: Characterizing Invalid Route Filtering via Tunnelled Observation",
+      "abstract": "To mitigate BGP prefix hijacking, the Resource Public Key Infrastructure (RPKI) provides prefix origin authentication via Route Origin Validation (ROV). Despite extensive measurement efforts in IPv4, the protective impact of ROV in IPv6 has yet to be systematically assessed. Existing approaches suffer from limited observability into invalid route propagation: they often rely on a small set of controlled prefixes or cannot fully profile the filtering of in-the-wild RPKI-invalid routes, which undermines the accuracy of assessment. Furthermore, the inherent opacity of the IPv6 data plane exacerbates the difficulty of performing scalable and reliable active measurements.   In this paper, we present TORCH, a novel framework for measuring invalid route filtering in IPv6. It repurposes open 6in4 tunnel endpoints as widely distributed vantage points for global measurement. At its core, we develop a cross-plane inference technique that determines reachability without requiring responsive targets. This method allows us to characterize whether and how traffic is steered to invalid origins across diverse routing scenarios, leading to an in-depth evaluation of the real-world impact of ROV.   Our measurements reveal that about 27\\% of ASes have achieved nearly full ROV protection. However, several permissive Tier-1 ASes still transit traffic towards invalid origins, maintaining a substantial attack surface. Through a prefix-centric analysis, we provide the first empirical evidence that the collateral damage of same-length prefix filtering can affect a significant fraction of the global Internet. Our findings pinpoint fundamental vulnerabilities in ROV deployment and underscore the urgent necessity for network operators to accelerate RPKI adoption. We make our datasets publicly available.",
+      "authors": [
+        "Renrui Tian",
+        "Yahui Li",
+        "Xia Yin",
+        "Han Zhang",
+        "Xingang Shi",
+        "Zhiliang Wang"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-31T03:21:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.29207v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "framework for measuring invalid route filtering and active measurements",
+      "llm_evidence_cn": "测量无效路由过滤与主动测量的框架",
+      "llm_evidence": "测量无效路由过滤与主动测量的框架",
+      "canonical_evidence": "测量无效路由过滤与主动测量的框架",
+      "llm_tldr_en": "Presents TORCH, a framework for measuring BGP route filtering, directly matching network measurement research.",
+      "llm_tldr_cn": "提出了TORCH框架用于测量BGP路由过滤，直接符合网络测量研究需求。",
+      "llm_tldr": "提出了TORCH框架用于测量BGP路由过滤，直接符合网络测量研究需求。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.23966v2",
+      "title": "Policy-Guided Threat Hunting: An LLM enabled Framework with Splunk SOC Triage",
+      "abstract": "With frequently evolving Advanced Persistent Threats (APTs) in cyberspace, traditional security solutions approaches have become inadequate for threat hunting for organizations. Moreover, SOC (Security Operation Centers) analysts are often overwhelmed and struggle to analyze the huge volume of logs received from diverse devices in organizations. To address these challenges, we propose an automated and dynamic threat hunting framework for monitoring evolving threats, adapting to changing network conditions, and performing risk-based prioritization for the mitigation of suspicious and malicious traffic. By integrating Agentic AI with Splunk, an established SIEM platform, we developed a unique threat hunting framework. The framework systematically and seamlessly integrates different threat hunting modules together, ranging from traffic ingestion to anomaly assessment using a reconstruction-based autoencoder, deep reinforcement learning (DRL) with two layers for initial triage, and a large language model (LLM) for contextual analysis. We evaluated the framework against a publicly available benchmark dataset, as well as against a simulated dataset. The experimental results show that the framework can effectively adapt to different SOC objectives autonomously and identify suspicious and malicious traffic. The framework enhances operational effectiveness by supporting SOC analysts in their decision-making to block, allow, or monitor network traffic. This study thus enhances cybersecurity and threat hunting literature by presenting the novel threat hunting framework for security decision-making, as well as promoting cumulative research efforts to develop more effective frameworks to battle continuously evolving cyber threats.",
+      "authors": [
+        "Rishikesh Sahay",
+        "Bell Eapen",
+        "Weizhi Meng",
+        "Md Rasel Al Mamun",
+        "Nikhil Kumar Dora",
+        "Manjusha Sumasadan",
+        "Sumit Kumar Tetarave",
+        "Rod Soto",
+        "Elyson De La Cruz"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-03-25T05:59:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.23966v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Monitoring and prioritizing suspicious network traffic",
+      "llm_evidence_cn": "监控并优先处理可疑网络流量",
+      "llm_evidence": "监控并优先处理可疑网络流量",
+      "canonical_evidence": "监控并优先处理可疑网络流量",
+      "llm_tldr_en": "An LLM-enabled framework for automated threat hunting and monitoring of malicious network traffic.",
+      "llm_tldr_cn": "一种利用大语言模型进行自动化威胁狩猎和恶意网络流量监控的框架。",
+      "llm_tldr": "一种利用大语言模型进行自动化威胁狩猎和恶意网络流量监控的框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.23787v1",
+      "title": "Digital Twin-Assisted Measurement Design and Channel Statistics Prediction",
+      "abstract": "Prediction of wireless channels and their statistics is a fundamental procedure for ensuring performance guarantees in wireless systems. Statistical radio maps powered by Gaussian processes (GPs) offer flexible, non-parametric frameworks, but their performance depends critically on the choice of mean and covariance functions. These are typically learned from dense measurements without exploiting environmental geometry. Digital twins (DTs) of wireless environments leverage computational power to incorporate geometric information; however, they require costly calibration to accurately capture material and propagation characteristics. This work introduces a hybrid channel prediction framework that leverages uncalibrated DTs derived from open-source maps to extract geometry-induced prior information for GP prediction. These structural priors are fused with a small number of channel measurements, enabling data-efficient prediction of channel statistics across the entire environment. By exploiting the uncertainty quantification inherent to GPs, the framework supports principled measurement selection by identifying informative probing locations under resource constraints. Through this integration of imperfect DTs with statistical learning, the proposed method reduces measurement overhead, improves prediction accuracy, and establishes a practical approach for resource-efficient wireless channel prediction.",
+      "authors": [
+        "Robin J. Williams",
+        "Mahmoud Saad Abouamer",
+        "Petar Popovski"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "cs.LG"
+      ],
+      "published": "2026-03-24T23:43:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.23787v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "measurement design and channel statistics prediction",
+      "llm_evidence_cn": "测量设计与信道统计预测",
+      "llm_evidence": "测量设计与信道统计预测",
+      "canonical_evidence": "测量设计与信道统计预测",
+      "llm_tldr_en": "Proposes a hybrid framework for wireless channel prediction and measurement design using digital twins.",
+      "llm_tldr_cn": "提出了一种利用数字孪生进行无线信道预测和测量设计的混合框架。",
+      "llm_tldr": "提出了一种利用数字孪生进行无线信道预测和测量设计的混合框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28096v1",
+      "title": "DELTA: A DAG-aware Efficient OCS Logical Topology Optimization Framework for AIDCs",
+      "abstract": "The rapid scaling of large language models (LLMs) exacerbates communication bottlenecks in AI data centers (AIDCs). To overcome this, optical circuit switches (OCS) are increasingly adopted for their superior bandwidth capacity and energy efficiency. However, their reconfiguration overhead precludes intra-iteration topology update, necessitating a priori engineering of a static topology to absorb time-varying LLM traffic. Existing methods engineer these topologies based on traffic matrices. However, this representation obscures the bursty concurrent bandwidth demands dictated by parallelization strategies and fails to account for the independent channels required for concurrent communication.   To address this, we propose DELTA, an efficient logical topology optimization framework for AIDCs that leverages the computation-communication directed acyclic graph (DAG) to encode time-varying traffic patterns into a Mixed-Integer Linear Programming (MILP) model, while exploiting the temporal slack of non-critical tasks to save optical ports without penalizing iteration makespan. By pioneering a variable-length time interval formulation, DELTA significantly reduces the solution space compared to the fixed-time-step formulation. To scale to thousand-GPU clusters, we design a dual-track acceleration strategy that combines search space pruning (reducing complexity from quadratic to linear) with heuristic hot-starting. Evaluations on large-scale LLM workloads show that DELTA reduces communication time by up to 17.5\\% compared to state-of-the-art traffic-matrix-based baselines. Furthermore, the framework reduces optical port consumption by at least 20\\%; dynamically reallocating these surplus ports to bandwidth-bottlenecked workloads reduces their performance gap relative to ideal non-blocking electrical networks by up to 26.1\\%, ultimately enabling most workloads to achieve near-ideal performance.",
+      "authors": [
+        "Niangen Ye",
+        "Jingya Liu",
+        "Weiqiang Sun",
+        "Weisheng Hu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-30T06:54:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.28096v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "traffic engineering and monitoring for AI data centers",
+      "llm_evidence_cn": "AI数据中心的流量工程与监控",
+      "llm_evidence": "AI数据中心的流量工程与监控",
+      "canonical_evidence": "AI数据中心的流量工程与监控",
+      "llm_tldr_en": "Optimizes optical circuit switch topologies in data centers based on LLM traffic patterns.",
+      "llm_tldr_cn": "根据大语言模型流量模式优化数据中心的光电路交换拓扑。",
+      "llm_tldr": "根据大语言模型流量模式优化数据中心的光电路交换拓扑。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.25378v1",
+      "title": "PRISM: Dynamic Primitive-Based Forecasting for Large-Scale GPU Cluster Workloads",
+      "abstract": "Accurately forecasting GPU workloads is essential for AI infrastructure, enabling efficient scheduling, resource allocation, and power management. Modern workloads are highly volatile, multiple periodicity, and heterogeneous, making them challenging for traditional predictors. We propose PRISM, a primitive-based compositional forecasting framework combining dictionary-driven temporal decomposition with adaptive spectral refinement. This dual representation extracts stable, interpretable workload signatures across diverse GPU jobs. Evaluated on large-scale production traces, PRISM achieves state-of-the-art results. It significantly reduces burst-phase errors, providing a robust, architecture-aware foundation for dynamic resource management in GPU-powered AI platforms.",
+      "authors": [
+        "Xin Wu",
+        "Fei Teng",
+        "Xingwang Li",
+        "Bin Zheng",
+        "Qiang Duan"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-03-26T12:28:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.25378v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Forecasting GPU cluster workloads for data center management",
+      "llm_evidence_cn": "针对数据中心管理的GPU集群工作负载预测",
+      "llm_evidence": "针对数据中心管理的GPU集群工作负载预测",
+      "canonical_evidence": "针对数据中心管理的GPU集群工作负载预测",
+      "llm_tldr_en": "A forecasting framework for GPU cluster workloads to enable efficient resource management in AI infrastructure.",
+      "llm_tldr_cn": "一种用于GPU集群工作负载预测的框架，旨在优化AI基础设施的资源管理。",
+      "llm_tldr": "一种用于GPU集群工作负载预测的框架，旨在优化AI基础设施的资源管理。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.29364v1",
+      "title": "Intelligent Forensics in Next-Generation Mobile Networks: Evidence, Methods, and Applications",
+      "abstract": "This survey examines intelligent forensics in next-generation mobile networks, arguing that future wireless security must move beyond real-time detection toward accountable post-incident reconstruction. Unlike traditional digital forensics, wireless investigations rely on short-lived, distributed, and heterogeneous evidence, including radio waveforms, channel measurements, device-side artifacts, and network telemetry, affected by calibration, timing uncertainty, privacy constraints, and adversarial manipulation. To address this limitation, this paper develops an evidence-centric framework that treats wireless measurements as first-class forensic artifacts and organizes the field through a unified taxonomy spanning physical-layer, device-layer, network-layer, and cross-layer forensics. We further systematize the forensic workflow into readiness and preservation-by-design, acquisition, correlation and analysis, and reporting and reproducibility, while comparing the complementary roles of traditional methods and artificial intelligence-assisted techniques. Subsequently, we review major application areas, including anomaly discovery, attribution, provenance and localization, authenticity verification, and timeline reconstruction. Finally, we identify key open challenges, including domain shift, resource-aware evidence capture, and the benefits and admissibility risks of generative evidence. Overall, this paper positions wireless forensics as a foundational capability for trustworthy, auditable, and reproducible security in next-generation wireless systems. Readers can understand and streamline wireless forensics processes for specific applications, such as low-altitude wireless networks, vehicular communications, and edge general intelligence.",
+      "authors": [
+        "Jiacheng Wang",
+        "Weihong Qin",
+        "Jialing He",
+        "Changyuan Zhao",
+        "Dusit Niyato",
+        "Tao Xiang"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-03-31T07:38:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.29364v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "network telemetry and wireless measurements for forensics",
+      "llm_evidence_cn": "用于取证的网络遥测与无线测量",
+      "llm_evidence": "用于取证的网络遥测与无线测量",
+      "canonical_evidence": "用于取证的网络遥测与无线测量",
+      "llm_tldr_en": "Develops a framework treating wireless measurements and telemetry as first-class forensic artifacts.",
+      "llm_tldr_cn": "开发了一个将无线测量和网络遥测视为首要取证伪影的框架。",
+      "llm_tldr": "开发了一个将无线测量和网络遥测视为首要取证伪影的框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.28239v1",
+      "title": "A Switch-Centric In-Network Architecture for Accelerating LLM Inference in Shared-Memory Network",
+      "abstract": "In-network computing techniques, exemplified by NVLink Sharp (NVLS), offer a promising approach to addressing the communication bottlenecks in LLM inference by offloading collective operations, such as All-Reduce, to switches. However, the accelerator-centric architecture of NVLS suffers from two fundamental limitations: 1) it relies on GPU load instructions to trigger reduction operations, which means that the data reduced in the switch must be additionally transferred back to the initiating GPU rather than being broadcast directly, thereby introducing unnecessary communication overhead; 2) due to its architectural constraints, NVLS cannot offload operators that are not decomposable into memory-semantic instructions, such as the in-network quantization (INQ) proposed in this work. As a result, All-Reduce in NVLS must operate at FP16/BF16 precision, leading to substantial bandwidth waste.To address these limitations, we propose SCIN, the first switch-centric in-network architecture for shared-memory networks of AI accelerators, enabling both low-latency and high-bandwidth All-Reduce. Specifically, we introduce an in-switch accelerator (ISA) capable of initiating memory-semantic operations for in-network processing, together with a co-designed communication fabric that incurs negligible protocol overhead. By eliminating redundant data movement, SCIN delivers lower All-Reduce latency than NVLS. Moreover, by integrating a quantization module into the ISA, SCIN enables INQ for All-Reduce, reducing its precision to 8 bits and nearly doubling bandwidth with negligible accuracy loss. We also present a prototype of SCIN on a multi-FPGA system to demonstrate its feasibility and effectiveness. Experimental results show that our design accelerates All-Reduce by up to 8.7x for small messages and 3.8x for large messages, leading up to 1.74x faster TTFT and 1.34x faster TPOT on LLaMA-2 models.",
+      "authors": [
+        "Aojie Jiang",
+        "Kang Zhu",
+        "Zhiheng Zhang",
+        "Zhengxu Su",
+        "Juntao Liu",
+        "Yuan Du",
+        "Li Du"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-03-30T09:59:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.28239v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "switch-centric in-network architecture for accelerating collective operations",
+      "llm_evidence_cn": "以交换机为中心的网络内架构，用于加速集合通信",
+      "llm_evidence": "以交换机为中心的网络内架构，用于加速集合通信",
+      "canonical_evidence": "以交换机为中心的网络内架构，用于加速集合通信",
+      "llm_tldr_en": "Proposes a switch-centric architecture to offload collective operations and reduce communication overhead.",
+      "llm_tldr_cn": "提出一种以交换机为中心的架构，通过卸载集合操作来减少通信开销。",
+      "llm_tldr": "提出一种以交换机为中心的架构，通过卸载集合操作来减少通信开销。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.28239v2",
+      "title": "A Switch-Centric In-Network Architecture for Accelerating LLM Inference in Shared-Memory Network",
+      "abstract": "In-network computing techniques, exemplified by NVLink Sharp (NVLS), offer a promising approach to addressing the communication bottlenecks in LLM inference by offloading collective operations, such as All-Reduce, to switches. However, the accelerator-centric architecture of NVLS suffers from two fundamental limitations: 1) it relies on GPU load instructions to trigger reduction operations, which means that the data reduced in the switch must be additionally transferred back to the initiating GPU rather than being broadcast directly, thereby introducing unnecessary communication overhead; 2) due to its architectural constraints, NVLS cannot offload operators that are not decomposable into memory-semantic instructions, such as the in-network quantization (INQ) proposed in this work. As a result, All-Reduce in NVLS must operate at FP16/BF16 precision, leading to substantial bandwidth waste.To address these limitations, we propose SCIN, the first switch-centric in-network architecture for shared-memory networks of AI accelerators, enabling both low-latency and high-bandwidth All-Reduce. Specifically, we introduce an in-switch accelerator (ISA) capable of initiating memory-semantic operations for in-network processing, together with a co-designed communication fabric that incurs negligible protocol overhead. By eliminating redundant data movement, SCIN delivers lower All-Reduce latency than NVLS. Moreover, by integrating a quantization module into the ISA, SCIN enables INQ for All-Reduce, reducing its precision to 8 bits and nearly doubling bandwidth with negligible accuracy loss. We also present a prototype of SCIN on a multi-FPGA system to demonstrate its feasibility and effectiveness. Experimental results show that our design accelerates All-Reduce by up to 8.7x for small messages and 3.8x for large messages, leading up to 1.74x faster TTFT and 1.34x faster TPOT on LLaMA-2 models.",
+      "authors": [
+        "Aojie Jiang",
+        "Kang Zhu",
+        "Zhiheng Zhang",
+        "Zhengxu Su",
+        "Juntao Liu",
+        "Yuan Du",
+        "Li Du"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-03-30T09:59:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.28239v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "switch-centric in-network architecture and programmable switch offloading",
+      "llm_evidence_cn": "以交换机为中心的网络内架构与可编程交换机卸载",
+      "llm_evidence": "以交换机为中心的网络内架构与可编程交换机卸载",
+      "canonical_evidence": "以交换机为中心的网络内架构与可编程交换机卸载",
+      "llm_tldr_en": "Proposes a switch-centric architecture for in-network computing, relevant to programmable switch systems.",
+      "llm_tldr_cn": "提出了一种以交换机为中心的网络内计算架构，与可编程交换机系统相关。",
+      "llm_tldr": "提出了一种以交换机为中心的网络内计算架构，与可编程交换机系统相关。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
