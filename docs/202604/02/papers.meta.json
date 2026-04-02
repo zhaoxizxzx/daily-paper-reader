@@ -1,0 +1,93 @@
+{
+  "label": "2026-04-02",
+  "date": "2026-04-02",
+  "generated_at": "2026-04-02T19:51:46",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202604/02/2603.29520v1-trafficmoe-heterogeneity-aware-mixture-of-experts-for-encrypted-traffic-classification",
+      "section": "quick",
+      "title_en": "TrafficMoE: Heterogeneity-aware Mixture of Experts for Encrypted Traffic Classification",
+      "authors": "Qing He, Xiaowei Fu, Lei Zhang",
+      "date": "2026-03-31",
+      "pdf": "https://arxiv.org/pdf/2603.29520v1",
+      "score": "7.0",
+      "evidence": "加密流量分类与协议信号分析",
+      "tldr": "针对加密流量分类中报文头与加密负载特征混杂的问题，本文提出TrafficMoE框架。该框架采用“解耦-过滤-聚合”（DFA）范式，通过双分支稀疏混合专家模型（MoE）分别处理报文头和负载，引入不确定性感知过滤机制抑制加密噪声，并利用路由引导的动态融合策略提取判别性特征。实验证明该方法在六个数据集上均优于现有技术，有效提升了加密流量分析的准确性。",
+      "tags": "query:netmes",
+      "abstract_en": "Encrypted traffic classification is a critical task for network security. While deep learning has advanced this field, the occlusion of payload semantics by encryption severely challenges standard modeling approaches. Most existing frameworks rely on static and homogeneous pipelines that apply uniform parameter sharing and static fusion strategies across all inputs. This one-size-fits-all static design is inherently flawed: by forcing structured headers and randomized payloads into a unified processing pipeline, it inevitably entangles the raw protocol signals with stochastic encryption noise, thereby degrading the fine-grained discriminative features. In this paper, we propose TrafficMoE, a framework that breaks through the bottleneck of static modeling by establishing a Disentangle-Filter-Aggregate (DFA) paradigm. Specifically, to resolve the structural between-components conflict, the architecture disentangles headers and payloads using dual-branch sparse Mixture-of-Experts (MoE), enabling modality-specific modeling. To mitigate the impact of stochastic noise, an uncertainty-aware filtering mechanism is introduced to quantify reliability and selectively suppress high-variance representations. Finally, to overcome the limitations of static fusion, a routing-guided strategy aggregates cross-modality features dynamically, that adaptively weighs contributions based on traffic context. With this DFA paradigm, TrafficMoE maximizes representational efficiency by focusing solely on the most discriminative traffic features. Extensive experiments on six datasets demonstrate TrafficMoE consistently outperforms state-of-the-art methods, validating the necessity of heterogeneity-aware modeling in encrypted traffic analysis. The source code is publicly available at https://github.com/Posuly/TrafficMoE_main.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2604.00748v1-optimal-sampling-and-actuation-policies-of-a-markov-source-over-a-wireless-channel",
+      "section": "quick",
+      "title_en": "Optimal Sampling and Actuation Policies of a Markov Source over a Wireless Channel",
+      "authors": "Mehrdad Salimnejad, Anthony Ephremides, Marios Kountouris, Nikolaos Pappas",
+      "date": "2026-04-01",
+      "pdf": "https://arxiv.org/pdf/2604.00748v1",
+      "score": "7.0",
+      "evidence": "实时监控的最佳采样策略",
+      "tldr": "本研究针对无线信道下N状态马尔可夫过程的实时监控，探讨了高效的数据管理与及时的信息分发策略。通过分析错误信息年龄（AoII），推导了多种调度策略下的闭式表达式，并优化了采样与传输策略。此外，针对执行器在不确定状态下的误操作问题，提出了“不确定性下的动作成本”（CoAU）概念及随机执行策略，显著提升了系统执行的准确性。",
+      "tags": "query:netmes",
+      "abstract_en": "This paper studies efficient data management and timely information dissemination for real-time monitoring of an $N$-state Markov process, enabling accurate state estimation and reliable actuation decisions. First, we analyze the Age of Incorrect Information (AoII) and derive closed-form expressions for its time average under several scheduling policies, including randomized stationary, change-aware randomized stationary, semantics-aware randomized stationary, and threshold-aware randomized stationary policies. We then formulate and solve constrained optimization problems to minimize the average AoII under a time-averaged sampling action constraint, and compare the resulting optimal sampling and transmission policies to identify the conditions under which each policy is most effective. We further show that directly using reconstructed states for actuation can degrade system performance, especially when the receiver is uncertain about the state estimate or when actuation is costly. To address this issue, we introduce a cost function, termed the Cost of Actions under Uncertainty (CoAU), which determines when the actuator should take correct actions and avoid incorrect ones when the receiver is uncertain about the reconstructed source state. We propose a randomized actuation policy and derive a closed-form expression for the probability of taking no incorrect action. Finally, we formulate an optimization problem to find the optimal randomized actuation policy that maximizes this probability. The results show that the resulting policy substantially reduces incorrect actuator actions.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2603.25538v1-missing-aware-multimodal-fusion-for-unified-microservice-incident-management",
+      "section": "quick",
+      "title_en": "Missing-Aware Multimodal Fusion for Unified Microservice Incident Management",
+      "authors": "Wenzhuo Qian, Hailiang Zhao, Ziqi Wang, Zhipeng Gao, Jiayi Chen, Zhiwei Ling, Shuiguang Deng",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25538v1",
+      "score": "6.0",
+      "evidence": "使用指标和追踪的微服务故障管理",
+      "tldr": "针对微服务运维中多模态数据（指标、日志、追踪）常因网络波动等原因缺失的问题，本文提出ARMOR框架。该框架通过非对称编码器处理异构数据，并利用缺失感知的门控融合机制及可学习占位符，有效减少了缺失数据带来的噪声干扰。ARMOR采用自监督学习，在无需故障标签的情况下实现异常检测与根因定位，在数据缺失场景下表现出极强的鲁棒性。",
+      "tags": "query:netmes",
+      "abstract_en": "Automated incident management is critical for microservice reliability. While recent unified frameworks leverage multimodal data for joint optimization, they unrealistically assume perfect data completeness. In practice, network fluctuations and agent failures frequently cause missing modalities. Existing approaches relying on static placeholders introduce imputation noise that masks anomalies and degrades performance. To address this, we propose ARMOR, a robust self-supervised framework designed for missing modality scenarios. ARMOR features: (i) a modality-specific asymmetric encoder that isolates distribution disparities among metrics, logs, and traces; and (ii) a missing-aware gated fusion mechanism utilizing learnable placeholders and dynamic bias compensation to prevent cross-modal interference from incomplete inputs. By employing self-supervised auto-regression with mask-guided reconstruction, ARMOR jointly optimizes anomaly detection (AD), failure triage (FT), and root cause localization (RCL). AD and RCL require no fault labels, while FT relies solely on failure-type annotations for the downstream classifier. Extensive experiments demonstrate that ARMOR achieves state-of-the-art performance under complete data conditions and maintains robust diagnostic accuracy even with severe modality loss.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2603.25538v2-missing-aware-multimodal-fusion-for-unified-microservice-incident-management",
+      "section": "quick",
+      "title_en": "Missing-Aware Multimodal Fusion for Unified Microservice Incident Management",
+      "authors": "Wenzhuo Qian, Hailiang Zhao, Ziqi Wang, Zhipeng Gao, Jiayi Chen, Zhiwei Ling, Shuiguang Deng",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25538v2",
+      "score": "6.0",
+      "evidence": "使用指标和追踪的微服务故障管理",
+      "tldr": "针对微服务故障管理中多模态数据（指标、日志、追踪）常因网络或采集故障而缺失的问题，本文提出ARMOR框架。该框架采用非对称编码器隔离分布差异，并通过缺失感知的门控融合机制与可学习占位符减少噪声干扰。ARMOR利用自监督学习联合优化异常检测、故障分类和根因定位，在数据缺失情况下仍能保持高诊断精度。",
+      "tags": "query:netmes",
+      "abstract_en": "Automated incident management is critical for microservice reliability. While recent unified frameworks leverage multimodal data for joint optimization, they unrealistically assume perfect data completeness. In practice, network fluctuations and agent failures frequently cause missing modalities. Existing approaches relying on static placeholders introduce imputation noise that masks anomalies and degrades performance. To address this, we propose ARMOR, a robust self-supervised framework designed for missing modality scenarios. ARMOR features: (i) a modality-specific asymmetric encoder that isolates distribution disparities among metrics, logs, and traces; and (ii) a missing-aware gated fusion mechanism utilizing learnable placeholders and dynamic bias compensation to prevent cross-modal interference from incomplete inputs. By employing self-supervised auto-regression with mask-guided reconstruction, ARMOR jointly optimizes anomaly detection (AD), failure triage (FT), and root cause localization (RCL). AD and RCL require no fault labels, while FT relies solely on failure-type annotations for the downstream classifier. Extensive experiments demonstrate that ARMOR achieves state-of-the-art performance under complete data conditions and maintains robust diagnostic accuracy even with severe modality loss.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2604.00317v1-from-skew-to-symmetry-node-interconnect-multi-path-balancing-with-execution-time-planning-for-modern-gpu-clusters",
+      "section": "quick",
+      "title_en": "From Skew to Symmetry: Node-Interconnect Multi-Path Balancing with Execution-time Planning for Modern GPU Clusters",
+      "authors": "Jinghan Yao, Kaushik Kandadi, Bharath Ramesh, Hari Subramoni, Dhabaleswar K. Panda",
+      "date": "2026-03-31",
+      "pdf": "https://arxiv.org/pdf/2604.00317v1",
+      "score": "6.0",
+      "evidence": "GPU集群中的流量偏斜与多路径平衡",
+      "tldr": "针对现代GPU集群中由于流量倾斜导致的互连带宽利用率低的问题，本文提出了NIMBLE系统。NIMBLE通过运行时通信编排，动态地在所有可用的节点内和节点间路径上重新分配流量。它将问题建模为容量归一化的最小拥塞优化，并利用乘法权重算法高效求解，同时结合CUDA感知的GPU内核RDMA流水线技术。实验表明，NIMBLE在处理倾斜负载时显著提升了带宽利用率，在LLM MoE等实际应用中表现优异。",
+      "tags": "query:netmes",
+      "abstract_en": "Modern GPU-based high-performance computing clusters offer unprecedented communication bandwidth through heterogeneous intra-node interconnects and inter-node networks. However, despite this high aggregate bandwidth, many real-world communication patterns fail to fully utilize the available hardware. Traffic skew often leads to situations where a small subset of links becomes oversaturated while others remain underutilized, resulting in congestion, latency spikes, and poor scalability. Existing communication frameworks such as NCCL and MPI with UCX typically rely on static fastest-path routing or hashing-based multi-rail striping, which leaves significant bandwidth unused when runtime traffic deviates from expected distributions. To address these limitations, we propose NIMBLE (Node-Interconnect Multi-path Balancing with Execution-time orchestration), a runtime communication orchestration system that dynamically redistributes traffic to balance link utilization across all available intra-node and inter-node paths. NIMBLE formulates this as a capacity-normalized minimum-congestion optimization problem and solves it efficiently using a multiplicative-weights algorithm. It further employs CUDA-aware GPU kernel-based RDMA pipelining to route traffic through intermediate GPUs and rail-matched NICs. The system is endpoint-driven, integrates transparently with existing communication libraries without requiring application changes, and preserves ordering, determinism, and low overhead. On H100-SXM4 nodes with fully connected NVLink and four NDR400 rails, NIMBLE achieves up to 2.3x higher intra-node bandwidth and 3.8x higher inter-node throughput compared to single-path baselines. It outperforms NCCL and MPI by up to 5.2x on skewed All-to-Allv workloads and 1.35x on end-to-end LLM MoE workloads, while matching baseline performance under balanced traffic.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2604.01127v1-multi-agent-llm-governance-for-safe-two-timescale-reinforcement-learning-in-sdn-iot-defense",
+      "section": "quick",
+      "title_en": "Multi-Agent LLM Governance for Safe Two-Timescale Reinforcement Learning in SDN-IoT Defense",
+      "authors": "Saeid Jamshidi, Negar Shahabi, Foutse Khomh, Carol Fung, Mohammad Hamdaqa",
+      "date": "2026-04-01",
+      "pdf": "https://arxiv.org/pdf/2604.01127v1",
+      "score": "6.0",
+      "evidence": "用于防御的 SDN 可编程转发与流量观测",
+      "tldr": "本研究针对SDN-IoT防御中缓解措施可能导致控制平面不稳定的问题，提出了一种双时间尺度防御方案。该方案在快速尺度利用PPO智能体进行受限缓解，在慢速尺度利用多智能体大语言模型（LLM）治理引擎动态更新全局策略章程。该方法实现了可审计的策略演进，在提升检测性能的同时显著降低了控制器负载和系统风险。",
+      "tags": "query:netmes",
+      "abstract_en": "Software-Defined Networking (SDN) is increasingly adopted to secure Internet-of-Things (IoT) networks due to its centralized control and programmable forwarding. However, SDN-IoT defense is inherently a closed-loop control problem in which mitigation actions impact controller workload, queue dynamics, rule-installation delay, and future traffic observations. Aggressive mitigation may destabilize the control plane, degrade Quality of Service (QoS), and amplify systemic risk. Existing learning-based approaches prioritize detection accuracy while neglecting controller coupling and short-horizon Reinforcement Learning (RL) optimization without structured, auditable policy evolution. This paper introduces a self-reflective two-timescale SDN-IoT defense solution separating fast mitigation from slow policy governance. At the fast timescale, per-switch Proximal Policy Optimization (PPO) agents perform controller-aware mitigation under safety constraints and action masking. At the slow timescale, a multi-agent Large Language Model (LLM) governance engine generates machine-parsable updates to the global policy constitution Pi, which encodes admissible actions, safety thresholds, and reward priorities. Updates (Delta Pi) are validated through stress testing and deployed only with non-regression and safety guarantees, ensuring an auditable evolution without retraining RL agents. Evaluation under heterogeneous IoT traffic and adversarial stress shows improvements of 9.1% Macro-F1 over PPO and 15.4% over static baselines. Worst-case degradation drops by 36.8%, controller backlog peaks by 42.7%, and RTT p95 inflation remains below 5.8% under high-intensity attacks. Policy evolution converges within five cycles, reducing catastrophic overload from 11.6% to 2.3%.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

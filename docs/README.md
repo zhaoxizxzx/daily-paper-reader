@@ -6,46 +6,41 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-01
-- 运行时间：2026-04-01 19:42:11 UTC
+- 最新运行日期：2026-04-02
+- 运行时间：2026-04-02 19:51:38 UTC
 - 运行状态：成功
-- 本次总论文数：8
-- 精读区：1
-- 速读区：7
+- 本次总论文数：6
+- 精读区：0
+- 速读区：6
 
 ### 今日简报（AI）
-今日聚焦 BGP 路由安全深度评测，同步覆盖 LLM 驱动的威胁猎杀与 AIDC 网络拓扑优化等 8 项前沿研究。
-重点推荐 TORCH 框架对无效路由过滤风险的实证分析，以及大模型在 Splunk SOC 自动化分诊中的落地应用。
-建议关注网络边界安全策略的有效性验证，并尝试将生成式 AI 引入日常安全运营与取证流程。
-- 详情：[/202604/01/README](/202604/01/README)
+今日速览 6 篇前沿论文，重点覆盖加密流量识别、无线通信优化及微服务故障管理等领域。
+TrafficMoE 通过专家混合模型有效解决了加密流量的异构性难题，而针对微服务运维的缺失感知融合方案提升了事故处理的鲁棒性。
+建议关注网络安全与智能运维的读者，深入探索 MoE 架构在复杂流量分类场景中的应用潜力。
+- 详情：[/202604/02/README](/202604/02/README)
 
 ### 精读区论文标签
-1. [TORCH: Characterizing Invalid Route Filtering via Tunnelled Observation](/202604/01/2603.29207v1-torch-characterizing-invalid-route-filtering-via-tunnelled-observation)  
-   标签：评分：9.0/10、query:netmes
-   evidence：测量无效路由过滤与主动测量的框架
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Policy-Guided Threat Hunting: An LLM enabled Framework with Splunk SOC Triage](/202604/01/2603.23966v2-policy-guided-threat-hunting-an-llm-enabled-framework-with-splunk-soc-triage)  
+1. [TrafficMoE: Heterogeneity-aware Mixture of Experts for Encrypted Traffic Classification](/202604/02/2603.29520v1-trafficmoe-heterogeneity-aware-mixture-of-experts-for-encrypted-traffic-classification)  
    标签：评分：7.0/10、query:netmes
-   evidence：监控并优先处理可疑网络流量
-2. [DELTA: A DAG-aware Efficient OCS Logical Topology Optimization Framework for AIDCs](/202604/01/2603.28096v1-delta-a-dag-aware-efficient-ocs-logical-topology-optimization-framework-for-aidcs)  
+   evidence：加密流量分类与协议信号分析
+2. [Optimal Sampling and Actuation Policies of a Markov Source over a Wireless Channel](/202604/02/2604.00748v1-optimal-sampling-and-actuation-policies-of-a-markov-source-over-a-wireless-channel)  
    标签：评分：7.0/10、query:netmes
-   evidence：AI数据中心的流量工程与监控
-3. [Intelligent Forensics in Next-Generation Mobile Networks: Evidence, Methods, and Applications](/202604/01/2603.29364v1-intelligent-forensics-in-next-generation-mobile-networks-evidence-methods-and-applications)  
-   标签：评分：7.0/10、query:netmes
-   evidence：用于取证的网络遥测与无线测量
-4. [Digital Twin-Assisted Measurement Design and Channel Statistics Prediction](/202604/01/2603.23787v1-digital-twin-assisted-measurement-design-and-channel-statistics-prediction)  
+   evidence：实时监控的最佳采样策略
+3. [Missing-Aware Multimodal Fusion for Unified Microservice Incident Management](/202604/02/2603.25538v1-missing-aware-multimodal-fusion-for-unified-microservice-incident-management)  
    标签：评分：6.0/10、query:netmes
-   evidence：测量设计与信道统计预测
-5. [PRISM: Dynamic Primitive-Based Forecasting for Large-Scale GPU Cluster Workloads](/202604/01/2603.25378v1-prism-dynamic-primitive-based-forecasting-for-large-scale-gpu-cluster-workloads)  
+   evidence：使用指标和追踪的微服务故障管理
+4. [Missing-Aware Multimodal Fusion for Unified Microservice Incident Management](/202604/02/2603.25538v2-missing-aware-multimodal-fusion-for-unified-microservice-incident-management)  
    标签：评分：6.0/10、query:netmes
-   evidence：针对数据中心管理的GPU集群工作负载预测
-6. [A Switch-Centric In-Network Architecture for Accelerating LLM Inference in Shared-Memory Network](/202604/01/2603.28239v1-a-switch-centric-in-network-architecture-for-accelerating-llm-inference-in-shared-memory-network)  
+   evidence：使用指标和追踪的微服务故障管理
+5. [From Skew to Symmetry: Node-Interconnect Multi-Path Balancing with Execution-time Planning for Modern GPU Clusters](/202604/02/2604.00317v1-from-skew-to-symmetry-node-interconnect-multi-path-balancing-with-execution-time-planning-for-modern-gpu-clusters)  
    标签：评分：6.0/10、query:netmes
-   evidence：以交换机为中心的网络内架构，用于加速集合通信
-7. [A Switch-Centric In-Network Architecture for Accelerating LLM Inference in Shared-Memory Network](/202604/01/2603.28239v2-a-switch-centric-in-network-architecture-for-accelerating-llm-inference-in-shared-memory-network)  
+   evidence：GPU集群中的流量偏斜与多路径平衡
+6. [Multi-Agent LLM Governance for Safe Two-Timescale Reinforcement Learning in SDN-IoT Defense](/202604/02/2604.01127v1-multi-agent-llm-governance-for-safe-two-timescale-reinforcement-learning-in-sdn-iot-defense)  
    标签：评分：6.0/10、query:netmes
-   evidence：以交换机为中心的网络内架构与可编程交换机卸载
+   evidence：用于防御的 SDN 可编程转发与流量观测
 
 
 <div class="dpr-home-promo-card">
