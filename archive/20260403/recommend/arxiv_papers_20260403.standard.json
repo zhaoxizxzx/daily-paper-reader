@@ -1,0 +1,217 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-03T19:21:14.586592+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 5,
+    "quick_skim_target": 11,
+    "quick_selected": 5
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.28096v2",
+      "title": "Beyond Traffic Matrix: DELTA -- A DAG-Aware OCS Logical Topology Optimization for AIDCs",
+      "abstract": "The rapid scaling of large language models (LLMs) exacerbates communication bottlenecks in AI data centers (AIDCs). To overcome this, optical circuit switches (OCS) are increasingly adopted for their superior bandwidth capacity and energy efficiency. However, their reconfiguration overhead precludes intra-iteration topology update, necessitating a priori engineering of a static topology to absorb time-varying LLM traffic. Existing methods engineer these topologies based on traffic matrices. However, this representation obscures the bursty concurrent bandwidth demands dictated by parallelization strategies and fails to account for the independent channels required for concurrent communication.   To address this, we propose DELTA, an efficient logical topology optimization framework for AIDCs that leverages the computation-communication directed acyclic graph (DAG) to encode time-varying traffic patterns into a Mixed-Integer Linear Programming (MILP) model, while exploiting the temporal slack of non-critical tasks to save optical ports without penalizing iteration makespan. By pioneering a variable-length time interval formulation, DELTA significantly reduces the solution space compared to the fixed-time-step formulation. To scale to thousand-GPU clusters, we design a dual-track acceleration strategy that combines search space pruning (reducing complexity from quadratic to linear) with heuristic hot-starting. Evaluations on large-scale LLM workloads show that DELTA reduces communication time by up to 17.5% compared to state-of-the-art traffic-matrix-based baselines. Furthermore, the framework reduces optical port consumption by at least 20%; dynamically reallocating these surplus ports to bandwidth-bottlenecked workloads reduces their performance gap relative to ideal non-blocking electrical networks by up to 26.1%, ultimately enabling most workloads to achieve near-ideal performance.",
+      "authors": [
+        "Niangen Ye",
+        "Jingya Liu",
+        "Weiqiang Sun",
+        "Weisheng Hu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-03-30T06:54:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.28096v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "traffic matrix and bandwidth demand analysis in AI data centers",
+      "llm_evidence_cn": "AI数据中心中的流量矩阵与带宽需求分析",
+      "llm_evidence": "AI数据中心中的流量矩阵与带宽需求分析",
+      "canonical_evidence": "AI数据中心中的流量矩阵与带宽需求分析",
+      "llm_tldr_en": "Optimizes logical topology in AI data centers by analyzing bursty concurrent traffic demands.",
+      "llm_tldr_cn": "通过分析突发并发流量需求，优化AI数据中心的逻辑拓扑结构。",
+      "llm_tldr": "通过分析突发并发流量需求，优化AI数据中心的逻辑拓扑结构。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.00368v1",
+      "title": "TENT: A Declarative Slice Spraying Engine for Performant and Resilient Data Movement in Disaggregated LLM Serving",
+      "abstract": "Modern GPU clusters are built upon a complex hierarchy of heterogeneous interconnects, ranging from multi-rail RDMA to proprietary fabrics such as Multi-Node NVLink and Ascend UB. Orchestrating these diverse links effectively remains a critical challenge in disaggregated LLM serving. Operating Mooncake TE on thousands of GPUs exposed a critical limitation shared by existing frameworks: imperative, statically bound path selection. This rigidity forces engines to rely on state-blind striping that ignores congestion signals, creating communication silos, wasting multi-rail bandwidth due to head-of-line blocking, and leading to operational fragility where routine faults require manual intervention. We present TENT, a data-movement engine that decouples transfer intent from physical execution. Instead of locking workloads to fixed backends, TENT unifies heterogeneous interconnects into a single dynamic resource pool. Applications simply declare transfer intents, while TENT dynamically decomposes elephant flows into fine-grained slices and \"sprays\" them across links based on instantaneous link quality. This telemetry-driven orchestration eliminates head-of-line blocking and enables transparent, sub-50 ms self-healing by rerouting slices around failures without application logic. TENT serves as the production data plane for LLM inference and RL pipelines at multiple industrial sites. Our evaluation on H800 HGX clusters shows that TENT outperforms state-of-the-art baselines, including Mooncake TE, NIXL, and UCCL. In LLM inference with SGLang HiCache, TENT achieves up to 1.36x higher throughput and 26% lower P90 TTFT than Mooncake TE. In RL pipelines, TENT accelerates parameter updates in Moonshot Checkpoint Engine by 20-26%.",
+      "authors": [
+        "Feng Ren",
+        "Ruoyu Qin",
+        "Teng Ma",
+        "Shangming Cai",
+        "Zheng Liu",
+        "Chao Lei",
+        "Dejiang Zhu",
+        "Ke Yang",
+        "Zheming Li",
+        "Jialei Cui",
+        "Weixiao Huang",
+        "Yikai Zhao",
+        "Yineng Zhang",
+        "Hao Wu",
+        "Xiang Gao",
+        "Yuhao Fu",
+        "Jinlei Jiang",
+        "Yongwei Wu",
+        "Mingxing Zhang"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-01T01:29:03+00:00",
+      "link": "https://arxiv.org/pdf/2604.00368v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "congestion signals and state-aware data movement in GPU clusters",
+      "llm_evidence_cn": "GPU集群中的拥塞信号与状态感知数据传输",
+      "llm_evidence": "GPU集群中的拥塞信号与状态感知数据传输",
+      "canonical_evidence": "GPU集群中的拥塞信号与状态感知数据传输",
+      "llm_tldr_en": "Introduces TENT, a declarative engine for resilient data movement in LLM serving by reacting to congestion signals.",
+      "llm_tldr_cn": "提出TENT，一种通过响应拥塞信号实现大模型推理中弹性数据移动的声明式引擎。",
+      "llm_tldr": "提出TENT，一种通过响应拥塞信号实现大模型推理中弹性数据移动的声明式引擎。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.29537v1",
+      "title": "Mean Masked Autoencoder with Flow-Mixing for Encrypted Traffic Classification",
+      "abstract": "Network traffic classification using self-supervised pre-training models based on Masked Autoencoders (MAE) has demonstrated a huge potential. However, existing methods are confined to isolated byte-level reconstruction of individual flows, lacking adequate perception of the multi-granularity contextual relationship in traffic. To address this limitation, we propose Mean MAE (MMAE), a teacher-student MAE paradigm with flow mixing strategy for building encrypted traffic pre-training model. MMAE employs a self-distillation mechanism for teacher-student interaction, where the teacher provides unmasked flow-level semantic supervision to advance the student from local byte reconstruction to multi-granularity comprehension. To break the information bottleneck in individual flows, we introduce a dynamic Flow Mixing (FlowMix) strategy to replace traditional random masking mechanism. By constructing challenging cross-flow mixed samples with interferences, it compels the model to learn discriminative representations from distorted tokens. Furthermore, we design a Packet-importance aware Mask Predictor (PMP) equipped with an attention bias mechanism that leverages packet-level side-channel statistics to dynamically mask tokens with high semantic density. Numerous experiments on a number of datasets covering encrypted applications, malware, and attack traffic demonstrate that MMAE achieves state-of-the-art performance. The code is available at https://github.com/lx6c78/MMAE",
+      "authors": [
+        "Xiao Liu",
+        "Xiaowei Fu",
+        "Fuxiang Huang",
+        "Lei Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.MM",
+        "cs.NI"
+      ],
+      "published": "2026-03-31T10:19:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.29537v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "encrypted traffic classification and flow perception",
+      "llm_evidence_cn": "加密流量分类与流感知",
+      "llm_evidence": "加密流量分类与流感知",
+      "canonical_evidence": "加密流量分类与流感知",
+      "llm_tldr_en": "Proposes a self-supervised model for multi-granularity encrypted network traffic classification.",
+      "llm_tldr_cn": "提出了一种基于自监督学习的 MMAE 模型，用于多粒度加密网络流量分类。",
+      "llm_tldr": "提出了一种基于自监督学习的 MMAE 模型，用于多粒度加密网络流量分类。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.02149v1",
+      "title": "AEGIS: Adversarial Entropy-Guided Immune System -- Thermodynamic State Space Models for Zero-Day Network Evasion Detection",
+      "abstract": "As TLS 1.3 encryption limits traditional Deep Packet Inspection (DPI), the security community has pivoted to Euclidean Transformer-based classifiers (e.g., ET-BERT) for encrypted traffic analysis. However, these models remain vulnerable to byte-level adversarial morphing -- recent pre-padding attacks reduced ET-BERT accuracy to 25.68%, while VLESS Reality bypasses certificate-based detection entirely. We introduce AEGIS: an Adversarial Entropy-Guided Immune System powered by a Thermodynamic Variance-Guided Hyperbolic Liquid State Space Model (TVD-HL-SSM). Rather than competing in the Euclidean payload-reading domain, AEGIS discards payload bytes in favor of 6-dimensional continuous-time flow physics projected into a non-Euclidean Poincare manifold. Liquid Time-Constants measure microsecond IAT decay, and a Thermodynamic Variance Detector computes sequence-wide Shannon Entropy to expose automated C2 tunnel anomalies. A pure C++ eBPF Harvester with zero-copy IPC bypasses the Python GIL, enabling a linear-time O(N) Mamba-3 core to process 64,000-packet swarms at line-rate. Evaluated on a 400GB, 4-tier adversarial corpus spanning backbone traffic, IoT botnets, zero-days, and proprietary VLESS Reality tunnels, AEGIS achieves an F1-score of 0.9952 and 99.50% True Positive Rate at 262 us inference latency on an RTX 4090, establishing a new state-of-the-art for physics-based adversarial network defense.",
+      "authors": [
+        "Vickson Ferrel"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-02T15:16:56+00:00",
+      "link": "https://arxiv.org/pdf/2604.02149v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "continuous-time flow physics for encrypted traffic analysis",
+      "llm_evidence_cn": "用于加密流量分析的连续时间流物理特征",
+      "llm_evidence": "用于加密流量分析的连续时间流物理特征",
+      "canonical_evidence": "用于加密流量分析的连续时间流物理特征",
+      "llm_tldr_en": "Introduces a state space model for zero-day evasion detection using flow-level physics instead of payloads.",
+      "llm_tldr_cn": "引入一种状态空间模型，利用流级物理特征而非载荷进行零日规避检测。",
+      "llm_tldr": "引入一种状态空间模型，利用流级物理特征而非载荷进行零日规避检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network traffic measurement methods for high-speed links",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.02299v1",
+      "title": "PARD-SSM: Probabilistic Cyber-Attack Regime Detection via Variational Switching State-Space Models",
+      "abstract": "Modern adversarial campaigns unfold as sequences of behavioural phases - Reconnaissance, Lateral Movement, Intrusion, and Exfiltration - each often indistinguishable from legitimate traffic when viewed in isolation. Existing intrusion detection systems (IDS) fail to capture this structure: signature-based methods cannot detect zero-day attacks, deep-learning models provide opaque anomaly scores without stage attribution, and standard Kalman Filters cannot model non-stationary multi-modal dynamics. We present PARD-SSM, a probabilistic framework that models network telemetry as a Regime-Dependent Switching Linear Dynamical System with K = 4 hidden regimes. A structured variational approximation reduces inference complexity from exponential to O(TK^2), enabling real-time detection on standard CPU hardware. An online EM algorithm adapts model parameters, while KL-divergence gating suppresses false positives. Evaluated on CICIDS2017 and UNSW-NB15, PARD-SSM achieves F1 scores of 98.2% and 97.1%, with latency less than 1.2 ms per flow. The model also produces predictive alerts approximately 8 minutes before attack onset, a capability absent in prior systems.",
+      "authors": [
+        "Prakul Sunil Hiremath",
+        "PeerAhammad M Bagawan",
+        "Sahil Bhekane"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-02T17:38:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.02299v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "modeling network telemetry for cyber-attack detection",
+      "llm_evidence_cn": "为网络攻击检测建模网络遥测数据",
+      "llm_evidence": "为网络攻击检测建模网络遥测数据",
+      "canonical_evidence": "为网络攻击检测建模网络遥测数据",
+      "llm_tldr_en": "Presents PARD-SSM to model network telemetry as switching linear dynamical systems for attack phase detection.",
+      "llm_tldr_cn": "提出PARD-SSM，将网络遥测建模为切换线性动态系统，用于检测网络攻击的不同阶段。",
+      "llm_tldr": "提出PARD-SSM，将网络遥测建模为切换线性动态系统，用于检测网络攻击的不同阶段。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "sketch-based algorithms for network telemetry and measurement",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
