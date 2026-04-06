@@ -1,0 +1,79 @@
+{
+  "label": "2026-04-06",
+  "date": "2026-04-06",
+  "generated_at": "2026-04-06T20:01:51",
+  "count": 5,
+  "papers": [
+    {
+      "paper_id": "202604/06/2604.02379v1-cardinality-is-not-enough-super-host-detection-via-segmented-cardinality-estimation",
+      "section": "deep",
+      "title_en": "Cardinality is Not Enough: Super Host Detection via Segmented Cardinality Estimation",
+      "authors": "Yilin Zhao, Jiawei Huang, Xianshi Su, Weihe Li, Xin Li, Yan Liu, Jiacheng Xie, Qichen Su, Jin Ye, Wanchun Jiang, Jianxin Wang",
+      "date": "2026-04-01",
+      "pdf": "https://arxiv.org/pdf/2604.02379v1",
+      "score": "10.0",
+      "evidence": "基于Sketch的流基数估计与超级主机检测方法",
+      "tldr": "准确检测超级主机对防御网络攻击至关重要。现有基于Sketch的方法因忽略子网内通信模式导致误报率高，而层次化结构又面临内存开销大的问题。本文提出SegSketch，通过轻量级的减半分段哈希策略推断IP公共前缀长度，实现子网内的基数估计。该方法在有限内存下显著提升了检测精度，实验表明其F1-Score最高可达现有最优方案的8.04倍。",
+      "tags": "query:netmes",
+      "abstract_en": "Accurately detecting super host that establishes connections to a large number of distinct peers is significant for mitigating web attacks and ensuring high quality of web service. Existing sketch-based approaches estimate the number of distinct connections called flow cardinality according to full IP addresses, while ignoring the fact that a malicious or victim super host often communicates with hosts within the same subnet, resulting in high false positive rates and low accuracy. Though hierarchical-structure based approaches could capture flow cardinality in subnet, they inherently suffer from high memory usage. To address these limitations, we propose SegSketch, a segmented cardinality estimation approach that employs a lightweight halved-segment hashing strategy to infer common prefix lengths of IP addresses, and estimates cardinality within subnet to enhance detection accuracy under constrained memory size. Experiments driven by real-world traces demonstrate that, SegSketch improves F1-Score by up to 8.04x compared to state-of-the-art solutions, particularly under small memory budgets.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/06/2604.02927v1-towards-near-real-time-telemetry-aware-routing-with-neural-routing-algorithms",
+      "section": "quick",
+      "title_en": "Towards Near-Real-Time Telemetry-Aware Routing with Neural Routing Algorithms",
+      "authors": "Andreas Boltres, Niklas Freymuth, Benjamin Schichtholz, Michael König, Gerhard Neumann",
+      "date": "2026-04-03",
+      "pdf": "https://arxiv.org/pdf/2604.02927v1",
+      "score": "7.0",
+      "evidence": "利用实时遥测数据的近实时遥测感知路由",
+      "tldr": "针对现有神经路由算法在处理网络遥测数据时往往忽略通信延迟的问题，本文提出了一种考虑延迟的闭环控制框架。研究者开发了基于图神经网络的路由算法LOGGIA，通过预训练和强化学习优化链路权重。实验证明，LOGGIA在存在现实延迟的情况下，性能显著优于传统最短路径和现有神经基准，并揭示了完全本地化部署在近实时路由中的优势。",
+      "tags": "query:netmes",
+      "abstract_en": "Routing algorithms are crucial for efficient computer network operations, and in many settings they must be able to react to traffic bursts within milliseconds. Live telemetry data can provide informative signals to routing algorithms, and recent work has trained neural networks to exploit such signals for traffic-aware routing. Yet, aggregating network-wide information is subject to communication delays, and existing neural approaches either assume unrealistic delay-free global states, or restrict routers to purely local telemetry. This leaves their deployability in real-world environments unclear. We cast telemetry-aware routing as a delay-aware closed-loop control problem and introduce a framework that trains and evaluates neural routing algorithms, while explicitly modeling communication and inference delays. On top of this framework, we propose LOGGIA, a scalable graph neural routing algorithm that predicts log-space link weights from attributed topology-and-telemetry graphs. It utilizes a data-driven pre-training stage, followed by on-policy Reinforcement Learning. Across synthetic and real network topologies, and unseen mixed TCP/UDP traffic sequences, LOGGIA consistently outperforms shortest-path baselines, whereas neural baselines fail once realistic delays are enforced. Our experiments further suggest that neural routing algorithms like LOGGIA perform best when deployed fully locally, i.e., observing network states and inferring actions at every router individually, as opposed to centralized decision making.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/06/2603.28985v1-kan-lstm-benchmarking-kolmogorov-arnold-networks-for-cyber-security-threat-detection-in-iot-networks",
+      "section": "quick",
+      "title_en": "KAN-LSTM: Benchmarking Kolmogorov-Arnold Networks for Cyber Security Threat Detection in IoT Networks",
+      "authors": "Mohammed Hassanin",
+      "date": "2026-03-30",
+      "pdf": "https://arxiv.org/pdf/2603.28985v1",
+      "score": "6.0",
+      "evidence": "网络流量数据中的网络安全威胁检测",
+      "tldr": "本研究探讨了Kolmogorov-Arnold网络（KAN）在物联网安全威胁检测中的应用。KAN通过样条参数化的单变量函数替代传统线性权重，实现了动态激活模式学习。作者提出了结合空间与时间编码优势的KAN-LSTM模型，并在UNSW-NB15、NSL-KDD等多个数据集及新构建的大规模综合数据集上进行实验。结果表明，KAN-LSTM在保持更少参数量的同时，检测准确率显著优于传统深度学习模型，为自适应防御模型提供了新方向。",
+      "tags": "query:netmes",
+      "abstract_en": "By utilising their adaptive activation functions, Kolmogorov-Arnold Networks (KANs) can be applied in a novel way for the diverse machine learning tasks, including cyber threat detection. KANs substitute conventional linear weights with spline-parametrized univariate functions, which allows them to learn activation patterns dynamically, inspired by the Kolmogorov-Arnold representation theorem. In a network traffic data, we show that KANs perform better than traditional Multi-Layer Perceptrons (MLPs), yielding more accurate results with a significantly less number of learnable parameters. We also propose KAN-LSTM model to combine advantages of spatial and temporal encoding. The suggested methodology highlights the potential of KANs as an effective tool in detecting cyber threats and offers up new directions for adaptive defensive models. Lastly, we conducted experiments on three main dataset, UNSW-NB15, NSL-KDD, and CICID2017, as well as we developed a new dataset combined from IOT-BOT, NSL-KDD, and CICID2017 to present a stable, unbiased, large-scale dataset with diverse traffic patterns. The results show the superiority of KAN-LSTM and then KAN models over the traditional deep learning models. The source code is available at GitHub repository",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/06/2604.02461v1-rl-loop-reinforcement-learning-driven-real-time-5g-slice-control-for-connected-and-autonomous-mobility-services",
+      "section": "quick",
+      "title_en": "RL-Loop: Reinforcement Learning-Driven Real-Time 5G Slice Control for Connected and Autonomous Mobility Services",
+      "authors": "Lara Tarkh, Ali Chouman, Hanan Lutfiyya, Abdallah Shami",
+      "date": "2026-04-02",
+      "pdf": "https://arxiv.org/pdf/2604.02461v1",
+      "score": "6.0",
+      "evidence": "5G网络切片关键性能指标的实时观测与监控",
+      "tldr": "针对智能联网交通对5G切片实时资源管理的需求，本文提出RL-Loop框架。该框架利用近端策略优化（PPO）算法，在真实实验平台上以秒级粒度动态调整边缘CPU分配。通过实时观测切片性能指标，RL-Loop实现了高效的软件定义边缘智能，在保证服务质量的同时显著降低了资源消耗，为5G联网汽车服务提供了响应迅速的资源管理方案。",
+      "tags": "query:netmes",
+      "abstract_en": "Smart and connected mobility systems rely on 5G edge infrastructure to support real-time communication, control, and service differentiation. Achieving this requires adaptive resource management mechanisms that can react to rapidly changing traffic conditions. In this paper, we propose RL-Loop, a closed-loop reinforcement learning framework for real-time CPU resource control in 5G network slicing environments supporting connected mobility services. RL-Loop employs a Proximal Policy Optimization (PPO) agent that continuously observes slice-level key performance indicators and adjusts edge CPU allocations at one-second granularity on a real testbed. The framework leverages real-time observability and feedback to enable adaptive, software-defined edge intelligence. Experimental results suggest that RL-Loop can reduce average CPU allocation by over 55% relative to the reference operating point while reaching a comparable quality-of-service degradation region. These results indicate that lightweight reinforcement learning--based feedback control can provide efficient and responsive resource management for 5G-enabled smart mobility and connected vehicle services.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/06/2604.03145v1-causal-inference-for-quantifying-noisy-neighbor-effects-in-multi-tenant-cloud-environments",
+      "section": "quick",
+      "title_en": "Causal Inference for Quantifying Noisy Neighbor Effects in Multi-Tenant Cloud Environments",
+      "authors": "Philipe S. Schiavo, João P. S. Milanezi, Moisés R. N. Ribeiro, Víctor M. G. Martínez, João Henrique Corrêa, José Marcos Nogueira, Fernando Frota Redigolo, Tereza C. Carvalho, Flávio de Oliveira Silva",
+      "date": "2026-04-03",
+      "pdf": "https://arxiv.org/pdf/2604.03145v1",
+      "score": "6.0",
+      "evidence": "多租户云环境中的性能下降监控与量化",
+      "tldr": "针对多租户云环境中“喧闹邻居”导致的性能干扰问题，本文提出一种结合受控实验与多阶段因果推理的分析方法。该方法不仅能量化性能下降程度（如I/O负载下降达67%），还通过格兰杰因果检验确立了租户间的统计因果关系，并识别出不同资源竞争的“降级特征”，为云平台SLA管理和资源调度提供了可解释的诊断依据。",
+      "tags": "query:netmes",
+      "abstract_en": "Resource sharing in multi-tenant cloud environments enables cost efficiency but introduces the Noisy Neighbor problem, i.e., co-located workloads that unpredictably degrade each other's performance. Despite extensive research on detecting such effects, there are no explainable methodologies for quantifying the severity of impact and establishing causal relationships among tenants. We propose an analytical that combines controlled experimentation with multi-stage causal inference and validates it across 10 independent rounds in a Kubernetes testbed. Our methodology not only quantifies severe performance degradations (e.g., up to 67\\% in I/O-bound workloads under combined stress) but also statistically establishes causality through Granger causality analysis, revealing a 75\\% increase in causal links when the noisy neighbor activates. Furthermore, we identify unique \"degradation signatures\" for each resource contention vector (i.e., CPU, memory, disk, network), enabling diagnostic capabilities that go beyond anomaly detection. This work transforms the Noisy Neighbor from an elusive problem into a quantifiable, diagnosable phenomenon, providing cloud operators with actionable insights for SLA management and smart resource allocation.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
