@@ -1,0 +1,1908 @@
+Title: Active Sequential Signal Detection with Asynchronous Decisions
+
+URL Source: https://arxiv.org/pdf/2604.04755v1
+
+Published Time: Tue, 07 Apr 2026 01:51:40 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Active Sequential Signal Detection with Asynchronous Decisions 
+
+Yiming Xing, Member, IEEE, and Georgios Fellouris, Member, IEEE 
+
+Abstract —This work considers the problem of detecting signals from multiple sequentially observed data streams, where only one stream can be observed at every time instant. The goal is to detect signals as quickly as possible while controlling the global probabilities of false alarm and missed detection. In this active sampling setup, it is impossible to minimize the expected detection time simultaneously for every signal, so we formulate a novel set of performance criteria that aim to minimize the expectations of the order statistics of the detection times. A novel procedure is proposed, which incorporates an exploration mechanism to a “follow-the-leader” procedure, and is shown to optimize all the criteria asymptotically as the global error probabilities go to zero. Its finite-sample performance is compared with existing and oracle procedures in simulation studies. 
+
+Index Terms —Active sampling, asymptotic optimality, asyn-chronous decisions, sequential multiple testing, signal detection 
+
+I. I NTRODUCTION 
+
+Consider a detection system comprising of multiple detec-tors, each monitoring an environment. It is of interest to iden-tify, based on observations collected in real-time, whether there is signal in each of these environments as quickly as possible while guaranteeing certain global reliability constraints. Such a problem arises in many scientific and engineering fields, where the “environments” may be any scenarios or media, and the “signals” may be any phenomena or segments with certain characteristics of interest, e.g., detecting intrusions in radar arrays (Almogi-Nadler et al., 2004), anomalies or outliers in surveillance systems (Chandola et al., 2009), influenced endpoints in clinical trials (Bartroff et al., 2012), unoccupied channels in communication networks (Geng et al., 2016), un-expected or useful patterns in databases (Fournier-Viger et al., 2017), matching pairs in gene-association studies (Uffelmann et al., 2021), frauds in financial markets or other platforms (Hilal et al., 2022), etc. If the distinguishing characteristics of signals are specified as the alternative hypotheses and those of non-signals, i.e., noises, are specified as the null hypotheses, such a problem can be naturally formulated as a sequential multiple testing problem. Such a problem was first studied in Bartroff and Lai (2010) De and Baron (2012a,b) and Bartroff and Song (2014), where sequential multiple testing procedures, i.e., procedures where the number of observations collected in each stream is not pre-determined but adaptively determined based on the collected observations, were proposed and were shown to control two         
+
+> Yiming Xing (email: yimingx4@tongji.edu.cn) is with the School of Mathematical Sciences, Tongji University, Shanghai, China and Georgios Fellouris (email: fellouri@illinois.edu) is with the Department of Statistics, University of Illinois at Urbana-Champaign, Urbana-Champaign, IL, USA. Part of this work is under review in 2026 IEEE International Symposium on Information Theory. This research was supported by ... Manuscript received ...; revised ...
+
+types of error metrics below arbitrary, user-specified levels. Besides, these sequential procedures were shown, in numerical studies, to outperform their fixed-sample-size counterparts. Later works consider, beyond controlling certain error met-rics, theoretically minimizing the expectation of an objective function about the number of observations. Objective functions that have been studied in the literature include: (1) the first time at which a signal is detected, if any , e.g., Lai et al. (2011); Malloy et al. (2013); Fellouris and Tartakovsky (2013); Heydari et al. (2016); Fellouris and Tartakovsky (2017), (2) 
+
+a common time at which decisions are made for all streams ,e.g., Cohen and Zhao (2015a); Huang et al. (2018); Hemo et al. (2020); Lambez and Cohen (2022); Gafni et al. (2023) and Song and Fellouris (2017, 2019); Tsopelakos and Fellouris (2023, 2025); Chaudhuri and Fellouris (2024); Xing et al. (2025), and (3) a function of the times at which decisions are made , e.g., Malloy and Nowak (2014); Cohen et al. (2014); Cohen and Zhao (2015b); Gurevich et al. (2019); Xing and Fellouris (2023); Xing et al. (2024). The work (Xing and Fellouris, 2025) is the first and, as far as the authors know, currently the only one that simultaneously minimizes more than one objective function. Specifically, Xing and Fellouris (2025) minimizes the expected time of decision simultaneously for every stream. However, this is achieved in a full sampling setup, where all streams can be observed at every time instant, even after some of them have reached a decision. Our focus of this work is the active sampling setup, where only a single stream can be observed at every time instant. This constraint may arise from practical limitations such as sampling budget, communication bandwidth and com-puting capacity, and has been considered, e.g., in Nitinawarat et al. (2013); Nitinawarat and Veeravalli (2015); Cohen and Zhao (2015a); Hemo et al. (2020); Deshmukh et al. (2021); Tsopelakos and Fellouris (2023, 2025) as well as Xu et al. (2021); Xu and Mei (2023); Veeravalli et al. (2024); Chaudhuri et al. (2024) that study a closely-related problem of sequential detection of changepoints. In contrast to the full sampling setup in Xing and Fel-louris (2025), in the active sampling setup it is impossible to minimize, even in an asymptotic sense, the expected decision time simultaneously for every stream. Indeed, if the goal is to identify a specific stream as quickly as possible, then clearly we should prioritize collecting observations from that stream, thereby delaying the identification of other streams. Therefore, we propose to minimize the expectations of the order statistics 
+
+of the decision times. In particular, since it is often more critical to quickly identify signals rather than noises, we focus on the order statistics of the detection times .Specifically, we consider K > 1 independent data streams, postulate two simple hypotheses for each of them, and assume that only one stream can be observed at each time instant. In 
+
+> arXiv:2604.04755v1 [stat.ME] 6 Apr 2026 2
+
+addition to the expected total sample size, we are interested in minimizing, simultaneously for every 1 ≤ k ≤ K, the expected time until either detecting the kth signal or declaring that there are fewer than k signals and terminating the pro-cedure , while controlling the probabilities of falsely detecting any noise and missing any signal below given levels α and 
+
+β, respectively. The solution to this active sequential multiple testing problem requires the specification of a sampling rule, a detection time for each stream, as well as a global termination time. The sampling rule determines which stream to observe at each time instant, the detection times when to claim that a stream is a signal, and the termination time when to stop the procedure claiming that all signals have already been detected. Our first result in this work is that the expected total sample size until termination can be minimized to a first-order asymptotic approximation with any sampling rule , as long as the detection/termination times induce a Sequential Probability Ratio Test (SPRT) (Wald, 1947) in each stream. By this we mean that a stream is identified as a signal (resp. noise) as soon as its local log-likelihood ratio (LLR) statistic, which quantifies evidence in favor of the stream being a signal, becomes larger (resp. smaller) than a positive (resp. negative) threshold a, (resp. −b). These thresholds are completely specified by the desired error rates, α and β.The choice of the sampling rule, however, turns out to be critical for the quick detection of signals, which is our main goal of this work. A sampling rule that has been proposed in the literature (Cohen and Zhao, 2015a, Section IV.B) is to always “follow-the-leader”, that is, to always sample the stream with the largest LLR. This sampling rule is efficient for detecting all signals (Cohen and Zhao, 2015a, Theorem 4), but not efficient for detecting easier signals earlier, where by “easier signals” we mean those that are quicker to be detected on average if observations are continuously collected from them. Indeed, if the LLR of the easiest signal happens to go downward based on the first a few observations, which is an event of positive probability, the “follow-the-leader” procedure will abandon it and switch to other streams that will on average take longer to be detected even if they are signals. Our sampling rule in this work is inspired by the universal lower bounds that we establish for the proposed criteria (Section III). These lower bounds point to an oracle sampling rule, according to which the streams are ordered as signals first, from the easiest to the most difficult, and noises next, in an arbitrary order, and then an SPRT is applied to each of them in this order. The difficulty level of a signal is quantified by the Kullback-Leibler (KL) divergence from its signal distribution to its noise distribution. Since the true subset of signals is unknown, the oracle sam-pling rule is not directly applicable. However, we may preserve its logic and incorporate a simple exploration mechanism that helps us to focus on signals with precision. Specifically, we order all streams according to their difficulty levels as if they are indeed signals, and we start by sampling the first stream until its LLR is either above the detection threshold a > 0, or below a negative value −b′, which is greater than the futility threshold −b. We repeat this process with the second stream, etc., until all streams have been traversed. We refer to this as Phase I of our proposed sampling rule. Our main result of this work is that, irrespective of how we sample after Phase I, the proposed sampling rule asymptotically minimizes the expected time of the kth detection for every 1 ≤ k ≤ K, as long as the exploration threshold b′ is sufficiently large but much smaller than b.At the end of Phase I we have not yet decided for the streams whose LLRs are between −b′ and −b. Thus, we need to continue sampling them. We refer to this as Phase II. While how we sample in Phase II does not affect our asymptotic optimality theory, it can have an impact in practice, especially in the non-asymptotic regime. Thus, for Phase II sampling we do propose to“follow-the-leader”. With this choice, the pure “follow-the-leader” procedure is recovered as a limiting case of our proposal when there is no exploration, i.e., when 
+
+b′ = 0 . We study the performance of the resulting procedure in numerical studies, where we observe it to be much more efficient in detecting easy signals early than the full-time “follow-the-leader” procedure, while having similar expected total sample size. The rest of the paper is organized as follows: In Section II we formulate the problem. In Section III we establish the universal lower bounds. In Section IV, we present and analyze the proposed procedure. In Section V we conduct numerical studies. In Section VI we conclude and raise future research directions. Long proofs and supporting lemmas are presented in the Appendix. II. P ROBLEM FORMULATION 
+
+Let {Xi(n), n ≥ 1}, i ∈ [K] := {1, . . . , K } be K ≥ 1
+
+independent streams of i.i.d. random elements. For each i ∈
+
+[K], assume that the density of Xi(1) with respect to some 
+
+σ-finite measure νi is either fi or gi. We refer to stream i as a 
+
+signal if the density of Xi(1) is gi, and as a noise otherwise. For any B ⊆ [K], we denote by PB the joint distribution of all streams if the subset of signals is B, i.e., if Xi(1) ∼ gi for 
+
+i ∈ B and Xi(1) ∼ fi for i / ∈ B, and by EB the corresponding expectation. We focus on the active sampling setup, where at every time instant it is possible to observe only one stream. This stream can be selected based on the observations collected up to the previous time instant. That is, at each time n we only observe the value XS(n)(n) from stream S(n), which we determine based on XS(n−1) (n − 1) , . . . , X S(1) (1) and possibly some randomization. Thus, we refer to the sequence 
+
+S := {S(n), n ≥ 1} as a sampling rule if for each time 
+
+n ≥ 1 the [K]-valued random element S(n) is FS (n − 1) -measurable, where FS (0) is a σ-algebra independent with the observations and FS (n) := σ(FS (n − 1) , X S(n)(n)) .Our aim in this work is not only to minimize the expected total sample size until all decisions are made, but also to detect signals as quickly as possible. Specifically, for every k ∈ [K],we denote by Tk the time instant at which the kth detection of signal occurs. We denote by Tstop the time at which we claim that all signals have been detected. As only one stream is observed at each time instant, Tstop is also the total sample size of the procedure. 3
+
+The random times Tk, k ∈ [K] and Tstop cannot utilize future observations, so they must be FS -stopping times. Without loss of generality, we assume that the stream detected as a signal at time Tk is the one sampled at this time, i.e., S(Tk). Thus, the subset of detected signals upon termination is 
+
+D := {S(Tk) : k ∈ [K], T k ≤ Tstop }. (1) Therefore, the sampling rule and the stopping times completely determine the decision rule. Of course, the value of Tk is irrelevant when Tk > T stop , so we can simply set it as +∞.To sum up, we consider a sequential, active, asynchronous signal detection problem, for which we need to specify a sampling rule S, which induces a filtration FS , and K + 1 
+
+FS -stopping times {Tk : k ∈ [K]}, T stop , which induce the estimated subset of signals, defined by (1). We refer to δ = (S, {Tk : k ∈ [K]}, T stop ) as a signal detection procedure , and denote by ∆ the family of all such procedures. When the true subset of signals is B ⊆ [K], we say that there is a type-I (or false positive, or false alarm) error if 
+
+D\B̸ = ∅, and that there is a type-II (or false negative, or missed detection) error if B\D̸ = ∅. We denote by ∆( α, β )
+
+the subfamily of procedures that terminate almost surely and control the probabilities of at least one type-I error and at least one type-II error below α and β respectively, i.e., 
+
+∆( α, β ) := 
+
+n
+
+δ ∈ ∆ : P B (Tstop < ∞) = 1 ,
+
+PB (D\B̸ = ∅) ≤ α, 
+
+PB (B\D̸ = ∅) ≤ β, ∀ B ⊆ [K]
+
+o
+
+,
+
+(2) where α, β ∈ (0 , 1) . For any possible true subset of signals 
+
+B ⊆ [K], we are interested in achieving not only the smallest possible expected time until termination, 
+
+JB (α, β ) := inf  
+
+> δ∈∆( α,β )
+
+EB [Tstop ] , (3) but also the smallest possible expected time until either detecting the kth signal or terminating the procedure ,
+
+JB,k (α, β ) := inf  
+
+> δ∈∆( α,β )
+
+EB [Tk ∧ Tstop ] , ∀ k ∈ [K]. (4) We will design a procedure that achieves all these infima simultaneously for every B ⊆ [K] and every k ∈ [K], in an asymptotic sense as α, β → 0.
+
+Remark 1. The proposed problem generalizes various formula-tions in the literature. For example, when the goal is to make all decisions synchronously, then one needs to specify only 
+
+Tstop , and each Tk can be set equal to either Tstop or +∞
+
+depending on whether the corresponding stream is identified as a signal or noise. In this context, the only relevant optimization problem is (3) (see, e.g., Cohen and Zhao (2015a); Huang et al. (2018); Hemo et al. (2020); Lambez and Cohen (2022); Gafni et al. (2023) and Song and Fellouris (2017, 2019); Tsopelakos and Fellouris (2023, 2025); Chaudhuri and Fellouris (2024); Xing et al. (2025)). On the other hand, if the goal is to detect the existence of signals, then we need to specify only T1 = Tstop , and each Tk, k ≥ 2 can be set equal to +∞. In this context, the only relevant optimization problem is (4) with k = 1 
+
+(see, e.g., Lai et al. (2011); Malloy et al. (2013); Fellouris and Tartakovsky (2013); Heydari et al. (2016); Fellouris and Tartakovsky (2017)). 
+
+A. Assumptions and notations 
+
+Our only distributional assumption throughout the paper is that, for every i ∈ [K], the Kullback-Leibler (KL) divergences between fi and gi are positive and finite, i.e., 
+
+Ii := 
+
+Z
+
+gi log 
+
+ gi
+
+fi
+
+
+
+dν i ∈ (0 , ∞),Ji := 
+
+Z
+
+fi log 
+
+ fi
+
+gi
+
+
+
+dν i ∈ (0 , ∞).
+
+(5) For any sampling rule S, stream i ∈ [K], and time n ≥ 1
+
+we set 
+
+λSi (n) := 
+
+> n
+
+X
+
+> m=1
+
+log 
+
+ gi(Xi(m)) 
+
+fi(Xi(m)) 
+
+
+
+1{S(m) = i}, (6) and we refer to λSi (n) as the local log-likelihood ratio statistic (LLR) in stream i up to time n under the sampling rule S. We provide a formal justification for this terminology in Appendix A. We simply write λi(n) when stream i is continuously sampled up to time n, i.e., 
+
+λi(n) := 
+
+> n
+
+X
+
+> m=1
+
+log 
+
+ gi(Xi(m)) 
+
+fi(Xi(m)) 
+
+
+
+. (7) For each i ∈ [K] we denote by T SPRT  
+
+> i
+
+the number of obser-vations until the LLR in stream i becomes either larger than 
+
+a or smaller than −b when stream i is sampled continuously ,and we set DSPRT  
+
+> i
+
+equal to 1 in the former case and 0 in the latter: T SPRT  
+
+> i
+
+:= inf {n ≥ 1 : λi(n) /∈ (−b, a )},DSPRT  
+
+> i
+
+:= 1 {λi(T SPRT  
+
+> i
+
+) ≥ a}, (8) This is is Wald’s Sequential Probability Ratio Test (SPRT) for the testing problem in stream i.For any B ⊆ [K] and ϵ ∈ (0 , 1) we set 
+
+VB (ϵ) := X
+
+> i∈B
+
+V+ 
+
+> i
+
+(ϵ) + X
+
+> i / ∈B
+
+V− 
+
+> i
+
+(ϵ), (9) where, for any i ∈ [K],
+
+V+ 
+
+> i
+
+(ϵ) := sup {n ≥ 1 : λi(n)/n ≤ Ii(1 − ϵ)} + 1 ,
+
+V− 
+
+> i
+
+(ϵ) := sup {n ≥ 1 : −λi(n)/n ≤ Ji(1 − ϵ)} + 1 . (10) Note that these random times are not stopping times. Also note that, for any i ∈ B,
+
+{ lim  
+
+> n→∞
+
+λi(n)/n = Ii}
+
+= {sup {n ≥ 1 : |λi(n)/n − Ii|> ϵ } < ∞ for all ϵ > 0}⊆ {V + 
+
+> i
+
+(ϵ) < ∞ for all ϵ ∈ (0 , 1) },
+
+and, similarly, for any i / ∈ B,
+
+{ lim  
+
+> n→∞
+
+−λi(n)/n = Ji} ⊆ {V − 
+
+> i
+
+(ϵ) < ∞ for all ϵ ∈ (0 , 1) }.
+
+Therefore, by the Strong Law of Large Numbers, condition (5) implies PB (VB (ϵ) < ∞) = 1 for all ϵ ∈ (0 , 1) . In Lemma C.3 we show that condition (5) further implies 
+
+VB (r, ϵ ) := E B [( VB (ϵ)) r ] < ∞, ∀ r ≥ 1 and ϵ ∈ (0 , 1) .4
+
+III. U NIVERSAL LOWER BOUNDS 
+
+In this section we establish a non-asymptotic lower bound for the infima in (3) and (4). For this, we introduce the function 
+
+d(x, y ) := x log 
+
+ x
+
+1 − y
+
+
+
++ (1 − x) log 
+
+ 1 − xy
+
+
+
+(11) for x, y ∈ (0 , 1) , which is the KL-divergence of a Bernoulli distribution with parameter x against one with parameter 1−y.Moreover, for any non-empty subset B ⊆ [K] we denote by 
+
+I(1) (B) ≥ · · · ≥ I(|B|)(B) (12) the non-increasingly ordered KL divergences in {Ii : i ∈ B}.
+
+Theorem III.1. Let α, β ∈ (0 , 1) such that α + β < 1, and 
+
+B ⊆ [K]. For any 1 ≤ k ≤ | B| we have 
+
+JB,k (α, β ) ≥
+
+> k
+
+X
+
+> i=1
+
+d(β, α )
+
+I(i)(B) , (13) 
+
+and for any |B|< k ≤ K we have 
+
+JB (α, β ) ≥ J B,k (α, β ) ≥ X
+
+> i∈B
+
+d(β, α )
+
+Ii
+
++ X
+
+> i / ∈B
+
+d(α, β )
+
+Ji
+
+.
+
+(14) 
+
+Proof: See Appendix B. To interpret these lower bounds, we first recall that, for each 
+
+i ∈ [K], d(β, α )/I i (resp. d(α, β )/J i)) is a lower bound on the expected sample size required for solving the testing problem in stream i if it is a signal (resp. noise), while controlling the type-I and type-II error rates below α and β respectively (see, e.g., Wald (1947)). This lower bound is attained by the SPRT in (8) exactly with thresholds a = log((1 − β)/α ) and b =log((1 − α)/β ) if there are no overshoots over the boundaries, and asymptotically as α, β → 0 with thresholds a = |log α|
+
+and b = |log β| (see, e.g., Tartakovsky et al. (2014)). Thus, for each i ∈ [K], the KL divergence Ii (resp. Ji) characterizes the inherent difficulty of the testing problem in the ith stream when it is a signal (resp. noise). In view of this, (14) states that the expected time until termination, i.e., the expected total sample size, as well as the expected time until either detecting more signals than actually exist or terminating, is lower bounded by the sum of (the lower bounds of) the expected sample sizes required for solving all 
+
+testing problems. On the other hand, (13) states that the expected time until either detecting the kth signal or terminating with fewer than 
+
+k signals detected is lower bounded by the sum of (the lower bounds of) the expected sample sizes required for solving the testing problems in the k easiest signal streams , that is, the k
+
+signal streams with the largest KL divergences in {Ii : i ∈ B}.We end this section by formulating asymptotic approxima-tions to the lower bounds of the previous theorem as α, β → 0.
+
+Corollary III.1. Fix B ⊆ [K]. As α, β → 0, for 1 ≤ k ≤ | B|
+
+we have 
+
+JB,k (α, β ) ≳
+
+> k
+
+X
+
+> i=1
+
+|log α|
+
+I(i)(B) , (15) 
+
+and for |B|< k ≤ K we have 
+
+JB (α, β ) ≥ J B,k (α, β ) ≳ X
+
+> i∈B
+
+|log α|
+
+Ii
+
++ X
+
+> i / ∈B
+
+|log β|
+
+Ji
+
+. (16) 
+
+Proof: Follows by Theorem III.1 and the fact that 
+
+d(x, y ) ∼ | log y| as x, y → 0.IV. T HE PROPOSED PROCEDURE 
+
+Algorithm 1 The proposed procedure  
+
+> 1:
+
+Input a, b > 0 and b′ ≥ 0 
+
+> 2:
+
+Initialize k = 0 , n = 0 , D = ∅, N = ∅
+
+λi = 0 for 1 ≤ i ≤ K 
+
+> 3:
+
+for 1 ≤ i ≤ K do // Phase 1  
+
+> 4:
+
+while λi /∈ (−b′, a ) do  
+
+> 5:
+
+n = n + 1  
+
+> 6:
+
+generate new Xi 
+
+> 7:
+
+compute λi = λi + log 
+
+ gi(Xi)
+
+> fi(Xi)
+
+ 
+
+> 8:
+
+end while  
+
+> 9:
+
+if λi ≥ a then  
+
+> 10:
+
+k = k + 1 , Tk = n, D = D ∪ { i} 
+
+> 11:
+
+end if  
+
+> 12:
+
+if λi ≤ − b then  
+
+> 13:
+
+N = N ∪ { i} 
+
+> 14:
+
+end if  
+
+> 15:
+
+end for  
+
+> 16:
+
+while D ∪ N̸ = [ K] do // Phase II  
+
+> 17:
+
+n = n + 1  
+
+> 18:
+
+let i be one of 
+
+arg max  
+
+> i′∈[K]\(D∪N)
+
+λi′ // Follow-the-leader 
+
+arg min  
+
+> i′∈[K]\(D∪N)
+
+|λi′ | // Follow-the-absolute-leader 
+
+min {[K]\(D ∪ N )} // In-order  
+
+> 19:
+
+generate new Xi 
+
+> 20:
+
+compute λi = λi + log 
+
+ gi(Xi)
+
+> fi(Xi)
+
+ 
+
+> 21:
+
+if λi ≥ a then  
+
+> 22:
+
+k = k + 1 , Tk = n, D = D ∪ { i} 
+
+> 23:
+
+end if  
+
+> 24:
+
+if λi ≤ − b then  
+
+> 25:
+
+N = N ∪ { i} 
+
+> 26:
+
+end if  
+
+> 27:
+
+end while  
+
+> 28:
+
+Tstop = n 
+
+> 29:
+
+Output T1, . . . , T k, Tstop , D
+
+In this section we introduce the proposed procedure, whose components are denoted with a hat symbol ˆ·, and establish the main theoretical results of this work. First, in Subsection IV-A, we introduce the proposed detection and termination times. We show that these suffice for achieving asymptotically the optimal expected total sample size , irrespective of the choice of the sampling rule. In Subsection IV-B we proceed with the specification of a sampling rule that leads to asymptotically optimal expected signal detection times. 5
+
+A. The detection and termination times 
+
+Let S be an arbitrary sampling rule. We start with the specification of the detection times. For this, we fix a threshold 
+
+a > 0, and we identify a stream as signal as soon as its LLR exceeds a. Thus, the proposed detection times are naturally defined as 
+
+ˆTk := inf {n > ˆTk−1 : ˆD(n)̸ = ˆD(n − 1) }, k ∈ [K], (17) where ˆT0 := 0 , ˆD(0) = ∅, and ˆD(n) is the subset of streams that have already been identified as signals at time n, i.e., 
+
+ˆD(n) := {i ∈ [K] : λSi (n) ≥ a}. (18) We continue with the determination of the termination time. For this, we need a criterion for identifying a stream as noise. To this end, we fix another threshold, b > 0, and we identify a stream as noise as soon as its LLR becomes smaller than 
+
+−b. That is, the subset of streams that have been identified as noises at time n is 
+
+ˆN (n) := {i ∈ [K] : λSi (n) ≤ − b}. (19) The procedure terminates when all streams have been identi-fied as either signals or noises, i.e., at 
+
+ˆTstop := inf {n ≥ 1 : λSi (n) /∈ (−b, a ) for all i ∈ [K]}
+
+= inf {n ≥ 1 : ˆD(n) ∪ ˆN (n) = [ K]}. (20) We stress that the detection/termination times have been defined with respect to any sampling rule, S. Our only assumption regarding the sampling rule, for now, which can be made without any loss of generality, is that a stream is no longer sampled once it has been identified as either noise or signal. That is, the set of active data streams at time n, that is, the data streams that can still be sampled at time n + 1 , is 
+
+ˆA(n) := {i ∈ [K] : λSi (n) ∈ (−b, a )}
+
+= [ K] \ ( ˆD(n) ∪ ˆN (n)) . (21) Given this and the assumption of independence over time and across streams, it follows that the number of observations from stream i until termination, PTstop  
+
+> m=1
+
+1{S(m) = i}, has the same distribution as T SPRT  
+
+> i
+
+, defined in (8), and the probability of identifying stream i as signal or noise is the same as that of the SPRT in (8), i.e., 
+
+PB (i ∈ ˆD) = P B (DSPRT  
+
+> i
+
+= 1) ,
+
+PB (i / ∈ ˆD) = P B (DSPRT  
+
+> i
+
+= 0) ,
+
+where ˆD := ˆD( ˆTstop ). These observations provide the basis for the following result. 
+
+Theorem IV.1. For any a, b > 0 and B ⊆ [K], we have 
+
+PB ( ˆTstop < ∞) = 1 ,
+
+PB ( ˆD\B̸ = ∅) ≤ (K − | B|) e−a,
+
+PB (B\ ˆD̸ = ∅) ≤ | B| e−b.
+
+(22) 
+
+Therefore, for any α, β ∈ (0 , 1) we have ˆδ ∈ ∆( α, β ) if we set 
+
+a = |log α|+ log K, b = |log β|+ log K. (23) 
+
+Proof of Theorem IV.1: Fix a, b > 0 and B ⊆ [K].If ˆTstop = ∞, then there must be a stream i ∈ [K] from which the number of samples is ∞, but whose LLR is always between (−b, a ). The probability of this event is zero, since every stream has a non-zero drift. Thus, we have the first line of (22). Next, we only show the second line of (22) as the third one is similar. It is clear that { ˆD\B̸ = ∅} = {∃ i / ∈ B :
+
+i ∈ ˆD}. Thus, by the union bound, 
+
+PB ( ˆD\B̸ = ∅) ≤ X
+
+> i / ∈B
+
+PB (i ∈ ˆD)= X
+
+> i / ∈B
+
+PB (DSPRT  
+
+> i
+
+= 1) ≤ (K − | B|)e−a,
+
+where the last inequality is a well-known bound for the type-I error probability of the SPRT. It turns out that the proposed termination and detection times, not only guarantee the desired error control, but also asymptotically optimize the expected total sample size, irre-spective of the choice of the sampling rule. This asymptotic optimality result is based on the following theorem. 
+
+Theorem IV.2. For any a, b > 0, B ⊆ [K], r ≥ 1 and ϵ ∈
+
+(0 , 1) we have 
+
+EB [( ˆTstop )r ]
+
+≤ 2r−1 11 − ϵ
+
+X
+
+> i∈B
+
+aIi
+
++ X
+
+> i / ∈B
+
+bJi
+
+!! r
+
++ VB (r, ϵ )
+
+!
+
+. (24) 
+
+Proof: First, we observe that 
+
+ˆTstop = X
+
+> i∈[K]
+> Tstop
+
+X
+
+> m=1
+
+1{S(m) = i},
+
+and, in view of the previous remark, 
+
+EB [( ˆTstop )r ] = E B
+
+ X
+
+> i∈[K]
+
+T SPRT 
+
+> i
+
+ 
+
+> r
+
+ .
+
+According to Lemma C.2, for every ϵ ∈ (0 , 1) we have 
+
+T SPRT  
+
+> i
+
+≤
+
+
+
+aIi(1 − ϵ) + V+ 
+
+> i
+
+(ϵ), for i ∈ B, bJi(1 − ϵ) + V− 
+
+> i
+
+(ϵ), for i / ∈ B, 
+
+so 
+
+X
+
+> i∈[K]
+
+T SPRT  
+
+> i
+
+≤ 11 − ϵ
+
+X
+
+> i∈B
+
+aIi
+
++ X
+
+> i / ∈B
+
+bJi
+
+!
+
++ VB (ϵ), (25) where V+ 
+
+> i
+
+(ϵ), V− 
+
+> i
+
+(ϵ), VB (ϵ) are defined in (9)-(10). The de-sired result follows by the Cr -inequality, which states that 
+
+E[( X + Y )r ] ≤ 2r−1(E[ Xr ] + E[ Y r ]) 
+
+for any non-negative random variables X, Y and r ≥ 1.
+
+Corollary IV.1. Suppose the thresholds a, b selected so that 
+
+ˆδ ∈ ∆( α, β ) for all α, β ∈ (0 , 1) and a ∼ | log α|, b ∼ | log β|6
+
+as α, β → 0, e.g., as in (23) . Then, for any B ⊆ [K] and 
+
+|B|< k ≤ K, as α, β → 0 we have 
+
+EB [ ˆTk ∧ ˆTstop ] ∼ J B,k (α, β ) ∼ J B (α, β ) ∼ EB [ ˆTstop ]
+
+∼ X
+
+> i∈B
+
+|log α|
+
+Ii
+
++ X
+
+> i / ∈B
+
+|log β|
+
+Ji
+
+(26) 
+
+and 
+
+(E B [( ˆTstop )r ]) 1/r = O(a ∨ b) for all r ≥ 1. (27) 
+
+Proof: Fix B ⊆ [K] and |B|< k ≤ K. Note that VB (r, ϵ )
+
+is finite for all r ≥ 1 and ϵ ∈ (0 , 1) based on Lemma C.3. Letting first a, b → ∞ and then ϵ → 0 in (24), we have 
+
+(E B [( ˆTstop )r ]) 1/r ≲ 21−1/r X
+
+> i∈B
+
+aIi
+
++ X
+
+> i / ∈B
+
+bJi
+
+!
+
+= O(a ∨ b).
+
+Setting r = 1 and comparing with the asymptotic lower bound in (16) proves (26). 
+
+B. The sampling rule 
+
+We established that, given the detection/termination times in the previous subsection, the choice of the sampling rule does not affect the asymptotic attainment of the optimal expected 
+
+total sample size . However, the sampling rule is critical for the quick detection of signals, and the lower bounds in (13) can provide useful insights for its design. Indeed, these bounds suggest that one should first sample the easiest signal until its detection, then the second easiest signal until its detection, etc., where the difficulty level is quantified by the “signal KL divergences”, that is, the KL divergences of the signal distributions against the noise distributions. Since we do not know a priori which streams are signals, we order all streams 
+
+according to their signal KL divergences, and switch sampling when there is weak evidence that the current stream is a signal. Specifically, we first order the streams in the decreasing order of their signal KL divergences, i.e., without loss of generality, assume I1 ≥ I2 ≥ · · · ≥ IK . We first sample stream 1 until its LLR either exceeds the detection threshold 
+
+a > 0 or is below a non-positive threshold −b′ ≤ 0, which is not smaller than the one used for the identification of noises, i.e., b ≥ b′. In the former case stream 1 is identified as a signal, and in the latter no call is made, and we repeat the same process for streams 2, . . . , K . In other words, the proposed sampling rule satisfies 
+
+ˆS(n) := i for i ∈ [K] and τi−1 < n ≤ τi, (28) where τ0 := 0 and 
+
+τi := inf {n > τ i−1 : λ ˆSi (n) /∈ (−b′, a )} for i ∈ [K]. (29) To understand the role of the tuning parameter b′, it is useful to consider its two extreme cases, b′ = b and b′ = 0 .If b′ = b, then the proposed sampling rule, combined with the detection times in (17) and the termination time in (20), leads to the following procedure: keep sampling stream 1 until a decision is made for it, then do the same for stream 2, . . . , K .This procedure is going to be very efficient when the true signals are the ones with the largest signal KL numbers, i.e., when B = {1, . . . , |B|} . However, it can be very inefficient otherwise. Indeed, if for example B = {K}, then it will identify all noise streams before even starting to sample the signal stream. If b′ = 0 , then sampling moves to the next stream once the LLR of the current stream becomes negative. However, there is a constant, positive probability for the LLR to take negative values with the first sample. This means that there is always a positive, bounded from zero, probability of detecting more difficult signal streams before easier ones. To sum up, setting b′ = b is a non-robust choice with respect to the unknown subset of signals, and setting b′ = 0 does not guarantee sufficient exploration in identifying the easiest signals. The following theorem provides a resolution to this trade-off. 
+
+Theorem IV.3. Suppose the sampling rule ˆS satisfies (28) -
+
+(29) , where 0 ≤ b′ ≤ b. Fix ϵ ∈ (0 , 1) . For any B ⊆ [K] and 
+
+1 ≤ k ≤ | B| we have 
+
+EB [ ˆTk ∧ ˆTstop ] ≤ 11 − ϵ
+
+> k
+
+X
+
+> i=1
+
+aI(i)(B) + VB (1 , ϵ )+ O(b′) + O(a ∨ b) · O(e−a∧b′
+
+).
+
+(30) 
+
+Proof: See Appendix B. 
+
+Remark 2. If b = O(a), then the higher-order term in (30), omitting multiplicative constants, is b′ + ae −b′
+
+. Thus, a rate-optimal selection of b′ is Θ(log a). This agrees with our intuition that b′ should be closer to 0 than b.Combining Theorem III.1 and IV.3, next corollary follows. 
+
+Corollary IV.2. Suppose the sampling rule ˆS satisfies (28) -
+
+(29) , and the thresholds a, b > 0 are selected so that ˆδ ∈
+
+∆( α, β ) for all α, β ∈ (0 , 1) and a ∼ | log α|, b ∼ | log β| as 
+
+α, β → 0, e.g., as in (23) . Moreover, suppose b′ is selected so that 0 < b ′ < b and b′ → ∞ , b′ = o(a) as α, β → 0. Then, for any B ⊆ [K] and 1 ≤ k ≤ | B| we have 
+
+EB [ ˆTk ∧ ˆTstop ] ∼ J B,k (α, β ) ∼
+
+> k
+
+X
+
+> i=1
+
+|log α|
+
+I(i)(B) ,
+
+as α, β → 0 so that |log β|= O(|log α|).Proof of Corollary IV.2: Fix B ⊆ [K] and 1 ≤ k ≤ | B|.Letting first a, b, b ′ → ∞ so that b = O(a) and b′ = o(a) and then ϵ → 0 in (30), we have 
+
+EB [ ˆTk ∧ ˆTstop ] ≲
+
+> k
+
+X
+
+> i=1
+
+aI(i)(B) .
+
+Comparing with the asymptotic lower bounds in (15) com-pletes the proof. 
+
+C. How to sample in Phase II 
+
+We have established the desired asymptotic optimality prop-erties by specifying the sampling rule up to time τK , defined in (29). We refer to [0 , τ K ] as Phase I of our sampling rule. At 
+
+τK , each LLR is either above a or below −b′. In the former case, the stream has been identified as a signal. In the latter, 7
+
+it will have been identified as a noise only if its LLR is also smaller than −b. Thus, the subset of active signals at time τK ,
+
+ˆA(τK ), is in general non-empty, and we will need to continue their sampling. We refer to this as Phase II of our sampling rule. While this choice does not affect asymptotic optimality, it can have a significant impact on the actual performance. Since we are interested in the quick detection of all signals, a natural approach is to prioritize sampling the (possibly weak) signals that we may have failed to identify in Phase I. For this, we propose sampling at each time instant the stream with the largest LLR, i.e., 
+
+ˆS(n) := arg max  
+
+> i∈ˆA(n−1)
+
+λ ˆSi (n − 1) for n > τ K . (31) In this way, streams with positive drift will be prioritized over streams with negative drift. We refer to this sampling rule as “follow-the-leader”. A number of other options are available. For example, an alternative approach may be to sample at each time instant the active stream whose LLR has the largest absolute value, i.e., 
+
+ˆS(n) := arg max  
+
+> i∈ˆA(n−1)
+
+|λ ˆSi (n − 1) | for n > τ K ,
+
+in order to identify all remaining streams as quickly as possi-ble, so that the number of undetermined streams will reduce fast. If it is desirable to reduce the number of switchings, then we may simply sample at each time instant “in-order”, that is, the active stream with the smallest index: 
+
+ˆS(n) := min { ˆA(n − 1) } for n > τ K ,
+
+Here, we follow the convention that if there are multiple maximizers or minimizers, the arg max and arg min oper-ators return the smallest index of the maximizers and mini-mizers, respectively. A pseudocode of the whole procedure is presented in Algorithm 1. 
+
+D. An alternative sampling rule 
+
+An alternative to the proposed sampling rule is to always 
+
+“follow-the-leader”: 
+
+ˇS(n) := arg max  
+
+> i∈ˇA(n−1)
+
+λ ˇSi (n − 1) for every n > 1. (32) This rule was proposed in (Cohen and Zhao, 2015a, Section IV.B). It coincides with the proposed one if the exploration threshold b′ in Phase I is set to 0 (recall (29)), and the sampling rule (31) is applied in Phase II. As we discussed in Subsection IV-B, this procedure is prone to missing easily-detectable signals. However, it is worth pointing out that it is asymptotically efficient for the detection of all signals . Indeed, it achieves the infimum in (4) for k = |B|. To show this, we rely on the following upper bound, whose proof is based on (Cohen and Zhao, 2015a, Section IV.B). To distinguish this procedure from our proposed one, we denote its components with a check symbol ˇ·.
+
+Theorem IV.4. Suppose the sampling rule ˇS is given by (32) ,and the detection times { ˇTk : k ∈ [K]} and the termination time ˇTstop by (17) -(20) . For any non-empty set B ⊆ [K] we have 
+
+EB [ ˇT|B| ∧ ˇTstop ] ≲ X
+
+> i∈B
+
+aIi
+
+, (33) 
+
+as a, b → ∞ so that b = O(a).Proof: See Appendix B. Combining Theorem III.1 and IV.4, the next corollary follows. 
+
+Corollary IV.3. Suppose the thresholds a, b > 0 are selected so that ˇδ ∈ ∆( α, β ) for all α, β ∈ (0 , 1) and a ∼ | log α|,
+
+b ∼ | log β| as α, β → 0, e.g., as in (23) . Then, for any non-empty B ⊆ [K] we have 
+
+EB [ ˇT|B| ∧ ˇTstop ] ∼ J B, |B|(α, β ) ∼ X
+
+> i∈B
+
+|log α|
+
+Ii
+
+as α, β → 0 so that |log β|= O(|log α|).Proof of Corollary IV.2: It suffices to compare the asymptotic lower bound in (13) with the asymptotic upper bound in (33), with a, b satisfying the conditions. V. N UMERICAL STUDIES 
+
+In this section, we present some numerical studies. First, we visualize the effect of parameter b′ on the performance of the proposed procedure. Then, we compare the performance of the proposed procedure with the “follow-the-leader” procedure in Section IV-D and the oracle procedure that applies an SPRT with thresholds a, b to the streams in the correct order, i.e., first signals in the non-increasing order of their KL divergences, then noises in any order. The data model is as follows: For each i ∈ [K], we assume that Xi are i.i.d. Gaussian, with unknown mean μi and unit variance, and the testing problem of interest is 
+
+μi = 0 versus μi = δi,
+
+for some δi > 0. We fix K = 10 , δ = ( δ1, . . . , δ 10 ) = (1 .5, 1.5, 1.25 , 1.25 , 1, 1, 0.75 , 0.75 , 0.5, 0.5) , and we set the true, unknown subset of signals as B = {2, 4, 6, 8, 10 }. Note that the streams are ordered in a non-increasing order of their KL divergences, and the true signals appear later than the true noises, which is a more difficult setup for the two practical procedures. We always use equal thresholds a = b.In Figure 1 we set a = b = 20 and plot the expected detection times and the expected termination time of the proposed procedure, i.e., EB [ ˆTk ∧ ˆTstop ] for k ∈ [K] and 
+
+EB [ ˆTstop ], against b′. Upper lines correspond to greater k, and the lines for EB [ ˆTk ∧ ˆTstop ], 5 = |B|< k ≤ K = 10 and for 
+
+EB [ ˆTstop ] basically overlap. Note that the best selection of b′
+
+slightly moves to the right as k ≤ | B|− 1 increases. A reason is that signals with smaller positive drifts are more likely to go below −b′ and be missed, so they require larger b′ to guarantee that they are sampled until detection in Phase I. Overall, the performance of the proposed procedure is quite insensitive to the selection of b′, and the rate-optimal selection, log( a),drawn as a vertical, dashed, gray line in Figure 1, is quite 8
+
+Fig. 1: Expected detection times of the proposed procedure, i.e., Ek[ ˆTk ∧ ˆTstop ] for k ∈ [K], against b′. Curves from bottom to top: k = 1 , ..., k = 5 and k = 6 , 7, 8, 9, 10 which basically overlap. The vertical, dashed, gray line: the value of log( a).reasonable. Thus, we adopt this selection when comparing with other procedures in the next numerical study. In Figure 2 we compare the three procedures. The six subfigures from left to right and from top to bottom correspond to EB [Tk ∧ Tstop ] for k = 1 , ..., k = 5 and k = 6 , 7, 8, 9, 10 ,where the last subfigure also correspond to EB [Tstop ]. The three lines of three different colors correspond to the three procedures, as shown in the legend of the first subfigure. We can see that the proposed procedure outperforms the “follow-the-leader” procedure significantly for 1 ≤ k ≤ | B|− 1 = 4 ,and slightly underperforms for k = |B|= 5 . The latter is reasonable, because in order to minimize the expected time until detecting all signals, exploration is not necessary. All procedures perform basically the same for k ≥ | B|+1 and for the expected time until termination, which are equal to the sum of the K SPRTs. In Figure 3, we plot the expected detection times of the proposed procedure and the ratios of the expected detection times of the proposed procedure divided by those of the oracle procedure, against thresholds. We can see that the former are basically linear in the thresholds, and the latter converge to one, corroborating the asymptotic optimality theory. VI. C ONCLUSION AND FUTURE DIRECTIONS 
+
+In this work, we propose and solve an active signal detection problem, where multiple independent data streams are present, only one can be observed at every time instant, and the goal is to minimize not only the expected total sample size, but also the expected time until the kth detection for every k,while controlling the two types of familywise error rates below 
+
+Fig. 2: Expected detection times of the three procedures against thresholds a = b. The three lines correspond to the three procedures, as shown in the legend of the first subfigure. The six subfigures, from left to right and from top to bottom, correspond to, k = 1 , ... k = 5 , and k = 6 , 7, 8, 9, 10 .
+
+Fig. 3: Expected detection times of the proposed procedure (left) and expected detection times of the proposed procedure divided by those of the oracle procedure (right), against thresholds a = b.9
+
+arbitrary, user-specified levels. Next, we discuss some potential extensions of this work. In this work, we postulate two simple hypotheses for every stream. As a result, we can order the streams, as in Section IV-B, in terms of their detection difficulty (as if they are true signals). The extension to unknown signal and noise distributions is a very interesting one. Such a problem is studied in Hemo et al. (2020), where a “follow-the-leader” approach (in the spirit of Section IV-D) is studied, under the assumption that it is a priori known that there is exactly one signal. With possibly multiple signals, this procedure will be efficient in detecting all signals, but poor in detecting easier ones, similarly to the phenomenon in this work. Some references in this direction include Garivier and Kaufmann (2016); Deshmukh et al. (2021). Other directions of interest include the case where it is possible to sample multiple streams at a time, and/or there is prior information regarding the number of signals (Cohen and Zhao, 2015a; Tsopelakos and Fellouris, 2023; Xing and Fellouris, 2025). In both cases, a procedure that minimizes the same set of objective functions as in the present work does not seem to exist in general, and a new problem formulation is needed. Finally, another direction is to consider dependent streams and/or non-i.i.d. data within streams. Without the assumption of independence across streams and/or the assumption of i.i.d. within streams, many derivations in the current work fail. Nitinawarat and Veeravalli (2015); Xing and Fellouris (2024) and Chaudhuri and Fellouris (2024) are some possible references. APPENDIX ALIKELIHOOD RATIOS 
+
+For any sampling rule S, two subsets B, C ⊆ [K] and time 
+
+n ≥ 1, we denote by λSB,C (n) the log-likelihood ratio between 
+
+PB and PC based on the observations collected by S up to time n. Based on the i.i.d. assumption within streams and independent assumption across streams, this can be written as 
+
+λSB,C (n) := λSB,C (n − 1) + X
+
+> i∈B\C
+
+log 
+
+ gi(Xi(n)) 
+
+fi(Xi(n)) 
+
+
+
+1{S(n) = i}− X
+
+> i∈C\B
+
+
+
+log gi(Xi(n)) 
+
+fi(Xi(n)) 
+
+
+
+1{S(n) = i},
+
+with λSB,C (0) := 0 . Recalling the statistics λSi (n), i ∈ [K]
+
+defined in (6), it follows that 
+
+λSB,C (n) = X
+
+> i∈B\C
+
+λSi (n) − X
+
+> i∈C\B
+
+λSi (n),
+
+which reveals that λSB,C (n) reduces to λSi (n) when B = {i}
+
+and C = ∅ and reduces to −λSi (n) when B = ∅ and C = {i}.We also note that for any sampling rule S and any B, C ⊆
+
+[K] the sequence 
+
+λSB,C (n) − X
+
+> i∈B\C
+
+IiN Si (n) − X
+
+> i∈C\B
+
+JiN Si (n), n ≥ 0
+
+is an FS -martingale with mean zero under PB , where 
+
+N Si (n) := 
+
+> n
+
+X
+
+> m=1
+
+1{S(m) = i}
+
+denotes the number of times stream i is sampled up to time n.As a result, for any PB -integrable FS -stopping time T , by the optional stopping theorem (see, e.g., Chapter 13.2 of Athreya and Lahiri (2006)) we have 
+
+EB [λSB,C (T )] = X
+
+> i∈B\C
+
+Ii EB [N Si (T )] + X
+
+> i∈C\B
+
+Ji EB [N Si (T )] . (34) Besides, by the information-theoretical lower bound in Lemma 3.2.1 of Tartakovsky et al. (2003), the following holds for any 
+
+FS (T )-measurable event Γ:
+
+EB [λSB,C (T )] ≥ d(P B (Γ) , PC (Γ c)) , (35) where d(·, ·) has been defined in (11) and Γc represents the complement of Γ. In addition, since only one stream is sampled at each time instant, we have 
+
+ EB [N Si (T )] EB [T ] , i ∈ [K]
+
+
+
+∈ WK , (36) where WK := {(w1, . . . , w K ) ∈ [0 , 1] K : w1 + · · · + wK = 1 }
+
+denotes all discrete probability distributions on [K].APPENDIX BPROOFS OF MAIN RESULTS 
+
+Proof of Theorem III.1: Fix α, β ∈ (0 , 1) so that 
+
+α + β < 1, δ ∈ ∆( α, β ), and B ⊆ [K]. In what follows, we always assume that the stopping time under consideration is PB -integrable, because otherwise the lower bound holds trivially. 1) Suppose B̸ = ∅ and fix 1 ≤ k ≤ | B|. Let C ⊆ B so that 
+
+|C|≤ k − 1. By (34) with T = Tk ∧ Tstop we have 
+
+EB [λSB,C (Tk ∧ Tstop )] = E B [Tk ∧ Tstop ] X
+
+> i∈B\C
+
+Ii
+
+EB [N Si (Tk ∧ Tstop )] EB [Tk ∧ Tstop ] .
+
+Meanwhile, since Tk and Tstop are FS -stopping times, we have 
+
+{Tk > T stop } ∈ F S (Tk ∧ Tstop ) and by (35) we have 
+
+EB
+
+λSB,C (Tk ∧ Tstop ) ≥ d(P B (Tk > T stop ), PC (Tk ≤ Tstop )) .
+
+Event {Tk > T stop } implies that the total number of detections is less than k and {Tk ≤ Tstop } implies that the total number of detections is at least k. Since |C|< k ≤ | B|, when the true subset of signals is B the former event makes at least one type-II error and when the true subset of signals is C the latter event makes at least one type-I error. Thus, PB (Tk > T stop ) ≤ β
+
+and PC (Tk ≤ Tstop ) ≤ α. Moreover, the function d(x, y ) is decreasing in both arguments when x, y ∈ (0 , 1) and x+y < 1.Thus, we conclude that 
+
+d(P B (Tk > T stop ), PC (Tk ≤ Tstop )) ≥ d(β, α ).10 
+
+Combining the previous three results, taking the worst case over C and recalling (36) we conclude that 
+
+EB [Tk ∧ Tstop ] ≥ d(β, α )sup 
+
+> w∈WK
+
+inf 
+
+> C⊆B:|C|≤ k−1
+
+P
+
+> i∈B\C
+
+wiIi
+
+.
+
+Note that the summation in the denominator decreases with the size of C, so it is equal to 
+
+sup 
+
+> w∈WB
+
+inf 
+
+> C⊆B:|C|=k−1
+
+X
+
+> i∈B\C
+
+wiIi
+
+= sup 
+
+> w∈WB
+
+inf 
+
+> C⊆B:|C|=|B|− k+1
+
+X
+
+> i∈C
+
+wiIi =
+
+> k
+
+X
+
+> i=1
+
+1
+
+I(i)(B)
+
+!−1
+
+,
+
+where the second equality follows from Lemma C.1. (2) We now let B̸ = [ K] and fix |B|+1 ≤ k ≤ K. For any 
+
+C ⫋ B, by (34) we have 
+
+EB [λSB,C (Tk ∧ Tstop )] = E B [Tk ∧ Tstop ] X
+
+> i∈B\C
+
+Ii
+
+EB [N Si (Tk ∧ Tstop )] EB [Tk ∧ Tstop ] ,
+
+and 
+
+EB [λSB,C (Tk ∧ Tstop )] 
+
+≥ d(P B (T|B| > T k ∧ Tstop ), PC (T|B| ≤ Tk ∧ Tstop )) = d(P B (T|B| > T stop ), PC (T|B| ≤ Tstop )) ≥ d(β, α ),
+
+where the first step is because 
+
+{T|B| > T k ∧ Tstop } ∈ F S (T|B| ∧ Tk ∧ Tstop ) ⊆ F S (Tk ∧ Tstop ),
+
+the second because, since T|B| ≤ Tk,
+
+{T|B| > T k ∧ Tstop } = {T|B| > T k or T|B| > T stop }
+
+= {T|B| > T stop },
+
+{T|B| ≤ Tk ∧ Tstop } = {T|B| ≤ Tk and T|B| ≤ Tstop }
+
+= {T|B| ≤ Tstop },
+
+and the third because at least one type-II error is made when the true number of signals is |B| but T|B| > T stop , and at least one type-I error is made when the true number of signals is 
+
+|C|< |B| but T|B| ≤ Tstop .Similarly, for any B ⫋ C we have 
+
+EB [λSB,C (Tk ∧ Tstop )] = E B [Tk ∧ Tstop ] X
+
+> i∈C\B
+
+Ji
+
+EB [N Si (Tk ∧ Tstop )] EB [Tk ∧ Tstop ] ,
+
+and 
+
+EB [λSB,C (Tk ∧ Tstop )] 
+
+≥ d(P B (T|B|+1 ≤ Tk ∧ Tstop ), PC (T|B|+1 > T k ∧ Tstop )) = d(P B (T|B|+1 ≤ Tstop ), PC (T|B|+1 > T stop )) ≥ d(α, β ).
+
+Combining the two lower bounds, we have 
+
+EB [Tk ∧ Tstop ] ≥ inf 
+
+> w∈WK
+
+max 
+
+
+
+d(β, α )inf  
+
+> i∈B
+
+wiIi
+
+, d(α, β )inf  
+
+> i / ∈B
+
+wiJi
+
+ .
+
+This infimum is achieved when all of {d(β, α )/w iIi : i ∈ B}
+
+and {d(α, β )/w iJi, i / ∈ B} are equal. Subject to the constraint that w ∈ WK , the desired lower bound can be computed. 
+
+Proof of Theorem IV.3: Fix B ⊆ [K], a > 0, 0 ≤ b′ ≤ b,
+
+ϵ ∈ (0 , 1) and 1 ≤ k ≤ | B|. Let Γ denote the event that the detected signals at time τK are those in B, that is, 
+
+Γ := { ˆD(τK ) = B}.
+
+We decompose 
+
+ˆTk ∧ ˆTstop = ˆTk ∧ ˆTstop · 1{Γ} + ˆTk ∧ ˆTstop · 1{Γc}≤ ˆTk · 1{Γ} + ˆTstop · 1{Γc}. (37) We start with the first term. For convenience, we denote by 
+
+Bk the subset of streams in B with the smallest k indices. Formally, Bk := {l ∈ B : l ≤ ik(B)}, where ik(B) is the kth 
+
+smallest index in B. Moreover, we denote by B′ 
+
+> k
+
+the subset of streams in Bc whose indices do not exceed ik(B), that is, B′ 
+
+> k
+
+:= {l ∈ Bc : l ≤ ik(B)}. Then, on the event Γ, the streams that have been sampled up to time ˆTk are those in Bk
+
+and B′
+
+> k
+
+, and 
+
+ˆTk = X
+
+> i∈Bk
+
+(inf {n ≥ τi−1 + 1 : λSi (n) ≥ a} − τi−1)+ X
+
+> i∈B′
+> k
+
+(inf {n ≥ τi−1 + 1 : λSi (n) ≤ − b′} − τi−1),
+
+which has the same distribution under PB as 
+
+X
+
+> i∈Bk
+
+inf {n ≥ 1 : λi(n) ≥ a} + X
+
+> i∈B′
+> k
+
+inf {n ≥ 1 : λi(n) ≤ − b′}.
+
+Based on Lemma C.2, this is upper bounded by 
+
+X
+
+> i∈Bk
+
+ aIi
+
+· 11 − ϵ + V+ 
+
+> i
+
+(ϵ)
+
+
+
++ X
+
+> i∈B′
+> k
+
+ b′
+
+Ji
+
+· 11 − ϵ + V− 
+
+> i
+
+(ϵ)
+
+
+
+≤
+
+> k
+
+X
+
+> i=1
+
+aI(i)(B) + X
+
+> i / ∈B
+
+b′
+
+Ji
+
+!
+
+· 11 − ϵ + VB (ϵ).
+
+Thus, 
+
+EB [ ˆTk · 1{Γ}]
+
+≤
+
+> k
+
+X
+
+> i=1
+
+aI(i)(B) + X
+
+> i / ∈B
+
+b′
+
+Ji
+
+!
+
+· 11 − ϵ + VB (1 , ϵ ).
+
+We continue with the second term in (37). By H¨ older’s inequality, for any r > 1,
+
+EB [ ˆTstop · 1{Γc}] ≤
+
+
+
+EB [( ˆTstop )r ]
+
+1/r 
+
+PB (Γ c).
+
+By (27) we know that (E B [( ˆTstop )r ]) 1/r = O(a ∨ b) for all 
+
+r ≥ 1. It remains to upper bound PB (Γ c). Note that 
+
+Γc = [
+
+> i∈B
+
+{i / ∈ ˆD(τK )} ∪ [
+
+> i / ∈B
+
+{i ∈ ˆD(τK )}.
+
+By the union bound we have 
+
+PB (Γ c) ≤ X
+
+> i∈B
+
+PB (i / ∈ ˆD(τK )) + X
+
+> i / ∈B
+
+PB (i ∈ ˆD(τK )) .11 
+
+For i ∈ B we have 
+
+PB (i / ∈ ˆD(τi)) = P B (DSPRT  
+
+> i
+
+= 0) ≤ e−b′
+
+,
+
+and for i / ∈ B we have 
+
+PB (i ∈ ˆD(τi)) = P B (DSPRT  
+
+> i
+
+= 1) ≤ e−a.
+
+Therefore, 
+
+PB (Γ c) ≤ | B|e−b′
+
++ ( K − | B|)e−a ≤ Ke −a∧b′
+
+.
+
+Combining the above results, the desired upper bound in (30) follows. 
+
+Proof of Theorem IV.4: For any 1 ≤ k ≤ | B| we have 
+
+ˇTk ∧ ˇTstop = ˇTk ∧ ˇTstop · 1{ ˇD = B} + ˇTk ∧ ˇTstop · 1{ ˇD̸ = B}≤ ˇTdet + ˇTstop · 1{ ˇD̸ = B},
+
+where ˇTdet := max { ˇTk : ˇTk ≤ ˇTstop , k ∈ [K]}.
+
+By H¨ older’s inequality, for any r > 1,
+
+EB [ ˇTk ∧ ˇTstop ] ≤ EB [ ˇTdet ] +  EB [( ˇTstop )r ]1/r PB ( ˇD̸ = B).
+
+From (Cohen and Zhao, 2015a, Section IV.B) we know 
+
+EB [ ˇTdet ] ≲ X
+
+> i∈B
+
+aIi
+
+as a, b → ∞ so that b = O(a).
+
+Similarly to the proof of Theorem IV.3 and Theorem IV.1, we have 
+
+(E B [( ˇTstop )r ]) 1/r = O(a ∨ b) as a, b → ∞ ,
+
+PB ( ˇD̸ = B) ≤ | B|e−b + ( K − | B|)e−a ≤ Ke −a∧b.
+
+The desired result follows after plugging in. APPENDIX CSUPPORTING LEMMAS 
+
+Lemma C.1. Let {Ii, i ∈ [K]} be K ≥ 1 non-increasingly ordered positive real numbers, i.e., I1 ≥ · · · ≥ IK > 0. Then, for any i ∈ [K],
+
+sup 
+
+> w∈WK
+
+inf  
+
+> C⊆[K]: |C|=k
+
+X
+
+> i∈C
+
+wiIi = 11/I 1 + · · · + 1 /I K−k+1 
+
+,
+
+which is attained by 
+
+wi =
+
+
+
+1/I i
+
+1/I 1 + · · · + 1 /I K−k+1 
+
+, for 1 ≤ i ≤ K − k + 1 ,
+
+0, for K − k + 2 ≤ i ≤ K. 
+
+Proof: We have 
+
+sup 
+
+> w∈WK
+
+inf  
+
+> C⊆[K]: |C|=k
+
+X
+
+> i∈C
+
+wiIi
+
+= sup  
+
+> w∈W′
+> K
+
+inf  
+
+> C⊆[K]: |C|=k
+
+X
+
+> i∈C
+
+wiIi = sup  
+
+> w∈W′
+> K
+> K
+
+X
+
+> i=K−k+1
+
+wiIi,
+
+= sup  
+
+> w∈W′′
+> K
+
+(
+
+wK−k+1 IK−k+1 
+
+)
+
+= sup  
+
+> w∈W′′′
+> K
+
+(
+
+w1I1
+
+)
+
+= 11/I 1 + · · · + 1 /I K−k+1 
+
+,
+
+where 
+
+W ′ 
+
+> K
+
+:= {w ∈ WK : w1I1 ≥ · · · ≥ wK IK },W ′′  
+
+> K
+
+= {w ∈ W ′ 
+
+> K
+
+: wK−k+2 = · · · = wK = 0 },W ′′′  
+
+> K
+
+= {w ∈ W ′′  
+
+> K
+
+: w1I1 = . . . = wK−k+1 IK−k+1 }.
+
+The first equality says that the supremum can always be attained by a w ∈ WK such that w1I1 ≥ · · · ≥ wK IK . To show this, it suffices to show that for any w ∈ WK that does not satisfy this property, we can find a w′ ∈ WK that does and does not decrease the value of the objective function. Indeed, suppose that wiIi < w j Ij for some 1 ≤ i < j ≤ K, and consider w′ := ( w′
+
+> 1
+
+, . . . , w ′ 
+
+> K
+
+) ∈ [0 , 1] K , where w′ 
+
+> i
+
+= wj Ij /I i,
+
+w′ 
+
+> j
+
+= wiIi/I j and w′ 
+
+> i′
+
+= wi′ for all i′ ∈ [K]\{ i, j }.Note that w′ indeed belongs to [0 , 1] K , since w′ 
+
+> i
+
+≤ wj and 
+
+w′ 
+
+> j
+
+< w j Ij /I j = wj , and satisfies w′ 
+
+> 1
+
++ · · · + w′ 
+
+> K
+
+≤ 1. To see the latter, it suffices to show that w′ 
+
+> i
+
++ w′ 
+
+> j
+
+≤ wi + wj ,or equivalently that wj Ij /I i + wiIi/I j ≤ wi + wj . This is equivalent to wiIi(Ii − Ij ) ≤ wj Ij (Ii − Ij ), which clearly holds since Ii ≥ Ij and wiIi < w j Ij . Meanwhile, the value of the objective function does not change, since w′
+
+> i
+
+Ii = wj Ij ,
+
+w′ 
+
+> j
+
+Ij = wiIi and w′ 
+
+> i′
+
+Ii′ = wi′ Ii′ for all i′ ∈ [K]\{ i, j }.Thus, by conducting this operation for a finite number of times (like a sorting algorithm), we reach a w′ ∈ [0 , 1] K with 
+
+w′
+
+> 1
+
+I1 ≥ · · · ≥ w′ 
+
+> K
+
+IK that leads to the same value for the objective function as w, and may not use up all the budget. Without loss of generality, putting all remaining budget onto 
+
+w′
+
+> 1
+
+, we obtain a w′ ∈ W ′ 
+
+> K
+
+whose value of the objective function is at least as good as that of w ∈ WK \W ′ 
+
+> K
+
+.The second equality says that for any w ∈ W ′ 
+
+> K
+
+the infimum is attained by the sum of the k smallest numbers in w1I1, . . . , w K IK , the ones with the largest indices. The third says that, since I1 ≥ . . . ≥ IK , it is optimal to kill the contribution of all terms in the sum apart from the first one, wK−k+1 IK−k+1 . In order to maximize this, since 
+
+w1I1 ≥ . . . ≥ wK−k+1 IK−k+1 , we need to set w1I1 = . . . =
+
+wK−k+1 IK−k+1 . This gives the fourth equality. Finally, since 
+
+w is a distribution, we obtain the last equality, that is, 
+
+1 = 
+
+> K
+
+X
+
+> i=1
+
+wi =
+
+> K−k+1
+
+X
+
+> i=1
+
+wi =
+
+> K−k+1
+
+X
+
+> i=1
+
+wiIi
+
+Ii
+
+= w1I1
+
+> K−k+1
+
+X
+
+> i=1
+
+(1 /I i).
+
+Lemma C.2. Let {Sk(n), n ≥ 1}, k ∈ [K] be K ≥ 1
+
+stochastic processes. Let a = ( a1, . . . , a K ) ∈ (0 , ∞)K and consider the stopping time 
+
+T (a) := inf {n ≥ 1 : Sk(n) ≥ ak for all k ∈ [K]} .
+
+Then, for any μ = ( μ1, . . . , μ K ) ∈ (0 , ∞)K and ϵ ∈ (0 , 1) ,
+
+T (a) ≤ max 
+
+> k∈[K]
+
+ ak
+
+μk
+
+
+
+· 11 − ϵ + max  
+
+> k∈[K]
+
+Vk(μk, ϵ ),
+
+where 
+
+Vk(μk, ϵ ) := sup {n ≥ 1 : Sk(n)/n ≤ μk(1 − ϵ)} + 1 .
+
+Proof: Fix μ ∈ (0 , ∞)K and ϵ ∈ (0 , 1) , and set 
+
+Γ( a, ϵ ) := 
+
+
+
+T (a) > max  
+
+> k∈[K]
+
+Vk(μk, ϵ )
+
+
+
+.12 
+
+On the event of Γ( a, ϵ ) we have 
+
+Sk(T (a) − 1) 
+
+T (a) − 1 > μ k(1 − ϵ) for all k ∈ [K],
+
+and 
+
+Sk(T (a) − 1) < a k for some k ∈ [K],
+
+so 
+
+(T (a) − 1) μk(1 − ϵ) < S k(T (a) − 1) < a k, ∃ k ∈ [K],T (a) < ak
+
+μk
+
+· 11 − ϵ + 1 for some k ∈ [K],
+
+i.e., 
+
+T (a) < max 
+
+> k∈[K]
+
+ ak
+
+μk
+
+
+
+· 11 − ϵ + 1 .
+
+Therefore, 
+
+T (a) = T (a) · 1{Γ( a, ϵ )} + T (a) · 1{Γ( a, ϵ )c}≤ max 
+
+> k∈[K]
+
+ ak
+
+μk
+
+
+
+· 11 − ϵ + max  
+
+> k∈[K]
+
+Vk(μk, ϵ ).
+
+Lemma C.3. Let f, g be two densities with respect to σ-finite measure ν and assume that I := R g log gf dν ∈ (0 , ∞). Let 
+
+{X(n), n ≥ 1} be a sequence of i.i.d. random variables and denote by {λ(n) := Pni=1 log g(X(i))   
+
+> f(X(i))
+
+, n ≥ 1} the sequence of log-likelihood ratios. Let P and E be the probability measure and expectation when the common density of {X(n), n ≥ 1}
+
+with respect to ν is g. Then, for any x < I , we have 
+
+P( λ(n)/n ≤ x) ≤ e−nψ (x), (38) 
+
+and 
+
+E [sup {n ≥ 1 : λ(n)/n ≤ x}r ] < ∞ for all r ≥ 1, (39) 
+
+where 
+
+ψ(x) := sup 
+
+> θ≤0
+
+
+
+θx − log 
+
+Z 
+
+g1+ θ f −θ dν 
+
+ 
+
+, x ≤ I
+
+is finite, convex and strictly decreasing at least in [0 , I ] with 
+
+ψ(I) = 0 and ψ(0) := C > 0 known as the Chernoff information between f and g.Proof: Inequality (38) is known as the Chernoff bound. This and the properties of function ψ(·) can be found, e.g., in (Dembo and Zeitouni, 1998, Chapter 3.4)). Next, we show inequality (39). Indeed, for any r ≥ 1 and x < I , we have 
+
+E[sup {t ≥ 1 : λ(t)/t ≤ x}r ]
+
+≤ 1
+
+r
+
+> ∞
+
+X
+
+> n=1
+
+nr−1P(sup {t ≥ 1 : λ(t)/t ≤ x} ≥ n)= 1
+
+r
+
+> ∞
+
+X
+
+> n=1
+
+nr−1P ( ∃ m ≥ n : λ(m)/m ≤ x)
+
+≤ 1
+
+r
+
+> ∞
+
+X
+
+> n=1
+
+nr−1
+
+> ∞
+
+X
+
+> m=n
+
+P( λ(m)/m ≤ x)= 1
+
+r
+
+> ∞
+
+X
+
+> m=1
+> m
+
+X
+
+> n=1
+
+nr−1
+
+!
+
+P( λ(m)/m ≤ x)
+
+≤ 1
+
+r
+
+> ∞
+
+X
+
+> m=1
+
+(m + 1) r
+
+r e−mψ (x) < ∞,
+
+where in the first inequality we used the inequality that 
+
+E[ Zr ] ≤ 1
+
+> r
+
+P∞ 
+
+> n=1
+
+nr−1P( Z ≥ n) for non-negative, integer-valued random variable Z.REFERENCES 
+
+Almogi-Nadler, M., Y. Oshman, and J. Z. Ben-Asher (2004). Boost-phase identification of theater ballistic missiles using radar measurements. Journal of Guidance, Control, and Dynamics 27 (2), 197–208. Athreya, K. B. and S. N. Lahiri (2006). Measure theory and probability theory , Volume 19. Springer. Bartroff, J. and T. L. Lai (2010). Multistage tests of multiple hypotheses. Communications in Statistics - Theory and Methods 39 (8-9), 1597–1607. Bartroff, J., T. L. Lai, and M.-C. Shih (2012). Sequential ex-perimentation in clinical trials: design and analysis , Volume 298. Springer Science & Business Media. Bartroff, J. and J. Song (2014). Sequential tests of multiple hypotheses controlling type i and ii familywise error rates. 
+
+Journal of Statistical Planning and Inference 153 , 100–114. Chandola, V., A. Banerjee, and V. Kumar (2009). Anomaly de-tection: A survey. ACM Computing Surveys (CSUR) 41 (3), 1–58. Chaudhuri, A. and G. Fellouris (2024). Joint sequential detection and isolation for dependent data streams. The Annals of Statistics 52 (5), 1899–1926. Chaudhuri, A., G. Fellouris, and A. Tajer (2024). Round robin active sequential change detection for dependent multi-channel data. IEEE Transactions on Information Theory 70 (12), 9327–9351. Cohen, K. and Q. Zhao (2015a). Active hypothesis testing for anomaly detection. IEEE Transactions on Information Theory 61 (3), 1432–1450. Cohen, K. and Q. Zhao (2015b). Asymptotically optimal anomaly detection via sequential testing. IEEE Transactions on Signal Processing 63 (11), 2929–2941. Cohen, K., Q. Zhao, and A. Swami (2014). Optimal index poli-cies for anomaly localization in resource-constrained cyber systems. IEEE Transactions on Signal Processing 62 (16), 4224–4236. De, S. K. and M. Baron (2012a). Sequential bonferroni methods for multiple hypothesis testing with strong control of family-wise error rates i and ii. Sequential Analysis 31 (2), 238–262. De, S. K. and M. Baron (2012b). Step-up and step-down meth-ods for testing multiple hypotheses in sequential experi-ments. Journal of Statistical Planning and Inference 142 (7), 2059–2070. Dembo, A. and O. Zeitouni (1998). Large Deviations Tech-niques and Applications . Springer, Berlin, Heidelberg. Deshmukh, A., V. V. Veeravalli, and S. Bhashyam (2021). Sequential controlled sensing for composite multihypothesis testing. Sequential Analysis 40 (2), 259–289. Fellouris, G. and A. Tartakovsky (2013). Unstructured sequen-tial testing in sensor networks. In 52nd IEEE Conference on Decision and Control , pp. 4784–4789. IEEE. 13 
+
+Fellouris, G. and A. G. Tartakovsky (2017). Multichannel sequential detection—part i: Non-i.i.d. data. IEEE Transac-tions on Information Theory 63 (7), 4551–4571. Fournier-Viger, P., J. C.-W. Lin, R. U. Kiran, Y. S. Koh, and R. Thomas (2017). A survey of sequential pattern mining. 
+
+Data Science and Pattern Recognition 1 (1), 54–77. Gafni, T., B. Wolff, G. Revach, N. Shlezinger, and K. Cohen (2023). Anomaly search over discrete composite hypotheses in hierarchical statistical models. IEEE Transactions on Signal Processing 71 , 202–217. Garivier, A. and E. Kaufmann (2016). Optimal best arm identification with fixed confidence. In Conference on Learning Theory , pp. 998–1027. PMLR. Geng, J., W. Xu, and L. Lai (2016). Quickest sequential multiband spectrum sensing with mixed observations. IEEE Transactions on Signal Processing 64 (22), 5861–5874. Gurevich, A., K. Cohen, and Q. Zhao (2019). Sequential anomaly detection under a nonlinear system cost. IEEE Transactions on Signal Processing 67 (14), 3689–3703. Hemo, B., T. Gafni, K. Cohen, and Q. Zhao (2020). Searching for anomalies over composite hypotheses. IEEE Transac-tions on Signal Processing 68 , 1181–1196. Heydari, J., A. Tajer, and H. Vincent Poor (2016). Quickest linear search over correlated sequences. IEEE Transactions on Information Theory 62 (10), 5786–5808. Hilal, W., S. A. Gadsden, and J. Yawney (2022). Financial fraud: a review of anomaly detection techniques and recent advances. Expert systems With applications 193 , 116429. Huang, B., K. Cohen, and Q. Zhao (2018). Active anomaly detection in heterogeneous processes. IEEE Transactions on Information Theory 65 (4), 2284–2301. Lai, L., H. V. Poor, Y. Xin, and G. Georgiadis (2011). Quickest search over multiple sequences. IEEE Transactions on Information Theory 57 (8), 5375–5386. Lambez, T. and K. Cohen (2022). Anomaly search with multiple plays under delay and switching costs. IEEE Transactions on Signal Processing 70 , 174–189. Malloy, M. L. and R. D. Nowak (2014). Sequential testing for sparse recovery. IEEE Transactions on Information Theory 60 (12), 7862–7873. Malloy, M. L., G. Tang, and R. D. Nowak (2013). The sample complexity of search over multiple populations. IEEE Transactions on Information Theory 59 (8), 5039–5050. Nitinawarat, S., G. K. Atia, and V. V. Veeravalli (2013). Controlled sensing for multihypothesis testing. IEEE Trans-actions on automatic control 58 (10), 2451–2464. Nitinawarat, S. and V. V. Veeravalli (2015). Controlled sens-ing for sequential multihypothesis testing with controlled markovian observations and non-uniform control cost. Se-quential Analysis 34 (1), 1–24. Song, Y. and G. Fellouris (2017). Asymptotically optimal, sequential, multiple testing procedures with prior infor-mation on the number of signals. Electronic Journal of Statistics 11 (1), 338 – 363. Song, Y. and G. Fellouris (2019). Sequential multiple testing with generalized error control: An asymptotic optimality theory. The Annals of Statistics 47 (3), 1776 – 1803. Tartakovsky, A., I. Nikiforov, and M. Basseville (2014). 
+
+Sequential Analysis: Hypothesis Testing and Changepoint Detection (1st ed.). Chapman & Hall/CRC. Tartakovsky, A. G., X. R. Li, and G. Yaralov (2003). Se-quential detection of targets in multichannel systems. IEEE Transactions on Information Theory 49 (2), 425–445. Tsopelakos, A. and G. Fellouris (2023). Sequential anomaly detection under sampling constraints. IEEE Transactions on Information Theory 69 (12), 8126–8146. Tsopelakos, A. and G. Fellouris (2025). Sequential anomaly identification under sampling constraints for generalized error metrics. IEEE Transactions on Information The-ory 71 (12), 9753–9783. Uffelmann, E., Q. Q. Huang, N. S. Munung, J. De Vries, Y. Okada, A. R. Martin, H. C. Martin, T. Lappalainen, and D. Posthuma (2021). Genome-wide association studies. 
+
+Nature Reviews Methods Primers 1 (1), 59. Veeravalli, V., G. Fellouris, and G. Moustakides (2024). Quickest change detection with controlled sensing. IEEE Journal on Selected Areas in Information Theory 5 , 1–11. Wald, A. (1947). Sequential Analysis . New York: John Wiley & Sons. Xing, Y., A. Chaudhuri, and Y. Chen (2025). Signal detection under composite hypotheses with identical distributions for signals and for noises. arXiv preprint arXiv:2507.21692 .Xing, Y. and G. Fellouris (2023). Signal recovery with multistage tests and without sparsity constraints. IEEE Transactions on Information Theory 69 (11), 7220–7245. Xing, Y. and G. Fellouris (2024). Asymptotically optimal multistage tests for non-iid data. Statistica Sinica 34 , 2325– 2346. Xing, Y. and G. Fellouris (2025). Asymptotically optimal sequential multiple testing with asynchronous decisions. 
+
+Bernoulli 31 (1), 271–294. Xing, Y., S. Yan, and Z. Wang (2024). High-dimensional sequential testing of multiple hypotheses. In 2024 IEEE Information Theory Workshop (ITW) , pp. 384–389. Xu, Q. and Y. Mei (2023). Asymptotic optimality theory for active quickest detection with unknown postchange parameters. Sequential Analysis 42 (2), 150–181. Xu, Q., Y. Mei, and G. V. Moustakides (2021). Optimum multi-stream sequential change-point detection with sam-pling control. IEEE Transactions on Information The-ory 67 (11), 7627–7636.

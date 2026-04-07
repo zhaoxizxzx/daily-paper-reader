@@ -6,36 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-06
-- 运行时间：2026-04-06 20:01:39 UTC
+- 最新运行日期：2026-04-07
+- 运行时间：2026-04-07 19:52:47 UTC
 - 运行状态：成功
-- 本次总论文数：5
-- 精读区：1
-- 速读区：4
+- 本次总论文数：3
+- 精读区：0
+- 速读区：3
 
 ### 今日简报（AI）
-今日聚焦网络安全与AI调度，深度解析了超越传统基数估计的超级主机检测新范式。
-重点
-- 详情：[/202604/06/README](/202604/06/README)
+今日聚焦云端故障自动化管理与网络安全实验基座，速览 3 篇前沿技术论文。
+重点关注 ActionNex 提出的云端虚拟故障管理系统，以及 NetSecBed 带来的容器化可复现安全测试平台。
+建议关注云原生环境下的自动化运维工具与实验复现技术，提升系统稳定性与安全性。
+- 详情：[/202604/07/README](/202604/07/README)
 
 ### 精读区论文标签
-1. [Cardinality is Not Enough: Super Host Detection via Segmented Cardinality Estimation](/202604/06/2604.02379v1-cardinality-is-not-enough-super-host-detection-via-segmented-cardinality-estimation)  
-   标签：评分：10.0/10、query:netmes
-   evidence：基于Sketch的流基数估计与超级主机检测方法
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Towards Near-Real-Time Telemetry-Aware Routing with Neural Routing Algorithms](/202604/06/2604.02927v1-towards-near-real-time-telemetry-aware-routing-with-neural-routing-algorithms)  
+1. [ActionNex: A Virtual Outage Manager for Cloud](/202604/07/2604.03512v1-actionnex-a-virtual-outage-manager-for-cloud)  
    标签：评分：7.0/10、query:netmes
-   evidence：利用实时遥测数据的近实时遥测感知路由
-2. [KAN-LSTM: Benchmarking Kolmogorov-Arnold Networks for Cyber Security Threat Detection in IoT Networks](/202604/06/2603.28985v1-kan-lstm-benchmarking-kolmogorov-arnold-networks-for-cyber-security-threat-detection-in-iot-networks)  
+   evidence：摄取遥测和运行信号用于云故障管理
+2. [NetSecBed: A Container-Native Testbed for Reproducible Cybersecurity Experimentation](/202604/07/2604.04121v1-netsecbed-a-container-native-testbed-for-reproducible-cybersecurity-experimentation)  
    标签：评分：6.0/10、query:netmes
-   evidence：网络流量数据中的网络安全威胁检测
-3. [RL-Loop: Reinforcement Learning-Driven Real-Time 5G Slice Control for Connected and Autonomous Mobility Services](/202604/06/2604.02461v1-rl-loop-reinforcement-learning-driven-real-time-5g-slice-control-for-connected-and-autonomous-mobility-services)  
+   evidence：生成网络流量证据和执行伪影
+3. [Active Sequential Signal Detection with Asynchronous Decisions](/202604/07/2604.04755v1-active-sequential-signal-detection-with-asynchronous-decisions)  
    标签：评分：6.0/10、query:netmes
-   evidence：5G网络切片关键性能指标的实时观测与监控
-4. [Causal Inference for Quantifying Noisy Neighbor Effects in Multi-Tenant Cloud Environments](/202604/06/2604.03145v1-causal-inference-for-quantifying-noisy-neighbor-effects-in-multi-tenant-cloud-environments)  
-   标签：评分：6.0/10、query:netmes
-   evidence：多租户云环境中的性能下降监控与量化
+   evidence：针对序列数据流的主动采样
 
 
 <div class="dpr-home-promo-card">

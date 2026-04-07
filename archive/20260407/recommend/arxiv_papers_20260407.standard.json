@@ -1,0 +1,142 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-07T19:52:29.270329+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.03512v1",
+      "title": "ActionNex: A Virtual Outage Manager for Cloud",
+      "abstract": "Outage management in large-scale cloud operations remains heavily manual, requiring rapid triage, cross-team coordination, and experience-driven decisions under partial observability. We present \\textbf{ActionNex}, a production-grade agentic system that supports end-to-end outage assistance, including real-time updates, knowledge distillation, and role- and stage-conditioned next-best action recommendations. ActionNex ingests multimodal operational signals (e.g., outage content, telemetry, and human communications) and compresses them into critical events that represent meaningful state transitions. It couples this perception layer with a hierarchical memory subsystem: long-term Key-Condition-Action (KCA) knowledge distilled from playbooks and historical executions, episodic memory of prior outages, and working memory of the live context. A reasoning agent aligns current critical events to preconditions, retrieves relevant memories, and generates actionable recommendations; executed human actions serve as an implicit feedback signal to enable continual self-evolution in a human-agent hybrid system. We evaluate ActionNex on eight real Azure outages (8M tokens, 4,000 critical events) using two complementary ground-truth action sets, achieving 71.4\\% precision and 52.8-54.8\\% recall. The system has been piloted in production and has received positive early feedback.",
+      "authors": [
+        "Zhenfeng Lin",
+        "Haoji Hu",
+        "Ming Hao",
+        "Xuchao Zhang",
+        "Ryan Zhang",
+        "Junhao Li",
+        "Ze Li",
+        "Oleg Kulygin",
+        "Chetan Bansal",
+        "Hatay Tuna",
+        "Murali Chintalapati",
+        "Sheila Jiang",
+        "Salman Zafar",
+        "Angie Anderson"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-03T23:19:11+00:00",
+      "link": "https://arxiv.org/pdf/2604.03512v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "ingests telemetry and operational signals for cloud outage management",
+      "llm_evidence_cn": "摄取遥测和运行信号用于云故障管理",
+      "llm_evidence": "摄取遥测和运行信号用于云故障管理",
+      "canonical_evidence": "摄取遥测和运行信号用于云故障管理",
+      "llm_tldr_en": "ActionNex is an agentic system for cloud outage assistance using real-time telemetry and operational signals.",
+      "llm_tldr_cn": "ActionNex 是一个利用实时遥测和运行信号进行云故障辅助处理的智能体系统。",
+      "llm_tldr": "ActionNex 是一个利用实时遥测和运行信号进行云故障辅助处理的智能体系统。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.04121v1",
+      "title": "NetSecBed: A Container-Native Testbed for Reproducible Cybersecurity Experimentation",
+      "abstract": "Cybersecurity research increasingly depends on reproducible evidence, such as traffic traces, logs, and labeled datasets, yet most public datasets remain static and offer limited support for controlled re-execution and traceability, especially in heterogeneous multi-protocol environments. This paper presents NetSecBed, a container-native, scenario-oriented testbed for reproducible generation of network traffic evidence and execution artifacts under controlled conditions, particularly suitable for IoT, IIoT, and pervasive multi-protocol environments. The framework integrates 60 attack scenarios, 9 target services, and benign traffic generators as single-purpose containers, enabling plug-and-play extensibility and traceability through declarative specifications. Its pipeline automates parametrized execution, packet capture, log collection, service probing, feature extraction, and dataset consolidation. The main contribution is a repeatable, auditable, and extensible framework for cybersecurity experimentation that reduces operational bias and supports continuous dataset generation.",
+      "authors": [
+        "Leonardo Bitzki",
+        "Diego Kreutz",
+        "Tiago Heinrich",
+        "Douglas Fideles",
+        "Leandro Bertholdo",
+        "Silvio Quincozes",
+        "Angelo Diniz"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.NI",
+        "cs.PF"
+      ],
+      "published": "2026-04-05T13:46:01+00:00",
+      "link": "https://arxiv.org/pdf/2604.04121v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "generation of network traffic evidence and execution artifacts",
+      "llm_evidence_cn": "生成网络流量证据和执行伪影",
+      "llm_evidence": "生成网络流量证据和执行伪影",
+      "canonical_evidence": "生成网络流量证据和执行伪影",
+      "llm_tldr_en": "NetSecBed is a container-native testbed for reproducible cybersecurity experiments and traffic evidence generation.",
+      "llm_tldr_cn": "NetSecBed 是一个用于可重复网络安全实验和流量证据生成的容器原生测试床。",
+      "llm_tldr": "NetSecBed 是一个用于可重复网络安全实验和流量证据生成的容器原生测试床。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.04755v1",
+      "title": "Active Sequential Signal Detection with Asynchronous Decisions",
+      "abstract": "This work considers the problem of detecting signals from multiple sequentially observed data streams, where only one stream can be observed at every time instant. The goal is to detect signals as quickly as possible while controlling the global probabilities of false alarm and missed detection. In this active sampling setup, it is impossible to minimize the expected detection time simultaneously for every signal, so we formulate a novel set of performance criteria that aim to minimize the expectations of the order statistics of the detection times. A novel procedure is proposed, which incorporates an exploration mechanism to a \"follow-the-leader\" procedure, and is shown to optimize all the criteria asymptotically as the global error probabilities go to zero. Its finite-sample performance is compared with existing and oracle procedures in simulation studies.",
+      "authors": [
+        "Yiming Xing",
+        "Georgios Fellouris"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME"
+      ],
+      "published": "2026-04-06T15:23:08+00:00",
+      "link": "https://arxiv.org/pdf/2604.04755v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "active sampling for sequential data streams",
+      "llm_evidence_cn": "针对序列数据流的主动采样",
+      "llm_evidence": "针对序列数据流的主动采样",
+      "canonical_evidence": "针对序列数据流的主动采样",
+      "llm_tldr_en": "Proposes an active sampling procedure for sequential signal detection to minimize detection time.",
+      "llm_tldr_cn": "提出一种用于序列信号检测的主动采样程序，旨在最小化检测时间。",
+      "llm_tldr": "提出一种用于序列信号检测的主动采样程序，旨在最小化检测时间。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "adaptive traffic sampling techniques for accurate measurement",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
