@@ -6,32 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-07
-- 运行时间：2026-04-07 19:52:47 UTC
+- 最新运行日期：2026-04-08
+- 运行时间：2026-04-08 20:12:49 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：0
+- 本次总论文数：4
+- 精读区：1
 - 速读区：3
 
 ### 今日简报（AI）
-今日聚焦云端故障自动化管理与网络安全实验基座，速览 3 篇前沿技术论文。
-重点关注 ActionNex 提出的云端虚拟故障管理系统，以及 NetSecBed 带来的容器化可复现安全测试平台。
-建议关注云原生环境下的自动化运维工具与实验复现技术，提升系统稳定性与安全性。
-- 详情：[/202604/07/README](/202604/07/README)
+今日深度解析了高密度场馆下的 5G 上行性能瓶颈，并同步探讨了边缘 AI 调度与轻量
+- 详情：[/202604/08/README](/202604/08/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [Comprehensive Analysis of Cellular Uplink Performance in a Dense Stadium Deployment](/202604/08/2604.04371v1-comprehensive-analysis-of-cellular-uplink-performance-in-a-dense-stadium-deployment)  
+   标签：评分：8.0/10、query:netmes
+   evidence：对密集部署环境下的网络行为和物理层指标进行广泛测量
 
 ### 速读区论文标签
-1. [ActionNex: A Virtual Outage Manager for Cloud](/202604/07/2604.03512v1-actionnex-a-virtual-outage-manager-for-cloud)  
+1. [ML Defender (aRGus NDR): An Open-Source Embedded ML NIDS for Botnet and Anomalous Traffic Detection in Resource-Constrained Organizations](/202604/08/2604.04952v1-ml-defender-argus-ndr-an-open-source-embedded-ml-nids-for-botnet-and-anomalous-traffic-detection-in-resource-constrained-organizations)  
    标签：评分：7.0/10、query:netmes
-   evidence：摄取遥测和运行信号用于云故障管理
-2. [NetSecBed: A Container-Native Testbed for Reproducible Cybersecurity Experimentation](/202604/07/2604.04121v1-netsecbed-a-container-native-testbed-for-reproducible-cybersecurity-experimentation)  
+   evidence：基于eBPF/XDP的数据包捕获和异常流量检测流水线
+2. [AlertStar: Path-Aware Alert Prediction on Hyper-Relational Knowledge Graphs](/202604/08/2604.03104v1-alertstar-path-aware-alert-prediction-on-hyper-relational-knowledge-graphs)  
    标签：评分：6.0/10、query:netmes
-   evidence：生成网络流量证据和执行伪影
-3. [Active Sequential Signal Detection with Asynchronous Decisions](/202604/07/2604.04755v1-active-sequential-signal-detection-with-asynchronous-decisions)  
+   evidence：利用知识图谱进行流级元数据分析与网络告警预测
+3. [PCA-Driven Adaptive Sensor Triage for Edge AI Inference](/202604/08/2604.05045v1-pca-driven-adaptive-sensor-triage-for-edge-ai-inference)  
    标签：评分：6.0/10、query:netmes
-   evidence：针对序列数据流的主动采样
+   evidence：带宽预算下的自适应传感器采样率
 
 
 <div class="dpr-home-promo-card">

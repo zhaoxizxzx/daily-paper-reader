@@ -1,0 +1,166 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-08T20:11:47.245865+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2604.04371v1",
+      "title": "Comprehensive Analysis of Cellular Uplink Performance in a Dense Stadium Deployment",
+      "abstract": "Uplink performance remains a critical limitation in modern 5G networks, where UEs have to balance limited transmission power against propagation challenges. We conducted extensive measurements in the University of Notre Dame's football stadium, which has a seating capacity of 80,000 spectators, evaluating network behavior under both unloaded (pregame) and severely congested (game day) conditions, with a focus on uplink performance. Analyzing PHY-layer metrics captured via the Rohde & Schwarz QualiPoc, we show that high-frequency TDD bands in the uplink are severely bottlenecked in both the spectral and temporal domains. Despite transmitting near maximum 3GPP power limits, propagation loss inherent to high-frequency bands restricts UEs to low MCS indices and low PRB allocations, even in unloaded networks. This inability to achieve wideband allocation is further compounded by the significantly smaller number of uplink slots compared to downlink slots in TDD frames. Consequently, we observe a severe disparity between uplink and downlink: while high-frequency TDD bands carry the majority of downlink throughput, the network relies heavily on lower-frequency FDD bands for uplink. Additional measurements under favorable propagation conditions around a Verizon COW deployment located in the stadium parking lot also show that this limitation is not solely propagation-driven; rather, the duplexing scheme itself also plays a significant role. Even when TDD bands achieve higher or comparable MCS, FDD bands have a performance edge in the uplink due to the restrictive, downlink-heavy TDD architecture. These findings emphasize the indispensable role of low-frequency FDD spectrum in sustaining uplink capacity, providing insights that will help guide the design of next-generation wireless networks.",
+      "authors": [
+        "S. M. Haider Ali Shuvo",
+        "Hardani Ismu Nabil",
+        "Joshua Roy Palathinkal",
+        "Muhammad I. Rochman",
+        "Monisha Ghosh"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "eess.SP"
+      ],
+      "published": "2026-04-06T02:41:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.04371v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "extensive measurements of network behavior and PHY-layer metrics in dense deployments",
+      "llm_evidence_cn": "对密集部署环境下的网络行为和物理层指标进行广泛测量",
+      "llm_evidence": "对密集部署环境下的网络行为和物理层指标进行广泛测量",
+      "canonical_evidence": "对密集部署环境下的网络行为和物理层指标进行广泛测量",
+      "llm_tldr_en": "Analyzes 5G uplink performance through extensive real-world measurements in a congested stadium.",
+      "llm_tldr_cn": "通过在拥挤体育场进行的广泛真实测量，分析了5G上行链路的性能。",
+      "llm_tldr": "通过在拥挤体育场进行的广泛真实测量，分析了5G上行链路的性能。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.04952v1",
+      "title": "ML Defender (aRGus NDR): An Open-Source Embedded ML NIDS for Botnet and Anomalous Traffic Detection in Resource-Constrained Organizations",
+      "abstract": "Ransomware and DDoS attacks disproportionately impact hospitals, schools, and small organizations that cannot afford enterprise security solutions. We present ML Defender (aRGus NDR), an open-source network intrusion detection system built in C++20, deployable on commodity hardware at approximately 150-200 USD. ML Defender implements a six-component pipeline over eBPF/XDP packet capture, ZeroMQ transport, and Protocol Buffers serialization, combining a rule-based Fast Detector with an embedded Random Forest classifier. The Maximum Threat Wins policy selects the arithmetic maximum of both scores, using ML inference to suppress false positives. Evaluated against the CTU-13 Neris botnet dataset: F1=0.9985, Precision=0.9969, Recall=1.0000, FPR=0.0002% (2 FP in 12,075 benign flows). The Fast Detector alone produces 6.61% FPR on benign traffic; the ML layer reduces this to zero -- a ~500-fold reduction. Per-class inference latency: 0.24-1.06 microseconds on commodity hardware. Under progressive load testing, the pipeline sustains ~34-38 Mbps with zero packet drops across 2.37 million packets. RAM stable at ~1.28 GB. The bottleneck is VirtualBox NIC emulation, not pipeline logic. All figures are conservative lower bounds; bare-metal characterization is future work. This work was developed through the Consejo de Sabios, a structured multi-LLM peer review methodology. Test-Driven Hardening (TDH) is proposed as a methodology for security-critical distributed systems. ML Defender is released under the MIT license.",
+      "authors": [
+        "Alonso Isidoro Román"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-03T05:20:13+00:00",
+      "link": "https://arxiv.org/pdf/2604.04952v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "eBPF/XDP packet capture and anomalous traffic detection pipeline",
+      "llm_evidence_cn": "基于eBPF/XDP的数据包捕获和异常流量检测流水线",
+      "llm_evidence": "基于eBPF/XDP的数据包捕获和异常流量检测流水线",
+      "canonical_evidence": "基于eBPF/XDP的数据包捕获和异常流量检测流水线",
+      "llm_tldr_en": "Presents an open-source NIDS using eBPF/XDP for efficient packet capture and traffic analysis.",
+      "llm_tldr_cn": "介绍了一种利用eBPF/XDP进行高效数据包捕获和流量分析的开源入侵检测系统。",
+      "llm_tldr": "介绍了一种利用eBPF/XDP进行高效数据包捕获和流量分析的开源入侵检测系统。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.03104v1",
+      "title": "AlertStar: Path-Aware Alert Prediction on Hyper-Relational Knowledge Graphs",
+      "abstract": "Cyber-attacks continue to grow in scale and sophistication, yet existing network intrusion detection approaches lack the semantic depth required for path reasoning over attacker-victim interactions. We address this by first modelling network alerts as a knowledge graph, then formulating hyper-relational alert prediction as a hyper-relational knowledge graph completion (HR-KGC) problem, representing each network alert as a qualified statement (h, r, t, Q), where h and t are source and destination IPs, r denotes the attack type, and Q encodes flow-level metadata such as timestamps, ports, protocols, and attack intensity, going beyond standard KGC binary triples (h, r, t) that would discard this contextual richness. We introduce five models across three contributions: first, Hyper-relational Neural Bellman-Ford (HR-NBFNet) extends Neural Bellman-Ford Networks to the hyper-relational setting with qualifier-aware multi-hop path reasoning, while its multi-task variant MT-HR-NBFNet jointly predicts tail, relation, and qualifier-value within a single traversal pass; second, AlertStar fuses qualifier context and structural path information entirely in embedding space via cross-attention and learned path composition, and its multi-task extension MT-AlertStar eliminates the overhead of full knowledge graph propagation; third, HR-NBFNet-CQ extends qualifier-aware representations to answer complex first-order logic queries, including one-hop, two-hop chain, two-anchor intersection, and union, enabling multi-condition threat reasoning over the alert knowledge graph. Evaluated inductively on the Warden and UNSW-NB15 benchmarks across three qualifier-density regimes, AlertStar and MT-AlertStar achieve superior MR, MRR, and Hits@k, demonstrating that local qualifier fusion is both sufficient and more efficient than global path propagation for hyper-relational alert prediction.",
+      "authors": [
+        "Zahra Makki Nayeri",
+        "Mohsen Rezvani"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-03T15:26:51+00:00",
+      "link": "https://arxiv.org/pdf/2604.03104v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "flow-level metadata and network alert prediction using knowledge graphs",
+      "llm_evidence_cn": "利用知识图谱进行流级元数据分析与网络告警预测",
+      "llm_evidence": "利用知识图谱进行流级元数据分析与网络告警预测",
+      "canonical_evidence": "利用知识图谱进行流级元数据分析与网络告警预测",
+      "llm_tldr_en": "Uses hyper-relational knowledge graphs to model network flow metadata for path-aware intrusion alert prediction.",
+      "llm_tldr_cn": "利用超关系知识图谱对网络流元数据建模，实现路径感知的入侵告警预测。",
+      "llm_tldr": "利用超关系知识图谱对网络流元数据建模，实现路径感知的入侵告警预测。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.05045v1",
+      "title": "PCA-Driven Adaptive Sensor Triage for Edge AI Inference",
+      "abstract": "Multi-channel sensor networks in industrial IoT often exceed available bandwidth. We propose PCA-Triage, a streaming algorithm that converts incremental PCA loadings into proportional per-channel sampling rates under a bandwidth budget. PCA-Triage runs in O(wdk) time with zero trainable parameters (0.67 ms per decision).   We evaluate on 7 benchmarks (8--82 channels) against 9 baselines. PCA-Triage is the best unsupervised method on 3 of 6 datasets at 50% bandwidth, winning 5 of 6 against every baseline with large effect sizes (r = 0.71--0.91). On TEP, it achieves F1 = 0.961 +/- 0.001 -- within 0.1% of full-data performance -- while maintaining F1 > 0.90 at 30% budget. Targeted extensions push F1 to 0.970. The algorithm is robust to packet loss and sensor noise (3.7--4.8% degradation under combined worst-case).",
+      "authors": [
+        "Ankit Hemant Lade",
+        "Sai Krishna Jasti",
+        "Nikhil Sinha",
+        "Indar Kumar",
+        "Akanksha Tiwari"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "eess.SY"
+      ],
+      "published": "2026-04-06T18:00:47+00:00",
+      "link": "https://arxiv.org/pdf/2604.05045v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "adaptive sensor sampling rates under bandwidth budget",
+      "llm_evidence_cn": "带宽预算下的自适应传感器采样率",
+      "llm_evidence": "带宽预算下的自适应传感器采样率",
+      "canonical_evidence": "带宽预算下的自适应传感器采样率",
+      "llm_tldr_en": "PCA-Triage adaptively adjusts sampling rates in sensor networks to optimize bandwidth usage for edge AI.",
+      "llm_tldr_cn": "PCA-Triage自适应调整传感器网络采样率，优化边缘AI的带宽利用。",
+      "llm_tldr": "PCA-Triage自适应调整传感器网络采样率，优化边缘AI的带宽利用。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "adaptive traffic sampling techniques for accurate measurement",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
