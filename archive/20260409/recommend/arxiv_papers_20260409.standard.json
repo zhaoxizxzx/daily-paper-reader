@@ -1,0 +1,175 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-09T19:54:37.647444+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.00319v1",
+      "title": "Collaborative AI Agents and Critics for Fault Detection and Cause Analysis in Network Telemetry",
+      "abstract": "We develop algorithms for collaborative control of AI agents and critics in a multi-actor, multi-critic federated multi-agent system. Each AI agent and critic has access to classical machine learning or generative AI foundation models. The AI agents and critics collaborate with a central server to complete multimodal tasks such as fault detection, severity, and cause analysis in a network telemetry system, text-to-image generation, video generation, healthcare diagnostics from medical images and patient records, etcetera. The AI agents complete their tasks and send them to AI critics for evaluation. The critics then send feedback to agents to improve their responses. Collaboratively, they minimize the overall cost to the system with no inter-agent or inter-critic communication. AI agents and critics keep their cost functions or derivatives of cost functions private. Using multi-time scale stochastic approximation techniques, we provide convergence guarantees on the time-average active states of AI agents and critics. The communication overhead is a little on the system, of the order of $\\mathcal{O}(m)$, for $m$ modalities and is independent of the number of AI agents and critics. Finally, we present an example of fault detection, severity, and cause analysis in network telemetry and thorough evaluation to check the algorithm's efficacy.",
+      "authors": [
+        "Syed Eqbal Alam",
+        "Zhan Shu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-03-31T23:33:56+00:00",
+      "link": "https://arxiv.org/pdf/2604.00319v1",
+      "tags": [
+        "keyword:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "AI agents for fault detection in network telemetry systems",
+      "llm_evidence_cn": "用于网络遥测系统故障检测的 AI 智能体",
+      "llm_evidence": "用于网络遥测系统故障检测的 AI 智能体",
+      "canonical_evidence": "用于网络遥测系统故障检测的 AI 智能体",
+      "llm_tldr_en": "Develops collaborative AI agents for fault detection and cause analysis within network telemetry systems.",
+      "llm_tldr_cn": "开发了用于网络遥测系统中故障检测和原因分析的协作 AI 智能体。",
+      "llm_tldr": "开发了用于网络遥测系统中故障检测和原因分析的协作 AI 智能体。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "sketch-based algorithms for network telemetry and measurement",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.06971v1",
+      "title": "RieIF: Knowledge-Driven Riemannian Information Flow for Robust Spatio-Temporal Graph Signal Prediction in 6G Wireless Networks",
+      "abstract": "With 6G evolving towards intelligent network autonomy, artificial intelligence (AI)-native operations are becoming pivotal. Wireless networks continuously generate rich and heterogeneous data, which inherently exhibits spatio-temporal graph structure. However, limited radio resources result in incomplete and noisy network measurements. This challenge is further intensified when a target variable and its strongest correlates are missing over contiguous intervals, forming systemic blind spots. To tackle this issue, we propose RieIF (Knowledge-driven Riemannian Information Flow), a geometry-consistent framework that incorporates knowledge graphs (KGs) for robust spatio-temporal graph signal prediction. For analytical tractability within the Fisher-Rao geometry, we project the input from a Riemannian manifold onto a positive unit hypersphere, where angular similarity is computationally efficient. This projection is implemented via a graph transformer, using the KG as a structural prior to constrain attention and generate a micro stream. Simultaneously, a Long Short-Term Memory (LSTM) model captures temporal dynamics to produce a macro stream. Finally, the micro stream (highlighting geometric shape) and the macro stream (emphasizing signal strength) are adaptively fused through a geometric gating mechanism for signal recovery. Experiments on three wireless datasets show consistent improvements under systemic blind spots, including up to 31% reduction in root mean squared error and up to 3.2 dB gain in recovery signal-to-noise ratio, while maintaining robustness to graph sparsity and measurement noise.",
+      "authors": [
+        "Zhonghao Jiu",
+        "Yongming Huang",
+        "Fan Meng",
+        "Hang Zhan",
+        "Zening Liu",
+        "Xiaohu You"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-04-08T11:42:33+00:00",
+      "link": "https://arxiv.org/pdf/2604.06971v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "handling incomplete and noisy network measurements in 6G",
+      "llm_evidence_cn": "处理6G中不完整且有噪声的网络测量数据",
+      "llm_evidence": "处理6G中不完整且有噪声的网络测量数据",
+      "canonical_evidence": "处理6G中不完整且有噪声的网络测量数据",
+      "llm_tldr_en": "Introduces a Riemannian framework to predict spatio-temporal graph signals from noisy network measurements.",
+      "llm_tldr_cn": "引入黎曼框架，用于从有噪声的网络测量中预测时空图信号。",
+      "llm_tldr": "引入黎曼框架，用于从有噪声的网络测量中预测时空图信号。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.06448v1",
+      "title": "From Load Tests to Live Streams: Graph Embedding-Based Anomaly Detection in Microservice Architectures",
+      "abstract": "Prime Video regularly conducts load tests to simulate the viewer traffic spikes seen during live events such as Thursday Night Football as well as video-on-demand (VOD) events such as Rings of Power. While these stress tests validate system capacity, they can sometimes miss service behaviors unique to real event traffic. We present a graph-based anomaly detection system that identifies under-represented services using unsupervised node-level graph embeddings. Built on a GCN-GAE, our approach learns structural representations from directed, weighted service graphs at minute-level resolution and flags anomalies based on cosine similarity between load test and event embeddings. The system identifies incident-related services that are documented and demonstrates early detection capability. We also introduce a preliminary synthetic anomaly injection framework for controlled evaluation that show promising precision (96%) and low false positive rate (0.08%), though recall (58%) remains limited under conservative propagation assumptions. This framework demonstrates practical utility within Prime Video while also surfacing methodological lessons and directions, providing a foundation for broader application across microservice ecosystems.",
+      "authors": [
+        "Srinidhi Madabhushi",
+        "Pranesh Vyas",
+        "Swathi Vaidyanathan",
+        "Mayur Kurup",
+        "Elliott Nash",
+        "Yegor Silyutin"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.MM",
+        "eess.IV"
+      ],
+      "published": "2026-04-07T20:43:07+00:00",
+      "link": "https://arxiv.org/pdf/2604.06448v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "anomaly detection in microservice traffic graphs",
+      "llm_evidence_cn": "微服务流量图中的异常检测",
+      "llm_evidence": "微服务流量图中的异常检测",
+      "canonical_evidence": "微服务流量图中的异常检测",
+      "llm_tldr_en": "Uses graph embeddings for anomaly detection in microservice architectures during live traffic events.",
+      "llm_tldr_cn": "在实时流量事件中利用图嵌入技术进行微服务架构的异常检测。",
+      "llm_tldr": "在实时流量事件中利用图嵌入技术进行微服务架构的异常检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.07345v1",
+      "title": "Measurement of Generative AI Workload Power Profiles for Whole-Facility Data Center Infrastructure Planning",
+      "abstract": "The rapid growth of generative artificial intelligence (AI) has introduced unprecedented computational demands, driving significant increases in the energy footprint of data centers. However, existing power consumption data is largely proprietary and reported at varying resolutions, creating challenges for estimating whole-facility energy use and planning infrastructure. In this work, we present a methodology that bridges this gap by linking high-resolution workload power measurements to whole-facility energy demand. Using NLR's high-performance computing data center equipped with NVIDIA H100 GPUs, we measure power consumption of AI workloads at 0.1-second resolution for AI training, fine-tuning and inference jobs. Workloads are characterized using MLCommons benchmarks for model training and fine-tuning, and vLLM benchmarks for inference, enabling reproducible and standardized workload profiling. The dataset of power consumption profiles is made publicly available. These power profiles are then scaled to the whole-facility-level using a bottom-up, event-driven, data center energy model. The resulting whole-facility energy profiles capture realistic temporal fluctuations driven by AI workloads and user-behavior, and can be used to inform infrastructure planning for grid connection, on-site energy generation, and distributed microgrids.",
+      "authors": [
+        "Roberto Vercellino",
+        "Jared Willard",
+        "Gustavo Campos",
+        "Weslley da Silva Pereira",
+        "Olivia Hull",
+        "Matthew Selensky",
+        "Juliane Mueller"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "published": "2026-04-08T17:56:41+00:00",
+      "link": "https://arxiv.org/pdf/2604.07345v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "high-resolution workload power measurements in data center",
+      "llm_evidence_cn": "数据中心高分辨率工作负载功率测量",
+      "llm_evidence": "数据中心高分辨率工作负载功率测量",
+      "canonical_evidence": "数据中心高分辨率工作负载功率测量",
+      "llm_tldr_en": "A methodology for high-resolution power measurement of AI workloads to aid data center infrastructure planning.",
+      "llm_tldr_cn": "一种用于 AI 工作负载高分辨率功率测量的方法，旨在辅助数据中心基础设施规划。",
+      "llm_tldr": "一种用于 AI 工作负载高分辨率功率测量的方法，旨在辅助数据中心基础设施规划。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
