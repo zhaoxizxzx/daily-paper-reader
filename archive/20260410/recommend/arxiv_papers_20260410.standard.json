@@ -1,0 +1,134 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-10T20:24:44.348119+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.05642v1",
+      "title": "T2T: Captioning Smartphone Activities Using Mobile Traffic",
+      "abstract": "This paper studies the creation of textual descriptions of user activities and interactions on smartphones. Our approach of referring to encrypted mobile traffic exceeds traditional smartphone activity classification methods in terms of model scalability and output readability. The paper addresses two obstacles to the realization of this idea: the semantic gap between traffic features and smartphone activity captions, and the lack of textually annotated traffic data. To overcome these challenges, we introduce a novel smartphone activity captioning system, called T2T (Traffic-to-Text). T2T consists of a flow feature encoder that converts low-level traffic characteristics into meaningful latent features and a caption decoder to yield readable transcripts of smartphone activities. In addition, T2T achieves the automatic textual annotation of mobile traffic by feeding synchronized screen capture videos into the Qwen-VL-Max vision-language model, and proposing multi-stage losses for effective cross-model training. We evaluate T2T on 40,000 traffic-description pairs collected in two real-world environments, involving 8 smartphone users and 20 mobile apps. T2T achieves a BLEU-4 score of 58.1, a METEOR score of 38.3, a ROUGE-L score of 70.5, and a CIDEr score of 108.7. The quantitative and qualitative analyses show that T2T can generate semantically accurate captions that are comparable to the vision-language model.",
+      "authors": [
+        "Jiyu Liu",
+        "Yong Huang",
+        "Yanzhao Lu",
+        "Yun Tie",
+        "Wanqing Tu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-07T09:44:27+00:00",
+      "link": "https://arxiv.org/pdf/2604.05642v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "smartphone activity captioning using encrypted mobile traffic features",
+      "llm_evidence_cn": "利用加密移动流量特征进行智能手机活动描述",
+      "llm_evidence": "利用加密移动流量特征进行智能手机活动描述",
+      "canonical_evidence": "利用加密移动流量特征进行智能手机活动描述",
+      "llm_tldr_en": "Develops a system to convert low-level traffic features into readable smartphone activity captions.",
+      "llm_tldr_cn": "开发了一个将底层流量特征转换为可读智能手机活动描述的系统。",
+      "llm_tldr": "开发了一个将底层流量特征转换为可读智能手机活动描述的系统。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07796v1",
+      "title": "Order-Optimal Sequential 1-Bit Mean Estimation in General Tail Regimes",
+      "abstract": "In this paper, we study the problem of mean estimation under strict 1-bit communication constraints. We propose a novel adaptive mean estimator based solely on randomized threshold queries, where each 1-bit outcome indicates whether a given sample exceeds a sequentially chosen threshold. Our estimator is $(ε, δ)$-PAC for any distribution with a bounded mean $μ\\in [-λ, λ]$ and a bounded $k$-th central moment $\\mathbb{E}[|X-μ|^k] \\le σ^k$ for any fixed $k > 1$. Crucially, our sample complexity is order-optimal in all such tail regimes, i.e., for every such $k$ value. For $k \\neq 2$, our estimator's sample complexity matches the unquantized minimax lower bounds plus an unavoidable $O(\\log(λ/σ))$ localization cost. For the finite-variance case ($k=2$), our estimator's sample complexity has an extra multiplicative $O(\\log(σ/ε))$ penalty, and we establish a novel information-theoretic lower bound showing that this penalty is a fundamental limit of 1-bit quantization. We also establish a significant adaptivity gap: for both threshold queries and more general interval queries, the sample complexity of any non-adaptive estimator must scale linearly with the search space parameter $λ/σ$, rendering it vastly less sample efficient than our adaptive approach. Finally, we present algorithmic variants that (i) handle an unknown sampling budget, (ii) adapt to an unknown scale parameter~$σ$ given (possibly loose) bounds, and (iii) require only two stages of adaptivity at the expense of more complicated general 1-bit queries.",
+      "authors": [
+        "Ivan Lau",
+        "Jonathan Scarlett"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.IT",
+        "cs.LG",
+        "math.ST"
+      ],
+      "published": "2026-04-09T04:49:21+00:00",
+      "link": "https://arxiv.org/pdf/2604.07796v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "adaptive mean estimation under communication constraints is a core component for traffic sampling and telemetry",
+      "llm_evidence_cn": "通信受限下的自适应均值估计是流量采样和遥测的核心组件",
+      "llm_evidence": "通信受限下的自适应均值估计是流量采样和遥测的核心组件",
+      "canonical_evidence": "通信受限下的自适应均值估计是流量采样和遥测的核心组件",
+      "llm_tldr_en": "Proposes an adaptive 1-bit mean estimator that is order-optimal for various distribution tails.",
+      "llm_tldr_cn": "提出了一种在1比特通信约束下的自适应均值估计器，适用于多种分布尾部情况。",
+      "llm_tldr": "提出了一种在1比特通信约束下的自适应均值估计器，适用于多种分布尾部情况。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "adaptive traffic sampling techniques for accurate measurement",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07836v1",
+      "title": "LCMP: Distributed Long-Haul Cost-Aware Multi-Path Routing for Inter-Datacenter RDMA Networks",
+      "abstract": "RDMA-empowered cloud services are gradually deployed across datacenters (DCs) with multiple paths, which exhibit new properties of path asymmetry, delayed congestion signals, and simultaneous flow routing collisions, and further fail existing routing methods.   We present LCMP, a distributed long-haul cost-aware multi-path routing framework that aims to place RDMA flows on multiple inter-DC paths, achieving low-cost, low-latency, and congestion-responsive transmission. LCMP combines a control-plane path-quality score with compact on-switch congestion signals, where the former unifies quality assessment for asymmetric paths and the latter enables responsive reaction to path congestion. LCMP further resolves the simultaneous flow decision collision problem by filtering high-cost candidates, and performing a diversity-preserving hash inside the reduced set. On an 8-DC testbed, LCMP reduces median and tail FCT slowdown by up to 76% and 64%, respectively compared to state-of-the-art (SOTA) DCN routing strategies. And large-scale NS-3 simulations under the 2000 km inter-DC scenario confirm similar improvements.",
+      "authors": [
+        "Dong-Yang Yu",
+        "Yuchao Zhang",
+        "Xiaodi Wang",
+        "Jun Wang",
+        "Wenfei Wu",
+        "Haipeng Yao",
+        "Wendong Wang",
+        "Ke Xu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-09T05:36:57+00:00",
+      "link": "https://arxiv.org/pdf/2604.07836v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "on-switch congestion signals in inter-datacenter networks",
+      "llm_evidence_cn": "跨数据中心网络中的交换机拥塞信号",
+      "llm_evidence": "跨数据中心网络中的交换机拥塞信号",
+      "canonical_evidence": "跨数据中心网络中的交换机拥塞信号",
+      "llm_tldr_en": "Uses on-switch signals for multi-path routing in inter-datacenter RDMA networks.",
+      "llm_tldr_cn": "在跨数据中心RDMA网络中利用交换机信号进行多路径路由。",
+      "llm_tldr": "在跨数据中心RDMA网络中利用交换机信号进行多路径路由。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

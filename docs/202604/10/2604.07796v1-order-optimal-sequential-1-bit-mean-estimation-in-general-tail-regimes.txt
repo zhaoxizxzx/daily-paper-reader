@@ -1,0 +1,3609 @@
+Title: Order-Optimal Sequential 1-Bit Mean Estimation in General Tail Regimes
+
+URL Source: https://arxiv.org/pdf/2604.07796v1
+
+Published Time: Fri, 10 Apr 2026 01:04:23 GMT
+
+Number of Pages: 36
+
+Markdown Content:
+# Order-Optimal Sequential 1-Bit Mean Estimation in General Tail Regimes 
+
+## Ivan Lau and Jonathan Scarlett National University of Singapore 
+
+Abstract 
+
+In this paper, we study the problem of mean estimation under strict 1-bit communication constraints. We propose a novel adaptive mean estimator based solely on randomized threshold queries, where each 1-bit outcome indicates whether a given sample exceeds a sequentially chosen threshold. Our estimator is pϵ, δ q-PAC for any distribution with a bounded mean μ P r´ λ, λ s and a bounded k-th central moment Er| X ´ μ|k s ď σk for any fixed k ą 1. Crucially, our sample complexity is order-optimal in all such tail regimes, i.e., for every such k value. For k ‰ 2, our estimator’s sample complexity matches the unquantized minimax lower bounds plus an unavoidable Oplog pλ{σqq localization cost. For the finite-variance case ( k “ 2), our estimator’s sample complexity has an extra multiplicative Oplog pσ{ϵqq 
+
+penalty, and we establish a novel information-theoretic lower bound showing that this penalty is a fundamental limit of 1-bit quantization. We also establish a significant adaptivity gap: for both threshold queries and more general interval queries, the sample complexity of any non-adaptive estimator must scale linearly with the search space parameter 
+
+λ{σ, rendering it vastly less sample efficient than our adaptive approach. Finally, we present algorithmic variants that (i) handle an unknown sampling budget, (ii) adapt to an unknown scale parameter σ given (possibly loose) bounds, and (iii) require only two stages of adaptivity at the expense of more complicated general 1-bit queries. 
+
+# 1 Introduction 
+
+Mean estimation is one of the most fundamental and ubiquitous tasks in statistics, machine learning, and theoretical computer science. In modern applications, such as those arising in large-scale sensor networks and decentralized federated learning, the learner rarely has direct access to raw data. Instead, communication bottlenecks often mandate that data samples be severely compressed prior to transmission. We address the absolute extreme of this communication-constrained setting, where the learner receives only a single bit of feedback per sample. This extreme quantization raises a fundamental theoretical question: 
+
+How does 1-bit quantization affect the sample complexity of mean estimation? 
+
+We specifically focus on the threshold query model, where the learner sequentially sends a scalar threshold to an agent and receives a 1-bit indicator of whether the observed sample exceeds it. Beyond its simplicity, the threshold query model naturally captures interesting real-world scenarios where observing the exact value of a sample is impossible, but binary threshold crossings are easily observed. A canonical example is pricing in economics (Kleinberg and Leighton, 2003; Paes Leme et al., 2023): A seller cannot directly observe a buyer’s maximum willingness-to-pay (their hidden sample), but by offering a price, the seller observes a 1-bit purchasing decision indicating whether the buyer’s internal valuation exceeds said price. Similar mechanisms appear in bio-assay testing, where a specimen reacts only if a viral load exceeds a dosage threshold, and in reliability engineering, where a component fails if a stressor exceeds its physical limit. 
+
+> A preliminary version of this work was presented at the 29th International Conference on Artificial Intelligence and Statistics (AISTATS 2026)
+
+1
+
+> arXiv:2604.07796v1 [stat.ML] 9 Apr 2026
+
+A significant challenge in 1-bit mean estimation is the loss of spatial information. When the location of the distribution’s core mass is highly uncertain (e.g., the mean lies somewhere in a massive range r´ λ, λ s), taking threshold queries in the “wrong” region yields sequences of all zeros or all ones, providing virtually no statistical information. This problem is severely exacerbated when the underlying distribution exhibits heavy tails, as the estimator must distinguish between rare, massive outlier samples and the true center of mass without being able to observe the magnitude of the outliers. In our preliminary conference version (Lau and Scarlett, 2025b), we proposed an adaptive 1-bit mean estimator that achieved near-optimal sample complexity for distributions with a bounded k-th central moment for k ě 2 (e.g., distributions with finite variance or sub-Gaussian tails). However, that preliminary framework suffered from several notable limitations. First, it was entirely unclear whether the framework could be generalized to handle heavy-tailed distributions where k P p 1, 2q. Second, it suffered from suboptimal logarithmic gaps between the upper and lower bounds. Finally, the estimator relied on the more demanding interval-query model, requiring the learner to effectively query two boundaries simultaneously. In this paper, we address these issues in detail by fundamentally restructuring the framework, in particular attaining the following advantages: • Threshold Queries and Heavy Tails: We replace the interval-query model with the simpler and more practically relevant threshold query model. Furthermore, by generalizing the framework of our preliminary version, we extend our estimator to successfully handle heavy-tailed distributions where k P p 1, 2q.• Order-Optimality for all k ą 1: To estimate the mean using 1-bit feedback, our approach partitions the search space into regions to estimate “local” probability masses. We replace the complicated, k-dependent spatial partitioning scheme of the prior work with a simple, universal geometric grid. By pairing this single grid with a carefully tuned k-dependent sample allocation strategy, we eliminate the suboptimal logarithmic factors present in the conference version, achieving order-optimal sample complexity across all tail regimes k ą 1. While this is shown using a matching lower bound from the unquantized setting when k ‰ 2, for the finite-variance case 
+
+k “ 2 we further provide a novel lower bound under 1-bit quantization (not present in the conference version) that shows a multiplicative log pσ{ϵq factor to be unavoidable. See Section 1.2 for a more detailed summary of our contributions. 
+
+## 1.1 Problem Setup 
+
+Distributional assumption. Let X be a real-valued random variable 1 with unknown distribution D. We assume that 
+
+D belongs to a (non-parametric) family D “ Dpk, λ, σ q, defined by known parameters k ą 1 and λ ě σ ą 0; a distribution D is in this family if the following conditions hold: 1. Bounded mean: μpDq P r´ λ, λ s,2
+
+2. Bounded k-th central moment: E|X ´ μ|k ď σk,where k, λ, and σ are known to the learner. Note that the support of D may be unbounded. 
+
+1-bit communication protocol. The learner is interested in estimating the population mean μ “ μpDq “ ErXs from n
+
+independent and identically distributed (i.i.d.) samples X1, . . . , X n „ D, subject to a 1-bit communication constraint per sample. The estimation proceeds through an interactive protocol between a learner and a single memoryless agent 3
+
+that observes i.i.d. samples and sends 1-bit feedback to the learner. Specifically, for t “ 1, . . . , n :       
+
+> 1Our results also have implications for certain multivariate settings; see Section 4.4 for details.
+> 2Without loss of generality, we set the search range to be symmetric. Note that a dependence on the search range λis unavoidable in the 1-bit setting (see Theorem 9), but a crude upper bound can be used due to the mild logarithmic dependence in the sample complexity (see Theorem 5).
+> 3Equivalently, this can be viewed as a sequence of memoryless agents where the agent in each round may be different. In particular, the agent in round tonly has access to Xtand not to the previous samples X1, . . . , X t´1.
+
+21. The learner sends a 1-bit quantization function Qt : R Ñ t 0, 1u to an agent; 2. The agent observes a fresh sample Xt „ D and sends a 1-bit message Yt “ QtpXtq to the learner. After n rounds, the learner forms an estimate ˆμ based on the entire interaction history `Q1, Y 1, . . . , Q n, Y n
+
+˘. This (and similar) setting was also adopted in previous communication-constrained learning works, e.g., (Hanna et al., 2022; Mayekar et al., 2023; Lau and Scarlett, 2025a). The learner’s algorithm in this protocol is formally defined as follows: 
+
+Definition 1 (1-bit mean estimator) . A 1-bit mean estimator is an algorithm for the learner that operates within the above communication protocol. It consists of 1. A (potentially randomized) query strategy for selecting the quantization functions Q1, . . . , Q n, where the choice of Qt can depend adaptively on the history of interactions pQ1, Y 1, . . . , Q t´1, Y t´1q.2. An estimation rule that maps the full transcript pQ1, Y 1, . . . , Q n, Y nq to a final estimate ˆμ P R.We say that an estimator is non-adaptive if the query strategy selects all quantization functions in advance, without access to any of the outcomes Y1, . . . , Y n.
+
+Threshold query model. In the general problem formulation, we place no restriction on the choice of quantization function Qt. However, motivated by the desire for “simple” choices in practice, we focus primarily on threshold queries . A threshold query yields a 1-bit indicator specifying whether a sample falls on a designated side of a spatial boundary. Formally, we define a threshold query as any quantization function of the form Qtpxq “ 1tx ď γtu or 
+
+Qtpxq “ 1tx ě γtu for some sequentially chosen threshold γt P R.4 Our main estimator will only use such queries, though we will also present a variant in Section 4.3 that utilizes general 1-bit quantization functions. 
+
+Learner’s goal. The learner’s goal is to design a 1-bit mean estimator that returns an accurate estimate with high probability, while using as few samples as possible. We formalize this notion as follows: 
+
+Definition 2 (pϵ, δ q-PAC) . A mean estimator is pϵ, δ q-PAC for distribution family D with sample complexity npϵ, δ q
+
+if, for each distribution D P D, it returns an ϵ-correct estimate ˆμ with probability at least 1 ´ δ, i.e., for each D P D, Pr p| ˆμ ´ μpDq| ď ϵq ě 1 ´ δ
+
+and the number of samples required is bounded by npϵ, δ q. The probability is taken over the samples X1, . . . , X n and any internal randomness of the estimator. 
+
+Notation. We use standard asymptotic notation Op¨q , Ωp¨q , and Θp¨q to hide absolute constants. When these hidden constant factors depend on the moment parameter k, we make this dependence explicit using the subscripted notation 
+
+Okp¨q , Ωkp¨q , and Θkp¨q .
+
+## 1.2 Summary of Contributions 
+
+With the problem setup now in place, we summarize our main contributions as follows: • Adaptive 1-Bit Mean Estimator: We propose a novel adaptive 1-bit mean estimator (see Section 2.1) that relies solely on (randomized) threshold queries. It operates by first localizing the distribution’s core via a noisy binary search, and subsequently estimating local probability masses over a universal geometric grid paired with a local variance-aware sample allocation strategy.                   
+
+> 4Since we do not assume the underlying distribution is continuous, the complement of the event tXtďγuis the strict inequality tXtąγu,which differs from tXtěγuif the distribution contains a point mass at the threshold γ. For analytical convenience, we formally allow both inclusive inequalities ( ďand ě) in our threshold query model. However, even if only one direction is allowed, we can easily handle this by adding very slight (continuous-valued) randomization to the values of aiand biused in our algorithm (see Section 2.1).
+
+3• Order-Optimal Sample Complexity: We prove that this estimator is pϵ, δ q-PAC for the generalized distribution family Dpk, λ, σ q for any fixed k ą 1. Despite its structural simplicity, our approach strictly tightens and generalizes the bounds from our preliminary conference version (Lau and Scarlett, 2025b), entirely eliminating the suboptimal logarithmic factors caused by unoptimized search space partitioning (see Remark 7). The resulting sample complexity achieves strict order-optimality across all tail regimes k ą 1.• Lower Bound in the Finite Variance Case: For k ‰ 2, the sample complexity matches the unquantized 
+
+minimax rate plus an additive log pλ{σq localization cost that we prove to be unavoidable (see Theorems 5 and 9). For the finite-variance case ( k “ 2), our upper bound contains an additional Oplog pσ{ϵqq factor compared to the unquantized minimax rate. We establish a novel information-theoretic lower bound proving that this logarithmic penalty is a fundamental, inescapable consequence of 1-bit quantization, thereby confirming our estimator’s optimality for k “ 2.• Lower Bound Proving an Adaptivity Gap: Our adaptive sample complexity bound scales only logarithmically with λ{σ, which contrasts with existing bounds for communication-constrained non-parametric mean estimators scaling at least linearly in λ (see Section 1.3). For the threshold-query and a more general interval-query model, we establish an “adaptivity gap” by showing a worst-case lower bound Ωpλσ {ϵ2 ¨ log pδ´1qq for non-adaptive estimators (see Theorem 11), in particular having a linear dependence on λ.
+
+## 1.3 Related Work 
+
+The related work on communication-constrained mean estimation is extensive; we only provide a brief outline here, emphasizing the most closely related works. 
+
+Classical mean estimation. Mean estimation (in the unquantized setting) is a fundamental and well-studied problem in statistics, e.g., see (Lee and Valiant, 2022; Cherapanamjeri et al., 2022; Minsker, 2023; Dang et al., 2023; Gupta et al., 2024) and the references therein. The state-of-the-art pϵ, δ q-PAC estimator by (Lee and Valiant, 2022) achieves a tight sample complexity n “ p 2 ` op1qq ¨ p σ2{ϵ2q ¨ log p1{δq for all distributions with finite variance σ2. Beyond the finite-variance regime, significant attention has been devoted to robust estimation for heavy-tailed distributions where only a fractional central moment k P p 1, 2q is bounded (Bubeck et al., 2013; Devroye et al., 2016; Lugosi and Mendelson, 2019a). In this regime, the unquantized minimax sample complexity is known to scale as Θ`pσ{ϵq kk´1 log p1{δq˘.Collectively, these unquantized rates serve as a natural benchmark for mean estimation problems under communication constraints. 
+
+Communication-constrained estimation and learning . Early work in communication-constrained estimation, learning, and optimization was motivated by the applications of wireless sensor networks (see (Xiao et al., 2006; Varshney, 2012; Veeravalli and Varshney, 2012; He et al., 2020) and the references therein), with a recent resurgence driven by the rise of large-scale machine learning systems. This has led to the characterization of the sample complexity or minimax risk/error for various communication-constrained estimation problems (Zhang et al., 2013; Garg et al., 2014; Shamir, 2014; Braverman et al., 2016; Xu and Raginsky, 2017; Han et al., 2018a,b; Barnes et al., 2019, 2020; Acharya et al., 2020a,b, 2021a,b,d, 2023; Shah et al., 2025). While abundant, most of the existing literature differs in major aspects including the estimation goal itself, the use of parametric models, and/or imposing significantly stronger assumptions. To our knowledge, none of the existing work on non-parametric communication-constrained estimation captures our problem setup. For example, non-parametric density estimation (Barnes et al., 2020; Acharya et al., 2021c) is an inherently harder problem, and accordingly the authors impose certain regularity conditions on the density function (e.g., belonging to Sobolev space). Similarly, communication-constrained non-parametric function estimation problems in (Zhu and Lafferty, 2018; Szab´ o and van Zanten, 2018, 2020; Cai and Wei, 2022b; Zaman and Szab´ o, 2022) assume certain tail bounds on the likelihood ratio (e.g., Gaussian white noise model). 
+
+Communication-constrained mean estimation. Several works study variants of mean estimation under communication constraints directly. A large body of work focuses on parametric settings, often assuming a known location-scale family (Kipnis and Duchi, 2022; Kumar and Vatedka, 2025) with a particular emphasis on Gaussians (Ribeiro and Giannakis, 2006a; Cai and Wei, 2022a, 2024). These estimators crucially rely on CDF 4inversion, which are highly dependent on exact knowledge of the parametric family, and are not suitable for our non-parametric setting. The non-parametric mean estimators in (Luo, 2005; Ribeiro and Giannakis, 2006b) can handle broader distributional families but require additional assumptions such as bounded support and/or smooth density functions. Furthermore, some of these estimators require more than 1 bit of feedback (per coordinate) per sample. A recent independent work on non-adaptive 1-bit mean estimation (Abdalla and Chen, 2026) partially circumvents these restrictive assumptions. However, their estimator adopts a fixed quantization range whose width scales as Ωpσ2{ϵq in the worst case, 5 and this translates to a sample complexity of Ωpσ4{ϵ4q. In contrast, our adaptive 1-bit mean estimator achieves rOpσ2{ϵ2q rates for all distributions whose first two moments lie within known bounds. 
+
+Empirical vs. population mean estimation. A closely related line of work focuses on distributed empirical mean estimation of a fixed dataset, which is a key primitive in federated learning (Suresh et al., 2017; Koneˇ cn` y and Richt´ arik, 2018; Davies et al., 2021; Vargaftik et al., 2021; Mayekar et al., 2021; Vargaftik et al., 2022; Ben-Basat et al., 2024; Babu et al., 2025). These estimators typically achieve a minimax optimal mean squared error (MSE) that scale as 
+
+Erp ˆμ ´ μemp q2s “ Opλ2{nq. By using Markov’s inequality and the median-of-means method, they can be converted to pϵ, δ q-PAC population mean estimator with a sample complexity of n “ rOpλ2{ϵ2 ¨ log p1{δqq . In contrast, our mean estimator achieves a sample complexity of rOpσ2{ϵ2 ¨ log p1{δq ` log pλ{σqq , which is considerably smaller when 
+
+σ2 ! λ2. Although some empirical mean estimators achieve MSE that depends on empirical deviation/variance σemp 
+
+of the fixed dataset (Ribeiro and Giannakis, 2006b; Suresh et al., 2022), they require a bounded support. Furthermore, their MSE scales at least linearly with λ, e.g., the one in (Suresh et al., 2022) scales as Erp ˆμ ´ μemp q2s “ Opσemp λ{n`
+
+λ2{n2q. Consequently, converting them to pϵ, δ q-PAC population mean estimator using standard techniques would result in a sample complexity bound that scales at least linearly with λ.
+
+# 2 Estimator and Upper Bound 
+
+In this section, we introduce our 1-bit mean estimator and provide its performance guarantee. Our estimator is designed as a target-accuracy driven procedure that takes parameters pk, λ, σ, ϵ, δ q as input. It operates to ensure the desired accuracy ϵ is attained with probability at least 1 ´ δ while minimizing the sample complexity n, and hence does not have an explicit pre-specified sample budget. However, the estimator can readily be applied to the fixed-budget setting where the sampling budget is given and the goal is to minimize the estimation error ϵ. In Section 4.1, we address a harder variant of this, where n is fixed but unknown to the learner. Before detailing the mechanics of the estimator, we first establish a structural property of the distribution family that simplifies the analysis for (very) light-tailed distributions. 
+
+Remark 3 (Reduction to k ď 3). By Lyapunov’s inequality, any distribution in Dpk, λ, σ q for k ą 3 satisfies 
+
+`Er| X ´ μ|3s˘1{3 ď `Er| X ´ μ|ks˘1{k ď σ. 
+
+Thus, when k ą 3, the distribution is inherently a member of Dp3, λ, σ q. Consequently, for any distribution with “very light” tails (e.g., k " 3), our estimator can safely process the samples using an “operative” moment parameter of 3.Therefore, without loss of generality, we assume the moment parameter satisfies k P p 1, 3s for the rest of the paper. This will be convenient for the analysis in Appendix A, ensuring that k-dependent constants (e.g., 2k) remain suitably bounded. 
+
+## 2.1 Description of the Estimator 
+
+Our estimator first localizes an interval I of length Opσq containing the mean μ with high probability (see Step 1 below). Using the mid-point of I as the “centre”, it identifies a cutoff threshold t such that the contribution to the    
+
+> 5To bound the worst-case truncation bias by Opϵqunder only a finite-variance assumption, it can be shown that one must set the range to be
+> Ωpσ2{ϵqdue to the worst-case tightness of Cantelli’s inequality (a one-sided version of Chebyshev’s inequality).
+
+5mean from the “insignificant region” |X| ą t is at most ϵ{2 (see Step 2). Finally, it forms an estimate of the mean contribution from the “significant region” |X| ď t to within an additive error of ϵ{2 (see Steps 3–6). This high-level strategy of performing “localization” (coarse estimation) and “refinement” (finer estimation) has appeared in prior works such as (Cai and Wei, 2022a), but with very different details, particularly for refinement. The key idea behind our refinement procedure is to partition the significant region into sub-regions, and optimally allocate samples to estimate the contribution from each sub-region using randomized threshold queries. Our mean estimator is outlined as follows, with any omitted details deferred to Appendix A: 1. Localization : Using existing median estimation techniques, we localize a high probability confidence interval 
+
+rL, U s containing the median M using nloc pδ, λ, σ q “ Θ`log λσ ` log 1
+
+> δ
+
+˘ 1-bit threshold queries. By the property 
+
+|ErXs ´ M | ď σ, the interval rL ´ σ, U ` σs contains the mean with high probability. It can be verified that this interval has length at most 8σ. Without loss of generality, we may shift our coordinate system so that the midpoint of the interval is exactly 0, i.e., the shifted mean is contained in r´ 4σ, 4σs.2. Cutoff Threshold Selection : We identify a cutoff threshold t ą 8σ ě | μ| such that the mean contribution from the “insignificant region” is bounded by |ErX ¨ 1p| X| ą tqs| ď ϵ{2, so that they can be estimated as being 0. For a distribution with a bounded k-th moment, it is sufficient to choose 
+
+t “ Θ
+
+ˆ
+
+σ ¨
+
+´ σϵ
+
+¯1{p k´1q˙
+
+.
+
+for a distribution with bounded k-th moment. It remains to form a final high-probability estimate ˆμ of the “clipped mean” ErX ¨ 1p| X| ď tqs satisfying |ˆμ ´ ErX ¨ 1p| X| ď tqs| ď ϵ{2.
+
+3. Significant Region Partitioning : We partition the significant region r´ t, t s into non-overlapping symmetric regions R1, R ´1, R 2, R ´2, . . . , R imax , R ´imax defined by exponentially growing interval boundaries miσ:
+
+Ri “
+
+$’&’%
+
+σ ¨ r mi´1, m iq if i ě 1
+
+´Ri if i ď ´ 1
+
+where m0 “ 0 and mi “ 2i for i ě 1. (1) The maximum index imax is chosen such that mimax σ ě t, yielding imax “ Θp 1 
+
+> k´1
+
+log p σϵ qq . Since the clipped mean is the sum of the local contributions μi :“ ErX ¨ 1pX P Riqs , we can estimate each μi separately. 4. Region-Wise Threshold Queries : For each region Ri “ r ai, b iq, the learner estimates its mean contribution μi
+
+using randomized threshold queries. We define the auxiliary probabilities based on a random threshold Ti „
+
+Unif pai, b iq:
+
+pai :“ Pr pX ě aiq ´ Pr pX ě Tiq “ Er1tX ě aius ´ Er1tX ě Tius (2) and 
+
+pbi :“ Pr pX ď biq ´ Pr pX ď Tiq “ Er1tX ď bius ´ Er1tX ď Tius . (3) By exploiting the identity 
+
+μi “ ai ¨ pai ` bi ¨ pbi ,
+
+the task of estimating μi reduces to estimating the probabilities pai and pbi . As suggested by (2) and (3), these can be estimated via threshold queries. Specifically, for a predetermined sample budget ni (specified in Step 5), the learner collects ni independent 1-bit responses for each of the following four query types: 
+
+1tX ě aiu, 1tX ě Tiu, 1tX ď biu, and 1tX ď Tiu,
+
+where the data samples X and random thresholds Ti „ Unif pai, b iq are freshly sampled for each query. Taking the empirical averages of these responses yields the unbiased probability estimates ˆpai and ˆpbi , which are combined to form the unbiased local estimate ˆμi “ ai ¨ ˆpai ` bi ¨ ˆpbi .65. Base Estimator and Sample Allocation : Summing the local estimates from all significant regions yields a single unbiased “base estimator” for the clipped mean: 
+
+ˆμbase “ ÿ
+
+> |i|ď imax
+
+ˆμi.
+
+To achieve the final pϵ, δ q-PAC guarantee through median-of-means (see Step 6), it is sufficient for this base estimator to satisfy a global variance constraint of the form Var pˆμbase q “ ř 
+
+> i
+
+Var pˆμiq “ Opϵ2q. The learner achieves this by setting the regional sample budget ni to scale according to the decay of the local variance 
+
+Var pˆμiq. Specifically, the sample allocation is set to: 
+
+ni “ Θ
+
+ˆ σ2
+
+ϵ2 ¨ 2|i|p 2´kq
+
+˙
+
+.
+
+This allocation guarantees the target variance while yielding an order-optimal sample complexity for a single base estimator: 
+
+ÿ
+
+> |i|ď imax
+
+ni “
+
+$’’’’’’’’’’’&’’’’’’’’’’’%
+
+Ok
+
+ˆ σ2
+
+ϵ2
+
+˙
+
+if k ą 2
+
+O
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯˙
+
+if k “ 2
+
+Ok
+
+ˆ´ σϵ
+
+¯ kk´1
+
+˙
+
+if k P p 1, 2q,
+
+where Okp¨q represents Op¨q notation with a hidden constant that depends on k.6. Median-of-Means : While the base estimator ˆμbase successfully bounds the variance to Opϵ2q, it provides an 
+
+ϵ-accurate estimate with only a constant probability. To boost the success probability to 1 ´ δ, the learner wraps the base estimator in a median-of-means framework. The learner repeats Steps 4 and 5 independently 
+
+K “ Θplog p1{δqq times to generate K independent base estimates ˆμp1q
+
+> base
+
+, . . . , ˆμpKq 
+
+> base
+
+. The final output of the 1-bit mean estimator is their median: 
+
+ˆμ “ median 
+
+´
+
+ˆμp1q
+
+> base
+
+, . . . , ˆμpKq
+
+> base
+
+¯
+
+.
+
+Remark 4 (Algorithmic Advancements over Preliminary Version) . While the high-level spatial partitioning architecture shares structural similarities with our preliminary conference version (Lau and Scarlett, 2025b), the framework of the estimator has been carefully refined to achieve order-optimality for all tail regimes. First, we replace the interval-query model with a simpler threshold-query model, estimating local probability masses purely through differences in empirical threshold crossings (Step 4). Second, we extend the estimation framework to handle heavy-tailed distributions where k P p 1, 2q (Step 5), while simultaneously discarding the complicated k-dependent partition boundaries of the prior work in favor of a simple, universal geometric grid ( mi “ 2i). Finally, instead of relying on crude union bounds to guarantee the accuracy of every local region simultaneously, we deploy a variance-aware local sample allocation (Step 5) paired with a median-of-means aggregator (Step 6). This effectively decouples the global pϵ, δ q-PAC requirement from the granularity of the spatial grid, which is the key to eliminating the suboptimal logarithmic sample complexity penalties present in the previous framework. 
+
+## 2.2 Upper bound 
+
+We now formally state the main result of this paper, which is the performance guarantee of our mean estimator in Section 2.1. The proof is deferred to Appendix A, where we also provide the omitted details in the above outline. 
+
+Theorem 5. The mean estimator given in Section 2.1 is pϵ, δ q-PAC for distribution family Dpk, λ, σ q, with sample 7complexity 
+
+n “ O
+
+ˆ
+
+log 
+
+ˆ λσ
+
+˙˙ 
+
+`
+
+$’’’’’’’’’’’&’’’’’’’’’’’%
+
+Ok
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k ą 2
+
+O
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k “ 2
+
+Ok
+
+ˆ´ σϵ
+
+¯ kk´1
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k P p 1, 2q,
+
+(4) where Okp¨q represents Op¨q notation with a hidden constant that depends on k.Next, suppose that X ´ μ is sub-Gaussian with known parameter σ2. Then X has its finite third central moment bounded by pCσ q3 for some absolute constant C. Therefore, the above mean estimator can be used for sub-Gaussian distributions too. 
+
+Corollary 6. Suppose that X ´ μ is sub-Gaussian with known parameter σ2. Then there exists an pϵ, δ q-PAC 1-bit mean estimator with sample complexity 
+
+n “ O
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙
+
+` log λσ
+
+˙
+
+.
+
+Thus, we match the minimax lower bound for the unquantized setting (see (Lee and Valiant, 2022, p.2) and (Devroye et al., 2016, Theorem 3.1)) up to constant factors for k ‰ 2 and up to a multiplicative log pσ{ϵq factor for k “ 2, along with an additional log pλ{σq term for all k ą 1; both of these extra terms are shown to be unavoidable in Theorem 9. We also study variants where pϵ, σ q are not prespecified in Sections 4.1 and 4.2; and a variant that uses only two rounds/stages of adaptivity in Section 4.3. 
+
+Remark 7 (Tightened Rates and Order-Optimality) . The algorithmic advancements described in Remark 4 yield strictly tightened and generalized upper bounds compared to our preliminary conference version (Lau and Scarlett, 2025b). Specifically, we achieve the following improvements across the tail regimes: 1. Heavy-tailed distributions ( k P p 1, 2q): We achieve strict order-optimal sample complexity for heavy-tailed distributions, an important regime that was entirely unaddressed in the preliminary version, without requiring any ad-hoc structural changes to the underlying estimator. 2. Light-tailed and sub-Gaussian distributions ( k ą 2): We completely eliminate the suboptimal doubly logarithmic factors for light-tailed distributions, and iterated logarithmic factors for sub-Gaussian distributions, yielding strict order-optimal rates. 3. Finite-variance distributions ( k “ 2): We shave two logarithmic factors off the previous sample complexity, matching the unquantized minimax bound up to a single O` log pσ{ϵq˘ factor (as opposed to the O` log 3pσ{ϵq˘
+
+gap in (Lau and Scarlett, 2025b)). We establish in Section 3 that this remaining logarithmic factor is not an artifact of our spatial partitioning, but rather a fundamental information-theoretic limit of 1-bit quantization. Consequently, our estimator achieves order-optimality across all tail regimes k ą 1.
+
+Remark 8 (k-Dependent Constant Factors and the Phase Transition at k “ 2). The subscripted asymptotic notation 
+
+Okp¨q hides k-dependent constant factors that diverge as the moment parameter k approaches the finite-variance boundary ( k Ñ 2). Specifically, the hidden k-dependence scales as Θ` max p1, pk ´ 2q´1q˘ for the light-tailed regime k ą 2, and Θ` max p1, p2 ´ kq´1q˘ for the heavy-tailed regime k P p 1, 2q. This dual-sided divergence characterizes a phase transition in the estimator’s behavior arising from the spatial partitioning architecture. As k Ñ 2,the geometric series governing our sample allocation flattens into a uniform sum (see Step 5(c) of Appendix A), organically manifesting the O` log pσ{ϵq˘ penalty that is an inescapable information-theoretic cost of 1-bit quantization (see Section 3). 83 Lower Bounds and Adaptivity Gap 
+
+In this section, we establish the information-theoretic limits of 1-bit mean estimation via lower bounds on the sample complexity. We first provide, in Theorem 9, a minimax lower bound that matches our upper bound in Theorem 5 up to constants across all tail regimes. In particular, we show that the additive log pλ{σq localization term is unavoidable, and we reveal a novel quantization penalty unique to finite-variance distributions. Subsequently, in Theorem 11, we show that the best non-adaptive mean estimator is strictly worse than our adaptive mean estimator when only threshold queries are allowed, and that the same holds even under a more general interval query model. This establishes a strict “adaptivity gap” between the performance of adaptive and non-adaptive query based mean estimators under threshold and/or interval queries. The proofs for all of our lower bounds are given in Appendix B. 
+
+Theorem 9 (Matching Lower Bound) . For any pϵ, δ q-PAC 1-bit mean estimator, and any ϵ ď cσ (for a sufficiently small constant c ą 0) and λ ě 3ϵ, there exists a distribution D P Dpk, λ, σ q such that the number of samples n must satisfy 
+
+n “ Ω
+
+ˆ
+
+log 
+
+ˆ λσ
+
+˙˙ 
+
+`
+
+$’’’’’’’’’’’&’’’’’’’’’’’%
+
+Ω
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k ą 2Ω
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k “ 2Ω
+
+ˆ´ σϵ
+
+¯ kk´1
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k P p 1, 2q
+
+Remark 10 (The Finite-Variance Penalty) . A surprising feature of Theorem 9 is the strict separation between finite-variance ( k “ 2) and light-tailed ( k ą 2) distributions. In the unquantized setting, both regimes share a base sample complexity of Θpσ2{ϵ2 ¨ log p1{δqq , whereas Theorem 9 establishes that 1-bit communication constraints force the 
+
+k “ 2 regime to uniquely incur an additional multiplicative log pσ{ϵq penalty. To state the second result, we formally define an interval query to be any query of the form Qtpxq “ 1tx P r αt, β tsu 
+
+for some pair pαt, β tq, possibly with αt “ ´8 or βt “ 8 . When αt “ ´8 (respectively, βt “ 8 ), we trivially recover the threshold query 1tx ď βtu (respectively, 1tx ě αtu), so interval queries strictly generalize threshold queries. 
+
+Theorem 11 (Adaptivity Gap) . For any non-adaptive pϵ, δ q-PAC mean estimator utilizing only interval queries, and any target accuracy ϵ ă σ{2, there exists a distribution supported on an interval of length σ (and therefore sub-Gaussian) with mean μ P r´ λ, λ s such that the total number of queries n must satisfy: 
+
+n “ Ω
+
+ˆ λσ ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+.
+
+Because the family of distributions with bounded support of length σ is a strict subset of Dpk, λ, σ q for all k ě 1, this non-adaptive lower bound universally applies to all tail regimes studied in this paper. In the remainder of this section, we discuss the high-level proof ideas. Setting aside the multiplicative log pσ{ϵq
+
+penalty unique to the k “ 2 regime momentarily, the remaining lower bounds (i.e., tail regimes for k ‰ 2 and the additive log pλ{σq localization cost) are established by constructing a finite “hard subset” of distributions that capture two distinct sources of difficulty: (i) “coarsely” identifying the distribution’s location in r´ λ, λ s among 
+
+Θpλ{σq possibilities, and (ii) “finely” estimating the mean by distinguishing between two candidate distributions at that location whose means differ by 2ϵ. The fine estimation step inherently dictates the “base” sample complexity for each respective tail regime based on standard hypothesis testing lower bounds, i.e., Ωp σ2 
+
+> ϵ2
+
+¨ log p1{δqq for k ě 2
+
+and Ωpp σϵ q kk´1 ¨ log p1{δqq for k P p 1, 2q. However, the dependency on λ{σ arising from the coarse identification step differs fundamentally in adaptive vs. non-adaptive settings: • In Theorem 9 (adaptive setting), we can simply interpret the additive logarithmic dependence as the number of bits needed to identify the correct location among the Θpλ{σq possibilities, with each query giving at most 1 bit of information. 9• In Theorem 11 (non-adaptive setting), the multiplicative dependence arises because the estimator needs to allocate enough queries in every one of the Θpλ{σq possible locations simultaneously, as it does not know the correct location in advance. We note that the distributed Gaussian mean estimator in (Cai and Wei, 2024) is non-adaptive and achieves an order-optimal MSE. However, their estimator is highly specific to Gaussian distributions, and their quantization functions are not based on interval queries. We will build upon their localization strategy in our two-stage variant (Section 4.3), but we avoid their refinement strategy, which relies on CDF inversion and is inherently Gaussian-specific. Next, we outline the proof idea for the lower bound showing that the log pσ{ϵq penalty is unavoidable when k “ 2.We define a hard-to-distinguish hypothesis testing problem over a geometric grid xj “ 2j ¨ σ for j “ 1, . . . , M “
+
+Θ` log pσ{ϵq˘. The two distributions are as follows: • The null distribution D0 is a symmetric, zero-mean distribution obtained by placing probability mass qj “
+
+Θ` σ2
+
+> M x 2
+> j
+
+˘ at each pair of points ˘xj , with the remaining mass placed at the origin. Each pair contributes 
+
+Θpσ2{M q to the variance, exhausting the prescribed variance budget σ2.• The alternative ¯D is a uniform mixture ¯D “ 1
+
+> M
+
+řMj“1 Dj , where each constituent distribution Dj is formed from D0 by shifting a small mass pj “ Θpϵ{xj q from ´xj to `xj . This creates a mean shift of Θpϵq while satisfying the global variance constraint. Note that sampling from ¯D is equivalent to first picking an index j uniformly at random and then drawing a sample from Dj . Because the learner does not know which j was chosen, any 1-bit query faces a fundamental signal-to-noise bottleneck: targeting specific grid points dilutes the expected signal by a factor of 1{M , while querying broad regions accumulates excessive baseline noise from D0. Formally, the per-query KL divergence between the Bernoulli response distributions is bounded by O` ϵ2
+
+> M σ 2
+
+˘, which is smaller than the counterpart Opϵ2{σ2q in the unquantized setting. Applying the chain rule for KL divergence over n adaptive rounds forces the sample complexity to scale as 
+
+n “ Ω`M ¨ σ2 
+
+> ϵ2
+
+log 1
+
+> δ
+
+˘ “ Ω` σ2 
+
+> ϵ2
+
+log σϵ log 1
+
+> δ
+
+˘.Crucially, the above argument breaks down in the lighter-tailed regime pk ą 2q. This stems from the fact that the contribution from ˘xj scales as qj xkj “ Θp σ2 
+
+> M
+
+xk´2 
+
+> j
+
+q; then, because xj grows exponentially, the sum řMj“1 xk´2
+
+> j
+
+diverges rapidly when k ą 2. Thus, to keep the k-th central moment bounded by σk, the grid must be truncated to 
+
+M “ Op1q points. Thus, the “logarithmic hiding space” vanishes, and the lower bound reverts to Ω` σ2 
+
+> ϵ2
+
+log 1
+
+> δ
+
+˘.
+
+# 4 Variations and Refinements 
+
+The main estimator developed in Section 2.1 operates under a specific set of conditions: it assumes the target accuracy ϵ
+
+and scale parameter σ are known a priori , it utilizes O` log λσ ` log 1
+
+> δ
+
+˘ rounds of sequential adaptivity, and it is restricted to univariate distributions. In this section, we present four algorithmic extensions that relax these constraints. Specifically, Section 4.1 modifies the protocol to operate without a prespecified target accuracy, yielding an “anytime” estimator that adapts to an unknown sampling budget. Section 4.2 details an approach for adapting to an unknown scale parameter σ when only loose bounds are available. Section 4.3 demonstrates how trading the threshold-query model for general 1-bit queries can drastically reduce the interaction down to just two stages of adaptivity. Finally, Section 4.4 outlines the generalization of our framework to multivariate mean estimation in Rd.
+
+## 4.1 Unknown Target Accuracy 
+
+Our estimator as described in Section 2.1 takes the target accuracy ϵ as an input and consumes a bounded number of samples. Conversely, if a fixed sampling budget n is pre-specified, one can invert the sample complexity bound in (4) to determine the best achievable target accuracy ϵ˚ “ ϵpn, k, δ, λ, σ q. Running the estimator with this parameter naturally yields an ϵ˚-accurate estimate while respecting the budget n.10 We now consider the “anytime” estimation scenario where the true sample budget ntrue is not pre-specified in advance (e.g., due to dynamic client dropouts or uncertain communication horizons), but the other parameters k, δ, λ, and σ
+
+remain known. In this setting, the algorithm cannot pre-compute the optimal oracle accuracy ϵ˚. A naive approach of guessing a target accuracy ϵguess is brittle: a conservative guess that is too large yields an unnecessarily coarse estimate, while an overly optimistic guess exhausts the budget prematurely without forming a valid estimate. To overcome this, we employ a standard halving trick on ϵguess (along with a careful decay schedule of the failure probability δ) to “anytime-ify” the mean estimator. To formalize this sequential procedure, let npϵ, δ, k, λ, σ q “ 
+
+nloc pδ, λ, σ q ` nref pϵ, δ, k, σ q denote the total sample complexity of a single run, where 
+
+nloc pδ, λ, σ q “ Θ
+
+ˆ
+
+log λσ ` log 1
+
+δ
+
+˙
+
+is the number of samples used in the localization step of our mean estimator (see Step 1 of Section 2.1), and 
+
+nref pϵ, δ, k, σ q “ 
+
+$’’’’’’’’’’’&’’’’’’’’’’’%
+
+Θk
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k ą 2Θ
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k “ 2Θk
+
+ˆ´ σϵ
+
+¯ kk´1
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k P p 1, 2q,
+
+(5) is the number of samples used in the refinement (Steps 2-6). The anytime estimator proceeds as follows. We run the localization step (see Step 1 of Section 2.1) once, which requires knowing only the parameters pδ, λ, σ q and consumes nloc pδ, λ, σ q samples. Then for each round τ “ 1, 2, . . . ,we run the remaining refinement steps (Steps 2-6) with progressively tightened parameters 6
+
+pϵτ , δ τ , k, σ q where ϵτ “ σ
+
+2τ and δτ “ 6δπ2τ 2 . (6) Each round τ consumes an additional nref pϵτ , δ τ , k, σ q samples. The estimator proceeds to the next round as long as the cumulative samples do not exceed the true sampling budget ntrue . When the true sampling budget is finally exhausted, the estimator terminates and outputs the last fully computed estimate ˆμT , where 
+
+T “ max  
+
+> τě1
+
+# τÿ
+
+> s“1
+
+nref pϵs, δ s, k, σ q ď ntrue ´ nloc pδ, λ, σ q
+
++
+
+(7) is the final round where the subroutine is completed. By the union bound př 
+
+> τ
+
+δτ ď δq and the PAC guarantee of each subroutine, we have with probability at least 1 ´ δ that every estimate ˆμτ formed is ϵτ -accurate. In particular, under this high-probability event, the final output ˆμT satisfies 
+
+|ˆμT ´ μ| ď ϵT “ σ
+
+2T .
+
+To evaluate the optimality of this anytime estimator, we compare ϵT against the “oracle accuracy” ϵ˚, implicitly defined as the optimal target accuracy achievable had ntrue been known a priori: 
+
+nref pϵ˚, δ, k, σ q “ ntrue ´ nloc pδ, λ, σ q.
+
+Under a mild assumption that the true budget ntrue is sufficiently large to complete the localization step and the first refinement round, we show that that our anytime estimator matches the oracle accuracy up to a doubly-logarithmic factor.       
+
+> 6Alternatively, we could pick any suitable ϵ0as the initial target accuracy and let ϵτ“ϵ0{2τ´1.
+
+11 Theorem 12. Under the preceding setup, assuming ntrue ě nloc pδ, λ, σ q ` nref pϵ1, δ 1, k, σ q, we have 
+
+ϵT “ O
+
+˜
+
+ϵ˚
+
+ˆ
+
+1 ` log log pσ{ϵ˚q
+
+log p1{δq
+
+˙ 1
+
+> p
+
+¸
+
+where p “ 2 if k ě 2, and p “ kk´1 if k P p 1, 2q.The crux of the proof lies in the fact that across all tail regimes k ą 1, the refinement complexity nref pϵ, ¨q scales at least as fast as p1{ϵq2. As a result, the sequence of sample complexities across rounds grows geometrically, meaning the cumulative sum of samples is always dominated by the cost of the final round T . The full derivation is provided in Appendix C.1. 
+
+## 4.2 Adapting to Unknown Scale σ
+
+The sample complexity of our main mean estimator, as established in Theorem 5, scales with the ratio σ{ϵ, where σk
+
+is a known upper bound on the true k-th central moment σk 
+
+> true
+
+“ Er| X ´ μ|ks. This scaling is not ideal when the provided bound is highly conservative (i.e., σ " σtrue ). This contrasts with the unquantized setting, where there exist finite-variance mean estimators whose sample complexities scale with the true ratio σtrue {ϵ without requiring any prior knowledge of σ2true (Lee and Valiant, 2022). Under the 1-bit communication constraint, it is difficult to learn the true scale parameter and estimate the mean simultaneously. We consider a setting where both the target accuracy ϵ and the true scale parameter σtrue are unknown to the learner, but the learner is given a valid but potentially vast range σtrue P r σmin , σ max s and seeks to estimate the mean to a relative accuracy ϵ “ rσ true for some known target ratio r P p 0, 1q. That is, we seek accuracy to within multiples of the true (but unknown) scale parameter. To achieve this, we wrap our main estimator in a geometric grid-search procedure. The learner tests a sequence of logarithmically decaying guesses for the scale parameter defined by σi “ σmax ¨ 2´i for i “ 0, 1, . . . , T , where the maximum index is given by 
+
+T “ rlog 2pσmax {σmin qs. (8) For each guessed scale σi, the learner runs the mean estimator in Section 2.1 with parameters 
+
+pϵi, δ i, λ, σ iq “ 
+
+ˆ rσ i
+
+6 , δT ` 1 , λ, σmax 
+
+2i
+
+˙
+
+(9) to obtain a candidate mean estimate ˆμpiq and an associated confidence interval 
+
+Ii “ r ˆμpiq ˘ ϵis “ 
+
+”
+
+ˆμpiq ´ rσ i
+
+6 , ˆμpiq ` rσ i
+
+6
+
+ı
+
+. (10) The algorithm proceeds sequentially and halts at the first index where the newly generated confidence interval fails to intersect with any of the previously established intervals: 
+
+Ii X Il “ H for some l ď i. (11) It then outputs the estimate ˆμpi˚q from the last successful index i˚ “ i ´ 1.Because the target accuracy scales proportionally with the guessed scale (i.e., ϵi “ rσ i{6), the ratio σi{ϵi “ 6{r
+
+remains constant across all rounds i. Consequently, the sample complexity of the refinement phase for every grid point depends only on the relative accuracy r (and the error probability δi). Summing the sample complexities across all 
+
+T ` 1 grid points yields the following performance guarantee. 
+
+Theorem 13 (Adaptation to Unknown Scale) . Given r P p 0, 1q and σtrue P r σmin , σ max s, the adaptive 1-bit mean estimator described above is prσ true , δ q-PAC for any distribution in Dpk, λ, σ true q. The total sample complexity is bounded by 
+
+n “ O
+
+ˆ
+
+log 
+
+ˆ σmax 
+
+σmin 
+
+˙
+
+¨
+
+ˆ
+
+Skprq ¨ log 
+
+ˆ log pσmax {σmin q
+
+δ
+
+˙
+
+` log 
+
+ˆ λ
+
+?σmin σmax 
+
+˙˙˙ 
+
+12 where Skprq captures the asymptotic sample complexity scaling with respect to the fixed ratio r:
+
+Skprq “ 
+
+$’’’’’’’’’’&’’’’’’’’’’%
+
+1
+
+r2 if k ą 21
+
+r2 log 
+
+ˆ 1
+
+r
+
+˙
+
+if k “ 2
+
+ˆ 1
+
+r
+
+˙ kk´1
+
+if k P p 1, 2q.
+
+The proof is given in Appendix C.2. 
+
+## 4.3 Two-Stage Variant 
+
+Our mean estimator in Section 2.1 uses O`log λσ ` log 1
+
+> δ
+
+˘ rounds of adaptivity. Specifically, the localization step (Step 1 of Section 2.1), which performs median estimation through noisy binary search, introduces sequential dependencies that require O`log λσ ` log 1
+
+> δ
+
+˘ rounds of adaptivity; while the refinement step requires only one additional round after an interval of length Opσq containing the mean has been identified. In this section, we provide an alternative localization procedure that is non-adaptive, while leaving the subsequent refinement step unchanged. This yields an alternative mean estimator that requires exactly two rounds of adaptivity — one for localization and one for refinement. However, this comes at the cost of using general (non-interval) 1-bit queries in the first round, as opposed to using only threshold queries. Our alternative localization step is adapted from the localization step of the non-adaptive Gaussian mean estimator in (Cai and Wei, 2024), which is presented therein for Gaussian distributions but also noted to extend to the general sub-Gaussian case (unlike their refinement stage). We modify their localization step so that it operates on all distributions in Dpk, λ, σ q, with the following performance guarantee: 
+
+Theorem 14. There exists a non-adaptive 1-bit localization protocol taking pk, δ, λ, σ q as input such that for each distribution D P Dpk, λ, σ q, it returns an interval I containing the true mean μ with probability at least 1 ´ δ{2.Furthermore, the number of samples used is Θ
+
+´
+
+log ` λσ
+
+˘ ¨ log log pλ{σq
+
+> δ
+
+¯
+
+and the interval length is |I| “ Opσq.We describe the high-level idea here. The learner partitions the search space r´ λ, λ s into 2M subintervals of equal length for some M “ Θplog pλ{σqq , and attempts to estimate all M bits of the Gray code representation of the subinterval containing μ. Each of these M bits is reliably estimated by making general 1-bit queries and taking a majority vote over J “ Θ`log Mδ
+
+˘ non-adaptive samples, consuming M J samples in total. The details are deferred to Appendix D. By replacing the sequential localization step of our main estimator with this non-adaptive alternative, we obtain a mean estimator with the following performance guarantee. 
+
+Corollary 15. The alternative mean estimator described above is pϵ, δ q-PAC for the distribution family Dpk, λ, σ q,with sample complexity 
+
+n “ O
+
+ˆ
+
+log 
+
+ˆ λσ
+
+˙
+
+¨ log log pλ{σq
+
+δ
+
+˙
+
+`
+
+$’’’’’’’’’’’&’’’’’’’’’’’%
+
+Ok
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k ą 2
+
+O
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k “ 2
+
+Ok
+
+ˆ´ σϵ
+
+¯ kk´1
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k P p 1, 2q,
+
+(12) 13 where Okp¨q represents Op¨q notation with a hidden constant that depends on k. Furthermore, the estimator uses only two rounds of adaptivity, the first of which uses general (non-interval) 1-bit queries. 
+
+## 4.4 Multivariate Mean Estimation 
+
+The multivariate case (i.e., X P Rd with d ą 1) is naturally of significant interest. We have focused our analysis exclusively on the univariate setting up to this point, as it forms the necessary theoretical foundation and already presents substantial challenges when characterizing the fundamental limits of 1-bit quantization across general tail regimes ( k ą 1). Nevertheless, our 1-bit architecture readily provides constructive, baseline guarantees for higher dimensions. To maintain clarity and isolate the impact of dimensionality, we restrict our discussion in this subsection to the canonical finite-variance setting ( k “ 2). Specifically, suppose that X takes values in Rd, where each coordinate Xj (for j “ 1, . . . , d ) individually satisfies our earlier assumptions for k “ 2; namely, a bounded mean ErXj s P r´ λ, λ s and bounded variance Var pXj q ď σ2.By applying our univariate estimator coordinate-wise with a refined target accuracy of ϵ{?d and a union-bounded confidence parameter of δ{d, we guarantee that every coordinate is estimated to within ϵ{?d accuracy. Consequently, we obtain an overall multivariate estimate that is ϵ-accurate in the ℓ2 norm with probability at least 1´δ. In accordance with Theorem 5, the total sample complexity across all d coordinates is 
+
+rO
+
+ˆ d2σ2
+
+ϵ2 log 1
+
+δ ` d log λσ
+
+˙
+
+,
+
+where the d2 factor arises from (i) using the scaled accuracy parameter ϵ{?d, and (ii) running the univariate subroutine d times. This may seem potentially loose on first glance, due to the correct scaling being σ2 
+
+> ϵ2
+
+¨p d ` log p1{δqq 
+
+in the absence of a communication constraint (Lugosi and Mendelson, 2019b). However, under 1-bit feedback, the 
+
+d2σ2{ϵ2 dependence in fact unavoidable even in the special case of Gaussian random variables; see (Cai and Wei, 2024, Theorem 8) with the parameter m1 therein equating to n{d in our notation under 1-bit feedback. 7 Moreover, if the communication bottleneck is relaxed to allow d bits of feedback per sample (i.e., one bit per coordinate ), applying our univariate estimator coordinate-wise yields a sample complexity of rO` dσ 2 
+
+> ϵ2
+
+log p1{δq ` d log pλ{σq˘. In the constant error probability regime ( δ “ Θp1q), this matches the unconstrained rate up to logarithmic factors. In the regime 
+
+δ “ op1q there remains a significant gap due to the fact that d log 1 
+
+> δ
+
+" d ` log 1 
+
+> δ
+
+, but this gap is inherent to any approach that controls each coordinate’s error to O` ϵ?d
+
+˘ separately. Beyond the issue of joint pd, δ q dependence, another limitation of the coordinate-wise approach is that it does not capture the dependence on off-diagonal terms in the covariance matrix Σ. Doing so may be significantly more difficult, particularly when Σ is not known exactly and so “whitening” techniques cannot readily be used. We leave such considerations for future work. 
+
+# 5 Conclusion 
+
+In this paper, we studied the fundamental limits of mean estimation under the extreme constraint of a single bit of communication per sample. We proposed a novel adaptive estimator based on threshold queries that is pϵ, δ q-PAC across a broad family of distributions, characterized by a bounded mean and a bounded k-th central moment. Crucially, we established that our estimator achieves order-optimal sample complexity across all tail regimes k ą 1. For k ‰ 2,our sample complexity matches the unquantized minimax lower bounds alongside an unavoidable additive localization cost. For the finite-variance case ( k “ 2), we established a novel information-theoretic lower bound proving that the extra multiplicative Oplog pσ{ϵqq penalty is an inescapable consequence of the 1-bit communication constraint, confirming our estimator’s order-optimality for k “ 2 (and, in turn, for all k ą 1). We also expanded the versatility of our framework by providing algorithmic variants capable of handling an unknown sampling budget, adapting to an         
+
+> 7To give slightly more detail, the parameters mand bi“1therein equate respectively to the number of samples nand number of bits allowed per feedback.
+
+14 unknown scale parameter given loose bounds, and using only two stages of adaptivity. To highlight the necessity of our adaptive approach, we established an adaptivity gap for both threshold queries and more general interval queries, showing that non-adaptive strategies must incur a sample complexity that scales linearly with the search size parameter 
+
+λ, thus being considerably higher than the log λ dependence for our adaptive estimators. Several directions remain for future research, including achieving fully parameter-free adaptation to the scale and target accuracy with minimal assumptions, and extending the 1-bit quantization framework to multivariate settings beyond the coordinate-wise approach. 
+
+# Acknowledgement 
+
+This work was supported by the Singapore National Research Foundation (NRF) under its AI Visiting Professorship programme. 
+
+# References 
+
+Abdalla, P. and Chen, J. (2026). Robust mean estimation under quantization. arXiv preprint arXiv:2601.07074 .Acharya, J., Canonne, C., Liu, Y., Sun, Z., and Tyagi, H. (2021a). Distributed estimation with multiple samples per user: Sharp rates and phase transition. In Advances in Neural Information Processing Systems , volume 34, pages 18920–18931. Acharya, J., Canonne, C. L., Liu, Y., Sun, Z., and Tyagi, H. (2021b). Interactive inference under information constraints. IEEE Transactions on Information Theory , 68(1):502–516. Acharya, J., Canonne, C. L., Singh, A. V., and Tyagi, H. (2021c). Optimal rates for nonparametric density estimation under communication constraints. CoRR , abs/2107.10078. Acharya, J., Canonne, C. L., Sun, Z., and Tyagi, H. (2023). Unified lower bounds for interactive high-dimensional estimation under information constraints. Advances in Neural Information Processing Systems , 36:51133–51165. Acharya, J., Canonne, C. L., and Tyagi, H. (2020a). Inference under information constraints I: Lower bounds from chi-square contraction. IEEE Transactions on Information Theory , 66(12):7835–7855. Acharya, J., Canonne, C. L., and Tyagi, H. (2020b). Inference under information constraints II: communication constraints and shared randomness. IEEE Transactions on Information Theory , 66(12):7856–7877. Acharya, J., Kairouz, P., Liu, Y., and Sun, Z. (2021d). Estimating sparse discrete distributions under privacy and communication constraints. In Algorithmic Learning Theory (ALT) , pages 79–98. PMLR. Babu, N. S., Kumar, R., and Vatedka, S. (2025). Unbiased quantization of the l1 ball for communication-efficient distributed mean estimation. In International Conference on Artificial Intelligence and Statistics (AISTATS) , volume 258, pages 1270–1278. PMLR. Barnes, L. P., Han, Y., and ¨Ozg¨ ur, A. (2019). Fisher information for distributed estimation under a blackboard communication protocol. In IEEE International Symposium on Information Theory (ISIT) , pages 2704–2708. IEEE. Barnes, L. P., Han, Y., and ¨ Ozg¨ ur, A. (2020). Lower bounds for learning distributions under communication constraints via Fisher information. Journal of Machine Learning Research , 21:1–30. Ben-Basat, R., Vargaftik, S., Portnoy, A., Einziger, G., Ben-Itzhak, Y., and Mitzenmacher, M. (2024). Accelerating federated learning with quick distributed mean estimation. In International Conference on Machine Learning (ICML) , volume 235, pages 3410–3442. PMLR. 15 Braverman, M., Garg, A., Ma, T., Nguyen, H. L., and Woodruff, D. P. (2016). Communication lower bounds for statistical estimation problems via a distributed data processing inequality. In Symposium on Theory of Computing Conference, STOC’16 , pages 1011–1020. ACM. Bubeck, S., Cesa-Bianchi, N., and Lugosi, G. (2013). Bandits with heavy tail. IEEE Transactions on Information Theory , 59(11):7711–7717. Cai, T. T. and Wei, H. (2022a). Distributed adaptive Gaussian mean estimation with unknown variance: Interactive protocol helps adaptation. The Annals of Statistics , 50(4):1992–2020. Cai, T. T. and Wei, H. (2022b). Distributed nonparametric function estimation: Optimal rate of convergence and cost of adaptation. The Annals of Statistics , 50(2):698–725. Cai, T. T. and Wei, H. (2024). Distributed Gaussian mean estimation under communication constraints: Optimal rates and communication-efficient algorithms. Journal of Machine Learning Research , 25(37):1–63. Cherapanamjeri, Y., Tripuraneni, N., Bartlett, P., and Jordan, M. (2022). Optimal mean estimation without a variance. In Conference on Learning Theory , pages 356–357. PMLR. Dang, T., Lee, J., Song, M., and Valiant, P. (2023). Optimality in mean estimation: Beyond worst-case, beyond sub-Gaussian, and beyond 1 ` α moments. In Advances in Neural Information Processing Systems , volume 36, pages 4150–4176. Davies, P., Gurunanthan, V., Moshrefi, N., Ashkboos, S., and Alistarh, D. (2021). New bounds for distributed mean estimation and variance reduction. In International Conference on Learning Representations, (ICLR) .DeGroot, M. and Schervish, M. (2013). Probability and Statistics: Pearson New International Edition . Pearson Education. Devroye, L., Lerasle, M., Lugosi, G., and Oliveira, R. I. (2016). Sub-Gaussian mean estimators. The Annals of Statistics , 44(6):2695 – 2725. Garg, A., Ma, T., and Nguyen, H. L. (2014). On communication cost of distributed statistical estimation and dimensionality. In Advances in Neural Information Processing Systems 27 , pages 2726–2734. Gretta, L. and Price, E. (2024). Sharp Noisy Binary Search with Monotonic Probabilities. In 51st International Colloquium on Automata, Languages, and Programming (ICALP) , volume 297, pages 75:1–75:19. Gupta, S., Hopkins, S., and Price, E. (2024). Beyond catoni: Sharper rates for heavy-tailed and robust mean estimation. In Conference on Learning Theory (COLT) , pages 2232–2269. PMLR. Han, Y., Mukherjee, P., ¨ Ozg¨ ur, A., and Weissman, T. (2018a). Distributed statistical estimation of high-dimensional and non-parametric distributions. In IEEE International Symposium on Information Theory (ISIT) , pages 506–510. Han, Y., ¨ Ozg¨ ur, A., and Weissman, T. (2018b). Geometric lower bounds for distributed parameter estimation under communication constraints. In Conference on Learning Theory (COLT) , volume 75, pages 3163–3188. PMLR. Hanna, O. A., Yang, L., and Fragouli, C. (2022). Solving Multi-Arm Bandit Using a Few Bits of Communication. In 
+
+International Conference on Artificial Intelligence and Statistics (AISTATS) , pages 11215–11236. He, S., Shin, H.-S., Xu, S., and Tsourdos, A. (2020). Distributed estimation over a low-cost sensor network: A review of state-of-the-art. Information Fusion , 54:21–43. Kipnis, A. and Duchi, J. C. (2022). Mean estimation from one-bit measurements. IEEE Transactions on Information Theory , 68(9):6276–6296. Kleinberg, R. and Leighton, T. (2003). The value of knowing a demand curve: Bounds on regret for online posted-price auctions. In IEEE Symposium on Foundations of Computer Science (FOCS) , pages 594–605. IEEE. Koneˇ cn` y, J. and Richt´ arik, P. (2018). Randomized distributed mean estimation: Accuracy vs. communication. 
+
+Frontiers in Applied Mathematics and Statistics , 4:62. 16 Kumar, R. and Vatedka, S. (2025). One-bit distributed mean estimation with unknown variance. arXiv preprint arXiv:2501.18502 .Lau, I. and Scarlett, J. (2025a). Quantile multi-armed bandits with 1-bit feedback. In Algorithmic Learning Theory ,pages 664–699. PMLR. Lau, I. and Scarlett, J. (2025b). Sequential 1-bit mean estimation with near-optimal sample complexity. arXiv preprint arXiv:2509.21940 .Lee, J. (2020). CSCI 1951-W Sublinear Algorithms for Big Data, Lecture 11. https://cs.brown.edu/ courses/csci1951-w/lec/lec%2011%20notes.pdf . Accessed: 2025-07-01. Lee, J. C. and Valiant, P. (2022). Optimal sub-Gaussian mean estimation in R. In IEEE Annual Symposium on Foundations of Computer Science (FOCS) , pages 672–683. IEEE. Lugosi, G. and Mendelson, S. (2019a). Mean estimation and regression under heavy-tailed distributions: A survey. 
+
+Foundations of Computational Mathematics , 19(5):1145–1190. Lugosi, G. and Mendelson, S. (2019b). Sub-Gaussian estimators of the mean of a random vector. The Annals of Statistics , 47(2):783 – 794. Luo, Z.-Q. (2005). Universal decentralized estimation in a bandwidth constrained sensor network. IEEE Transactions on Information Theory , 51(6):2210–2219. Mayekar, P., Scarlett, J., and Tan, V. Y. (2023). Communication-constrained bandits under additive Gaussian noise. In 
+
+International Conference on Machine Learning (ICML) , pages 24236–24250. Mayekar, P., Suresh, A. T., and Tyagi, H. (2021). Wyner-ziv estimators: Efficient distributed mean estimation with side-information. In International Conference on Artificial Intelligence and Statistics (AISTATS) , pages 3502–3510. PMLR. Minsker, S. (2023). Efficient median of means estimator. In Conference on Learning Theory (COLT) , pages 5925– 5933. PMLR. Paes Leme, R., Sivan, B., Teng, Y., and Worah, P. (2023). Pricing query complexity of revenue maximization. In 
+
+ACM-SIAM Symposium on Discrete Algorithms (SODA) , pages 399–415. SIAM. Polyanskiy, Y. and Wu, Y. (2025). Information Theory: From Coding to Learning . Cambridge University Press. Ribeiro, A. and Giannakis, G. B. (2006a). Bandwidth-constrained distributed estimation for wireless sensor networks-part i: Gaussian case. IEEE Transactions on Signal Processing , 54(3):1131–1143. Ribeiro, A. and Giannakis, G. B. (2006b). Bandwidth-constrained distributed estimation for wireless sensor networks-part ii: Unknown probability density function. IEEE Transactions on Signal Processing , 54(7):2784–2796. Shah, J., Cardone, M., Rush, C., and Dytso, A. (2025). Generalized linear models with 1-bit measurements: Asymptotics of the maximum likelihood estimator. In International Conference on Acoustics, Speech and Signal Processing (ICASSP) , pages 1–5. IEEE. Shamir, O. (2014). Fundamental limits of online and distributed algorithms for statistical learning and estimation. In 
+
+Advances in Neural Information Processing Systems 27 , pages 163–171. Suresh, A. T., Felix, X. Y., Kumar, S., and McMahan, H. B. (2017). Distributed mean estimation with limited communication. In International Conference on Machine Learning (ICML) , pages 3329–3337. PMLR. Suresh, A. T., Sun, Z., Ro, J., and Yu, F. (2022). Correlated quantization for distributed mean estimation and optimization. In International Conference on Machine Learning , pages 20856–20876. PMLR. Szab´ o, B. and van Zanten, H. (2018). Adaptive distributed methods under communication constraints. The Annals of Statistics .17 Szab´ o, B. and van Zanten, H. (2020). Distributed function estimation: Adaptation using minimal communication. 
+
+Mathematical Statistics and Learning .Tsybakov, A. B. (2009). Introduction to Nonparametric Estimation . Springer Series in Statistics. Vargaftik, S., Basat, R. B., Portnoy, A., Mendelson, G., Itzhak, Y. B., and Mitzenmacher, M. (2022). EDEN: Communication-efficient and robust distributed mean estimation for federated learning. In International Conference on Machine Learning (ICML) , volume 162, pages 21984–22014. PMLR. Vargaftik, S., Ben-Basat, R., Portnoy, A., Mendelson, G., Ben-Itzhak, Y., and Mitzenmacher, M. (2021). Drive: One-bit distributed mean estimation. In Advances in Neural Information Processing Systems , volume 34, pages 362–377. Varshney, P. K. (2012). Distributed detection and data fusion . Springer Science & Business Media. Veeravalli, V. V. and Varshney, P. K. (2012). Distributed inference in wireless sensor networks. Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences , 370(1958):100–117. Xiao, J.-J., Ribeiro, A., Luo, Z.-Q., and Giannakis, G. B. (2006). Distributed compression-estimation using wireless sensor networks. IEEE Signal Processing Magazine , 23(4):27–41. Xu, A. and Raginsky, M. (2017). Information-theoretic lower bounds on Bayes risk in decentralized estimation. IEEE Transactions on Information Theory , 63(3):1580–1600. Zaman, A. and Szab´ o, B. (2022). Distributed nonparametric estimation under communication constraints. arXiv preprint arXiv:2204.10373 .Zhang, Y., Duchi, J., Jordan, M. I., and Wainwright, M. J. (2013). Information-theoretic lower bounds for distributed statistical estimation with communication constraints. In Advances in Neural Information Processing Systems 26 ,pages 2328–2336. Zhu, Y. and Lafferty, J. (2018). Distributed nonparametric regression under communication constraints. In 
+
+International Conference on Machine Learning (ICML) , pages 6009–6017. PMLR. 18 Appendix 
+
+# A Proof of Theorem 5 (Performance Guarantee of 1-bit Mean Estimator) 
+
+We first state a useful generalization of Chebyshev’s inequality that will be used multiple times in the proof. 
+
+Lemma 16 (k-moment Chebyshev’s Inequality) . Suppose that the random variable X has a finite k-th central moment bounded by σk for some k ą 1, i.e., E“|X ´ μ|k‰ ď σk. Then, for each t ą 0, we have 
+
+Pr p| X ´ μ| ě tq “ Pr `|X ´ μ|k ě tk˘ ď E“|X ´ μ|k‰
+
+tk ď σk
+
+tk (13) We proceed in several steps as we outlined in Section 2.1. 
+
+Step 1 (Narrowing Down the Mean via the Median): We discretize the interval r´ λ, λ s containing ErXs into a discrete set of points with uniform spacing of σ:8
+
+t´ λ, ´λ ` σ, . . . , ´σ, 0, σ, . . . , λ ´ σ, λ u.
+
+We then form estimates L, U P t´ λ, ´λ ` σ, . . . , λ ´ σ, λ u using noisy binary search (Gretta and Price, 2024) that satisfy 
+
+Pr `F pLq ă 0.5 and F pL ` σq ą 0.49 ˘ ě 1 ´ δ
+
+4 (14) and 
+
+Pr `F pU ´ σq ă 0.51 and F pU q ą 0.5˘ ě 1 ´ δ
+
+4 . (15) The algorithm in (Gretta and Price, 2024) achieves this using at most O` log λσδ 
+
+˘ 1-bit queries. Under these high-probability events, the median M satisfies L ď M ď U . Using the well-known fact that the median minimizes the mean absolute error (DeGroot and Schervish, 2013, Theorem 4.5.3): 
+
+E|X ´ M | ď E|X ´ d| for each d P R,
+
+we have 
+
+|μ ´ M | “ | ErXs ´ M | “ | ErX ´ M s| ď E|X ´ M | ď E|X ´ μ|.
+
+Meanwhile, applying Jensen’s inequality to the convex function z Þ Ñ | z|k (for k ą 1), along with the k-th central moment bound, yields 
+
+pEr| X ´ μ|sq k ď E“|X ´ μ|k‰ ď σk ùñ E|X ´ μ| ď σ. 
+
+Combining these two findings and L ď M ď U , we have 
+
+|μ ´ M | ď σ ùñ μ P r L ´ σ, U ` σs.
+
+Next, we bound the length of this localized interval, pU ` σq ´ p L ´ σq. We consider two cases: (i) L ` σ ě U ´ σ
+
+and (ii) L ` σ ă U ´ σ. In case (i), the interval length is trivially at most 4σ. In case (ii), we claim that the interval length is at most 8σ. Seeking contradiction, suppose the length of interval pU ` σq ´ p L ´ σq ě 9σ. Then we must have either 
+
+μ ´ p L ´ σq ě 4.5σ or pU ` σq ´ μ ě 4.5σ. 
+
+We will show that μ ´ p L ´ σq ě 4.5σ (which implies μ ´ 2.5σ ě L ` σ) will lead to a contradiction; the case 
+
+pU ` σq ´ μ ě 4.5σ is similar. Using (14), we have 
+
+Pr pX ď μ ´ 2.5σq ě Pr pX ď L ` σq “ FX pL ` σq ą 0.49 .   
+
+> 8For ease of analysis, we assume that λis an integer multiple of σ.
+
+19 On the other hand, by the “ k-moment” Chebyshev’s inequality (13), we have 
+
+Pr pX ď μ ´ 2.5σq ď Pr p| X ´ μ| ě 2.5σq ď 12.5k ă 12.5 ă 0.49 ,
+
+which is a contradiction. Therefore, we have shown that with probability at least 1 ´ δ{2, the mean μ lies in an interval of length at most 8σ.
+
+Step 2 (Cutoff Threshold Selection): Let T ptq :“ | ErX ¨ 1p| X| ą tqs| denote the contribution from the insignificant region for a threshold t ą 8σ. Using the decomposition X “ p X ´ μq ` μ and the triangle inequality, we have: 
+
+T ptq ď | Erp X ´ μq ¨ 1p| X| ą tqs| ` | μ ¨ Er1p| X| ą tqs| ď Er| X ´ μ| ¨ 1p| X| ą tqs ` ˇˇμˇˇ ¨ Pr p| X| ą tq. (16) Recall from Step 1 that our centering guarantees |μ| ď 4σ. Since t ą 8σ, it follows that t ´ | μ| ě t{2 ą 0. Using the reverse triangle inequality on the event |X| ą t, we observe: 
+
+t ă | X| ùñ t ´ | μ| ă | X| ´ | μ| ď | X ´ μ| ùñ 1 ă
+
+ˆ |X ´ μ|
+
+t ´ | μ|
+
+˙k´1
+
+ùñ | X ´ μ| ă |X ´ μ|k
+
+pt ´ | μ|q k´1 .
+
+Substituting this bound into (16), and applying both the k-th central bound and the k-moment Chebyshev’s inequality (13), we obtain: 
+
+T ptq ď Er| X ´ μ|kspt ´ | μ|q k´1 ` | μ| ¨ Pr p| X ´ μ| ą t ´ | μ|q ď σk
+
+pt ´ | μ|q k´1 ` ˇˇμˇˇ ¨ σk
+
+pt ´ | μ|q k .
+
+Because t ´ | μ| “ Θptq and |μ| “ Opσq due to our centering step, the first term dominates, yielding 
+
+T ptq “ O
+
+ˆ σk
+
+tk´1
+
+˙
+
+.
+
+To ensure the tail contribution is at most ϵ{2, it is sufficient to set 
+
+ˆ tσ
+
+˙k´1
+
+“ Θ
+
+´ σϵ
+
+¯
+
+ùñ t “ Θ
+
+ˆ
+
+σ ¨
+
+´ σϵ
+
+¯1{p k´1q˙
+
+.
+
+It remains to form a final high-probability estimate ˆμ of the “clipped mean” ErX ¨ 1p| X| ď tqs satisfying 
+
+|ˆμ ´ ErX ¨ 1p| X| ď tqs| ď ϵ{2,
+
+as this implies 
+
+|μ ´ ˆμ| “ 
+
+ˇˇˇErX ¨ 1p| X| ą tqs ` ErX ¨ 1p| X| ď tqs ´ ˆμ
+
+ˇˇˇ
+
+ď
+
+ˇˇˇErX ¨ 1p| X| ą tqs 
+
+ˇˇˇ `
+
+ˇˇˇErX ¨ 1p| X| ď tqs ´ ˆμ
+
+ˇˇˇ
+
+ď ϵ
+
+2 ` ϵ
+
+2 ď ϵ. 
+
+(17) 
+
+Step 3 (Significant Region Partitioning). As outlined in Section 2.1, we partition the significant region r´ t, t s into symmetric sub-regions. For i ě 1, we define the right-sided regions as Ri “ σrmi´1, m iq where m0 “ 0 and mi “ 2i.The left-sided regions are formed by symmetry: R´i “ ´ Ri.To ensure the union of these partitioned regions fully covers the target interval r´ t, t s, the maximum index imax must satisfy mimax σ ě t. Recalling from Step 2 that t “ Θ`σ ¨ p σ{ϵq 1
+
+> k´1
+
+˘, we set imax to be the minimum integer satisfying this condition: 
+
+imax “
+
+R
+
+log 2
+
+ˆ tσ
+
+˙V 
+
+“ Θ
+
+ˆ 1
+
+k ´ 1 log 
+
+´ σϵ
+
+¯˙
+
+.
+
+Let t1 “ mimax σ “ Θptq denote the effective cutoff threshold. Because t1 ě t, expanding the truncation window from r´ t, t s to r´ t1, t 1s can only decrease the truncation bias, meaning the tail mass bound of ϵ{2 established in Step 2 20 remains valid. Furthermore, since the regions are disjoint, the clipped mean decomposes into the sum of the local mean contributions: ÿ
+
+> |i|ď imax
+
+μi “ ÿ
+
+> |i|ď imax
+
+ErX ¨ 1pX P Riqs “ ErX ¨ 1p| X| ď t1qs .
+
+Therefore, to estimate the overall clipped mean, it is sufficient to independently estimate the local mean contribution μi
+
+of each region Ri.
+
+Step 4 (Region-Wise Randomized Threshold Queries): For each i, write Ri “ r ai, b iq, and let Ti „ Unif pai, b iq be a random threshold independent of X. To formally justify the local mean identity introduced in Step 4 of Section 2.1, we define a (hypothetical) stochastic quantizer SQ ipXq that rounds X to the boundaries of Ri if X falls within the region, and outputs 0 otherwise: 
+
+SQ ipXq “ 
+
+$’&’%
+
+ai if X P Ri and X ď Ti
+
+bi if X P Ri and X ą Ti
+
+0 if X R Ri.
+
+By this direct construction, the probability of outputting ai (respectively, bi) precisely matches the auxiliary probability 
+
+pai (respectively, pbi ) defined in (2) (respectively, (3)). Specifically, we have: 
+
+pai “ Pr pX ě aiq ´ Pr pX ě Tiq “ Pr pX P r ai, T isq “ Pr pX P Ri and X ď Tiq “ Pr pSQ ipXq “ aiq.
+
+Likewise, analogous steps yield 
+
+pbi “ Pr pX P Ri and X ą Tiq “ Pr pSQ ipXq “ biq.
+
+These equivalences allow us to interpret our threshold queries as a form of binary stochastic quantization. A well-known property of a stochastic quantizer is that it “rounds” X in a way that preserves its value in expectation. To formally show this, we evaluate the conditional expectation of SQ ipXq given X “ x. Using the CDF of the uniform distribution Ti, we observe the following: • If x R Ri, then SQ ipxq “ 0, which trivially gives ErSQ ipXq | X “ xs “ 0.• If x P Ri, the conditional expectation simplifies to ErSQ ipXq | X “ xs “ ai
+
+´ bi´xbi´ai
+
+¯
+
+` bi
+
+´ x´ai
+
+> bi´ai
+
+¯
+
+“ x.Using an indicator function, we can express this conditional expectation compactly for all X:
+
+ErSQ ipXq | Xs “ X ¨ 1pX P Riq.
+
+Combining the above findings and applying the law of total expectation yields the key identity: 
+
+μi “ ErX ¨ 1pX P Riqs “ ErErSQ ipXq | Xss “ ErSQ ipXqs “ ai ¨ pai ` bi ¨ pbi .
+
+It follows that to estimate the true local mean contribution μi, it is sufficient to estimate pai and pbi . To do this, the learner forms unbiased estimates ˆpai and ˆpbi using the empirical averages of randomized threshold queries. Specifically, the estimation procedure for pai operates as follows: 1. Ask the agent ni threshold queries “Is Xi,j ě ai?” for j “ 1, . . . , n i, where ni is the regional sample budget determined in Step 5. 2. Generate independent random variables Ti,j „ Unif pai, b iq for j “ ni ` 1, . . . , 2ni.3. Ask the agent ni randomized threshold queries “Is Xi,j ě Ti,j ?” for j “ ni ` 1, . . . , 2ni.4. Compute the empirical averages based on the 1-bit feedback and perform the subtraction according to (2). The learner forms the corresponding estimate ˆpbi using an analogous procedure, utilizing 2ni fresh samples with queries “Is Xi,j ď bi?” and “Is Xi,j ď Ti,j ?”. We summarize the empirical estimates as 
+
+ˆpai “ 1
+
+ni
+
+˜ niÿ
+
+> j“1
+
+1pXi,j ě aiq
+
+¸
+
+´ 1
+
+ni
+
+˜ 2niÿ
+
+> j“ni`1
+
+1pXi,j ě Ti,j q
+
+¸
+
+(18) 21 and 
+
+ˆpbi “ 1
+
+ni
+
+˜ 3niÿ
+
+> j“2ni`1
+
+1pXi,j ď biq
+
+¸
+
+´ 1
+
+ni
+
+˜ 4niÿ
+
+> j“3ni`1
+
+1pXi,j ď Ti,j q
+
+¸
+
+. (19) This procedure consumes exactly 4ni independent samples per region Ri. Because the region boundaries ai and bi are explicitly fixed after Step 3, the data collection for all empirical pairs tp ˆpai , ˆpbi qu |i|ď imax can be executed entirely in a non-adaptive, parallel manner. Combining the empirical averages using ˆμi “ ai ˆpai ` bi ˆpbi yields the final unbiased local estimate. 
+
+Step 5 (Base Estimator and Sample Allocation) : Let the base estimator ˆμbase “ ř 
+
+> |i|ď imax
+
+ˆμi be the sum of the local estimates. To guarantee that the median-of-means wrapper in Step 6 succeeds, the base estimator ˆμbase must achieve an estimation error of at most ϵ{2 with a failure probability strictly less than 1{2 (e.g., ď 1{4). Since ˆμbase is an unbiased estimator of the clipped mean, i.e., Erˆμbase s “ ř 
+
+> |i|ď imax
+
+μi, applying Chebyshev’s inequality yields 
+
+Pr 
+
+¨˝ˇˇˇˇˇˇˆμbase ´ ÿ
+
+> |i|ď imax
+
+μi
+
+ˇˇˇˇˇˇ ě ϵ
+
+2
+
+˛‚“ Pr 
+
+´
+
+|ˆμbase ´ Erˆμbase s| ě ϵ
+
+2
+
+¯
+
+ď Var pˆμbase qpϵ{2q2 “ 4Var pˆμbase q
+
+ϵ2 . (20) Therefore, it is sufficient to enforce the global variance constraint Var pˆμbase q ď ϵ2{16 . Because the local estimates are constructed from independent random threshold queries, the variance of the base estimator decomposes as the sum of the local variances: 
+
+Var pˆμbase q “ Var 
+
+¨˝ ÿ
+
+> |i|ď imax
+
+ˆμi
+
+˛‚“ ÿ
+
+> |i|ď imax
+
+Var pˆμiq.
+
+We analyze this in three substeps: 5(a) bounding the local variance via tail probabilities, 5(b) constructing sample allocation to satisfy the global variance constraint, and 5(c) evaluating the final sample complexity across the tail regimes. 
+
+Substep 5(a): Local Variance Bounds . By the symmetry of the partition construction ( R´i “ ´ Ri), we can assume 
+
+i ě 1 (the right tail) without loss of generality; an identical argument applies to the left tail. Recall that Ri “ r ai, b iq “ 
+
+σ ¨ r mi´1, m iq, where m0 “ 0 and mi “ 2i. Since ˆμi “ ai ¨ ˆpai ` bi ¨ ˆpbi , the local variance decomposes as 
+
+Var pˆμiq “ a2 
+
+> i
+
+¨ Var pˆpai q ` b2 
+
+> i
+
+¨ Var pˆpbi q ď m2 
+
+> i
+
+¨ σ2 ¨ p Var pˆpai q ` Var pˆpbi qq .
+
+We bound the variance of each probability estimate. Using the definition of ˆpai (see (18)) and the fact that the queries within each empirical average are i.i.d. (i.e., Xj „ X and Tij „ Ti), we have 
+
+Var pˆpai q “ 1
+
+ni
+
+¨ Var p1`X ě aiqq ` 1
+
+ni
+
+¨ Var p1`X ě Tiqq ď 1
+
+ni
+
+¨ Pr pX ě aiq ` 1
+
+ni
+
+¨ Pr pX ě Tiqď 2
+
+ni
+
+¨ Pr pX ě aiq,
+
+where the first inequality follows from the Bernoulli variance property Var pBer ppqq “ pp1 ´ pq ď p, and the second inequality follows because Ti ě ai. An identical argument but with Var pBer ppqq “ pp1 ´ pq ď 1 ´ p yields 
+
+Var pˆpbi q ď 1
+
+ni
+
+¨ Pr pX ě biq ` 1
+
+ni
+
+¨ Pr pX ě Tiq ď 2
+
+ni
+
+¨ Pr pX ě aiq.
+
+Let pj :“ Pr pX P Rj q. Using this, the tail probability can be expressed as Pr pX ě aiq “ ř8 
+
+> j“i
+
+pj . Substituting this into the local variance yields the following bound: 
+
+Var pˆμiq ď 4 ¨ m2 
+
+> i
+
+¨ σ2
+
+ni
+
+> 8
+
+ÿ
+
+> j“i
+
+pj . (21) 22 Substep 5(b): Sample Allocation and Global Variance Verification . Summing over all imax regions of the right tail and swapping the order of summation (which is justified by the non-negativity of arguments and Tonelli’s theorem) gives 
+
+> imax
+
+ÿ
+
+> i“1
+
+Var pˆμiq ď 
+
+> imax
+
+ÿ
+
+> i“1
+
+4 ¨ m2 
+
+> i
+
+¨ σ2
+
+ni
+
+> 8
+
+ÿ
+
+> j“i
+
+pj “
+
+> 8
+
+ÿ
+
+> j“1
+
+pj ¨
+
+¨˝
+
+> min pj,i max q
+
+ÿ
+
+> i“1
+
+4 ¨ m2 
+
+> i
+
+¨ σ2
+
+ni
+
+˛‚. (22) Recall from Step 1 that the shifted mean is bounded by |μ| ď 4σ. Furthermore, the region boundaries satisfy aj ą 4σ
+
+if and only if j ě 4. Based on these observations, we split the outer sum of (22) into the two cases: (i) j ď 3 and (ii) 
+
+j ě 4. For j ď 3, using the trivial bound pj ď 1, their contribution to the global variance is at most 
+
+> 3
+
+ÿ
+
+> j“1
+
+pj ¨
+
+¨˝
+
+> min pj,i max q
+
+ÿ
+
+> i“1
+
+4 ¨ m2 
+
+> i
+
+¨ σ2
+
+ni
+
+˛‚“ O
+
+ˆ σ2
+
+min iď3 ni
+
+˙
+
+. (23) We now consider j ě 4. If X P Rj , then X ě mj´1σ “ 2j´1σ. Applying the triangle inequality and exploiting 
+
+|μ| ď 4σ yields 
+
+X P Rj ùñ | X ´ μ| ě X ´ | μ| ě p 2j´1 ´ 4q ¨ σ ě 2j´2 ¨ σ “ mj´2σ ùñ | X ´ μ|k ě p mj´2σqk.
+
+Multiplying by the indicator 1tX P Rj u and taking the expectation across all j ě 4 connects the region probabilities to the k-th central moment bound: 
+
+> 8
+
+ÿ
+
+> j“4
+
+pj ¨ p mj´2σqk “
+
+> 8
+
+ÿ
+
+> j“4
+
+pmj´2σqk ¨ E“1tX P Rj u‰ ď
+
+> 8
+
+ÿ
+
+> j“4
+
+Er| X ´ μ|k1tX P Rj us ď Er| X ´ μ|ks ď σk.
+
+Dividing by σk and noting that mkj´2 “ 2kpj´2q “ 2jk {22k, this simplifies to 
+
+> 8
+
+ÿ
+
+> j“4
+
+pj ¨ 2jk ď 22k “ Op1q, (24) where the Op1q bound follows directly from Remark 3, as we assume k ď 3 without loss of generality. We propose setting the local sample allocation to scale as 
+
+ni “ Θ
+
+ˆ σ2
+
+ϵ2 ¨ 2ip2´kq
+
+˙
+
+.
+
+Under this allocation, the inner geometric sum of (22) is upper bounded by the following (extending the highest index from min pj, i max q to j for simplicity): 
+
+> j
+
+ÿ
+
+> i“1
+
+4 ¨ m2 
+
+> i
+
+¨ σ2
+
+ni
+
+“ O
+
+˜
+
+ϵ2
+
+> j
+
+ÿ
+
+> i“1
+
+2ik 
+
+¸
+
+“ O`ϵ2 ¨ 2jk ˘. (25) Substituting this into the outer sum of (22) for j ě 4 and combining with (24) (as well as (23)) yields: 
+
+> imax
+
+ÿ
+
+> i“1
+
+Var pˆμiq ď Opϵ2q ` O
+
+˜
+
+ϵ2
+
+> 8
+
+ÿ
+
+> j“4
+
+pj ¨ 2jk 
+
+¸
+
+“ Opϵ2q.
+
+By scaling the sample allocation with a sufficiently large absolute constant, it follows that the base estimator satisfies the global variance constraint Var pˆμbase q ď ϵ2{16 .
+
+Substep 5(c): Total Sample Complexity . The sample complexity for a single base estimator is given by the sum of the regional sample allocations: 
+
+ÿ
+
+> |i|ď imax
+
+ni “ 2
+
+> imax
+
+ÿ
+
+> i“1
+
+ni “ Θ
+
+¨˚˚˚˚˝
+
+σ2
+
+ϵ2 ¨
+
+˜imax ÿ
+
+> i“1
+
+2ip2´kq
+
+¸looooooomooooooon 
+
+> Sk
+
+˛‹‹‹‹‚
+
+To establish explicit asymptotic bounds, we evaluate the geometric series Sk across three distinct tail regimes: 23 1. Light-tailed distributions ( k ą 2): Because the exponent 2´k is strictly negative, Sk is a convergent geometric series bounded by 
+
+Sk “ 22´kp1 ´ 2p2´kq¨ imax q
+
+1 ´ 22´k ď 22´k
+
+1 ´ 22´k “ 12k´2 ´ 1 .
+
+As k Ñ 2`, the denominator 2k´2 ´ 1 “ Θpln 2 ¨ p k ´ 2qq “ Θpk ´ 2q by a Taylor series expansion. Therefore, 
+
+Sk “ Θ` 1
+
+> k´2
+
+˘, and the sample complexity is bounded by 
+
+ÿ
+
+> |i|ď imax
+
+ni “ O
+
+ˆ σ2
+
+ϵ2 ¨ 1
+
+k ´ 2
+
+˙
+
+.
+
+Note that if we drop the assumption k ě 3 from Remark 8, then this generalizes to O
+
+´ σ2 
+
+> ϵ2
+
+¨ max 
+
+!
+
+1, 1
+
+> k´2
+
+)¯ 
+
+, i.e., the factor 1 
+
+> k´2
+
+is highly relevant as k Ñ 2` but not as k Ñ 8 .2. Finite-variance distributions ( k “ 2): Because the exponent 2 ´ k is exactly zero, Sk trivially evaluates to 
+
+Sk “
+
+> imax
+
+ÿ
+
+> j“1
+
+1 “ imax “ Θ
+
+´
+
+log σϵ
+
+¯
+
+.
+
+The sample complexity is therefore bounded by 
+
+ÿ
+
+> |i|ď imax
+
+ni “ O
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯˙
+
+.
+
+3. Heavy-tailed distributions ( k P p 1, 2q): Because the exponent 2 ´ k is strictly positive, Sk is a growing geometric series dominated by its final term: 
+
+Sk “ 22´kp2imax p2´kq ´ 1q
+
+22´k ´ 1 “ Θ
+
+ˆ 2imax p2´kq
+
+22´k ´ 1
+
+˙
+
+.
+
+As k Ñ 2´, the denominator 22´k ´ 1 “ Θpln 2 p2 ´ kqq “ Θp2 ´ kq by a Taylor series expansion. For the numerator, we recall from Steps 2 and 3 that 2imax σ “ Θptq “ Θpσ ¨ p σ{ϵq1{p k´1qq, which yields 
+
+2imax p2´kq “ p 2imax q2´k “ Θ
+
+ˆ´ σϵ
+
+¯ 2´kk´1
+
+˙
+
+.
+
+Substituting these bounds into Sk gives 
+
+Sk “ Θ
+
+ˆ´ σϵ
+
+¯ 2´kk´1
+
+¨ 12 ´ k
+
+˙
+
+.
+
+The sample complexity is therefore bounded by 
+
+ÿ
+
+> |i|ď imax
+
+ni “ O
+
+ˆ σ2
+
+ϵ2 ¨
+
+´ σϵ
+
+¯ 2´kk´1
+
+¨ 12 ´ k
+
+˙
+
+“ O
+
+ˆ´ σϵ
+
+¯ kk´1
+
+¨ 12 ´ k
+
+˙
+
+.
+
+Step 6 (Median-of-Means): While the base estimator ˆμbase satisfies the target global variance constraint, it achieves 
+
+ϵ-accuracy with only constant probability. We boost this success probability using the median-of-means framework. The algorithm repeats the base estimation independently K “ r8 log p2{δqs times to obtain ˆμp1q
+
+> base
+
+, . . . , ˆμpKq 
+
+> base
+
+and takes their median as the final estimate: 
+
+ˆμ “ median 
+
+´
+
+ˆμp1q
+
+> base
+
+, . . . , ˆμpKq
+
+> base
+
+¯
+
+.
+
+For k “ 1, . . . , K , let Yk be the indicator variable for the failure event of the k-th batch: 
+
+Yk “ 1
+
+¨˝ˇˇˇˇˇˇˆμpkq 
+
+> base
+
+´ ÿ
+
+> |i|ď imax
+
+μi
+
+ˇˇˇˇˇˇ ą ϵ
+
+2
+
+˛‚,
+
+24 and let S “ řKk“1 Yk denote the total number of failures. By Chebyshev’s inequality (as shown in (20)) and our variance bound Var pˆμbase q ď ϵ2{16 established in Step 5, the variables Y1, . . . , Y K are i.i.d. Bernoulli random variables with Pr pYk “ 1q ď 1{4. This implies ErSs ď K{4.If the final median estimate ˆμ deviates from the clipped mean by more than ϵ{2, it must be the case that at least half of the individual base estimates failed (i.e., S ě K{2). Therefore, applying Hoeffding’s inequality yields 
+
+Pr 
+
+¨˝ˇˇˇˇˇˇˆμ ´ ÿ
+
+> |i|ď imax
+
+μi
+
+ˇˇˇˇˇˇ ą ϵ
+
+2
+
+˛‚ď Pr 
+
+ˆ
+
+S ě K
+
+2
+
+˙
+
+ď Pr 
+
+ˆ
+
+S ´ ErSs ě K
+
+4
+
+˙
+
+ď exp 
+
+ˆ
+
+´ K
+
+8
+
+˙
+
+ď δ
+
+2 .
+
+Finally, we recall the deterministic truncation error bound 
+
+ˇˇˇř 
+
+> |i|ď imax
+
+μi ´ μ
+
+ˇˇˇ ď ϵ{2 established in Step 2. By the triangle inequality, the condition 
+
+ˇˇˇˆμ ´ ř 
+
+> |i|ď imax
+
+μi
+
+ˇˇˇ ď ϵ{2 implies the final estimate satisfies |ˆμ ´ μ| ď ϵ. Taking the union bound over the localization failure probability ( ď δ{2 from Step 1) and the median-of-means failure probability (ď δ{2), the estimator achieves the target accuracy with probability at least 1 ´ δ. This concludes the proof. 
+
+# B Lower Bounds and Adaptivity Gap 
+
+## B.1 Proof of Theorem 9 (Matching Lower Bound) 
+
+Theorem 9 establishes a lower bound that decomposes into two components: a tail-dependent base complexity, and a tail-independent additive localization cost. We prove these components separately. 
+
+Part 1: Tail-Dependent Base Complexities 
+
+In the asbence of communication constraints, the minimax sample complexity bounds for unquantized mean estimation are well known: 
+
+n “
+
+$’’’’&’’’’%
+
+Ω
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k ě 2Ω
+
+ˆ´ σϵ
+
+¯ kk´1
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+if k P p 1, 2q.
+
+For instance, these can be derived via a reduction to distinguishing two Bernoulli distributions for k ě 2 (Lee, 2020, Section 4), and two scaled Bernoulli distributions for k P p 1, 2q (Devroye et al., 2016, Section 4.3). However, these unquantized lower bounds are insufficient to verify the strict optimality of our estimator for the finite-variance case ( k “ 2), as our upper bound contains an additional Oplog pσ{ϵqq factor. We now prove that this extra logarithmic penalty is not an artifact of our analysis, but a fundamental information-theoretic bottleneck imposed by 1-bit quantization. Specifically, we prove that any (potentially adaptive) 1-bit mean estimator that is pϵ, δ q-PAC for the family Dp2, λ, σ q
+
+with ϵ ď cσ (for a sufficiently small constant c ą 0) and λ ě 3ϵ must satisfy: 
+
+n “ Ω
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+.
+
+Proof of the base complexity for k “ 2. We will employ a result from (Tsybakov, 2009, Theorem 2.2(iii)) that combines Le Cam’s two-point method combined with the Bretagnolle–Huber inequality. We construct a null distribution D0 with mean 0 and an alternative distribution ¯D with mean 3ϵ. Both belong to Dp2, λ, σ q when σ “ Ωpϵq
+
+with a sufficiently large hidden constant. Distinguishing them with error δ requires the stated number of samples. 25 Step 1 (Construction of the distributions): Set 
+
+M “
+
+Z 12 log 2
+
+´ σ
+
+3ϵ
+
+¯^
+
+,
+
+so that 2M ď aσ{p 3ϵq and M “ Θplog pσ{ϵqq . Define the grid points xi “ 2i ¨ σ for i “ 1, . . . , M .
+
+Null distribution D0: Place symmetric point masses at ˘xi with probabilities 
+
+qi “ 12M ¨ 22i , i “ 1, . . . , M. 
+
+The remaining mass 
+
+1 ´
+
+> M
+
+ÿ
+
+> i“1
+
+2qi “ 1 ´ 1
+
+M
+
+˜ Mÿ
+
+> i“1
+
+4´i
+
+¸
+
+ě 1 ´ 13M ą 12
+
+is placed at 0. By symmetry ED0 rXs “ 0, and 
+
+Var D0 pXq “ 
+
+> M
+
+ÿ
+
+> i“1
+
+2qix2 
+
+> i
+
+“
+
+> M
+
+ÿ
+
+> i“1
+
+2
+
+ˆ 12M 22i
+
+˙
+
+22iσ2 “
+
+> M
+
+ÿ
+
+> i“1
+
+σ2
+
+M “ σ2,
+
+which implies D0 P Dp2, λ, σ q.
+
+Alternative distribution ¯D: For each j “ 1, . . . , M , construct Dj by taking D0 and shifting mass pj from ´xj to `xj ,where 
+
+pj “ 3ϵ
+
+2j`1 ¨ σ .
+
+Validity requires pj ď qj . This follows from the ratio 
+
+pj
+
+qj
+
+“ 3ϵ
+
+2j`1 ¨ σ ¨ 2M ¨ 22j “ 3M ¨ ϵ ¨ 2j
+
+σ ď 3M ¨ ϵ ¨ 2M
+
+σ ď 3M ¨ ϵσ ¨
+
+c σ
+
+3ϵ “
+
+Z 12 log 2
+
+´ σ
+
+3ϵ
+
+¯^
+
+¨
+
+c 3ϵσ
+
+and the fact that ϵ ď cσ for a sufficiently small absolute constant c (e.g., c ď 0.01 ). Define the uniform mixture 
+
+¯D “ 1
+
+> M
+
+řMj“1 Dj . For each constituent distribution Dj , the mean is 
+
+EDj rXs “ 2pj ¨ xj “ 2 ¨ 3ϵ ¨ 2j ¨ σ
+
+2j`1 ¨ σ “ 3ϵ. 
+
+Because the mean of ¯D is an average of the constituent means, E ¯D rXs “ 3ϵ. Furthermore, since mass was simply shifted from ´xj to xj , the second moment is preserved, ensuring 
+
+Var ¯D pXq ď E ¯D rX2s “ ED0 rX2s “ Var D0 pXq “ σ2.
+
+Thus, ¯D P Dp2, λ, σ q since the mean constraint λ ě 3ϵ holds by assumption. 
+
+Step 2 (Reduction to Hypothesis Testing): An pϵ, δ q-PAC estimator must output an estimate ˆμ P r´ ϵ, ϵ s with probability ě 1 ´ δ under D0, and ˆμ P r 2ϵ, 4ϵs under ¯D with probability ě 1 ´ δ. Since these two target intervals are strictly disjoint, any valid pϵ, δ q-PAC estimator natively acts as a binary classifier that distinguishes between D0 and 
+
+¯D with an error probability of at most δ.
+
+Step 3 (Per-query KL divergence bound): Fix an arbitrary 1-bit query and let S Ă R be the corresponding measurable set. Define P0pSq “ Pr D0 pX P Sq and ¯P pSq “ Pr ¯D pX P Sq.We now upper bound the KL divergence DKL 
+
+` ¯P pSq ›› P0pSq˘. Because the KL divergence between two Bernoulli distributions is invariant to swapping the labels of the outcomes (i.e., replacing S with Sc), we have: 
+
+DKL 
+
+` ¯P pScq ›› P0pScq˘ “ DKL 
+
+` ¯P pSq ›› P0pSq˘.
+
+26 Consequently, we may assume without loss of generality that P0pSq ď 1{2. Furthermore, because D0 has strictly more than 1{2 of its mass at 0, the set S cannot contain 0; thus S can only capture mass from the grid points t˘ xiu.Let j˚ “ min tj ě 1 : S X t xj , ´xj u ‰ Hu . If no such index exists, P0pSq “ ¯P pSq “ 0 and the KL divergence is exactly 0. Otherwise, 
+
+P0pSq ě qj˚ “ 12M ¨ 22j˚ . (26) The difference in probabilities is bounded by the total shifted mass from indices j˚ onwards: 
+
+ˇˇ ¯P pSq ´ P0pSqˇˇ “
+
+ˇˇˇˇˇˇ
+
+1
+
+M
+
+> M
+
+ÿ
+
+> j“j˚
+
+`PDj pSq ´ P0pSq˘ˇˇˇˇˇˇ ď 1
+
+M
+
+> M
+
+ÿ
+
+> j“j˚
+
+pj “ 1
+
+M
+
+> M
+
+ÿ
+
+> j“j˚
+
+3ϵ
+
+2j`1 ¨ σ ď 3ϵM σ ¨ 12j˚ . (27) Using (26)–(27), alongside the standard inequality DKL pBern ppq } Bern pqqq ď pp´qq2 
+
+> qp1´qq
+
+and the condition P0pSq ď 
+
+1{2, we obtain: 
+
+DKL p ¯P pSq } P0pSqq ď p ¯P pSq ´ P0pSqq 2
+
+P0pSq ¨ p 1 ´ P0pSqq ď 2p ¯P pSq ´ P0pSqq 2
+
+P0pSq ď 2 ¨
+
+´ 3ϵM σ 2j˚
+
+¯212M 22j˚
+
+“ 36 ϵ2
+
+M σ 2 .
+
+Step 4 (Adaptive protocol and chain rule): While the estimator’s sequential querying strategy may be randomized, Yao’s minimax principle states that the worst-case error of any randomized algorithm over tD0, ¯Du is lower-bounded by the average error of the optimal deterministic algorithm under a uniform prior over tD0, ¯Du. Therefore, to establish our lower bound, we may assume without loss of generality that the algorithm is deterministic. Under a deterministic algorithm, each measurable query set St is a fixed function of the past 1-bit responses Y t´1 “pY1, . . . , Y t´1q. Denote by P0,n and ¯Pn the joint distributions of the n-length response transcript under D0 and ¯D,respectively. By the chain rule for KL divergence (see (Polyanskiy and Wu, 2025, Theorem 2.16(c))), we have: 
+
+DKL 
+
+` ¯Pn
+
+›› P0,n 
+
+˘ “
+
+> n
+
+ÿ
+
+> t“1
+
+E ¯PY t´1
+
+”
+
+DKL 
+
+` ¯PYt|Y t´1
+
+›› P0,Y t|Y t´1
+
+˘ı
+
+.
+
+Conditioned on a specific realization of the past responses Y t´1, the query St is fixed. Thus, the conditional distributions ¯PYt|Y t´1 and P0,Y t|Y t´1 are Bernoulli distributions induced by evaluating the static set St under ¯D and 
+
+D0. Applying the universal pointwise bound from Step 3 to each conditional term yields the total transcript bound: 
+
+DKL 
+
+` ¯Pn
+
+›› P0,n 
+
+˘ ď n ¨ 36 ϵ2
+
+M σ 2 . (28) 
+
+Step 5 (Lower bound via Bretagnolle–Huber): By applying the Bretagnolle–Huber inequality to Le Cam’s method, the result in (Tsybakov, 2009, Theorem 2.2(iii)) states that the average error probability δ of distinguishing the two hypotheses under a uniform prior is lower bounded as follows: 
+
+δ ě 14 exp `´DKL p ¯Pn } P0,n q˘ ùñ DKL p ¯Pn } P0,n q ě log 
+
+ˆ 14δ
+
+˙
+
+.
+
+Applying this to (28) and rearranging, we obtain the required sample complexity: 
+
+n ě M σ 2
+
+36 ϵ2 ¨ log 
+
+ˆ 14δ
+
+˙
+
+“ Ω
+
+ˆ σ2
+
+ϵ2 ¨ log 
+
+´ σϵ
+
+¯
+
+¨ log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+,
+
+completing the proof. 27 Part 2: Localization Cost 
+
+It remains to establish the additive n “ Ω`log λσ
+
+˘ localization cost for all tail regimes k ą 1.We create N “ Θpλ{σq instances of “hard-to-distinguish” distribution pairs, which we will reuse in the proof of Theorem 11 in Appendix B.2. Divide r´ λ, λ s into a grid of N “ λ{σ ´ 1 “center-points” spaced 2σ apart, 9 i.e., the center-points are 
+
+cj “ ´ λ ` 2jσ for each j “ 1, 2 . . . , N. (29) For each instance j, we define two probability distributions Dj, ´ and Dj, `, each with a two-point support set tcj ´
+
+σ{2, c j ` σ{2u, as follows: 
+
+Dj, ´ : Pr 
+
+´
+
+X “ cj ` σ
+
+2
+
+¯
+
+“ 12 ´ ϵσ “ 1 ´ Pr 
+
+´
+
+X “ cj ´ σ
+
+2
+
+¯
+
+ùñ ErXs “ cj ´ ϵDj, ` : Pr 
+
+´
+
+X “ cj ` σ
+
+2
+
+¯
+
+“ 12 ` ϵσ “ 1 ´ Pr 
+
+´
+
+X “ cj ´ σ
+
+2
+
+¯
+
+ùñ ErXs “ cj ` ϵ. 
+
+(30) By construction, these “hard” distributions satisfy the structural properties required to be members of our target distribution families: • Bounded Mean: By the assumption ϵ ă σ{2, the mean of each of these 2N distributions is contained within the search range r´ λ, λ s.• Bounded Support and Sub-Gaussianity: The support of each distribution is bounded to an interval of exactly length σ (the distance between cj ´ σ{2 and cj ` σ{2). By Hoeffding’s Lemma, any random variable bounded in an interval of length σ is sub-Gaussian with a variance proxy of at most σ2{4 ď σ2.• Universal Moment Bounds: For any of these distributions, the maximum deviation of a sample from its true mean μ is |X ´ μ| ď |p cj ˘ σ{2q ´ p cj ¯ ϵq| ď σ{2 ` ϵ. Since ϵ ă σ{2, we are guaranteed that |X ´ μ| ă σ.Consequently, the k-th central moment satisfies Er| X ´ μ|ks ď σk for all k ą 1.Thus, this specific hard subset of discrete, bounded distributions inherently belongs to the family Dpk, λ, σ q across all tail regimes studied in this paper, ensuring our lower bound is applicable in all such regimes. By the above construction, when the distributions are restricted to only these 2N distributions, the task of being able to form an ϵ-good estimation of the true mean of each unknown underlying distribution is at least as hard as being able to distinguish the distributions from each other. 10 We proceed to establish a lower bound for this goal of identification ,also known as multiple hypothesis testing .Let Θ be a uniform random variable over the 2N distributions, which implies 
+
+HpΘq “ log p2N q, (31) where HpXq :“ ´ ř 
+
+> xPX
+
+ppxq log ppxq is the entropy function. Fix an adaptive mean estimator that makes n queries, and let Y n “ p Y1, . . . , Y nq be the resulting binary responses. Using the chain rule for mutual information (see e.g. (Polyanskiy and Wu, 2025, Theorem 3.7)) and the fact that each query yields at most 1 bit of information, we have 
+
+IpΘ; Y nq “ 
+
+> n
+
+ÿ
+
+> k“1
+
+I`Θ; Yk | Y k´1˘ ď
+
+> n
+
+ÿ
+
+> k“1
+
+H`Yk | Y k´1˘ ď
+
+> n
+
+ÿ
+
+> k“1
+
+HpYkq ď 
+
+> n
+
+ÿ
+
+> k“1
+
+1 “ n. (32) Moreover, Fano’s inequality (see (Polyanskiy and Wu, 2025, Theorem 3.12)) gives: 
+
+HpΘ | Y nq ď H2pδq ` δ log p2N ´ 1q ď 1 ` δ log p2N q, (33)                 
+
+> 9For convenience, we assume that λis an integer multiple of 2σ. This is justified by a simple rounding argument and the fact that when
+> λ“Θpσqthe Ω`log λσ
+> ˘lower bound is trivial.
+> 10 Strictly speaking this is true when the algorithm is required to attain accuracy strictly smaller than ϵ, rather than smaller or equal , but this distinction clearly has no impact on the final result stated using Op¨q notation, and by ignoring it we can avoid cumbersome notation.
+
+28 where δ is the error probability and H2ppq “ ´ p log p ´p 1 ´ pq log p1 ´ pq is the binary entropy function. Using (31)– (33) and the definition of mutual information, we obtain 
+
+n ě IpΘ; Y nq “ HpΘq ´ HpΘ | Y nq ě log p2N q ´ 1 ´ δ log p2N q “ p 1 ´ δq log p2N q ´ 1. (34) Combining this with N “ Θpλ{σq, we have 
+
+n “ Ωpp 1 ´ δq log N q “ Ω
+
+ˆ
+
+log λσ
+
+˙
+
+as desired. 
+
+## B.2 Proof of Theorem 11 (Adaptivity Gap) 
+
+We consider the same instance as that of Section B.1, and accordingly re-use the notation therein. Before proving Theorem 11, we first introduce the idea of an interval query being “informative” or “uninformative” for distinguishing between the distributions Dj, ´ and Dj, `.
+
+Definition 17 (Informative Interval Queries) . For a fixed interval query Q “ “Is X P r αt, β ts?” , we say that Q is informative for the j-th pair of distributions pDj, ´, D j, `q if its binary feedback B “ 1tX P r αt, β tsu satisfies 
+
+Pr 
+
+> X„Dj, ´
+
+pB “ 1q ‰ Pr 
+
+> X„Dj, `
+
+pB “ 1q.
+
+Otherwise, Q is said to be uninformative. The following lemma shows that each interval query can be simultaneously informative for at most two different pairs. 
+
+Lemma 18. An interval query Q “ “Is X P r αt, β ts?” can be simultaneously informative for at most two different 
+
+pDj, ´, D j, `q pairs, i.e., at most two different values of j.
+
+Proof of Lemma 18. The claim follows from the following two facts: 1. For a fixed distribution pair (indexed by j), an interval query Q “ “Is X P r αt, β ts?” is informative for distinguishing between Dj, ´ and Dj, ` only if rαt, β ts contains exactly one of the two support points tcj ˘σ{2u,i.e., ˇˇrαt, β ts X t cj ˘ σ{2uˇˇ “ 1.2. There are at most two indices j for which ˇˇrαt, β ts X t cj ˘ σ{2uˇˇ “ 1.Fact 1 can be verified by analyzing the binary feedback B “ 1tX P r αt, β tsu for all cases of rαt, β ts X t cj ˘ σ{2u:
+
+ˇˇrαt, β ts X t cj ˘ σ{2uˇˇ P t 0, 2u ùñ Pr 
+
+> X„Dj, ´
+
+pB “ 1q “ Pr 
+
+> X„Dj, `
+
+pB “ 1q ùñ Q is uninformative ,
+
+and 
+
+ˇˇrαt, β ts X t cj ˘ σ{2uˇˇ “ 1 ùñ ˇˇ Pr 
+
+> X„Dj, ´
+
+pB “ 1q ´ Pr 
+
+> X„Dj, `
+
+pB “ 1qˇˇ “ 2ϵσ ùñ Q is informative . (35) For Fact 2, we first observe from (29) that the support points of all 2N distributions satisfy 
+
+c1 ´ σ
+
+2 ă c1 ` σ
+
+2 ă c2 ´ σ
+
+2 ă ¨ ¨ ¨ ă cN ´ σ
+
+2 ă cN ` σ
+
+2 ,
+
+with each pair j having a unique disjoint interval pcj ´ σ{2, c j ` σ{2q between its support points. An interval rαt, β ts
+
+satisfies ˇˇrαt, β ts X t cj ˘ σ{2uˇˇ “ 1 if and only if exactly one endpoint of rαt, β ts lies in the interval pcj ´ σ{2, c j `
+
+σ{2q. Since the gaps are disjoint and rαt, β ts has only two endpoints, it follows that at most two indices j satisfy ˇˇrαt, β ts X t cj ˘ σ{2uˇˇ “ 1.29 Proof of Theorem 11. Consider an arbitrary algorithm that makes n non-adaptive interval queries. Recall the set of 
+
+2N distributions tDj, ´, D j, `uNj“1 Ď Dpλ, σ q constructed in the proof of Theorem 9, where N “ λ{σ ´ 1. We will again establish a lower bound for this “hard subset” of distributions, but with different details to exploit the assumption of non-adaptive interval queries. Recall from Section B.1 that the means of the 2N distributions are pairwise separated by 2ϵ or more, and thus, attaining 
+
+ϵ-accuracy implies being able to identify the underlying distribution from the hard subset. We proceed to establish a lower bound for this goal of identification (multiple hypothesis testing). Suppose that the true distribution is drawn uniformly at random from the 2N distributions in the hard subset. By Yao’s minimax principle, the worst-case error probability is lower bounded by the average-case error probability of the best 
+
+deterministic strategy, so we may assume that the algorithm is deterministic (in the choice of queries and the procedure for forming the final estimate). Letting pˆj, ˆsq be the estimated index (in t1, . . . , N u) and sign (in t1, ´1u), the average-case error probability is given by 
+
+Pr perror q “ 12N
+
+> N
+
+ÿ
+
+> j“1
+
+ÿ
+
+> sPt` 1,´1u
+
+Pr 
+
+> j,s
+
+pp ˆj, ˆsq ‰ p j, s qq (36) 
+
+ě 1
+
+N
+
+> N
+
+ÿ
+
+> j“1
+
+ˆ 12 Pr 
+
+> j, `
+
+`ˆs ‰ 1˘ ` 12 Pr 
+
+> j, ´
+
+`ˆs ‰ ´ 1˘looooooooooooooooooomooooooooooooooooooon  
+
+> “:Pr jperror q
+
+˙
+
+, (37) where Pr j,s denotes probability when the underlying distribution is Dj,s .For each j “ 1, . . . , N , we define nj to be the algorithm’s total number of interval queries that are informative (in the sense of Definition 17) for distinguishing between Dj, ´ and Dj, `. Since the algorithm is deterministic and the n
+
+queries are assumed to be non-adaptive (i.e., they must all be chosen in advance), it follows that the values tnj uNj“1
+
+are also deterministic. Recall from (35) that each informative query provides binary feedback that follows either Bern pp`q or Bern pp´q,where p` “ 1{2 ` ϵ{σ and p´ “ 1{2 ´ ϵ{σ “ 1 ´ p`. Distinguishing between these two cases is a binary hypothesis testing problem, and the associated error probability Pr j perror q is given by the j-th summand in (37). Using standard binary hypothesis testing lower bounds (Lee, 2020, Theorem 11.9), we have 11 
+
+Pr  
+
+> j
+
+perror q ą exp `´c1 ¨ nj ¨ d2 
+
+> H
+
+pp`, p ´q˘ (38) for some constant c1, where d2 
+
+> H
+
+pp, qq “ 12
+
+ř
+
+> i
+
+`?pi ´ ?qi
+
+˘2 is the Squared Hellinger distance. For Bern pp`q and 
+
+Bern pp´q, we have the following standard calculation: 
+
+d2 
+
+> H
+
+pp`, p ´q “ `?p` ´ ?p´
+
+˘2 “
+
+ˆ p` ´ p´
+
+?p` ` ?p´
+
+˙2
+
+“ |p` ´ p´|2
+
+`1 ` 2?p`p´
+
+˘2 “ Θ`|p` ´ p´|2˘ “ Θ
+
+ˆ ϵ2
+
+σ2
+
+˙
+
+, (39) where the equalities follow from the facts that p` ` p´ “ 1 and p`p´ P r 0, 1{4s. Combining (38) and (39), we obtain 
+
+Pr  
+
+> j
+
+perror q ą exp 
+
+ˆ
+
+´c2 ¨ nj ϵ2
+
+σ2
+
+˙
+
+(40) for some constant c2 ą 0. Applying Jensen’s inequality (since exp is convex) and using řNj“1 nj ď 2n (see Lemma 18), it follows that 
+
+1
+
+N
+
+> N
+
+ÿ
+
+> j“1
+
+Pr  
+
+> j
+
+perror q ą 1
+
+N
+
+> N
+
+ÿ
+
+> j“1
+
+exp 
+
+ˆ
+
+´c2 ¨ nj ϵ2
+
+σ2
+
+˙
+
+ě exp 
+
+˜
+
+´c2 ¨ ϵ2
+
+σ2 ¨ 1
+
+N
+
+> N
+
+ÿ
+
+> j“1
+
+nj
+
+¸
+
+ě exp 
+
+ˆ
+
+´c2 ¨ ϵ2
+
+σ2 ¨ 2nN
+
+˙
+
+.
+
+> 11 We have re-arranged their result to express other quantities in term of the error probability.
+
+30 It follows that if 
+
+n ă 14c2 ¨ λσ ϵ2 log 
+
+ˆ 1
+
+δ
+
+˙
+
+“ 14c2 ¨ λσ ¨ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙
+
+“ 14c2 ¨ p N ` 1q ¨ σ2
+
+ϵ2 ¨ log 
+
+ˆ 1
+
+δ
+
+˙
+
+ď N
+
+2c2
+
+σ2
+
+ϵ2 log 
+
+ˆ 1
+
+δ
+
+˙
+
+,
+
+then the average error probability is lower bounded by 
+
+1
+
+N
+
+> N
+
+ÿ
+
+> j“1
+
+Pr  
+
+> j
+
+perror q ą exp 
+
+ˆ
+
+´c2 ¨ ϵ2
+
+σ2 ¨ 2nN
+
+˙
+
+ě exp 
+
+ˆ
+
+log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+“ δ. 
+
+Therefore, to attain an error probability no higher than δ, we must have 
+
+n “ Ω
+
+ˆ λσ ϵ2 log 
+
+ˆ 1
+
+δ
+
+˙˙ 
+
+as desired. 
+
+# C Unknown Parameters 
+
+## C.1 Proof of Theorem 12 (Unknown Target Accuracy) 
+
+We first decompose the refinement sample complexity in (5) into an accuracy-dependent scaling function gkpσ, ϵ q and a probability term: 
+
+nref pϵ, δ, k, σ q “ gkpσ, ϵ q ¨ log p1{δq,
+
+where gkpσ, ϵ q is defined as: 
+
+gkpσ, ϵ q “ 
+
+$’’’’’’’’’’’&’’’’’’’’’’’%
+
+Θk
+
+ˆ´ σϵ
+
+¯2˙
+
+if k ą 2Θ
+
+ˆ´ σϵ
+
+¯2
+
+¨ log 
+
+´ σϵ
+
+¯˙
+
+if k “ 2Θk
+
+ˆ´ σϵ
+
+¯ kk´1
+
+˙
+
+if k P p 1, 2q.
+
+Let p “ 2 for k ě 2, and p “ kk´1 ą 2 for k P p 1, 2q. Because the logarithmic penalty in the k “ 2 regime strictly increases as ϵ shrinks, we can establish a geometric lower bound on the growth of gkpσ, ¨q . Specifically, we have 
+
+gkpσ, ϵ 1q
+
+gkpσ, ϵ 2q “ Ω
+
+ˆˆ ϵ2
+
+ϵ1
+
+˙p˙
+
+for any 0 ă ϵ1 ď ϵ2 ď σ. (41) Fix a round τ and consider the prior rounds s ď τ . Applying (41) to ϵ1 “ ϵτ and ϵ2 “ ϵs “ 2τ ´s ¨ ϵτ gives 
+
+gkpσ, ϵ sq “ O
+
+´
+
+2´ppτ ´sq ¨ gkpσ, ϵ τ q
+
+¯
+
+. (42) Combining this geometric decay with the trivial bound log p1{δsq ď log p1{δτ q for all s ď τ , the cumulative sample complexity is dominated by the final round: 
+
+> τ
+
+ÿ
+
+> s“1
+
+nref pϵs, δ s, k, σ q “ O
+
+˜ τÿ
+
+> s“1
+
+gkpσ, ϵ sq ¨ log p1{δsq
+
+¸
+
+“ O
+
+˜
+
+gkpσ, ϵ τ q ¨ log p1{δτ q ¨ 
+
+> τ
+
+ÿ
+
+> s“1
+
+2´ppτ ´sq
+
+¸
+
+“ Opgkpσ, ϵ τ q ¨ log p1{δτ qq . (43) 31 We now relate the anytime performance to the oracle accuracy ϵ˚, which satisfies the implicit equation 
+
+nref pϵ˚, δ, k, σ q “ ntrue ´ nloc “ Θ
+
+´
+
+gkpσ, ϵ ˚q ¨ log p1{δq
+
+¯
+
+. (44) By the definition of the stopping condition in (7), round T completes successfully, but attempting round T ` 1 would exceed the available budget: 
+
+ntrue ´ nloc ă 
+
+> T`1
+
+ÿ
+
+> s“1
+
+nref pϵs, δ s, k, σ q. (45) Substituting (44) into the left side of (45) and bounding the right side using (43) yields 
+
+gkpσ, ϵ ˚q ¨ log p1{δq “ Opgkpσ, ϵ T `1q ¨ log p1{δT `1qq .
+
+Rearranging the terms to isolate the ratio of gkp¨q and substituting δs “ 6δπ2s2 gives 
+
+gkpσ, ϵ ˚q
+
+gkpσ, ϵ T `1q “ O
+
+ˆ log p1{δT `1q
+
+log p1{δq
+
+˙
+
+“ O
+
+ˆ
+
+1 ` 2 log pT ` 1q ` log pπ2{6q
+
+log p1{δq
+
+˙
+
+“ O
+
+ˆ
+
+1 ` log pT ` 1q
+
+log p1{δq
+
+˙
+
+. (46) To map this scaling bound back to the target accuracies, we consider two cases based on the relative size of ϵ˚ and 
+
+ϵT `1:• Case 1 (ϵ˚ ě ϵT `1): Because the target accuracy is halved at each round, we have ϵT “ 2ϵT `1 “ Opϵ˚q trivially. • Case 2 (ϵ˚ ă ϵT `1): Applying (41) to the left side of (46) with ϵ1 “ ϵ˚ and ϵ2 “ ϵT `1 yields 
+
+´ ϵT `1
+
+ϵ˚
+
+¯p
+
+“ O
+
+ˆ gkpσ, ϵ ˚q
+
+gkpσ, ϵ T `1q
+
+˙
+
+“ O
+
+ˆ
+
+1 ` log pT ` 1q
+
+log p1{δq
+
+˙
+
+ùñ ϵT “ 2ϵT `1 “ O
+
+˜
+
+ϵ˚
+
+ˆ
+
+1 ` log pT ` 1q
+
+log p1{δq
+
+˙ 1
+
+> p
+
+¸
+
+.
+
+Finally, we bound the round index T . Because the anytime estimator cannot surpass the oracle efficiency given the same budget, we trivially have ϵT ě ϵ˚, which implies 2T ď σ{ϵ˚ and thus T ď log 2pσ{ϵ˚q. Therefore, 
+
+log pT ` 1q “ Oplog log pσ{ϵ˚qq , which gives us the desired bound: 
+
+ϵT “ O
+
+˜
+
+ϵ˚
+
+ˆ
+
+1 ` log log pσ{ϵ˚q
+
+log p1{δq
+
+˙ 1
+
+> p
+
+¸
+
+.
+
+## C.2 Proof of Theorem 13 (Adapting to Unknown Scale) 
+
+Recall that in each round i P t 0, 1, . . . , T u, the algorithm invokes the main estimator with target accuracy ϵi “ rσ i{6,guessed scale parameter σi, and failure probability δi “ δ{p T ` 1q. We first bound the worst-case total sample complexity n, which occurs if the estimator does not halt early and run all T ` 1 loops. Applying the upper bound from Theorem 5 for the sample complexity npϵi, δ i, λ, σ iq of each round i, and summing over all rounds yields 
+
+n “
+
+> T
+
+ÿ
+
+> i“0
+
+O
+
+ˆ
+
+Sk
+
+ˆ σi
+
+ϵi
+
+˙
+
+log 
+
+ˆ 1
+
+δi
+
+˙
+
+` log 
+
+ˆ λσi
+
+˙˙ 
+
+“ O
+
+˜
+
+pT ` 1q ¨ Skprq log 
+
+ˆ T ` 1
+
+δ
+
+˙
+
+`
+
+> T
+
+ÿ
+
+> i“0
+
+log 
+
+ˆ λσi
+
+˙¸
+
+, (47) where 
+
+Skprq “ 
+
+$’’’’’’’’’’&’’’’’’’’’’%
+
+1
+
+r2 if k ą 21
+
+r2 log 
+
+ˆ 1
+
+r
+
+˙
+
+if k “ 2
+
+ˆ 1
+
+r
+
+˙ kk´1
+
+if k P p 1, 2q
+
+32 is the asymptotic scaling defined in Theorem 13). Recalling that σi is a geometric sequence with σ0 “ σmax and 
+
+σT “ Θpσmin q (see (8) and (9)), we can evaluate the summation over the localization terms by 
+
+> T
+
+ÿ
+
+> i“0
+
+log 2
+
+ˆ λσi
+
+˙
+
+“ log 2
+
+˜ Tź
+
+> i“0
+
+λσi
+
+¸
+
+“ log 2
+
+˜
+
+λT `1
+
+`?σ0 ¨ σT
+
+˘T `1
+
+¸
+
+“ Θ
+
+ˆ
+
+T log λ
+
+?σ0 ¨ σT
+
+˙
+
+“ Θ
+
+ˆ
+
+T log λ
+
+?σmin ¨ σmax 
+
+˙
+
+,
+
+where the second equality follows from the fact that the product of a finite geometric sequence is its geometric mean raised to the number of terms (i.e., śTi“0 σi “ p ?σ0 ¨ σT qT `1). Combining the above two findings and substituting 
+
+T “ rlog 2pσmax {σmin qs gives the desired sample complexity: 
+
+n “ O
+
+ˆ
+
+log 
+
+ˆ σmax 
+
+σmin 
+
+˙
+
+¨
+
+ˆ
+
+Skprq ¨ log 
+
+ˆ log pσmax {σmin q
+
+δ
+
+˙
+
+` log 
+
+ˆ λ
+
+?σmin σmax 
+
+˙˙˙ 
+
+.
+
+We now show that selected output ˆμpi˚q is pϵ, δ q-PAC for the relative target accuracy ϵ “ rσ true , i.e., 
+
+Pr 
+
+´ˇ ˇˇˆμpi˚q ´ μ
+
+ˇˇˇ ď rσ true 
+
+¯
+
+ě 1 ´ δ. (48) Let j˚ be the largest grid index (corresponding to the tightest valid scale) that still upper bounds the true scale, i.e., 
+
+j˚ “ max  
+
+> iě0
+
+tσi ě σtrue u. (49) Due to the geometric spacing σi “ σmax ¨ 2´i, we are guaranteed that the scale at j˚ tightly bounds the true scale: 
+
+σj˚ ď 2σtrue “ 2ϵr . (50) For each round i ď j˚, the guessed parameter satisfies σi ě σtrue . Therefore, the distribution validly satisfies the assumed moment bound Er| X ´ μ|ks ď σki , ensuring that the subroutine’s theoretical guarantees hold. Let Ei “ t μ P
+
+Iiu be the event that the true mean lies in the i-th confidence interval Ii “ r ˆμpiq ˘ ϵis. By the subroutine’s guarantee, the event Ei occurs with probability at least 1 ´ δi “ 1 ´ δ{p T ` 1q. Applying the union bound over all valid rounds, the “good event” E “ Ş 
+
+> iďj˚
+
+Ei happens with probability at least 
+
+Pr pEq “ Pr 
+
+˜ č
+
+> iěk
+
+Ei
+
+¸
+
+“ 1 ´ Pr 
+
+˜ ď
+
+> iěk
+
+␣Ei
+
+¸
+
+ě 1 ´ ÿ
+
+> iěk
+
+Pr p␣ Eiq ě 1 ´ ÿ
+
+> iěk
+
+δi ě 1 ´
+
+> T
+
+ÿ
+
+> i“0
+
+δi “ 1 ´ δ. 
+
+We condition on the event E for the rest of the proof. Under event E, we have μ P Ii for all i ď j˚, and so all confidence intervals up to j˚ mutually intersect at the true mean μ. Consequently, the algorithm’s stopping condition (Ii X Il “ H for some l ă i) will not trigger at any step i ď j˚. Therefore, the last successful index i˚ “ i ´ 1 must satisfy i˚ ě j˚, which implies 
+
+σi˚ ď σj˚ (51) To establish the PAC guarantee, we analyze the estimation error of ˆμpi˚q. By the algorithm’s acceptance criteria, because the interval Ii˚ was successfully accepted, it must intersect with all previously established intervals. In particular, because j˚ ď i˚, there exists a common point z P Ii˚ X Ij˚ . By the definition of the intervals ((see (10))), we have |ˆμpi˚q ´ z| ď ϵi˚ and |ˆμpj˚q ´ z| ď ϵj˚ . Applying the triangle inequality yields 
+
+|ˆμpi˚q ´ μ| ď | ˆμpi˚q ´ z| ` | z ´ ˆμpj˚q| ` | ˆμpj˚q ´ μ| ď ϵi˚ ` 2ϵj˚ .
+
+Using the target accuracy choice of ϵi “ rσ i{6 and bounds (50)–(51), we obtain the desired guarantee: 
+
+|ˆμpiq
+
+´ μ| ď ϵi˚ ` 2ϵj˚ “ rσ i˚
+
+6 ` 2rσ j˚
+
+6 ď 3rσ j˚
+
+6 ď rσ true “ ϵ. 
+
+33 D Details of the Two-stage Mean Estimator 
+
+Here we provide the technical details for the non-adaptive localization protocol described in Section 4.3. The goal of this protocol is to non-adaptively identify an interval I of length Opσq that contains the mean μ with high probability. The core idea is adapted from (Cai and Wei, 2024), whose focus is on Gaussian distributions. We modify their approach to handle our general non-parametric family Dpk, λ, σ q for any k ą 1. The protocol encodes the location of the mean using a binary Gray code of length M “ Θplog pλ{σqq , and estimates each of these M bits by aggregating responses from suitably chosen non-adaptive 1-bit queries. We now formalize the necessary definitions and describe the procedure. 
+
+Definition 19 (Gray function) . Let τr0,1s : R Ñ r 0, 1s be the truncation function τr0,1spxq “ max p0, min p1, x qq . For integers ℓ ě 0, we let gℓ : R Ñ t 0, 1u be the ℓ-th Gray function, defined by 
+
+gℓpxq :“
+
+#
+
+0 if X2ℓ ¨ τr0,1spxq\ mod 4 P t 0, 3u
+
+1 if X2ℓ ¨ τr0,1spxq\ mod 4 P t 1, 2u .
+
+Definition 20 (Change points set) . The set Gℓ of change points for gℓ is defined as the collection of points x P r 0, 1s
+
+where gℓpxq changes its value from 0 to 1 or from 1 to 0. Formally, 
+
+Gℓ “ ␣p2j ´ 1q ¨ 2´ℓ : 1 ď j ď 2ℓ´1( “
+
+"
+
+x P r 0, 1s : lim 
+
+> yÑx´
+
+gℓpyq ‰ lim 
+
+> yÑx`
+
+gℓpyq
+
+*
+
+.
+
+Note that the sets Gℓ are pairwise disjoint, i.e., Gℓ X Gℓ1 “ ∅ for ℓ ‰ ℓ1.
+
+Definition 21 (Decoding) . For any M ě 1, we let Dec M : t0, 1uM Ñ 2r0,1s be the decoding function defined by 
+
+Dec M py1, . . . , y M q :“ t x P r 0, 1s : gℓpxq “ yℓ for 1 ď ℓ ď M u.
+
+This forms a dyadic interval of length 2´M that is consistent with the Gray code bits y1, y 2, . . . , y M , which can be expressed as Dec M py1, . . . , y M q “ “x0, x 0 ` 2´M ‰ Ă r 0, 1s for some base point x0.With these definitions in mind, we now describe the localization procedure. 1. Rescaling: We first rescale the samples and the true mean, so that the scaled mean lies on the unit interval: 
+
+X1 “ X ` λ
+
+2λ and μ1 “ μ ` λ
+
+2λ P r 0, 1s.
+
+Note that the resulting k-th central moment bound scales accordingly as 
+
+E“|X1 ´ μ1|k‰ ď
+
+´ σ
+
+2λ
+
+¯k
+
+. (52) 2. Sample grouping: Let the total number of bits to be estimated be 12 
+
+M “
+
+Z
+
+log 2
+
+ˆ λσ
+
+˙
+
+´ 1 ´ 2
+
+k
+
+^
+
+. (53) Each bit ℓ P t 1, . . . , M u is estimated using a fixed group of samples of size J “ P8 ln 2Mδ
+
+T. Thus, the total number of samples used (for localization) is M J “ Θ
+
+´
+
+log ` λσ
+
+˘ ¨ log log pλ{σq
+
+> δ
+
+¯
+
+.3. Querying: For sample j in group ℓ, the learner issues a fixed 1-bit query to observe 
+
+Zℓ,j “ gℓpX1 
+
+> ℓ,j
+
+q,
+
+where X1 
+
+> ℓ,j
+
+is an independent transformed unquantized sample observed by an agent.         
+
+> 12 We assume without loss of generality that λ{σě22`2{k; otherwise, the initial search space r´ λ, λ sis already of length Opσq, and the learner can bypass this localization step entirely. Under this assumption, the term inside the floor function is at least 1.
+
+34 4. Majority-voting: For each bit ℓ “ 1, . . . , M , the learner computes the majority vote 
+
+ˆzℓ “ Maj tZℓ, 1, . . . , Z ℓ,J u “ 1
+
+# Jÿ
+
+> j“1
+
+Zℓ,j ě J
+
+2
+
++
+
+.
+
+5. Decoding and Widening: The learner computes the base interval “x0, x 0 ` 2´M ‰ “ Dec M pˆz1, . . . , ˆzM q, and widens it by shifting the endpoints outward by 2´p M `2q to absorb boundary errors: 
+
+I1 “
+
+”
+
+x0 ´ 2´p M `2q, x 0 ` 2´M ` 2´p M `2q
+
+ı
+
+X r 0, 1s. (54) Finally, it scales and shifts the widened interval I1 “ r L1, U 1s back to the original space, returning I “r2λL 1 ´ λ, 2λU 1 ´ λs. By the choice of M in (53), the length of the returned interval satisfies 
+
+|I| “ 2λ ¨ p U 1 ´ L1q ď 2λ ¨
+
+´
+
+2´M ` 2 ¨ 2´p M `2q
+
+¯
+
+“ 3λ ¨ 2´M ď 3λ ¨
+
+´ σλ ¨ 22`2{k
+
+¯
+
+“ Opσq. (55) Before proving Theorem 14, we state three supporting lemmas. Lemma 22 is a restatement of (Cai and Wei, 2024)[Lemma 17] (whose proof is elementary and straightforward), while the other two lemmas bound the encoding and decoding error probability. 
+
+Lemma 22 (Widened Interval Containment (Cai and Wei, 2024)[Lemma 17]) . Let I1 be the widened interval in (54). If each bit ℓ P t 1, . . . , M u satisfies the condition 
+
+dℓ :“ inf 
+
+> yPGℓ
+
+|μ1 ´ y| ă 2´p M `2q or ˆzℓ “ gℓpμ1q, (56) then μ1 P I1. Note that because the change point grids Gℓ are separated by at least 2´M , there is at most one bit ℓ that can satisfy the boundary proximity condition dℓ ă 2´p M `2q.
+
+Lemma 23 (Encoding Error Probability) . For each bit ℓ “ 1, . . . , M and each sample j, we have 
+
+Pr `gℓpX1 
+
+> ℓ,j
+
+q ‰ gℓpμ1q˘ ď
+
+ˆ σ
+
+2λd ℓ
+
+˙k
+
+,
+
+where dℓ “ inf yPGℓ |μ1 ´ y| is the distance from the transformed mean to the nearest change point. 
+
+Proof. By the definitions of dℓ and Gℓ, the function gℓpxq changes value only if its truncated input τr0,1spxq crosses a change point in Gℓ. Because truncation to r0, 1s is a non-expansive projection and μ1 P r 0, 1s, we have 
+
+|τr0,1spX1 
+
+> ℓ,j
+
+q ´ μ1| “ | τr0,1spX1 
+
+> ℓ,j
+
+q ´ τr0,1spμ1q| ď | X1 
+
+> ℓ,j
+
+´ μ1|.
+
+Therefore, if the “unclamped distance” |X1 
+
+> ℓ,j
+
+´ μ1| is less than dℓ, then the distance between the truncated sample and the true mean is also less than dℓ. This guarantees that the truncated sample has not crossed the boundary of the nearest change point, ensuring gℓpX1 
+
+> ℓ,j
+
+q “ gℓpμ1q. In other words, an encoding error can thus occur only if the unclamped sample deviates from μ1 by at least dℓ. Combining this with the k-moment Chebyshev’s inequality (Lemma 16) and the scaled moment bound from (52) yields 
+
+Pr `gℓpX1 
+
+> ℓ,j
+
+q ‰ gℓpμ1q˘ ď Pr `|X1 
+
+> ℓ,j
+
+´ μ1| ě dℓ
+
+˘ ď
+
+E
+
+”ˇˇX1 
+
+> ℓ,j
+
+´ μ1ˇˇkı
+
+dkℓ
+
+ď
+
+ˆ σ
+
+2λd ℓ
+
+˙k
+
+.
+
+Lemma 24 (Majority-Vote Decoding Error Probability) . Fix a bit ℓ P t 1, . . . , M u. Suppose that the i.i.d. query error satisfies Pr 
+
+´
+
+gℓpX1 
+
+> ℓ,j
+
+q ‰ gℓpμ1q
+
+¯
+
+ď 1{4. Then under the allocation J “ r8 ln p2M {δqs, the majority vote ˆzℓ satisfies 
+
+Pr `ˆzℓ ‰ gℓpμ1q˘ ď exp 
+
+ˆ
+
+´ J
+
+8
+
+˙
+
+ď δ
+
+2M .
+
+35 Proof. Let S „ Binomial pJ, p q count the total number of incorrect votes, where p ď 1{4. The expected number of errors is ErSs ď J{4. The majority vote fails only if S ě J{2. Applying Hoeffding’s inequality yields 
+
+Pr `ˆzℓ ‰ gℓpμ1q˘ “ Pr 
+
+ˆ
+
+S ě J
+
+2
+
+˙
+
+ď Pr 
+
+ˆ
+
+S ´ ErSs ě J
+
+4
+
+˙
+
+ď exp 
+
+ˆ
+
+´ 2pJ{4q2
+
+J
+
+˙
+
+ď exp 
+
+ˆ
+
+´ J
+
+8
+
+˙
+
+ď δ
+
+2M
+
+as desired. 
+
+Proof of Theorem 14. Given the guaranteed interval length in (55), it remains to show that μ1 P I1 (which implies 
+
+μ P I) with probability at least 1 ´ δ{2. In view of Lemma 22, we define the “good events” 
+
+Eℓ “
+
+!
+
+dℓ ă 2´p M `2q or ˆzℓ “ gℓpμ1q
+
+)
+
+(57) and show that 
+
+Pr 
+
+˜ Mč
+
+> ℓ“1
+
+Eℓ
+
+¸
+
+ě 1 ´ δ{2.
+
+By the union bound, it is sufficient to show that each individual “bad event” ¯Eℓ occurs with probability at most δ{p 2M q.Fix an arbitrary bit ℓ P t 1, . . . , M u. If dℓ ă 2´p M `2q, then the good event (57) is deterministically true, yielding 
+
+Pr p ¯Eℓq “ 0. Therefore, we assume without loss of generality that dℓ ě 2´p M `2q, which implies 1{dℓ ď 2M `2.Using this assumption alongside the choice of M ď log 2pλ{σq ´ 1 ´ 2{k from (53), we can bound the base term in Lemma 23 by 
+
+σ
+
+2λd ℓ
+
+ď σ
+
+2λ ¨ 2M `2 ď σ
+
+2λ ¨ 2log 2pλ{σq` 1´2{k “ σ
+
+2λ ¨ λσ ¨ 21´2{k “ 2´2{k.
+
+Applying Lemma 23, the probability of a single-bit encoding error is bounded by 
+
+Pr `gℓpX1 
+
+> ℓ,j
+
+q ‰ gℓpμ1q˘ ď
+
+´
+
+2´2{k
+
+¯k
+
+“ 2´2 “ 14 .
+
+Because the single-bit error is at most 1{4, Lemma 24 guarantees that the majority vote error probability is at most 
+
+δ{p 2M q. Thus, Pr p ¯Eℓq “ Pr pˆzℓ ‰ gℓpμ1qq ď δ{p 2M q as desired. 36
