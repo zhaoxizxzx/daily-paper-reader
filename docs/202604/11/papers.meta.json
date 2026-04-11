@@ -1,0 +1,23 @@
+{
+  "label": "2026-04-11",
+  "date": "2026-04-11",
+  "generated_at": "2026-04-11T19:54:42",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202604/11/2604.02900v1-augmenting-automatic-differentiation-for-a-single-server-queue-via-the-leibniz-integral-rule",
+      "section": "quick",
+      "title_en": "Augmenting Automatic Differentiation for a Single-Server Queue via the Leibniz Integral Rule",
+      "authors": "Michael C. Fu",
+      "date": "2026-04-03",
+      "pdf": "https://arxiv.org/pdf/2604.02900v1",
+      "score": "6.0",
+      "evidence": "基于单样本路径的平均排队时间估计器",
+      "tldr": "本文针对先到先服务（FCFS）单服务器队列，提出了一种计算平均排队时间高阶导数的新型递归估计方法。该研究结合了经典的 Lindley 方程与微积分中的莱布尼茨积分法则，使得仅通过单条样本路径即可高效获取高阶导数信息。这一成果增强了自动微分在排队系统中的应用能力，为系统的灵敏度分析和参数优化提供了有力的数学工具和计算方案。",
+      "tags": "query:netmes",
+      "abstract_en": "New recursive estimators for computing higher-order derivatives of mean queueing time from a single sample path of a first-come, first-served single-server queue are presented, derived using the well-known Lindley equation and applying the Leibniz integral rule of differential calculus. Illustrative examples are provided.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

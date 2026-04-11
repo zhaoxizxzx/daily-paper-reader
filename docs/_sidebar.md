@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-11 <!--dpr-date:20260411-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/11/2604.02900v1-augmenting-automatic-differentiation-for-a-single-server-queue-via-the-leibniz-integral-rule" data-sidebar-item="{&quot;title&quot;: &quot;Augmenting Automatic Differentiation for a Single-Server Queue via the Leibniz Integral Rule&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.02900v1-augmenting-automatic-differentiation-for-a-single-server-queue-via-the-leibniz-integral-rule&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;netmes&quot;}], &quot;evidence&quot;: &quot;基于单样本路径的平均排队时间估计器&quot;}">Augmenting Automatic Differentiation for a Single-Server Queue via the Leibniz Integral Rule</a>
   * 2026-04-10 <!--dpr-date:20260410-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/10/2604.05642v1-t2t-captioning-smartphone-activities-using-mobile-traffic" data-sidebar-item="{&quot;title&quot;: &quot;T2T: Captioning Smartphone Activities Using Mobile Traffic&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.05642v1-t2t-captioning-smartphone-activities-using-mobile-traffic&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;netmes&quot;}], &quot;evidence&quot;: &quot;利用加密移动流量特征进行智能手机活动描述&quot;}">T2T: Captioning Smartphone Activities Using Mobile Traffic</a>

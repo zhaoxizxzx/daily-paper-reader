@@ -6,32 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-10
-- 运行时间：2026-04-10 20:25:12 UTC
+- 最新运行日期：2026-04-11
+- 运行时间：2026-04-11 19:54:33 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：1
 - 精读区：0
-- 速读区：3
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦网络流量感知与分布式路由优化，涵盖从手机活动识别到跨数据中心 RDMA 传输的前沿探索。
-重点关注通过移动流量自动生成手机活动描述的 T2T 技术，以及针对长途跨数据中心网络设计的低成本多路径路由协议 LCMP。
-建议关注网络流量分析与高性能数据中心通信的读者深入了解相关算法实现。
-- 详情：[/202604/10/README](/202604/10/README)
+今日聚焦如何利用莱布尼茨积分法则优化单服务器队列的自动微分计算。
+该研究通过引入经典数学规则增强了自动微分在排队系统中的表现，有效提升了复杂动态建模的导数计算精度。
+推荐对运筹学与深度学习交叉领域感兴趣的读者关注这种理论驱动的算法改进方向。
+- 详情：[/202604/11/README](/202604/11/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [T2T: Captioning Smartphone Activities Using Mobile Traffic](/202604/10/2604.05642v1-t2t-captioning-smartphone-activities-using-mobile-traffic)  
+1. [Augmenting Automatic Differentiation for a Single-Server Queue via the Leibniz Integral Rule](/202604/11/2604.02900v1-augmenting-automatic-differentiation-for-a-single-server-queue-via-the-leibniz-integral-rule)  
    标签：评分：6.0/10、query:netmes
-   evidence：利用加密移动流量特征进行智能手机活动描述
-2. [Order-Optimal Sequential 1-Bit Mean Estimation in General Tail Regimes](/202604/10/2604.07796v1-order-optimal-sequential-1-bit-mean-estimation-in-general-tail-regimes)  
-   标签：评分：6.0/10、query:netmes
-   evidence：通信受限下的自适应均值估计是流量采样和遥测的核心组件
-3. [LCMP: Distributed Long-Haul Cost-Aware Multi-Path Routing for Inter-Datacenter RDMA Networks](/202604/10/2604.07836v1-lcmp-distributed-long-haul-cost-aware-multi-path-routing-for-inter-datacenter-rdma-networks)  
-   标签：评分：6.0/10、query:netmes
-   evidence：跨数据中心网络中的交换机拥塞信号
+   evidence：基于单样本路径的平均排队时间估计器
 
 
 <div class="dpr-home-promo-card">
