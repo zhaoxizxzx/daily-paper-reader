@@ -6,26 +6,22 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-11
-- 运行时间：2026-04-11 19:54:33 UTC
+- 最新运行日期：2026-04-12
+- 运行时间：2026-04-12 19:29:43 UTC
 - 运行状态：成功
-- 本次总论文数：1
+- 本次总论文数：0
 - 精读区：0
-- 速读区：1
+- 速读区：0
 
 ### 今日简报（AI）
-今日聚焦如何利用莱布尼茨积分法则优化单服务器队列的自动微分计算。
-该研究通过引入经典数学规则增强了自动微分在排队系统中的表现，有效提升了复杂动态建模的导数计算精度。
-推荐对运筹学与深度学习交叉领域感兴趣的读者关注这种理论驱动的算法改进方向。
-- 详情：[/202604/11/README](/202604/11/README)
+> 今日无新推荐，系统未产出可展示论文。
+- 详情：[/202604/12/README](/202604/12/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Augmenting Automatic Differentiation for a Single-Server Queue via the Leibniz Integral Rule](/202604/11/2604.02900v1-augmenting-automatic-differentiation-for-a-single-server-queue-via-the-leibniz-integral-rule)  
-   标签：评分：6.0/10、query:netmes
-   evidence：基于单样本路径的平均排队时间估计器
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">
