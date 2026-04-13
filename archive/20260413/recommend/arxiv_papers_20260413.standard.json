@@ -1,0 +1,127 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-13T20:40:17.216070+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2604.08791v1",
+      "title": "eBandit: Kernel-Driven Reinforcement Learning for Adaptive Video Streaming",
+      "abstract": "User-space Adaptive Bitrate (ABR) algorithms cannot see the transport layer signals that matter most, such as minimum RTT and instantaneous delivery rate, and they respond to network changes only after damage has already propagated to the playout buffer. We present eBandit, a framework that relocates both network monitoring and ABR algorithm selection into the Linux kernel using eBPF. A lightweight epsilon-greedy Multi-Armed Bandit (MAB) runs inside a sockops program, evaluating three ABR heuristics against a reward derived from live TCP metrics. On an adversarial synthetic trace eBandit achieves $416.3 \\pm 4.9$ cumulative QoE, outperforming the best static heuristic by $7.2\\%$. On 42 real-world sessions eBandit achieves a mean QoE per chunk of $1.241$, the highest across all policies, demonstrating that kernel-resident bandit learning transfers to heterogeneous mobile conditions.",
+      "authors": [
+        "Mahdi Alizadeh"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.AI"
+      ],
+      "published": "2026-04-09T22:02:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.08791v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "kernel-level network monitoring using eBPF for real-time TCP metrics",
+      "llm_evidence_cn": "利用eBPF在内核层进行实时TCP指标的网络监控",
+      "llm_evidence": "利用eBPF在内核层进行实时TCP指标的网络监控",
+      "canonical_evidence": "利用eBPF在内核层进行实时TCP指标的网络监控",
+      "llm_tldr_en": "Relocates network monitoring to the Linux kernel using eBPF to improve adaptive video streaming.",
+      "llm_tldr_cn": "利用eBPF将网络监控移至Linux内核，以优化自适应视频流传输。",
+      "llm_tldr": "利用eBPF将网络监控移至Linux内核，以优化自适应视频流传输。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.08140v1",
+      "title": "Multimodal Reasoning with LLM for Encrypted Traffic Interpretation: A Benchmark",
+      "abstract": "Network traffic, as a key media format, is crucial for ensuring security and communications in modern internet infrastructure. While existing methods offer excellent performance, they face two key bottlenecks: (1) They fail to capture multidimensional semantics beyond unimodal sequence patterns. (2) Their black box property, i.e., providing only category labels, lacks an auditable reasoning process. We identify a key factor that existing network traffic datasets are primarily designed for classification and inherently lack rich semantic annotations, failing to generate human-readable evidence report. To address data scarcity, this paper proposes a Byte-Grounded Traffic Description (BGTD) benchmark for the first time, combining raw bytes with structured expert annotations. BGTD provides necessary behavioral features and verifiable chains of evidence for multimodal reasoning towards explainable encrypted traffic interpretation. Built upon BGTD, this paper proposes an end-to-end traffic-language representation framework (mmTraffic), a multimodal reasoning architecture bridging physical traffic encoding and semantic interpretation. In order to alleviate modality interference and generative hallucinations, mmTraffic adopts a jointly-optimized perception-cognition architecture. By incorporating a perception-centered traffic encoder and a cognition-centered LLM generator, mmTraffic achieves refined traffic interpretation with guaranteed category prediction. Extensive experiments demonstrate that mmTraffic autonomously generates high-fidelity, human-readable, and evidence-grounded traffic interpretation reports, while maintaining highly competitive classification accuracy comparing to specialized unimodal model (e.g., NetMamba). The source code is available at https://github.com/lgzhangzlg/Multimodal-Reasoning-with-LLM-for-Encrypted-Traffic-Interpretation-A-Benchmark",
+      "authors": [
+        "Longgang Zhang",
+        "Xiaowei Fu",
+        "Fuxiang Huang",
+        "Lei Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.MM",
+        "cs.NI"
+      ],
+      "published": "2026-04-09T11:56:28+00:00",
+      "link": "https://arxiv.org/pdf/2604.08140v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multimodal reasoning for encrypted traffic interpretation and semantic annotation",
+      "llm_evidence_cn": "加密流量解释的多模态推理与语义标注",
+      "llm_evidence": "加密流量解释的多模态推理与语义标注",
+      "canonical_evidence": "加密流量解释的多模态推理与语义标注",
+      "llm_tldr_en": "Proposes a benchmark for interpreting encrypted traffic using LLMs to provide auditable reasoning reports.",
+      "llm_tldr_cn": "提出一个利用大模型解释加密流量的基准，旨在提供可审计的推理报告。",
+      "llm_tldr": "提出一个利用大模型解释加密流量的基准，旨在提供可审计的推理报告。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.09322v1",
+      "title": "EYWA: Elastic Load-Balancing and High-Availability Wired Virtual Network Architecture",
+      "abstract": "Infrastructure as a Service (IaaS) in cloud environments provides compute, storage, networking, and other fundamental resources that allow consumers to deploy and run arbitrary software, including operating systems and applications. To support multi-tenant environments, IaaS leverages virtualization, but conventional overlay network architectures have become a direct cause of scalability limitations. In particular, current IaaS virtual networks face challenges in high availability and load balancing.   To address these issues, we present EYWA, a virtual network architecture that scales to support very large data centers with high availability, efficient load balancing, and large layer-2 semantics. EYWA overcomes scalability limitations by: (1) accommodating a large number of tenants (about 2^24 = 16,777,216) through logically isolated virtual LANs with unique IP ranges, (2) providing per-tenant public network services without throughput bottlenecks or single points of failure in network address translation (SNAT/DNAT), and (3) enabling a single large IP subnet per tenant with extended layer-2 semantics.   EYWA combines existing techniques into a distributed scale-out control and data plane. Its only component is an agent running on each hypervisor host, which collectively act as a distributed controller. As a result, EYWA can be deployed in today's multi-tenant cloud environments. We have implemented a proof-of-concept (PoC) of EYWA and evaluated its effectiveness through measurements and experiments in our lab.",
+      "authors": [
+        "Wookjae Jeong",
+        "Jungin Jung"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-10T13:47:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.09322v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "virtual network architecture for large data centers with load balancing",
+      "llm_evidence_cn": "面向大型数据中心的负载均衡虚拟网络架构",
+      "llm_evidence": "面向大型数据中心的负载均衡虚拟网络架构",
+      "canonical_evidence": "面向大型数据中心的负载均衡虚拟网络架构",
+      "llm_tldr_en": "Presents EYWA, a scalable virtual network architecture for data centers focusing on high availability.",
+      "llm_tldr_cn": "提出 EYWA，一种面向数据中心的可扩展虚拟网络架构，重点关注高可用性。",
+      "llm_tldr": "提出 EYWA，一种面向数据中心的可扩展虚拟网络架构，重点关注高可用性。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

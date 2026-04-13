@@ -1,0 +1,51 @@
+{
+  "label": "2026-04-13",
+  "date": "2026-04-13",
+  "generated_at": "2026-04-13T20:41:14",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202604/13/2604.08791v1-ebandit-kernel-driven-reinforcement-learning-for-adaptive-video-streaming",
+      "section": "deep",
+      "title_en": "eBandit: Kernel-Driven Reinforcement Learning for Adaptive Video Streaming",
+      "authors": "Mahdi Alizadeh",
+      "date": "2026-04-09",
+      "pdf": "https://arxiv.org/pdf/2604.08791v1",
+      "score": "8.0",
+      "evidence": "利用eBPF在内核层进行实时TCP指标的网络监控",
+      "tldr": "eBandit是一个基于eBPF的内核级自适应比特率（ABR）框架，旨在解决用户态ABR算法无法实时获取传输层信号且响应滞后的问题。该框架在Linux内核中运行轻量级多臂老虎机（MAB）算法，利用实时TCP指标动态选择最优ABR启发式策略。实验表明，eBandit在合成和真实网络环境下均能显著提升视频观看体验（QoE），证明了内核驻留学习在移动网络中的有效性。",
+      "tags": "query:netmes",
+      "abstract_en": "User-space Adaptive Bitrate (ABR) algorithms cannot see the transport layer signals that matter most, such as minimum RTT and instantaneous delivery rate, and they respond to network changes only after damage has already propagated to the playout buffer. We present eBandit, a framework that relocates both network monitoring and ABR algorithm selection into the Linux kernel using eBPF. A lightweight epsilon-greedy Multi-Armed Bandit (MAB) runs inside a sockops program, evaluating three ABR heuristics against a reward derived from live TCP metrics. On an adversarial synthetic trace eBandit achieves $416.3 \\pm 4.9$ cumulative QoE, outperforming the best static heuristic by $7.2\\%$. On 42 real-world sessions eBandit achieves a mean QoE per chunk of $1.241$, the highest across all policies, demonstrating that kernel-resident bandit learning transfers to heterogeneous mobile conditions.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/13/2604.08140v1-multimodal-reasoning-with-llm-for-encrypted-traffic-interpretation-a-benchmark",
+      "section": "quick",
+      "title_en": "Multimodal Reasoning with LLM for Encrypted Traffic Interpretation: A Benchmark",
+      "authors": "Longgang Zhang, Xiaowei Fu, Fuxiang Huang, Lei Zhang",
+      "date": "2026-04-09",
+      "pdf": "https://arxiv.org/pdf/2604.08140v1",
+      "score": "7.0",
+      "evidence": "加密流量解释的多模态推理与语义标注",
+      "tldr": "该研究针对加密流量分析中语义缺失和缺乏可解释性的挑战，提出了首个字节对齐的流量描述基准BGTD，并开发了多模态推理框架mmTraffic。该框架通过感知编码器与大语言模型的联合优化，实现了从原始流量编码到语义解释的跨越，能够生成具有证据支撑的可解释性报告，同时在分类性能上保持了极高竞争力。",
+      "tags": "query:netmes",
+      "abstract_en": "Network traffic, as a key media format, is crucial for ensuring security and communications in modern internet infrastructure. While existing methods offer excellent performance, they face two key bottlenecks: (1) They fail to capture multidimensional semantics beyond unimodal sequence patterns. (2) Their black box property, i.e., providing only category labels, lacks an auditable reasoning process. We identify a key factor that existing network traffic datasets are primarily designed for classification and inherently lack rich semantic annotations, failing to generate human-readable evidence report. To address data scarcity, this paper proposes a Byte-Grounded Traffic Description (BGTD) benchmark for the first time, combining raw bytes with structured expert annotations. BGTD provides necessary behavioral features and verifiable chains of evidence for multimodal reasoning towards explainable encrypted traffic interpretation. Built upon BGTD, this paper proposes an end-to-end traffic-language representation framework (mmTraffic), a multimodal reasoning architecture bridging physical traffic encoding and semantic interpretation. In order to alleviate modality interference and generative hallucinations, mmTraffic adopts a jointly-optimized perception-cognition architecture. By incorporating a perception-centered traffic encoder and a cognition-centered LLM generator, mmTraffic achieves refined traffic interpretation with guaranteed category prediction. Extensive experiments demonstrate that mmTraffic autonomously generates high-fidelity, human-readable, and evidence-grounded traffic interpretation reports, while maintaining highly competitive classification accuracy comparing to specialized unimodal model (e.g., NetMamba). The source code is available at https://github.com/lgzhangzlg/Multimodal-Reasoning-with-LLM-for-Encrypted-Traffic-Interpretation-A-Benchmark",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/13/2604.09322v1-eywa-elastic-load-balancing-and-high-availability-wired-virtual-network-architecture",
+      "section": "quick",
+      "title_en": "EYWA: Elastic Load-Balancing and High-Availability Wired Virtual Network Architecture",
+      "authors": "Wookjae Jeong, Jungin Jung",
+      "date": "2026-04-10",
+      "pdf": "https://arxiv.org/pdf/2604.09322v1",
+      "score": "6.0",
+      "evidence": "面向大型数据中心的负载均衡虚拟网络架构",
+      "tldr": "EYWA 是一种针对大规模多租户云环境设计的虚拟网络架构，旨在解决传统叠加网络在可扩展性、高可用性和负载均衡方面的局限。它通过在每个宿主机上部署分布式代理，实现了支持千万级租户的逻辑隔离、无瓶颈的公网访问服务以及大二层语义。该架构消除了网络地址转换（NAT）的单点故障，为超大规模数据中心提供了高效、弹性的网络支撑。",
+      "tags": "query:netmes",
+      "abstract_en": "Infrastructure as a Service (IaaS) in cloud environments provides compute, storage, networking, and other fundamental resources that allow consumers to deploy and run arbitrary software, including operating systems and applications. To support multi-tenant environments, IaaS leverages virtualization, but conventional overlay network architectures have become a direct cause of scalability limitations. In particular, current IaaS virtual networks face challenges in high availability and load balancing.   To address these issues, we present EYWA, a virtual network architecture that scales to support very large data centers with high availability, efficient load balancing, and large layer-2 semantics. EYWA overcomes scalability limitations by: (1) accommodating a large number of tenants (about 2^24 = 16,777,216) through logically isolated virtual LANs with unique IP ranges, (2) providing per-tenant public network services without throughput bottlenecks or single points of failure in network address translation (SNAT/DNAT), and (3) enabling a single large IP subnet per tenant with extended layer-2 semantics.   EYWA combines existing techniques into a distributed scale-out control and data plane. Its only component is an agent running on each hypervisor host, which collectively act as a distributed controller. As a result, EYWA can be deployed in today's multi-tenant cloud environments. We have implemented a proof-of-concept (PoC) of EYWA and evaluated its effectiveness through measurements and experiments in our lab.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
