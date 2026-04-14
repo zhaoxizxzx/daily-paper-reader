@@ -1,0 +1,537 @@
+Title: Verifying In-Network Computing Systems for Design Risks
+
+URL Source: https://arxiv.org/pdf/2604.10186v1
+
+Published Time: Tue, 14 Apr 2026 00:40:03 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Verifying In-Network Computing Systems for Design Risks 
+
+# Tianyu Bai Peking University Ying Zhang Meta Xiaoxi Zhang Sun Yat-sen University Wenfei Wu ∗
+
+# Peking University 
+
+# Abstract 
+
+The emergence of programmable switches has brought in-network computing (INC) into the spotlight in recent years. By offloading computation directly onto the data transmission process, INC improves network utilization, reduces latency to sub-RTT levels, saves link bandwidth, and maintains through-put. However, INC disrupts the transparency of traditional networks, forcing developers to consider network exceptions like packet loss and out-of-order. If not properly handled, these exceptions can lead to violations of application prop-erties, such as cache consistency and lock exclusion. Usual testing cannot exhaustively cover these exceptions, raising doubts about the correctness of INC systems and hindering their deployment in the industry. This paper presents INCGuard 1, the first general-purpose tool for verifying INC systems. INCGuard provides a high-level specification language and saves developers 67.2% lines of code on average. To help better understand the behavior of the system, INCGuard offers configurable net-work environments. INCGuard enables developers to express INC-specific correctness properties. INCGuard translates developer-specified systems into state transition representa-tions, performs model checking to detect potential design risks, and reports violation traces to developers. We propose optimizations for INC-specific scenarios to address the chal-lenge of state space explosion. We modeled seven INC sys-tems and identified their risks with INCGuard in seconds. We further reproduce them in real systems to confirm the validity of our verification result 2.
+
+This work does not raise any ethical issues.   
+
+> ∗Cooresponding author.
+> 1INCGuard is open-sourced at https://anonymous.4open.scienc e/r/OSDI26-VeriNC-F64C .
+> 2Reproduction code is open-sourced at https://anonymous.4open. science/r/OSDI26-VeriNC-Reproduction-main-5BB9 .
+
+# 1 Introduction 
+
+The advent of programmable switches, including Barefoot Tofino [23], Cisco Silicon One [9], Broadcom Trident [6], Juniper Networks Trio [57], and Huawei NetEngine [22], has opened up new possibilities for in-network computing (INC). These switches enable flexible user-defined packet process-ing at line speed and encourage the application developer to offload computation functions directly onto the data transmis-sion process. Using programmable switches, INC applications can optimize network utilization, achieve sub-RTT latencies, conserve link bandwidth, and maintain high throughput. Numerous INC applications have been proposed in recent years, including tensor aggregation [36, 42, 49, 54], key-value store cache [26, 37, 43, 50], lock manager [59, 62], virtual address translation [61], task scheduling [58, 64] and con-sensus [13, 14, 39, 47]. For example, ATP [36] accelerates distributed ML training throughput by 38%~66% in a clus-ter shared by multiple jobs; Seer [37] achieves up to 65% lower cache miss ratio and up to 78% lower flow completion time compared to LRU for key network applications; F ISS -LOCK [62] cuts up to 79.1% of median lock grant time in the microbenchmark and improves transaction throughput for TPC-C by 2.28 ×. These applications demonstrate the potential of INC in various fields. Guaranteeing system correctness is essential for the proper functioning of applications, yet it presents a considerable dif-ficulty for INC systems. An INC system, which manages both communication and computation for applications, must ad-here to correctness criteria in terms of communication (e.g., transmission reliability) and computation (e.g., cache consis-tency and lock mutual exclusion). However, the characteristics of INC exhibit two natures that are different from host-based computation on CPU, leading to its unique difficulty in achiev-ing system correctness. 
+
+• Network unreliability can lead to computational er-rors. Networks may lose packets due to corruption or conges-tion. Conventional networks rely on TCP to ensure immutable byte-stream delivery, where hosts acknowledge packets and 1
+
+> arXiv:2604.10186v1 [cs.DC] 11 Apr 2026
+
+retransmit lost ones. However, such reliability is guaranteed only at endpoints and is not extended to intermediate net-work devices. In an INC system, even with TCP, the switch may still observe packet loss, duplication, and out-of-order. If not properly addressed, the switch will handle the altered stream in its usual manner. Such operations can further cause inconsistency in system states [50], loss of data [62], or even preventing system termination (Section 7.1). 
+
+• The limited programmability of switches complicates error recovery. Programmable switches offer restricted pro-gramming capabilities, such as the absence of loops and lim-ited access to switch memory (a single read/write per pipeline stage) [30]. Also, the switch data plane cannot support reli-able communication [33]. Developers have to significantly simplify the protocol in order to fit it into the switch. Thus, when a network exception occurs, the switch might lack the necessary state information or logical processing ability to resolve the issue, leading to potential errors. Due to the challenges in ensuring system correctness, INC systems often encounter doubts about their suitability for deployment in production environments. 
+
+INC developers need a tool for comprehensive explo-ration of network exceptions. Studying existing litera-ture [26, 36, 42, 49, 50, 59, 62], we find that developers tend to propose algorithms designed to work correctly in reliable net-works and subsequently handle exceptions with patch mech-anisms. However, people are not adept at identifying corner cases; thus, relying on human intuition does not ensure all-case correctness due to (1) unforeseen exceptions not being considered, (2) patch mechanisms addressing only specific exceptions, rather than the underlying root causes, and (3) potential conflicts between different patch mechanisms, es-pecially in extreme situations where multiple exceptions co-occur. For instance, our experiments demonstrate that under particular packet loss and event interleaving, NetCache [26] and FarReach [50] fail to guarantee the consistency of the cache system (Section 7.2). Developers generally use syn-thetic workloads [11] or simulators [46] to test systems, but these methods are insufficient for capturing all exceptional cases. 
+
+Current network verification tools struggle to satisfy the requirements of INC. (1) Traditional networks, which do not involve computation, have led prior research to focus mainly on routing properties, such as reachability analysis [31, 55], loop detection [28, 32], and isolation verification [20, 56]. In contrast, we aim to verify application properties involving both communication and computation. (2) Since traditional packet stream is an end-to-end concept, many studies consider stateless networks [28] or focus on one-packet-at-a-time pro-cessing [60]. Conversely, INC protocols necessitate switches to maintain state information and correctly process multiple interrelated packets. (3) Many existing studies prioritize ver-ifying implementation correctness over design correctness 3,
+
+> 3The process of verifying design correctness is also called protocol rea-
+
+which proves that implementation code aligns with design specifications [63], rather than ensures that the design itself satisfies correctness properties. Notably, recent efforts have aimed at verifying P4 4 programs [17,19,41,51 – 53]. They only verify properties concerning the data plane of programmable switches and thus do not align with our objectives. 
+
+We present INCGuard, the first general-purpose INC system verification tool. The goal of INCGuard is to help de-velopers verify the design correctness of the system. Develop-ers use the INCGuard specification language to write system specifications and desired properties, which are then checked by INCGuard. If the verification succeeds, INCGuard simply returns success. If the verification fails, INCGuard returns an violation trace, which can help developers gain deeper insights into the system’s behavior. First, INCGuard provides a high-level abstraction model and specification language. In the abstraction of INCGuard, a system is composed of nodes, each running several threads simultaneously, connected through links. Threads of the same node synchronize with private variables and communicate with other nodes by exchanging packets. INCGuard provides three types of network environments: reliable, lossy, and out-of-order. INCGuard implicitly maintains system states, offer-ing primitives regarding transmission and thread execution. Second, INCGuard uses computation tree logic (CTL) for-mulas to express correctness properties and utilizes model checking to explore all possible execution traces of concur-rency units. By converting the INCGuard specification lan-guage into a lower-level state transition representation, we can leverage the highly optimized performance of state-of-the-art model checkers [21, 34]. Finally, we propose optimizations tailored to INC scenarios to address the challenge of state space explosion in model checking, including input space reduction, symmetric state elimination, and network nondeterminism constraints. These optimizations allow the state space to be fully explored within minutes on a reasonable parameter size. We have used INCGuard to model seven INC systems, in-cluding three tensor aggregation systems [36, 42, 49], two key-value cache systems [26, 50], and two lock management systems [59, 62]. We found that these systems all have design risks under certain network environments, including viola-tions of terminality and application properties. These vio-lations involve many interrelated packets and long logical chains, making them difficult to identify through human in-tuition or usual testing. To confirm the validity of our verifi-cation result, we further reproduce these violations with real implementations. In summary, we make the following key contributions: • We propose INCGuard, the first general-purpose INC sys-tem verification tool, allowing users to model INC systems 
+
+> soning [27].
+> 4P4 [5] is a language for programming the data plane of network devices.
+
+2and verify correctness properties. • We introduce optimizations tailored to INC scenarios to improve verification efficiency. • We apply INCGuard to model seven INC systems, identify-ing their design risks and reproducing the violations with real implementations. 
+
+# 2 Background and Motivation 2.1 Model Checking 
+
+Preliminaries. In model checking, a user delineates the sys-tem as a model with a particular state . The system logic leads to state changes known as transitions . All possible states and transitions of the system constitute a state graph, also called the state space . Each path within this graph, from the initial to a terminal state, signifies an execution trace . A system property may be a constraint on an individual state, depicted with first-order logic (FOL), or a relationship between states along a path, depicted with computation tree logic (CTL). Model checking [10] provides a search algorithm to verify these formulas with a given model. 
+
+Workflow. The model checking algorithm performs state space exploration alongside property violation detection to verify the system model. It maintains a directed state graph 
+
+G, and a queue Q for state frontiers, traversing the state space in a breadth-first manner. The model checker starts by insert-ing all initial states into G and Q. During each iteration, it removes the first state s from Q and determines the set T of its successor states. If T is empty, it reports a deadlock and halts. Alternatively, for each state t in T , it evaluates whether the transition s → t violates any properties. If a violation occurs, it reports an error and halts. Otherwise, it adds the edge s → t
+
+to G. If t is not be present in G, it appends t to both G and the end of Q. Special considerations are taken for termination states of the system. Once Q is empty, the model checker halts and declares the verification successful. 
+
+Why model checking? In addition to model checking, there are other formal verification methods, such as theorem prov-ing [8] and SMT solvers [15]. We chose to build our system based on model checking because network protocols can nat-urally be represented as state machines. As a result, model checking is easily accepted by network practitioners, and it is straightforward to model networked systems using state-transition representations. In contrast, theorem proving and SMT solvers require extracting the logical structure of the system, which is highly non-trivial. Furthermore, it is chal-lenging for theorem proving to achieve automated proofs and counterexample generation [40]. 
+
+# 2.2 Model Checking for INC 
+
+Modeling the computational behaviors of systems has been extensively researched [2, 4, 7], but model checking specific to INC introduces new requirements for the network part. 
+
+Providing friendly network abstractions in the specifi-cation language. An INC system spans almost every layer of the network stack (device, routing, transmission, and ap-plication), making it difficult and unnecessary to model all the network details. For example, the switch hardware pro-gramming language (e.g., P4) provides low-level hardware instructions; translating them into high-level language is cum-bersome and error-prone. The network reliability mechanism includes packet acknowledgment, windowing, and retrans-mission; describing the overall behavior is as complex as developing the transmission layer. Furthermore, some low-level operations are well-studied and validated over long-term network use, thus not needed to verify its internal correctness. INCGuard provides interfaces for users to specify network topology, routing, and transmission. 
+
+Analyzing network nondeterminism in state space explo-ration. Even for nodes directly connected via a link, packet loss may still occur due to buffer overflow or bit corruption. Packet loss further leads to retransmissions that may result in duplicated or out-of-order packets. This type of network non-determinism significantly contributes to errors in INC systems. Although programming languages abstract away transmission and hardware details, model checking must incorporate this nondeterminism. Doing so enables a comprehensive explo-ration of the state space, aiding in detecting errors in corner cases. INCGuard offers three types of network environments: reliable, lossy, and out-of-order (Section 3.4). They are encap-sulated in the primitives ( Send , Multicast , and Receive )INCGuard provides. 
+
+Specifying correctness properties of both communication and computation. The INC system orchestrates both com-munication and computation processes; thus, it must guar-antee both correctness. Network-specific properties include protocol terminality and memory leak freedom in switches. Computation-specific properties include application-specific correctness properties (Section 7). 
+
+# 2.3 Challenge of State Space Explosion 
+
+Model checking suffers from severe state space explosion problems. Data-intensive INC systems handle a collection of items and involve multiple endpoints, leading to an expansion of states and transitions. Network nondeterminism results in multiple potential outcomes per packet sending, further ex-acerbating the expansion. By applying INC domain insights, such as data independence, node symmetry, and impact of net-work nondeterminism, we introduce optimizations of input space reduction, symmetric state elimination, and network nondeterminism constraints, effectively minimizing the state space and improving verification efficiency (Section 4). 33 INCGuard Design 3.1 Overview  
+
+> Figure 1: The workflow of INCGuard. The left half deals with nodes and links, while the right deals with states and transitions.
+
+Figure 1 demonstrates the structure and workflow of IN-CGuard. It consists of a specification language, a compiler, a model checker, and a reporter. INCGuard provides a high-level specification language featuring network abstractions, such as topology and transmission, enabling users to create a network, specify the INC protocol, and express correctness properties. The user submits its INC system specification to the INC-Guard compiler, which converts it into a low-level state tran-sition representation. The model checker then reads the con-verted specification and performs verification, either declaring success or outputting a violation trace. The reporter interprets this trace, returning it to the network abstractions for user review. 
+
+# 3.2 INC System Abstraction 
+
+The abstraction model of INCGuard consists of nodes and their networking. 
+
+Node. Each node corresponds to a machine, with multiple threads assigned to different tasks. For example, the applica-tion thread executes the application logic, the receive thread monitors the receive buffer for incoming packets, and the re-transmission thread initiates retransmissions upon timeout. Nodes have private variables for state recording and intra-node synchronization. Threads run concurrently. An interleaved execution can be conceptually seen as selecting a thread for execution, interrupt-ing it at any moment, switching to another non-blocked thread, and continuing this process until system termination. Model checking explores every potential interleaving. Threads can invoke Wait(condition) to block itself until the condition is satisfied. A blocked thread will not be selected for execution. Threads terminate after executing their code or can invoke 
+
+Exit to terminate the entire node. The system terminates once all threads terminate. 
+
+Network. Nodes are interconnected via links, creating a net-work structure. Inter-node communication involves packet exchange. Nodes generate packets and trigger Send . The next-hop node retrieves the packet by invoking Receive and de-cides to either discard, respond, alter, or forward it. In INC-Guard, packets are immediately directed to the next hop when sent. As model checking explores all possible interleaving, the receiver might process the packet at any moment, effectively simulating packet delays. Likewise, transmission timeout can be triggered at any time. 
+
+Nondeterministic network environment. Real-world net-works exhibit unreliability. INCGuard offers three types of network environments: reliable, lossy, and out-of-order. A reliable network ensures all packets arrive sequentially at the next hop. Conversely, in a lossy network, packets may not arrive. In an out-of-order network, packets sent subsequently may precede earlier ones at the next hop. A network can be both lossy and out-of-order. 
+
+# 3.3 Specification Language 
+
+INCGuard defines a specification language allowing users to model an INC protocol conveniently. The grammar is depicted in Figure 2. A specification comprises four components: con-figuration, topology, protocol, and property. 
+
+Configuration. In INCGuard, customizable parameters in-clude the network environment, its nondeterminism con-straints, and user-defined constants. Users can designate the network as reliable, lossy, or out-of-order. Finer-grained con-figuration is available, e.g., setting specific links to be lossy while others remain reliable. Moreover, network nondeter-minism is controllable (Section 4.3). Users can define other constants like the number of requests. 
+
+Topology. In INCGuard, users interact with nodes and links directly, where every node is assigned a type, like client or switch. Nodes of the same type exhibit identical protocol behavior without differentiation. Users define node types, instantiate nodes, and establish links among them. Users may manually specify routing tables for each node, or leave part of the work to the compiler. 
+
+Protocol. An INC protocol essentially defines the states and behaviors of each type of node. INCGuard specifies node states as variables, supporting integers, strings, sequences, sets, and dictionaries. INCGuard specifies node behaviors as threads. Like in usual programming languages, a thread con-sists of statements, either simple or compound. Simple state-ments include breakpoints, expressions, assignments, and tem-porary value definitions, while compound statements include branching and looping. Expressions include binary operators, function calls, and first-order predicates for conditioning. 
+
+• Network-specific language element. INCGuard provides the following abstractions for network transmission: (1) A packet is a dictionary with field names as keys. (2) Send() 
+
+and Receive() describe the single-packet transmission be-tween nodes. (3) Multicast() (along with Receive() ) de-scribes the process where the source replicates a packet and 4spec :: = block ∗                                                                                                                        
+
+> block :: =configuration ‘{’ con f ig ∗‘}’
+> |topology ‘{’ topo ∗‘}’
+> |protocol ‘{’ protocol ∗‘}’
+> |property ‘{’ property ∗‘}’
+> con f ig :: =assign assign :: =var ‘=’ value topo :: =nodetype type ∗
+> |type node ∗
+> |link node ∗‘− − ’node ∗
+> |route ‘(’ src ∗‘)’ ‘{’ route _entry ∗‘}’
+> route _entry :: =dst ∗‘:’ next _hop protocol :: =var ‘(’ type ‘)’ assign ∗
+> |thread ‘(’ type ‘)’ name ‘{’ stmt ∗‘}’
+> stmt :: =breakpoint ‘:’
+> |exp
+> |assign
+> |temp assign ∗
+> |if ‘(’ exp ‘)’ ‘{’ stmt ∗‘}’
+> |while ‘(’ exp ‘)’ ‘{’ stmt ∗‘}’
+> |. . .
+> exp :: =forall var in set ‘:’ exp
+> |exists var in set ‘:’ exp
+> |exp op exp
+> |f unc ‘(’ param ∗‘)’
+> |. . .
+> f unc :: =Send |Multicast |Receive |Wait
+> |Exit |Assert |. . .
+> property :: =name ‘=’ ctl ctl :: =exp |‘[]’ exp |‘<>’ exp |. . .
+> Figure 2: The grammar of INCGuard’s specification language, simplified to highlight the core structure.
+
+sends it to multiple destinations. 
+
+• Breakpoint. Interpreting every statement as a transition would lead to an overwhelming expansion of the state space. INCGuard runs model checking in a coarser granularity by requiring users to explicitly designate breakpoints in threads. Thread suspension and switch only occur at breakpoints. Wait ,Exit , Send , Multicast , and Receive are mandatory break-points. To expose all intermediate states, each variable may be modified at most once between two adjacent breakpoints, enforced by the compiler. 
+
+• Modeling failure. INCGuard does not explicitly model failure. Yet, by configuring a specific link to always drop pack-ets, link failure is effectively simulated. Node failure can be simulated by implementing the corresponding logic manually,                                       
+
+> 1thread ( Client ) LockOp {
+> 2Acquire :
+> 3temp acquire_request =...;
+> 4Send ( acquire_request );
+> 5Release :
+> 6temp pkt =Receive () ;
+> 7Assert ( pkt . type == GRANT , " unexpected packet type ");
+> 8temp release_request =...;
+> 9Send ( release_request );
+> 10 End :
+> 11 temp pkt =Receive () ;
+> 12 Assert ( pkt . type == ACK_OF_RELEASE ,
+> 13 " unexpected packet type ");
+> 14 Exit () ;
+> 15 }
+> Figure 3: An example thread.
+
+e.g., pausing all threads for some period and resuming with a certain state and an empty buffer. Figure 3 shows an example thread, in which the client acquires a lock and then releases it. temp statements define temporary values, which are only valid between two adjacent breakpoints and thus not part of the system state. 
+
+Property. INCGuard offers two methods for expressing cor-rectness properties. The first is statement Assert(expr, error_msg) , where expr is a first-order logic (FOL) formula that refers to the node’s private variables and is verified when the statement is executed. The second method is to define them as computation tree logic (CTL) formulas within the property block, which can involve any variables in the system and are verified after each state transition. INCGuard supports common CTL operators and utilizes the notation ( [] and <> ) akin to TLA+. We elab-orate on the correctness properties for each INC system in Section 7. Figure 4 presents our NetCache [26] specification under a reliable network (no packet loss or out-of-order), prohibiting duplication (Section 4.3), enabling terminality check (Sec-tion 7.1), and involving three clients initiating five requests each. The network comprises nodes of four types, connected by links ( -- denotes a full connection between operands), routing tables partially specified. Each type of node is associ-ated with variables and threads. There is no property block as properties are checked with Assert s. 
+
+# 3.4 Compilation and Model Checking 
+
+INCGuard uses TLA+ as its model checker. The INCGuard compiler converts the user-defined INC system model to the state transition representation accepted by TLA+. Most of INCGuard’s language elements concerning computation ( stmt 
+
+and exp in Figure 2) can be mapped directly to those in TLA+, including variable operations and control flows. By replacing the compiler backend and reporter frontend, it is easy to switch 51 configuration {                                                                                                                              
+
+> 2MAX_LOSS =0;
+> 3MAX_OUT_OF_ORDER =0;
+> 4DUPLICATION =0;
+> 5TERMINATION_CHECK =1;
+> 6CLIENT_NUM =3;
+> 7REQ_NUM =5;
+> 8...
+> 9}
+> 10 topology {
+> 11 nodetype Client , Switch , Controller , Server ;
+> 12 Client c1 , c2 , c 3 ;
+> 13 Switch sw ; Controller ctrl ; Server s;
+> 14 link c1 , c2 , c 3 --sw --ctrl , s;
+> 15 link ctrl --s;
+> 16 route ( c1 , c2 , c 3 ) {s: sw ; }
+> 17 route ( sw ) {... }
+> 18 route ( ctrl ) {... }
+> 19 route (s) {
+> 20 c1 , c2 , c 3 , sw : sw ;
+> 21 ctrl : ctrl ;
+> 22 }
+> 23 }
+> 24 protocol {
+> 25 var ( Client ) base =1 , requests =... , replies =...;
+> 26 var ( Switch ) cached =0 , valid =0 , value =null ;
+> 27 ...
+> 28 thread ( Client ) ClientApp {... }
+> 29 thread ( Client ) ClientRecv {... }
+> 30 thread ( Client ) ClientRetx {... }
+> 31 thread ( Switch ) SwitchRecv {... }
+> 32 ...
+> 33 }
+> 34 // Properties are checked with Assert in threads .
+> Figure 4: The specification of NetCache.
+
+to another model checker. In model checking, each thread operates as an independent concurrent unit. Variable changes between two adjacent break-points constitute a single transition. INCGuard maintains a dictionary, mapping each thread to its execution point (break-point), updated in each transition. INCGuard ensures strong fairness [29]: any thread not indefinitely blocked eventually executes, which makes sense in reality. A thread terminates when it either finishes its code or explicitly calls Exit ; in the latter case, all threads within the same node also termi-nate. A terminated thread is permanently blocked. The system terminates when every thread terminates. Specific network abstractions in INCGuard are realized with additional states. INCGuard maintains a dictionary that maps each node to a sequence of packets, denoting its receive buffer. INCGuard also maintains a routing table, which is a dictionary that maps source-destination pairs to the next-hop nodes, consulted when sending packets. The table is partially specified by the user and finalized by the INCGuard compiler according to the network topology. The compiler throws an error if multiple routing paths exist but not specified by the user. 
+
+Receive blocks until the node’s receive buffer is non-empty and retrieves the first element. The behavior of Send 
+
+varies by network environment: in a reliable network, it ap-pends the packet to the tail of the next hop’s receive buffer; in a lossy network, it might drop the packet; in an out-of-order network, it can insert the packet at any position in the next hop’s receive buffer. The reporter operates inversely to the compiler. It takes the violation trace produced by the model checker, identifies the special variables maintained by INCGuard, reconstructs the network elements, and presents them to the user. Based on the violation trace, users can gain insights into potential risks and refine the protocol design. 
+
+# 4 Optimization 4.1 Reducing Input Space 
+
+Model checking is mainly appropriate for control-intensive systems and less suited for data-intensive ones, as data typi-cally ranges over infinite domains [3]. INC systems are driven by requests and suffer a similar problem. We exploit INC characteristics to reduce the input space to a manageable size. INC applications often handle logically independent ob-jects, and it is straightforward to ensure independent access by design. We assume this as a precondition, concentrating on states concerning a specific object, such as a task, a key-value pair, or a lock. INC protocols maintain only very few state variables in the switch per object due to the limitation of programmable switches. When processing long request sequences, the same state will occur repeatedly. Our findings suggest that a rela-tively small number of requests suffice to identify inconsistent states within the system. Consequently, we limit the input re-quest sequence to a short length in verification. 
+
+# 4.2 Leveraging Node Symmetry 
+
+An INC system consists of multiple nodes, but of only few node types. Nodes of the same type exhibit symmetry. For example, when client 1 issues a read request to the storage server and client 2 issues a write, it is essentially the same as client 1 issuing a write and client 2 issuing a read. For a system state, swapping all variables associated with two nodes of the same type constitutes a swap of the state. The composition of swaps forms a permutation. In model check-ing, any new state is discarded if one of its permutations has been explored. This optimization, which is called symmetry 6reduction, maintains the completeness of verification [18]. 
+
+# 4.3 Constraining Network Nondeterminism 
+
+Unreliable networks and retransmissions impose a consid-erable burden on model checking. Each packet may be dis-carded in a lossy network; each packet could be inserted at any position in the receiver’s buffer in an out-of-order network; retransmissions might occur at any time. In the worst scenario, where all packets are lost, the system never terminates. We make a mandatory constraint that when a node receives a packet, it must handle the packet before triggering retrans-mission; i.e., retransmission is only enabled when the node’s receive buffer is empty. Without this constraint, finishing the verification within a reasonable timeframe is unfeasible, even with minimal parameters. We also provide users with configurable parameters to constrain the network nondeterminism, including maximum packet losses, unreliable links, out-of-order packets, and du-plicates. A packet that is retransmitted when still present in the network is considered a duplicate. In our findings, only a small amount of network nondeterminism is sufficient to expose risks in INC systems. 
+
+# 5 Discussion 
+
+This section discusses some design choices and future direc-tions of INCGuard. 
+
+Off-the-shelf model checker. INCGuard uses an off-the-shelf model checker, TLA+, rather than implementing one from scratch. As the first step in building a practical verification system, a mature model checker helps to avoid internal bugs and allows us to directly leverage its highly optimized perfor-mance. However, this choice also limits further optimizations, as we are limited to the features provided by TLA+. As a re-sult, this paper does not make a great contribution at the level of verification algorithms. We plan to replace TLA+ with our own custom model checker, validate its execution against TLA+ to ensure correctness, and explore optimizations at the algorithmic level based on the characteristics of INC systems. 
+
+Manual specification writing. INCGuard requires users to manually write the protocol specification, rather than gener-ating from implementation code (such as P4 and C++). This is an intentional choice. Our goal is to help users model the core logic, verify its correctness, and continuously refine the protocol at design phase, without introducing too much imple-mentation details. This aligns with the fundamental purpose of model checking [27]. 
+
+Hardware-aware abstractions. Although we do not wish to introduce implementation details, it is important to note that the execution model of programmable hardware differs from that of end hosts, where design risks may stem. Currently, INCGuard only abstracts general computation. We plan to provide abstractions related to specific hardware (such as                          
+
+> Table 1: LOC and time to first violation of the seven systems.
+> System INCGuard LOC TLA+ LOC Time (s)
+> SwitchML 98 440 3ATP 170 515 2NetReduce 146 486 72 NetCache 190 589 8FarReach 246 640 4NetLock 148 504 4FISS LOCK 466 1053 1
+
+Tofino native architecture [24]) in the future. 
+
+# 6 Verification Performance 
+
+Implementation and experiment settings. We prototyped INCGuard, including the compiler and the reporter. We used TLA+ [34] as the model checker. The compiler is built on Flex/Bison [38] with around 3500 lines of C++, converting INCGuard specifications into a TLA+ compatible format. The experiments were carried out on a workstation with a 4-core 2.2 GHz AMD EPYC-Milan processor, 4 GB DRAM, and 40 GB SSD. We present evaluations of LOC, verification efficiency, the effect of optimizations, and the overhead of property checking. 
+
+LOC. We modeled seven state-of-the-art INC systems. Ta-ble 1 shows the lines of code required to model each system using the INCGuard specification language, as well as the lines of TLA+ 5 code generated by the INCGuard compiler. On average, INCGuard reduces the amount of code by 67.2%. Since we only modeled the core logic described in the paper (thus verifying design correctness rather than implementa-tion), the LOC required for modeling are much fewer than their actual P4 implementation. 
+
+Verification efficiency. Table 1 presents the time to identify the first violation for each system, with parameters properly set. INCGuard requires only a few to tens of seconds to detect violations. These violations are discussed in Section 7. The characteristics of INC make it likely for violations to occur in the shallow layers of the state space. Since we employ breadth-first search, the first violation can be identified in a short amount of time. Figure 5 shows the full state space size of NetCache under a reliable network with a single client. The diameter of the state space refers to the maximum distance from the initial state to all reachable states. The number of found states repre-sents the total number of explored states, while the number of distinct states indicates the de-duplicated count. As shown, under reasonable parameter settings, the full state space can be explored in a few seconds to a few minutes. 
+
+Effect of optimizations. Figure 6 illustrates the effect of symmetry reduction, using SwitchML as an example. The 
+
+> 5Technically, PlusCal [35], which is an intermediate language specified by TLA+.
+
+73 4 5 6 7        
+
+> Request Number
+> 10 0
+> 10 1
+> 10 2
+> Time (s)
+> Time
+> Diameter
+> 0
+> 20
+> 40
+> 60
+> Diameter (a) Time and diameter. 34567
+> Request Number
+> 10 4
+> 10 5
+> 10 6
+> 10 7
+> State Space Size  Distinct States
+> Found States (b) State space size.
+> Figure 5: The verification time, state space diameter, and state space size of NetCache.
+
+setup includes a reliable network, a single aggregator, and four clients, disabling packet duplication and property checking, exploring the full state space. As shown, symmetry reduction significantly improves efficiency, reducing verification time by 88.1% and the number of distinct states by 95.5% on average. Figure 7 shows the impact of network nondeterminism, using NetCache as an example. The setup includes a single client and three requests, disabling property checking, explor-ing the full state space. We start with a reliable network, grad-ually relaxing the constraints on packet loss, out-of-order, and duplication. As observed, the size of the state space increases with greater amount of network nondeterminism, leading to a longer verification time. This highlights the necessity of ap-plying appropriate restrictions on network nondeterminism. 
+
+Overhead of property checking. Figure 8 illustrates the over-head of property checking, using SwitchML as an example. The setup includes a reliable network, a single aggregator, two requests, and four clients, disabling packet duplication and symmetry reduction, exploring the full state space. As shown, property checking does not alter the state space it-self, but incurs additional verification time. Checking com-putational correctness adds only a slight overhead, whereas checking terminality significantly increases verification time. This is because the former is a safety property, while the lat-ter is a liveness property [44]. These two types of properties can be transformed into each other under certain conditions. Among all the properties verified in this paper, only termi-nality is implemented as a liveness property. The definitions of computational correctness and terminality are provided in Section 7.1. 
+
+# 7 Verification Result 
+
+This section describes how we model three INC applications involving seven protocols, the property violations identified within these protocols, and their possible fixes. Table 2 sum-marizes the property violations found in the seven INC sys-tems. To confirm the validity of our verification result, we further reproduce these violations with real implementations. Existing INC protocols focus more on leveraging hard-ware potential to improve application performance and less on guaranteeing correctness. The limited programmability of the switches further exacerbates the compromises in correct-ness. However, we believe that it is necessary to identify risks during the design phase. Otherwise, if anomalies arise after deployment, it would be challenging to diagnose and resolve them. 
+
+# 7.1 Tensor Aggregation Systems 
+
+System model. We model a tensor aggregation system using a star topology, where a switch connects multiple clients and a possible parameter server (PS). Each client has N tensors to be aggregated. Clients send each tensor in a request, expecting to receive the sum of the corresponding tensors from all clients, i.e., performing an all-reduce operation. INC protocols allow the switch to intercept requests, complete the aggregation within the switch, and broadcast the results back to the clients, optionally falling back to the PS under certain conditions. We choose SwitchML [49], ATP [36], and NetReduce [42] as representative protocols. SwitchML maintains an aggregator array of size 2S on the switch. A request is mapped to an aggregator through a mod-ulo operation. Clients initially send the first S requests. Upon receiving the result for request t, the client sends request t + S,continuing until there are no more requests. Consequently, if a specific position in the aggregator is occupied by request n
+
+and later reoccupied by n + 2S, it indicates that request n + S
+
+has been completed, which in turn implies that all clients have received the result for request n, allowing its information to be safely overwritten. SwitchML does not involve the PS. ATP targets multi-tenant scenarios. To maximize spatial utilization under multi-task parallelism, ATP maintains a sin-gle aggregator array on the switch. Each request of a task is hashed to a specific position within the array. In cases of hash collisions, the aggregation falls back to the PS. When the switch receives a retransmitted request, it releases the cor-responding aggregator and falls back to the PS to prevent the aggregator from being permanently occupied. As discussed in Section 4.1, we only focus on a specific task. NetReduce is dedicated to in-network aggregation compat-ible with RoCE. RoCE splits a message into multiple packets, but only the first packet carries the aggregation header, which is necessary for addressing. NetReduce maintains a Connec-tion Lookup Table (CLT) on the switch, mapping connections to aggregation headers. When the first packet of a message arrives, the switch records the aggregation header in the CLT. When subsequent packets arrive, the switch queries the CLT to obtain the header. NetReduce ensures that a packet belongs to the same message as the one recorded in CLT by compar-ing the difference in packet sequence number (PSN). If they do not belong to the same message, the packet is discarded. NetReduce does not involve the PS. 
+
+Correctness properties. We specify the following correct-ness properties with INCGuard. 
+
+• Terminality , which requires the system to eventually 83 4 5 6 7
+
+> Request Number
+> 0
+> 10
+> 20
+> 30
+> 40
+> Time (s)
+> w/o reduction
+> w/ reduction
+
+(a) Verification time. 3 4 5 6 7 
+
+> Request Number
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> Distinct States
+> 1e6
+> w/o reduction
+> w/ reduction
+
+(b) Distinct States. 
+
+Figure 6: The effect of symmetry reduction. 0 1 2 3 4
+
+> Maximum Packet Loss
+> 0
+> 5
+> 10
+> 15
+> 20
+> Time (s)
+> Time
+> Found States
+> 0
+> 1
+> 2
+> 3
+> 4
+> Found States
+> 1e6
+
+(a) Loss. 0 2 4 
+
+> Maximum Packet Out-of-Order
+> 0
+> 5
+> 10
+> Time (s)
+> Time
+> Found States
+> 0
+> 1
+> 2
+> Found States
+> 1e6
+
+(b) Out-of-order. 0 1 2 3 
+
+> Maximum Packet Duplication
+> 0
+> 50
+> 100
+> 150
+> Time (s)
+> Time
+> Found States
+> 0
+> 1
+> 2
+> 3
+> Found States
+> 1e7
+
+(c) Duplication. 
+
+Figure 7: The impact of network nondeterminism. 
+
+Table 2: Property violations in seven INC systems. 
+
+System Network Environment Property Violation Explanation Tensor Aggregation 
+
+SwitchML out-of-order computational correctness Out-of-order breaks the implicit assumption that completed re-quests will not appear in the network ATP out-of-order memory leak freedom A request reaches the switch after aggregation completion, per-manently occupying an aggregator NetReduce lossy terminality CLT update prevents the aggregation of requests in previous messages from completing 
+
+Key-Value Cache 
+
+NetCache lossy cache consistency Particular packet loss and event interleaving expose the risk of replying to the client and updating the switch simultaneously NetCache lossy terminality Cache eviction during a write operation leads to a state inconsis-tency in the system FarReach reliable cache consistency Particular event interleaving breaks the implicit assumption that read replies from the server carry the latest values 
+
+Lock Management 
+
+NetLock reliable lock exclusion The switch dequeues extra elements upon receiving retransmitted release requests FISS LOCK reliable lock exclusion Delayed acquisition triggers release and re-acquisition, leading to inconsistency in lock states 0 2 4 6 8 10 12 14 
+
+Percentage 
+
+> Distinct States
+> Found States
+> Diameter
+> Time (s)
+> no check (baseline)
+> check computational correctness
+> check terminality
+
+Figure 8: The overhead of property checking. 
+
+reach a termination state (i.e., no deadlock or livelock). Termi-nality is expressed as CTL formula <> (active _nodes = /0),where <> is the CTL operator “eventually”. 
+
+• Computational correctness , which requires the aggrega-tion result received by clients to be the exact sum of corre-sponding aggregated values. We precompute the correct ag-gregation results and check computational correctness when clients receive aggregation results. 
+
+• Memory leak freedom for ATP only, which requires a task to occupy no aggregator when it terminates. As we only focus on a specific task, memory leak freedom is checked on system termination, expressed as active _nodes = /0 →∀i(aggregators [i].id ̸ = TASK _ID ).
+
+Property violations. 
+
+• Computational correctness violation in SwitchML. Swi-tchML does not maintain PSN in aggregators. Due to network delays, the reply to request t may arrive at the client after a timeout. This client will retransmit request t and send request 
+
+t + S. However, in an out-of-order network, the retransmitted request t may be delayed in the network for some reason, breaking an implicit assumption in SwitchML: completed requests will not appear in the network. This request t could potentially be involved in the aggregation of request t + 2S,leading to incorrect results. 
+
+• Memory leak freedom violation in ATP. ATP frees an aggregator under two conditions: (1) the aggregation is com-pleted 6, and (2) a retransmitted request is received. However, in an out-of-order network, an original request may be trapped in the network, and reaches the switch after the aggregation has been completed with its retransmission. If the request takes up an aggregator, it cannot be normally freed. 
+
+• Terminality violation in NetReduce. Assume that RoCE splits each message into n packets, and all requests are sequen-tially numbered as 1.1, 1.2, . . . , 1.n, 2.1, . . . , with the window 
+
+> 6
+
+ATP sends the aggregation result to the PS for durability, and frees the aggregator when receiving an ACK from the PS. 
+
+9size at least two messages. The following trace is possible. Requests 1.1 from all clients arrive at the switch and up-date the CLT, completing the aggregation. Some request in 1.2, · · · , 1.n from a client is lost, yet his request 2.1 reaches the switch and updates the CLT before retransmission of the lost request. At this point, the CLT does not contain the aggre-gation header for message 1. Since the aggregation has been completed, the client will never retransmit request 1.1 . As a result, the lost request will keep being retransmitted by the client and dropped by the switch, which is a livelock. 
+
+Possible fixes. 
+
+• The computational correctness violation in SwitchML can be fixed by associating a PSN with each aggregator. Packets carrying a different PSN are excluded from the aggregation process of an aggregator. 
+
+• The memory leak freedom violation in ATP can be fixed by associating a timestamp with each aggregator and enabling the system to preempt aggregators that have timed out in favor of new requests. This is actually the idea of DSA [54]. 
+
+• The terminality violation in NetReduce can be fixed by incorporating PSN into the key of CLT, so that CLT entries are uniquely identified and will not be overwritten uninten-tionally. 
+
+# 7.2 Key-Value Cache Systems 
+
+System model. We model a key-value cache system using a star topology, where a switch connects multiple clients and a storage server; the system also incorporates a controller connected to the switch and the server. As discussed in Sec-tion 4.1, we only focus on a specific item ( key-value pair). Clients send requests to the storage server to read or write to the item. INC protocols allow the switch to admit an item into the cache, serve read/write requests, and evict an item from the cache under certain conditions. We choose NetCache [26] and FarReach [50] as representative protocols. NetCache implements a write-through cache on the switch. When the switch receives a request on an uncached or invali-dated item, it forwards the request to the server. Otherwise, if it is a read, the switch directly replies to the client; if it is a write, the switch invalidates the item and forwards it to the server. Upon receiving the write on a cached item, the server updates its database, then replies to the client and updates the switch cache simultaneously. To ensure cache consistency, the server blocks subsequent writes until it confirms that the switch cache has been updated. The server normally han-dles other requests by performing read/write and replying to the client. NetCache uses per-key counters to track the query frequency of cached items and employs a Count-Min sketch [12] to detect hot uncached items. The controller helps the switch decide which cache items to evict and where to admit new ones. During cache admission, the server blocks write requests and performs the same operations as when han-dling write requests on cached items. During cache eviction, the switch simply deletes the item since it is a write-through cache. FarReach implements a write-back cache on the switch. Unlike NetCache, when the switch receives a write on a valid cached item, it directly updates the cache and replies to the client. To achieve non-blocking cache admission/eviction while ensuring cache consistency, FarReach introduces a com-plex protocol. To admit a new item, the switch first marks it as “outdated” and treats it as invalid. When receiving a write request or a read reply (from the server) on the item, the switch extracts the latest value of the item from the packet and updates the cache. The item is then marked as “latest” and used for handling requests, ending the admission. We omit the eviction process of FarReach due to space limitations. 
+
+Correctness properties. We specify the following correct-ness properties with INCGuard. 
+
+• Terminality , the same as described in Section 7.1. 
+
+• Cache consistency . Since in-network caching serves as a transparent layer, its primary role is to maintain the consis-tency provided by the underlying key-value store. This paper uses the following definition of consistency [1]. A key-value store system is said to be consistent if each individual item within it is consistent. For a specific item, an operation on it is either a read or a write, associated with a start time and an end time. Two operations are considered concurrent if their time intervals overlap; otherwise, their order can be determined. An item is said to be consistent if every read operation that is not concurrent with any write returns one of the values of the most recent writes. A read operation that is concurrent with some write may return any value. Figure 9 shows an example of cache consistency. R1
+
+may return any value as it is concurrent with W(1). R2 must return 1 or 2 as W(1) and (2) are the most recent writes.     
+
+> Figure 9: An example of cache consistency. All operations per-form on the same item. W( n) means writing its value to n.R1,R2
+> are two reads.
+
+In INCGuard, an operation starts when the client sends a request and ends when it receives a reply. Each operation is assigned a unique ID. Retransmitted requests are treated as new operations. We propose Algorithm 1 to check cache consistency. This algorithm is implemented as a check func-tion, which is invoked at the start and end of each operation (referred to in Algorithm 1 as an event), terminating the ver-ification as soon as a violation is detected. The correctness of this algorithm can be easily proven according to the defi-nition of consistency. Users can adopt another definition of consistency by simply replacing the check function. 
+
+Property violations. 
+
+• Cache consistency violation in NetCache. Figure 10 il-10 Algorithm 1: Cache Consistency Checking                                                                            
+
+> Input: An event e
+> Init : number of ongoing writes num =0, ongoing reads
+> reads =/0which are not concurrent with writes, possible latest values values ={initial value }
+> 1if eis the start of a write then
+> 2num =num +1
+> 3reads =/0
+> 4values =/0
+> 5else if eis the end of a write then
+> 6num =num −1
+> 7values =values ∪ { e.value }
+> 8else if eis the start of a read then
+> 9if num == 0then
+> 10 reads =reads ∪ { e.id }
+> 11 end
+> 12 else /* end of a read */
+> 13 if e.id ∈reads then
+> 14 if e.value /∈values then report violation
+> 15 reads =reads − { e.id }
+> 16 end
+> 17 end
+> Figure 10: An execution trace of cache consistency violation in NetCache. All operations perform on the same item, which is initially V0and cached in the switch. Dashed lines represent packet loss. Important events are marked in red.
+
+lustrates an execution trace of cache consistency violation in NetCache. The client initiates a request to write the item to V1.The switch, recognizing the item is cached, invalidates it and forwards the request to the server. The server then updates its local copy of the item to V1, replies to the client, and si-multaneously updates the switch cache. However, the update packet is lost. Upon receiving the reply, the client sends a subsequent request to write the item to V2. Since the item is invalid, the switch forwards it to the server. The server blocks it, as the previous update has not yet completed. After a time-out, the server retransmits the previous update. The switch processes it by updating the cache, validating the item, and ac-knowledging the server. The server proceeds with the blocked write, modifying the local copy, replying to the client, and updating the switch cache. Unfortunately, the update packet is lost again. Upon receiving the reply, the client sends a read and is replied to by the switch with V1. This violates cache consistency since the read is not concurrent with any write but does not get the latest value V2.
+
+• Terminality violation in NetCache. NetCache does not provide a detailed discussion on the simultaneous occurrence of multiple events. Without special handling, the following trace is possible. The switch receives a write request, inval-idates the corresponding item, and forwards it to the server. At this point, the switch receives a notification from the con-troller to evict the item, so the switch deletes it. Consequently, when the switch receives the update packet from the server, it discards the packet because there is no such item in the cache. This results in the write request never being completed, and all subsequent writes are indefinitely blocked. 
+
+• Cache consistency violation in FarReach. Figure 11 il-lustrates an execution trace of cache consistency violation in FarReach concerning admission. The item is initially un-cached. When an admission is triggered, the server sends the latest value V0 to the controller. The controller then notifies the switch to admit the item. Before arrival, the switch processes a read and a write request, forwarding them to the server. Upon receiving the admission notification, the switch inserts V0 into the cache, marking it as outdated. Later, the switch receives the reply to the read. Believing it carries the latest value, the switch updates the cached item to V0 and marks it as the latest. Following the replies to both the read and write requests, the client initiates another read and is replied to by the switch with V0. This violates cache consistency since the read is not concurrent with any write but does not get the latest value V1.
+
+Possible fixes. 
+
+• The cache consistency violation in NetCache can be fixed by requiring the server, upon receiving a write request, to first confirm that the switch cache has been updated before replying to the client. Yet, this may harm system performance. 
+
+• The terminality violation in NetCache can be fixed by requiring the switch to respond with a special message when it is asked to update a non-existent item. Other concurrent events should be handled similarly. 
+
+• The cache consistency violation in FarReach can be fixed by requiring the switch to monitor all replies from the server and update its cache whenever the reply carries a newer value. 11 Figure 11: An execution trace of cache consistency violation in FarReach. All operations perform on the same item, which is initially V0 and uncached. Important events are marked in red. 
+
+# 7.3 Lock Management Systems 
+
+We modeled NetLock [59] and F ISS LOCK [62], and identified their violations of lock exclusion under reliable networks. The violation in NetLock is conceptually straightforward to fix, but is challenging to implement using programmable switches. It is difficult to provide a simple fix to the violations in F ISS -LOCK . Details are discussed in Appendix A (the supplemen-tary material) due to space limitations. 
+
+# 7.4 Reproduction in Real System 
+
+To demonstrate that the design risks identified by INCGuard indeed exist in real implementations, we conduct reproduc-tion experiments using the open-source code of the aforemen-tioned systems. The main challenge lies in that the identified violations are triggered only under specific conditions, making them difficult to reproduce directly in a physical environment. To address this, we deploy each node of the system (including clients, programmable switches, and servers) inside individual Docker [16] containers. We further introduce an additional proxy node responsible for forwarding network traffic among nodes. The proxy connects to all other nodes via virtual Eth-ernet pairs. This setup preserves the original system behavior while allowing us to manipulate the network through the proxy node. Following the violation traces reported by INCGuard, we inject packet loss and delays (consequently packet out-of-order) into the network via the proxy node. By analyzing the system logs, we confirm that all six systems (excluding Ne-tReduce, which is close-sourced) indeed exhibit the violations we identified. We successfully contacted the authors of ATP and NetReduce, who acknowledged that the risks we identi-fied were caused by oversights during the design phase. We have open-sourced the reproduction code for the six systems on GitHub, including scripts for one-click container build and experiment execution. 
+
+# 8 Related Work 
+
+In-network computing. High-speed programmable switches have enabled various INC techniques to offload computa-tion from end hosts to the network. ATP [36] uses top-of-rack switches to aggregate tensors and hugely accelerates distributed training throughput. NetCache [26] implements an on-path key-value cache in switches to balance the load across storage nodes. F ISS LOCK [62] decouples lock management into grant decision and participant maintenance, supporting over one million locks on one switch. These works focus mainly on improving system perfor-mance and somewhat neglect the correctness under unreliable networks. Only few protocols [25, 33] have seriously consid-ered correctness issues and verified themselves using formal methods. We believe that INC applications should pay more attention to correctness, and provide INCGuard as an easy-to-use, general-purpose verification tool. 
+
+INC verification. Programmable switches have brought new topics to network verification. ASSERT-P4 [19] verifies P4 programs annotated with assertions based on symbolic execu-tion. Aquila [53] presents a verification system for production-scale programmable data planes. P6 [51] detects violations of pre-specified behavior in P4 programs at runtime based on ma-chine learning-guided fuzzing. However, existing works focus on implementation correctness regarding the data plane, while our work verifies design correctness regarding the whole INC system. 
+
+Model checking in network verification. Model checking has been widely used in network verification. Musuvath et al. [45] propose model checking techniques and finds four errors in Linux TCP/IP implementation. NetSMC [60] adopts a one-packet-at-a-time network model and verifies routing policies in stateful networks with symbolic model checking. Plankton [48] combines equivalence partitioning with model checking to perform efficient network configuration verifi-cation. We differ from these works in that we target design correctness concerning properties required by applications. 
+
+# 9 Conclusion 
+
+We present INCGuard, the first general-purpose tool for ver-ifying INC systems. INCGuard provides developers with a high-level abstraction model and specification language. IN-CGuard offers configurable network environments to help developers better understand the behavior of the system. We modeled seven INC systems and identified their risks with INCGuard in seconds. We believe that formal modeling and 12 verification are an essential step in driving the deployment of INC systems. 
+
+# References 
+
+[1] Eric Anderson, Xiaozhou Li, Mehul Shah, Joseph Tucek, and Jay Wylie. What consistency does your key-value store actually provide? HP Laboratories Technical Re-port , 01 2010. [2] Aoxueluo, Weigang Wu, Jiannong Cao, and Michel Ray-nal. A generalized mutual exclusion problem and its algorithm. In Proceedings of the 2013 42nd Interna-tional Conference on Parallel Processing , ICPP ’13, page 300–309, USA, 2013. IEEE Computer Society. [3] Christel Baier and Joost-Pieter Katoen. Principles of model checking (representation and mind series) . The MIT Press, 2008. [4] Egon Börger. Modeling distributed algorithms by ab-stract state machines compared to Petri nets. In Michael Butler, Klaus-Dieter Schewe, Atif Mashkoor, and Mik-los Biro, editors, Abstract State Machines, Alloy, B, TLA, VDM, and Z , pages 3–34, Cham, 2016. Springer Inter-national Publishing. [5] Pat Bosshart, Dan Daly, Glen Gibb, Martin Izzard, Nick McKeown, Jennifer Rexford, Cole Schlesinger, Dan Talayco, Amin Vahdat, George Varghese, and David Walker. P4: Programming protocol-independent packet processors. SIGCOMM Comput. Commun. Rev. ,44(3):87–95, July 2014. [6] Broadcom. Broadcom trident, 2025. [7] Saksham Chand, Yanhong A. Liu, and Scott D. Stoller. Formal verification of multi-paxos for distributed con-sensus. In John Fitzgerald, Constance Heitmeyer, Stefa-nia Gnesi, and Anna Philippou, editors, FM 2016: For-mal Methods , pages 119–136, Cham, 2016. Springer International Publishing. [8] Chin-Liang Chang and Richard Char-Tung Lee. Sym-bolic logic and mechanical theorem proving . Academic Press, Inc., USA, 1st edition, 1997. [9] Cisco. Cisco Silicon One. https://blogs.cisco. com/sp/one-silicon-one-experience-multipl e-roles , 2019. [10] E. M. Clarke, E. A. Emerson, and A. P. Sistla. Auto-matic verification of finite-state concurrent systems us-ing temporal logic specifications. ACM Transactions on Programming Languages and Systems , page 244–263, April 1986. [11] Brian F. Cooper, Adam Silberstein, Erwin Tam, Raghu Ramakrishnan, and Russell Sears. Benchmarking cloud serving systems with YCSB. In Proceedings of the 1st ACM Symposium on Cloud Computing , SoCC ’10, page 143–154, New York, NY, USA, 2010. Association for Computing Machinery. [12] Graham Cormode and S. Muthukrishnan. An improved data stream summary: The Count-Min sketch and its applications. Journal of Algorithms , 55(1):58–75, 2005. [13] Huynh Tu Dang, Pietro Bressana, Han Wang, Ki Suh Lee, Noa Zilberman, Hakim Weatherspoon, Marco Canini, Fernando Pedone, and Robert Soulé. P4xos: Consensus as a network service. IEEE/ACM Transac-tions on Networking , 28(4):1726–1738, 2020. [14] Huynh Tu Dang, Daniele Sciascia, Marco Canini, Fer-nando Pedone, and Robert Soulé. NetPaxos: Consensus at network speed. In Proceedings of the 1st ACM SIG-COMM Symposium on Software Defined Networking Research , SOSR ’15, New York, NY, USA, 2015. Asso-ciation for Computing Machinery. [15] Leonardo De Moura and Nikolaj Bjørner. Satisfiability modulo theories: Introduction and applications. Com-mun. ACM , 54(9):69–77, September 2011. [16] Docker, Inc. Docker. https://www.docker.com/ ,2013. [17] Dragos Dumitrescu, Radu Stoenescu, Lorina Negreanu, and Costin Raiciu. bf4: Towards bug-free P4 programs. In Proceedings of the Annual Conference of the ACM Special Interest Group on Data Communication on the Applications, Technologies, Architectures, and Protocols for Computer Communication , SIGCOMM ’20, page 571–585, New York, NY, USA, 2020. Association for Computing Machinery. [18] E. Allen Emerson and A. Prasad Sistla. Symme-try and model checking. Form. Methods Syst. Des. ,9(1–2):105–131, August 1996. [19] Lucas Freire, Miguel Neves, Lucas Leal, Kirill Levchenko, Alberto Schaeffer-Filho, and Marinho Barcellos. Uncovering bugs in P4 programs with assertion-based verification. In Proceedings of the Symposium on SDN Research , SOSR ’18, New York, NY, USA, 2018. Association for Computing Machinery. [20] Stephen Gutz, Alec Story, Cole Schlesinger, and Nate Foster. Splendid isolation: A slice abstraction for software-defined networks. In Proceedings of the First Workshop on Hot Topics in Software Defined Networks ,HotSDN ’12, page 79–84, New York, NY, USA, 2012. Association for Computing Machinery. 13 [21] G.J. Holzmann. The model checker SPIN. IEEE Trans-actions on Software Engineering , page 279–295, May 1997. [22] Huawei. Huawei netengine, 2025. [23] Intel. Barefoot Tofino. https://www.intel.com/co ntent/www/us/en/products/network-io/progra mmable-ethernet-switch.html#tofino , 2020. [24] Intel. Tofino native architecture. https: //github.com/barefootnetworks/Open-Tofino/ blob/master/PUBLIC_Tofino-Native-Arch.pdf ,2021. [25] Xin Jin, Xiaozhou Li, Haoyu Zhang, Nate Foster, Jeongkeun Lee, Robert Soulé, Changhoon Kim, and Ion Stoica. NetChain: Scale-free sub-RTT coordination. In 
+
+15th USENIX Symposium on Networked Systems Design and Implementation (NSDI 18) , pages 35–49, Renton, WA, April 2018. USENIX Association. [26] Xin Jin, Xiaozhou Li, Haoyu Zhang, Robert Soulé, Jeongkeun Lee, Nate Foster, Changhoon Kim, and Ion Stoica. NetCache: Balancing key-value stores with fast in-network caching. In Proceedings of the 26th Sympo-sium on Operating Systems Principles , SOSP ’17, page 121–136, New York, NY, USA, 2017. Association for Computing Machinery. [27] Rajeev Joshi, Leslie Lamport, John Matthews, Serdar Tasiran, Mark Tuttle, and Yuan Yu. Checking cache-coherence protocols with tla+. Form. Methods Syst. Des. , 22(2):125–131, March 2003. [28] Peyman Kazemian, George Varghese, and Nick McKe-own. Header space analysis: Static checking for net-works. In Proceedings of the 9th USENIX Confer-ence on Networked Systems Design and Implementation ,NSDI’12, page 9, USA, 2012. USENIX Association. [29] Yonit Kesten, Amir Pnueli, Li-On Raviv, and Elad Sha-har. Model checking with strong fairness. Formal Meth-ods in System Design , 28(1):57–84, 2006. [30] Elie F. Kfoury, Jorge Crichigno, and Elias Bou-Harb. An exhaustive survey on P4 programmable data plane switches: Taxonomy, applications, challenges, and fu-ture trends. IEEE Access , 9:87094–87155, 2021. [31] Amir R. Khakpour and Alex X. Liu. Quantifying and querying network reachability. In 2010 IEEE 30th Inter-national Conference on Distributed Computing Systems ,pages 817–826, 2010. [32] Ahmed Khurshid, Xuan Zou, Wenxuan Zhou, Matthew Caesar, and P. Brighten Godfrey. Veriflow: Verifying network-wide invariants in real time. In 10th USENIX Symposium on Networked Systems Design and Imple-mentation (NSDI 13) , pages 15–27, Lombard, IL, April 2013. USENIX Association. [33] Daehyeok Kim, Jacob Nelson, Dan R. K. Ports, Vyas Sekar, and Srinivasan Seshan. Redplane: Enabling fault-tolerant stateful in-switch applications. In Proceedings of the 2021 ACM SIGCOMM 2021 Conference , SIG-COMM ’21, page 223–244, New York, NY, USA, 2021. Association for Computing Machinery. [34] Leslie Lamport. Specifying systems: The TLA+ lan-guage and tools for hardware and software engineers .Addison-Wesley, June 2002. [35] Leslie Lamport. The PlusCal algorithm language. In Martin Leucker and Carroll Morgan, editors, Theoreti-cal aspects of computing - ICTAC 2009 , pages 36–60, Berlin, Heidelberg, 2009. Springer Berlin Heidelberg. [36] ChonLam Lao, Yanfang Le, Kshiteej Mahajan, Yixi Chen, Wenfei Wu, Aditya Akella, and Michael Swift. ATP: In-network aggregation for multi-tenant learning. In 18th USENIX Symposium on Networked Systems De-sign and Implementation (NSDI 21) , pages 741–761. USENIX Association, April 2021. [37] Jason Lei and Vishal Shrivastav. Seer: Enabling future-aware online caching in networked systems. In 21st USENIX Symposium on Networked Systems Design and Implementation (NSDI 24) , pages 635–649, Santa Clara, CA, April 2024. USENIX Association. [38] John Levine. Flex & Bison: Text processing tools . " O’Reilly Media, Inc.", 2009. [39] Jialin Li, Ellis Michael, Naveen Kr. Sharma, Adriana Szekeres, and Dan R. K. Ports. Just say NO to Paxos overhead: Replacing consensus with network ordering. In 12th USENIX Symposium on Operating Systems De-sign and Implementation (OSDI 16) , pages 467–483, Savannah, GA, November 2016. USENIX Association. [40] Yahui Li, Xia Yin, Zhiliang Wang, Jiangyuan Yao, Xin-gang Shi, Jianping Wu, Han Zhang, and Qing Wang. A survey on network verification and testing with formal methods: Approaches and challenges. IEEE Communi-cations Surveys & Tutorials , 21(1):940–969, 2019. [41] Jed Liu, William Hallahan, Cole Schlesinger, Milad Sharif, Jeongkeun Lee, Robert Soulé, Han Wang, C˘ alin Ca¸ scaval, Nick McKeown, and Nate Foster. p4v: Practi-cal verification for programmable data planes. In Pro-ceedings of the 2018 Conference of the ACM Special Interest Group on Data Communication , SIGCOMM ’18, page 490–503, New York, NY, USA, 2018. Associ-ation for Computing Machinery. 14 [42] Shuo Liu, Qiaoling Wang, Junyi Zhang, Wenfei Wu, Qinliang Lin, Yao Liu, Meng Xu, Marco Canini, Ray C. C. Cheung, and Jianfei He. In-network aggregation with transport transparency for distributed training. In 
+
+Proceedings of the 28th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 3 , ASPLOS 2023, page 376–391, New York, NY, USA, 2023. Association for Computing Machinery. [43] Zaoxing Liu, Zhihao Bai, Zhenming Liu, Xiaozhou Li, Changhoon Kim, Vladimir Braverman, Xin Jin, and Ion Stoica. DistCache: Provable load balancing for large-scale storage systems with distributed caching. In 17th USENIX Conference on File and Storage Technologies (FAST 19) , pages 143–157, Boston, MA, February 2019. USENIX Association. [44] Zohar Manna and Amir Pnueli. A hierarchy of tem-poral properties (invited paper, 1989). In Proceedings of the Ninth Annual ACM Symposium on Principles of Distributed Computing , PODC ’90, page 377–410, New York, NY, USA, 1990. Association for Computing Ma-chinery. [45] Madanlal Musuvathi, Dawson R Engler, et al. Model checking large network protocol implementations. In 
+
+NSDI , volume 4, pages 12–12, 2004. [46] ns 3 Consortium. ns-3: Network simulator 3. https: //www.nsnam.org/ , 2006. [47] Dan R. K. Ports, Jialin Li, Vincent Liu, Naveen Kr. Sharma, and Arvind Krishnamurthy. Designing dis-tributed systems using approximate synchrony in data center networks. In 12th USENIX Symposium on Net-worked Systems Design and Implementation (NSDI 15) ,pages 43–57, Oakland, CA, May 2015. USENIX Asso-ciation. [48] Santhosh Prabhu, Kuan Yen Chou, Ali Kheradmand, Brighten Godfrey, and Matthew Caesar. Plankton: Scal-able network configuration verification through model checking. In 17th USENIX Symposium on Networked Systems Design and Implementation (NSDI 20) , pages 953–967, Santa Clara, CA, February 2020. USENIX Association. [49] Amedeo Sapio, Marco Canini, Chen-Yu Ho, Jacob Nelson, Panos Kalnis, Changhoon Kim, Arvind Kr-ishnamurthy, Masoud Moshref, Dan Ports, and Peter Richtarik. Scaling distributed machine learning with in-network aggregation. In 18th USENIX Symposium on Networked Systems Design and Implementation (NSDI 21) , pages 785–808. USENIX Association, April 2021. [50] Siyuan Sheng, Huancheng Puyang, Qun Huang, Lu Tang, and Patrick P. C. Lee. FarReach: Write-back caching in programmable switches. In 2023 USENIX Annual Technical Conference (USENIX ATC 23) , pages 571–584, Boston, MA, July 2023. USENIX Association. [51] Apoorv Shukla, Kevin Hudemann, Zsolt Vági, Lily Hügerich, Georgios Smaragdakis, Artur Hecker, Stefan Schmid, and Anja Feldmann. Fix with P6: Verifying programmable switches at runtime. In IEEE INFOCOM 2021 - IEEE Conference on Computer Communications ,pages 1–10, 2021. [52] Radu Stoenescu, Dragos Dumitrescu, Matei Popovici, Lorina Negreanu, and Costin Raiciu. Debugging p4 pro-grams with Vera. In Proceedings of the 2018 Conference of the ACM Special Interest Group on Data Communi-cation , SIGCOMM ’18, page 518–532, New York, NY, USA, 2018. Association for Computing Machinery. [53] Bingchuan Tian, Jiaqi Gao, Mengqi Liu, Ennan Zhai, Yanqing Chen, Yu Zhou, Li Dai, Feng Yan, Mengjing Ma, Ming Tang, Jie Lu, Xionglie Wei, Hongqiang Harry Liu, Ming Zhang, Chen Tian, and Minlan Yu. Aquila: A practically usable verification system for production-scale programmable data planes. In Proceedings of the 2021 ACM SIGCOMM 2021 Conference , SIGCOMM ’21, page 17–32, New York, NY, USA, 2021. Association for Computing Machinery. [54] Hao Wang, Yuxuan Qin, ChonLam Lao, Yanfang Le, Wenfei Wu, and Kai Chen. Preemptive switch memory usage to accelerate training jobs with shared in-network aggregation. In 2023 IEEE 31st International Confer-ence on Network Protocols (ICNP) , pages 1–12, 2023. [55] G.G. Xie, Jibin Zhan, D.A. Maltz, Hui Zhang, A. Green-berg, G. Hjalmtysson, and J. Rexford. On static reach-ability analysis of IP networks. In Proceedings IEEE 24th Annual Joint Conference of the IEEE Computer and Communications Societies. , volume 3, pages 2170– 2183 vol. 3, 2005. [56] Hongkun Yang and Simon S. Lam. Real-time verifi-cation of network properties using atomic predicates. 
+
+IEEE/ACM Transactions on Networking , 24(2):887– 900, 2016. [57] Mingran Yang, Alex Baban, Valery Kugel, Jeff Libby, Scott Mackie, Swamy Sadashivaiah Renu Kananda, Chang-Hong Wu, and Manya Ghobadi. Using trio: Juniper networks’ programmable chipset-for emerging in-network applications. In Proceedings of ACM SIG-COMM , pages 633–648, 2022. [58] Parham Yassini, Khaled Diab, Saeed Mahloujifar, and Mohamed Hefeeda. Horus: Granular in-network task 15 scheduler for cloud datacenters. In 21st USENIX Sympo-sium on Networked Systems Design and Implementation (NSDI 24) , pages 1–22, Santa Clara, CA, April 2024. USENIX Association. [59] Zhuolong Yu, Yiwen Zhang, Vladimir Braverman, Mosharaf Chowdhury, and Xin Jin. NetLock: Fast, cen-tralized lock management using programmable switches. In Proceedings of the Annual Conference of the ACM Special Interest Group on Data Communication on the Applications, Technologies, Architectures, and Protocols for Computer Communication , SIGCOMM ’20, page 126–138, New York, NY, USA, 2020. Association for Computing Machinery. [60] Yifei Yuan, Soo-Jin Moon, Sahil Uppal, Limin Jia, and Vyas Sekar. NetSMC: A custom symbolic model checker for stateful network verification. In 17th USENIX Symposium on Networked Systems Design and Implementation (NSDI 20) , pages 181–200, Santa Clara, CA, February 2020. USENIX Association. [61] Lior Zeno, Ang Chen, and Mark Silberstein. In-network address caching for virtual networks. In Proceedings of the ACM SIGCOMM 2024 Conference , ACM SIG-COMM ’24, page 735–749, New York, NY, USA, 2024. Association for Computing Machinery. [62] Hanze Zhang, Ke Cheng, Rong Chen, and Haibo Chen. Fast and scalable in-network lock management using lock fission. In 18th USENIX Symposium on Operating Systems Design and Implementation (OSDI 24) , pages 251–268, Santa Clara, CA, July 2024. USENIX Associ-ation. [63] Naiqian Zheng, Mengqi Liu, Yuxing Xiang, Linjian Song, Dong Li, Feng Han, Nan Wang, Yong Ma, Zhuo Liang, Dennis Cai, Ennan Zhai, Xuanzhe Liu, and Xin Jin. Automated verification of an in-production DNS authoritative engine. In Proceedings of the 29th Sym-posium on Operating Systems Principles , SOSP ’23, page 80–95, New York, NY, USA, 2023. Association for Computing Machinery. [64] Hang Zhu, Kostis Kaffes, Zixu Chen, Zhenming Liu, Christos Kozyrakis, Ion Stoica, and Xin Jin. RackSched: A microsecond-scale scheduler for rack-scale computers. In 14th USENIX Symposium on Operating Systems De-sign and Implementation (OSDI 20) , pages 1225–1240. USENIX Association, November 2020. 16 Appendix A Verification Result of Lock Management Systems 
+
+System model. We model a lock management system using a star topology, where a switch connects multiple clients and a lock server. As discussed in Section 4.1, we only focus on a specific lock. Clients send requests to the lock server to acquire or release that lock. INC protocols allow the switch to maintain lock metadata and serve lock requests. We choose NetLock [59] and F ISS LOCK [62] as representative protocols. NetLock maintains a queue for each lock in the switch. An element in the queue is a tuple of the lock mode, transaction ID, and client IP. The first few elements represent the current holders, while the remaining represent the waiters. Due to the limitations of programmable switches, only one position in the queue can be accessed while processing a packet. When receiving a lock acquisition request, the switch enqueues it. If the queue was previously empty (no holder), or elements in the queue and the request are all in shared mode, the request is directly granted. When receiving a release request, the switch dequeues the head element and resubmits the request to the beginning of the processing pipeline, granting the new head if not granted yet. Because the switch can only dequeue the head of the queue, it does not check the transaction ID when releasing locks. NetLock argues that this design does not affect the correctness, because only one transaction can hold an exclusive lock, and the operations of releasing shared locks are commutative. FISS LOCK decouples lock management into grant decision and participant maintenance. The switch is only responsible for grant decisions, maintaining the lock mode (free, exclusive, or shared), and the holder’s machine ID for each lock. The lock agent, which resides on the lock holder, is responsible for participant maintenance, i.e., the holder and the waiters. When the holder changes, the agent migrates. When receiving a lock acquisition request, the switch decides whether to grant the client based on lock mode. If the lock is free, the switch replies to the client with a grant packet and asks it to establish the lock agent. If both the lock and the acquisition request are shared, the switch replies to the client with a grant packet and forwards the request to the lock agent. In other cases where grant is not immediately possible, the switch simply forwards the request to the lock agent. When receiving a lock release request, the switch forwards it to the lock agent. When there is no holder, the lock agent migrates itself to the next waiter, or notifies the switch to free the lock if no waiter exists. If the client and the agent are on the same machine, acquisition and release will be handled locally without passing through the switch. FISS LOCK discusses anomalies caused by network excep-tions and introduces patch mechanisms. To address packet loss, F ISS LOCK requires each client-initiated packet to be acknowledged, and retransmitted after a timeout. To prevent metadata from being modified twice, the switch maintains a sequence number for each server to track the number of pro-cessed packets, and only updates the metadata if the incoming packet’s sequence number is higher than the on-switch num-ber. One exception is the grant packet, which is initiated by the switch. When a lock acquisition times out, F ISS LOCK 
+
+requires the client to release the lock and retry the acquisition. To address packet out-of-order (e.g., release before acquisi-tion), F ISS LOCK requires the agent to send unprocessable packets back to the switch. This additional routing corrects packet order. FISS LOCK discusses another anomaly caused by a par-ticular event interleaving. When a shared lock is released, the agent grants the lock to the first waiter, who attempts to acquire the lock exclusively, and migrates itself to that ma-chine. Meanwhile, the switch grants the same shared lock to another client, violating lock exclusion. To address this anomaly, F ISS LOCK introduces the incarnation mechanism. Both the switch and the agent maintain a per-lock incarnation, which is incremented upon receiving a shared acquisition. The agent embeds its incarnation in grant and free packets it sends. When the switch receives such a packet, it compares the embedded incarnation with its own. If they match, the switch resets the incarnation and handles the request as usual. Otherwise, it rejects the packet, and the agent returns to its original machine, continuing to handle lock requests. 
+
+Correctness properties. We specify the following correct-ness properties with INCGuard. 
+
+• Terminality , the same as described in Section 7.1. 
+
+• Lock exclusion , which requires that if a lock is held by one client exclusively, it cannot be held by other clients. This property is verified by checking state variables in the system. 
+
+Property violations. 
+
+• Lock exclusion violation in NetLock. NetLock does not provide a detailed discussion on retransmission. Without spe-cial handling, the following trace is possible. At some mo-ment, the lock is held in shared mode by client 1 and client 2. Client 1 initiates a lock release request, but it is delayed in the network, triggering a timeout and resulting in a retransmission of the release request. Since the switch does not check trans-action ID, it processes both release requests and dequeues two elements. If client 3 initiates an exclusive acquisition request at this point, the switch grants it as the queue is empty. This violates lock exclusion: client 3 holds the lock exclusively, while client 2 still holds it in shared mode. 
+
+• Lock exclusion violations in FissLock. Figure 12 illus-trates an execution trace of lock exclusion violation in F ISS -LOCK . The lock is initially free. The client initiates a lock acquisition request, and the switch replies with a grant packet. However, it is delayed in the network, leading to a timeout that triggers the release and re-acquisition of the lock. Later, the client receives the delayed grant and assumes it holds the lock, while the switch, having handled the release request, 17 Figure 12: An execution trace of lock exclusion violation in FISS LOCK . All operations perform on the same lock, which is initially free and cached in the switch. Important events are marked in red. 
+
+considers the lock free. At this point, if a client on another machine attempts to acquire the lock at this point, the switch will directly grant it. This will violate lock exclusion if one of the two clients holds the lock exclusively. 
+
+Possible fixes. 
+
+The lock exclusion violation in NetLock can be fixed by requiring the switch to check the transaction ID and dequeue the correct element upon receiving a release request. While this solution is conceptually straightforward, it is challeng-ing to implement within the constraints of a programmable switch. It is difficult to provide a simple fix to the lock exclusion violations in FissLock . As F ISS LOCK migrates the lock agent across the entire network, it is challenging to maintain the consistency between the lock agent, the switch, and the ac-tual state of the system. While only two violation traces are presented, additional ones have been observed. Although dis-tributed consensus algorithms are applicable, they may incur significant performance overhead. 18

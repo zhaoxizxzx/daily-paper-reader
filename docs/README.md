@@ -6,31 +6,37 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-13
-- 运行时间：2026-04-13 20:41:05 UTC
+- 最新运行日期：2026-04-14
+- 运行时间：2026-04-14 20:10:31 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：5
 - 精读区：1
-- 速读区：2
+- 速读区：4
 
 ### 今日简报（AI）
-今日聚焦自适应视频流优化与加密流量智能解析，涵盖强化学习与大模型前沿应用。
-重点推荐 eBandit 算法通过核驱动强化学习提升视频传输质量，并关注 LLM 在加密流量推理中的基准突破。
-建议优先研读 eBandit 的内核机制，探索 AI 如何在复杂网络环境下实现更精准的决策调度。
-- 详情：[/202604/13/README](/202604/13/README)
+今日聚焦网络性能前沿，深度解析了支持线速动态重排序的可编程分组调度技术。
+重点揭示了动态重排序在提升调度灵活性上的突破，并同步探讨了网内计算风险验证与 HPC 拥塞特性。
+建议优先研读 8.0 分的精读论文，掌握利用可编程数据平面解决复杂流量管理难题的核心思路。
+- 详情：[/202604/14/README](/202604/14/README)
 
 ### 精读区论文标签
-1. [eBandit: Kernel-Driven Reinforcement Learning for Adaptive Video Streaming](/202604/13/2604.08791v1-ebandit-kernel-driven-reinforcement-learning-for-adaptive-video-streaming)  
+1. [Programmable Packet Scheduling with Dynamic Reordering at Line Rate](/202604/14/2604.11453v1-programmable-packet-scheduling-with-dynamic-reordering-at-line-rate)  
    标签：评分：8.0/10、query:netmes
-   evidence：利用eBPF在内核层进行实时TCP指标的网络监控
+   evidence：用于高速交换机线速处理的可编程硬件调度模型
 
 ### 速读区论文标签
-1. [Multimodal Reasoning with LLM for Encrypted Traffic Interpretation: A Benchmark](/202604/13/2604.08140v1-multimodal-reasoning-with-llm-for-encrypted-traffic-interpretation-a-benchmark)  
+1. [Verifying In-Network Computing Systems for Design Risks](/202604/14/2604.10186v1-verifying-in-network-computing-systems-for-design-risks)  
    标签：评分：7.0/10、query:netmes
-   evidence：加密流量解释的多模态推理与语义标注
-2. [EYWA: Elastic Load-Balancing and High-Availability Wired Virtual Network Architecture](/202604/13/2604.09322v1-eywa-elastic-load-balancing-and-high-availability-wired-virtual-network-architecture)  
+   evidence：验证基于可编程交换机和网络计算构建的系统
+2. [Characterizing the Impact of Congestion in Modern HPC Interconnects](/202604/14/2604.11432v1-characterizing-the-impact-of-congestion-in-modern-hpc-interconnects)  
+   标签：评分：7.0/10、query:netmes
+   evidence：表征高性能计算互连网络中的拥塞和流量模式
+3. [Attribution-Driven Explainable Intrusion Detection with Encoder-Based Large Language Models](/202604/14/2604.06266v1-attribution-driven-explainable-intrusion-detection-with-encoder-based-large-language-models)  
    标签：评分：6.0/10、query:netmes
-   evidence：面向大型数据中心的负载均衡虚拟网络架构
+   evidence：在 SDN 中使用流级流量特征进行入侵检测
+4. [Blink: CPU-Free LLM Inference by Delegating the Serving Stack to GPU and SmartNIC](/202604/14/2604.07609v1-blink-cpu-free-llm-inference-by-delegating-the-serving-stack-to-gpu-and-smartnic)  
+   标签：评分：6.0/10、query:netmes
+   evidence：数据中心中基于智能网卡（SmartNIC）的请求处理
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,217 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-14T20:09:34.320125+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2604.11453v1",
+      "title": "Programmable Packet Scheduling with Dynamic Reordering at Line Rate",
+      "abstract": "High-speed switch packet scheduling demands both line-rate performance and programmability. Existing programmable hardware scheduling models, such as PIFO and PIEO, can express a broad range of scheduling algorithms; however, their semantics are restricted to packet-level ordering and cannot dynamically reorder buffered packets, which limits the support for dynamic-ordering algorithms such as pFabric.   To overcome this limitation, we propose UIFO (Update-In-First-Out), a new programmable scheduling model that introduces a two-level abstraction over classes and packets. UIFO enables dynamic updates to the scheduling order at the class level while preserving in-order packet scheduling within each class, thereby supporting dynamic reordering of already-buffered packets. Furthermore, UIFO remains fully compatible with and generalizes existing PIFO and PIEO models.   We implement a hardware prototype of UIFO based on priority-queue designs and evaluate it on an FPGA platform and in a 28 nm ASIC process. Overall, UIFO significantly enhances scheduling expressiveness and maintains favorable scalability while sustaining 100 Gbps line-rate throughput.",
+      "authors": [
+        "Zekun Wang",
+        "Binghao Yue",
+        "Yichen Deng",
+        "Weitao Pan",
+        "Jiangyi Shi",
+        "Yue Hao"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-13T13:31:50+00:00",
+      "link": "https://arxiv.org/pdf/2604.11453v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "programmable hardware scheduling model for high-speed switches at line rate",
+      "llm_evidence_cn": "用于高速交换机线速处理的可编程硬件调度模型",
+      "llm_evidence": "用于高速交换机线速处理的可编程硬件调度模型",
+      "canonical_evidence": "用于高速交换机线速处理的可编程硬件调度模型",
+      "llm_tldr_en": "UIFO is a programmable packet scheduling model that supports dynamic reordering at line rate in high-speed switches.",
+      "llm_tldr_cn": "UIFO 是一种可编程分组调度模型，支持高速交换机在线速下的动态重排序。",
+      "llm_tldr": "UIFO 是一种可编程分组调度模型，支持高速交换机在线速下的动态重排序。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.10186v1",
+      "title": "Verifying In-Network Computing Systems for Design Risks",
+      "abstract": "The emergence of programmable switches has brought in-network computing (INC) into the spotlight in recent years. By offloading computation directly onto the data transmission process, INC improves network utilization, reduces latency to sub-RTT levels, saves link bandwidth, and maintains throughput. However, INC disrupts the transparency of traditional networks, forcing developers to consider network exceptions like packet loss and out-of-order. If not properly handled, these exceptions can lead to violations of application properties, such as cache consistency and lock exclusion. Usual testing cannot exhaustively cover these exceptions, raising doubts about the correctness of INC systems and hindering their deployment in the industry. This paper presents INCGuard, the first general-purpose tool for verifying INC systems. INCGuard provides a high-level specification language and saves developers 67.2% lines of code on average. To help better understand the behavior of the system, INCGuard offers configurable network environments. INCGuard enables developers to express INC-specific correctness properties. INCGuard translates developer-specified systems into state transition representations, performs model checking to detect potential design risks, and reports violation traces to developers. We propose optimizations for INC-specific scenarios to address the challenge of state space explosion. We modeled seven INC systems and identified their risks with INCGuard in seconds. We further reproduce them in real systems to confirm the validity of our verification result.",
+      "authors": [
+        "Tianyu Bai",
+        "Ying Zhang",
+        "Ying Zhang",
+        "Wenfei Wu"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-11T12:41:16+00:00",
+      "link": "https://arxiv.org/pdf/2604.10186v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "verifying systems built on programmable switches and in-network computing",
+      "llm_evidence_cn": "验证基于可编程交换机和网络计算构建的系统",
+      "llm_evidence": "验证基于可编程交换机和网络计算构建的系统",
+      "canonical_evidence": "验证基于可编程交换机和网络计算构建的系统",
+      "llm_tldr_en": "INCGuard provides a verification framework for in-network computing systems to handle packet loss and reordering.",
+      "llm_tldr_cn": "INCGuard为网络内计算系统提供了一个验证框架，以处理丢包和乱序等异常。",
+      "llm_tldr": "INCGuard为网络内计算系统提供了一个验证框架，以处理丢包和乱序等异常。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.06266v1",
+      "title": "Attribution-Driven Explainable Intrusion Detection with Encoder-Based Large Language Models",
+      "abstract": "Software-Defined Networking (SDN) improves network flexibility but also increases the need for reliable and interpretable intrusion detection. Large Language Models (LLMs) have recently been explored for cybersecurity tasks due to their strong representation learning capabilities; however, their lack of transparency limits their practical adoption in security-critical environments. Understanding how LLMs make decisions is therefore essential. This paper presents an attribution-driven analysis of encoder-based LLMs for network intrusion detection using flow-level traffic features. Attribution analysis demonstrates that model decisions are driven by meaningful traffic behavior patterns, improving transparency and trust in transformer-based SDN intrusion detection. These patterns align with established intrusion detection principles, indicating that LLMs learn attack behavior from traffic dynamics. This work demonstrates the value of attribution methods for validating and trusting LLM-based security analysis.",
+      "authors": [
+        "Umesh Biswas",
+        "Shafqat Hasan",
+        "Syed Mohammed Farhan",
+        "Nisha Pillai",
+        "Charan Gudla"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-07T03:21:14+00:00",
+      "link": "https://arxiv.org/pdf/2604.06266v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "intrusion detection using flow-level traffic features in SDN",
+      "llm_evidence_cn": "在 SDN 中使用流级流量特征进行入侵检测",
+      "llm_evidence": "在 SDN 中使用流级流量特征进行入侵检测",
+      "canonical_evidence": "在 SDN 中使用流级流量特征进行入侵检测",
+      "llm_tldr_en": "Analyzes encoder-based LLMs for explainable network intrusion detection using flow-level traffic features.",
+      "llm_tldr_cn": "利用流级流量特征，分析基于编码器的 LLM 在可解释网络入侵检测中的应用。",
+      "llm_tldr": "利用流级流量特征，分析基于编码器的 LLM 在可解释网络入侵检测中的应用。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.11432v1",
+      "title": "Characterizing the Impact of Congestion in Modern HPC Interconnects",
+      "abstract": "High-performance computing (HPC) systems increasingly support both scalable AI training and large-scale simulation workloads. Both typically rely heavily on collective communication operations. On modern supercomputers, however, network congestion has emerged as a major limitation, driven by heterogeneous traffic patterns resulting from diverse workload mixes. As system scale and active users continue to grow, understanding how today's interconnect technologies respond to congestion is essential for establishing realistic performance expectations and informing future system design. This paper presents a comprehensive characterization of congestion behavior across four major HPC fabrics: EDR InfiniBand, HDR InfiniBand, NDR InfiniBand, Cray Slingshot, and emerging Ethernet fabrics. These fabrics span high-performance proprietary interconnects as well as adaptive Ethernet-based designs aligned with emerging standards such as Ultra Ethernet. We evaluate their responses to both steady congestion and a wide range of bursty patterns that vary in duration, intensity, and pause length, capturing the bursty communication typical of AI workloads. Our study covers multiple scales, examining how congestion manifests differently as system size increases and identifying scale-dependent behaviors that influence collective performance. By analyzing the challenges that arise under these controlled stress conditions, we aim to provide a practical overview of congestion issues and possible optimizations. The insights derived from this evaluation can guide researchers and HPC architects in designing more effective congestion-control mechanisms and network load-balancing strategies.",
+      "authors": [
+        "Lorenzo Piarulli",
+        "Marco Faltelli",
+        "Dirk Pleiter",
+        "Karthee Sivalingam",
+        "Dancheng Zhang",
+        "Kexue Zhao",
+        "Matteo Turisini",
+        "Francesco Iannone",
+        "Aldo Artigiani",
+        "Daniele De Sensi"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-13T13:18:08+00:00",
+      "link": "https://arxiv.org/pdf/2604.11432v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "characterizing congestion and traffic patterns in HPC interconnects",
+      "llm_evidence_cn": "表征高性能计算互连网络中的拥塞和流量模式",
+      "llm_evidence": "表征高性能计算互连网络中的拥塞和流量模式",
+      "canonical_evidence": "表征高性能计算互连网络中的拥塞和流量模式",
+      "llm_tldr_en": "This paper analyzes network congestion and traffic behavior across major high-performance computing fabrics.",
+      "llm_tldr_cn": "本文分析了主要高性能计算架构中的网络拥塞和流量行为。",
+      "llm_tldr": "本文分析了主要高性能计算架构中的网络拥塞和流量行为。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.07609v1",
+      "title": "Blink: CPU-Free LLM Inference by Delegating the Serving Stack to GPU and SmartNIC",
+      "abstract": "Large Language Model (LLM) inference is rapidly becoming a core datacenter service, yet current serving stacks keep the host CPU on the critical path for orchestration and token-level control. This makes LLM performance sensitive to CPU interference, undermining application colocation and forcing operators to reserve CPU headroom, leaving substantial capacity unutilized.   We introduce Blink, an end-to-end serving architecture that removes the host CPU from the steady-state inference path by redistributing responsibilities across a SmartNIC and a GPU. Blink offloads request handling to the SmartNIC, which delivers inputs directly into GPU memory via RDMA, and replaces host-driven scheduling with a persistent GPU kernel that performs batching, scheduling, and KV-cache management without CPU involvement.   Evaluated against TensorRT-LLM, vLLM, and SGLang, Blink outperforms all baselines even in isolation, reducing pre-saturation P99 TTFT by up to 8.47$\\times$ and P99 TPOT by up to 3.40$\\times$, improving decode throughput by up to 2.1$\\times$, and reducing energy per token by up to 48.6$\\%$. Under CPU interference, Blink maintains stable performance, while existing systems degrade by up to two orders of magnitude.",
+      "authors": [
+        "Mohammad Siavashi",
+        "Mariano Scazzariello",
+        "Gerald Q. Maguire",
+        "Dejan Kostić",
+        "Marco Chiesa"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.LG",
+        "cs.OS",
+        "cs.PF",
+        "cs.SE"
+      ],
+      "published": "2026-04-08T21:27:47+00:00",
+      "link": "https://arxiv.org/pdf/2604.07609v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "SmartNIC-based request handling in data centers",
+      "llm_evidence_cn": "数据中心中基于智能网卡（SmartNIC）的请求处理",
+      "llm_evidence": "数据中心中基于智能网卡（SmartNIC）的请求处理",
+      "canonical_evidence": "数据中心中基于智能网卡（SmartNIC）的请求处理",
+      "llm_tldr_en": "Blink offloads LLM serving tasks to SmartNICs and GPUs to bypass CPU bottlenecks in data centers.",
+      "llm_tldr_cn": "Blink 将 LLM 推理任务卸载到智能网卡和 GPU，以绕过数据中心中的 CPU 瓶颈。",
+      "llm_tldr": "Blink 将 LLM 推理任务卸载到智能网卡和 GPU，以绕过数据中心中的 CPU 瓶颈。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

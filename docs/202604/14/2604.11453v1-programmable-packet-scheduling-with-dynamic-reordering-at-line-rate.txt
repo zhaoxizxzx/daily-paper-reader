@@ -1,0 +1,354 @@
+Title: Programmable Packet Scheduling with Dynamic Reordering at Line Rate
+
+URL Source: https://arxiv.org/pdf/2604.11453v1
+
+Published Time: Tue, 14 Apr 2026 02:54:11 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# Programmable Packet Scheduling with Dynamic Reordering at Line Rate 
+
+# Zekun Wang, Binghao Yue, Yichen Deng, Weitao Pan, Jiangyi Shi, Yue Hao 
+
+Xidian University 
+
+## ABSTRACT 
+
+High-speed switch packet scheduling demands both line-rate performance and programmability. Existing programmable hardware scheduling models, such as PIFO and PIEO, can express a broad range of scheduling algorithms; however, their semantics are restricted to packet-level ordering and cannot dynamically reorder buffered packets, which limits the support for dynamic-ordering algorithms such as pFabric. To overcome this limitation, we propose UIFO (Update-In-First-Out), a new programmable scheduling model that introduces a two-level abstraction over classes and packets. UIFO enables dynamic updates to the scheduling order at the class level while preserving in-order packet scheduling within each class, thereby supporting dynamic reordering of already-buffered packets. Furthermore, UIFO remains fully compatible with and generalizes existing PIFO and PIEO models. We implement a hardware prototype of UIFO based on priority-queue designs and evaluate it on an FPGA platform and in a 28 nm ASIC process. Overall, UIFO significantly enhances scheduling expressiveness and maintains favorable scalability while sustaining 100 Gbps line-rate throughput. 
+
+## 1 INTRODUCTION 
+
+Packet scheduling governs the timing and ordering of packet transmissions at a network device’s egress, directly affect-ing fairness, latency, and quality of service (QoS). Its funda-mental objective is to determine when and in what order packets queued at an output port should be transmitted [ 21 ]. As cloud computing, large-scale datacenters, and latency-sensitive applications continue to evolve, network traffic has become increasingly diverse and dynamic, making it difficult for any single scheduling algorithm to meet all oper-ational requirements. In practice, network operators rely on a variety of scheduling policies, each optimized for specific objectives—for example, pFabric [ 2 ] aims to minimize flow completion time(FCT), Priority Flow Control (PFC) [ 14 ] tar-gets lossless transport, token-bucket mechanisms are widely used for traffic shaping [ 30 ], and fairness-oriented schedulers such as WFQ [ 7] and DRR [ 19 ] seek bandwidth-proportional allocation. With the advent of SDN, the flexibility of the control plane has been substantially improved; however, similar flexibility is also needed in the data plane, particularly for queue man-agement and scheduling [ 22 ]. Since no universally optimal packet scheduling algorithm exists in practice [ 15 ], modern networks increasingly demand programmable schedulers that can support a wide range of policies at line rate. Unfortu-nately, existing programmable hardware scheduling models largely confine scheduling decisions to packet-level ordering. Once a packet is enqueued, its relative scheduling position typically cannot be updated in response to subsequent state changes. This limitation makes it difficult to naturally ex-press many algorithms that require runtime information to dynamically reorder buffered packets, while still preserving line-rate performance. To enable programmability across a broad range of schedul-ing algorithms and to improve the flexibility of hardware-programmable schedulers, recent years have seen the emer-gence of programmable scheduling models represented by PIFO [ 21 ] and PIEO [ 20 ], which largely define the capability boundary of today’s hardware-programmable packet sched-uling. While these models are expressive enough to realize most scheduling algorithms, they share a fundamental limita-tion: once a packet is enqueued, its relative scheduling order cannot be dynamically updated in response to subsequently arriving packets or changes in system state. For instance, pFabric aims to minimize FCT by always prioritizing packets from the flow with the smallest remaining size. When a flow with a smaller remaining size arrives, the algorithm semanti-cally requires that all buffered packets belonging to this flow be advanced in the service order. However, under existing PIFO and PIEO abstractions, enqueuing a new packet alone cannot alter the relative order among multiple packets al-ready buffered in the queue. Consequently, such algorithms are difficult to implement efficiently in programmable hard-ware schedulers. From an abstraction perspective, the key difference between PIFO and PIEO lies in how the set of schedulable packets is constructed. Nevertheless, both mod-els ultimately adhere to the same scheduling semantics: per-forming packet-level ordering within a given candidate set. This packet-centric view makes it hard for state updates to directly affect the service order of buffered packets, thereby becoming a fundamental bottleneck for dynamically adap-tive scheduling policies. A large body of prior work on programmable packet sched-ulers has primarily focused on improving implementation  
+
+> 1
+> arXiv:2604.11453v1 [cs.NI] 13 Apr 2026 SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al.
+
+efficiency—such as queue scalability and throughput—within the aforementioned scheduling models. However, there is still a lack of a direct and general abstraction that supports updating the service order of already-buffered packets. To bridge this gap, we propose a new programmable schedul-ing model, UIFO (Update-In-First-Out). UIFO introduces a two-level scheduling semantics. The scheduler first selects among classes and allows the priority of a class to be updated based on runtime state; it then schedules packets within the chosen class according to packet priorities. This hierarchical design enables UIFO to preserve fine-grained packet-level scheduling, while allowing flow-/queue-level state updates to immediately reshape the service order of buffered packets. Built on this model, UIFO can naturally express dynamic-ordering algorithms such as pFabric, while remaining com-patible with existing programmable scheduling abstractions including PIFO and PIEO. We implement UIFO using an update-enabled priority queue and a multi-priority-queue group, and evaluate its resource cost and timing characteris-tics on a Xilinx XCVU13P FPGA as well as in a 28nm ASIC process. We will open-source the UIFO implementation in camera ready version. In this paper, we make the following contributions: 
+
+• Identify a fundamental semantic limitation shared by existing programmable scheduling abstractions, in-cluding PIFO and PIEO: scheduling decisions are ul-timately applied at the packet level, preventing state updates from directly reordering buffered packet. 
+
+• Proposed UIFO, a new programmable scheduling ab-straction that elevates subsets of data packets to first-class scheduling objects, enables reordering of data packets through class-based scheduling, while remain-ing fully compatible with previous models. 
+
+• Demonstrate that UIFO can naturally express a broad range of scheduling algorithms—including dynamic, flow- or queue-centric policies such as pFabric,PFC— that are difficult or inefficient to realize under existing abstractions. 
+
+• Implemented UIFO in hardware using a priority queue that supports update operations and a multi-priority-queue group, and evaluated its resource cost and tim-ing on FPGA and ASIC platforms, showing that the increased expressive power comes with a moderate hardware overhead. 
+
+This work does not raise any ethical issues. 
+
+## 2 BACKGROUND 2.1 Packet Scheduling Algorithms 
+
+Packet scheduling algorithms are a key mechanism in net-work devices for determining the transmission order and tim-ing of competing packets on an output link. Their goal is to provide differentiated guarantees across traffic flows—such as latency, throughput, fairness, and QoS—under constrained link bandwidth and buffer resources. Depending on the dif-ferent classification criteria, packet scheduling algorithms can be further categorized. 
+
+2.1.1 Classification by Link Utilization. All packet sched-uling algorithms make two fundamental decisions: the ser-vice order of packets and their transmission time. Based on how a scheduler behaves when the output link is idle, scheduling algorithms are typically classified into work-conserving and non-work-conserving algorithms [ 21 ].Work-conserving algorithms focus primarily on determining packet transmission order: whenever the link becomes idle, the scheduler always transmits the packet at the head of the queue, ensuring that the output link never remains idle as long as there are buffered packets. In contrast, non-work-conserving algorithms emphasize transmitting packets at the correct time. If buffered packets do not satisfy the re-quired transmission conditions (i.e., the eligibility predicate evaluates to false), the scheduler defers transmission even when the link is idle. 
+
+2.1.2 Classification by Dynamic Ordering. Depending on whether the scheduling order of buffered packets may change upon the arrival of new packets, scheduling algorithms can be classified into static-ordering and dynamic-ordering schemes. In static-ordering algorithms, once a packet enters the queue, its priority remains unchanged, as in LSTF [ 27 ], WFQ [ 7], DRR [ 19 ], and STFQ [ 12 ]. Such algorithms can be mapped straightforwardly onto conventional priority-queue-based models. In contrast, dynamic-ordering algorithms exhibit the following characteristic: the service order of buffered packets may be revised as new packets arrive. For exam-ple, in pFabric, when an newly arrived packet belongs to a flow with a shorter remaining size, the scheduler must transmit ahead the already-buffered packets of that flow, thereby reordering multiple packets in the queue. Similar dynamic reordering strategies include D3 [ 31 ], DDRR [ 32 ], and DBA [ 36 ]. Although existing hardware scheduling mod-els can precisely support static-ordering algorithms, they remain notably limited in both expressing and efficiently implementing dynamic-ordering algorithms. 
+
+## 2.2 Hardware Programmable Scheduling Model 
+
+Currently, programmable scheduling models that have been implemented in hardware and extensively studied mainly fall into two categories: PIFO [21] and PIEO [20]. 
+
+2.2.1 Push-In-First-Out. In the PIFO scheduling program-ming model, users provide a small program to compute a packet’s rank, which determines its priority. Combined with  
+
+> 2Programmable Packet Scheduling with Dynamic Reordering at Line Rate SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA
+
+a single priority queue, PIFO can implement scheduling al-gorithms that specify either transmission timing or trans-mission order. However, its key limitation is that the service order of already-buffered packets cannot be changed in re-sponse to subsequently arriving packets. In recent years, a large body of work has focused on improving the scala-bility and throughput of hardware implementations of the PIFO model, proposing both exact and approximate designs. Among them, BBQ [ 3 ] is a representative exact implemen-tation: it uses a tree-based structure to index priorities and supports logical partitioning by segmenting the priority field. 
+
+2.2.2 Push-In-Extract-Out. The PIEO scheduling model can be viewed as a generalized extension of PIFO. Its key idea is to abstract scheduling as selecting, at any time, the highest-priority eligible element (i.e., the smallest-ranked el-igible element). By introducing an eligibility predicate, PIEO can capture both scheduling order and transmission time, thereby supporting a broader class of scheduling algorithms. The model exposes three primitive operations— 𝑒𝑛𝑞𝑢𝑒𝑢𝑒 (𝑓 ),
+
+𝑑𝑒𝑞𝑢𝑒𝑢𝑒 () , and 𝑑𝑒𝑞𝑢𝑒𝑢𝑒 (𝑓 )—which respectively support en-queuing, dequeuing from the head, and dequeuing an ele-ment from an arbitrary position. 
+
+## 2.3 Limitation 
+
+Although both PIFO and PIEO have been realized in hard-ware, they remain fundamentally limited in expressing dynamic-ordering scheduling algorithms. We illustrate this limita-tion using pFabric, a dynamic algorithm that achieves near-optimal FCT. pFabric always prioritizes packets from the flow with the smallest remaining flow size, while enforcing first-in-first-out(FIFO) order within each flow. Fig. 1 depicts a representative scenario: when 𝑓 𝑙𝑜𝑤 0.𝑝𝑘𝑡 3
+
+arrives, its associated remaining flow size becomes the small-est among all flows currently buffered in the queue. Conse-quently, the scheduler should advance the already-buffered packets of this flow and transmit them earlier. However, since PIFO does not support modifying the relative order of buffered packets, it cannot realize this scheduling behavior. Although PIEO can, in principle, update the scheduling order of buffered packets by dequeueing a specific element and re-enqueueing it, this approach incurs substantial overhead in practice. Consider the three buffered packets in Fig. 1. Since PIEO requires 4 clock cycles to complete a single op-eration, updating the position of one packet would take at least 8 cycles. As a result, enqueuing one new packet while reordering the other three buffered packets would require 28 clock cycles in total. This overhead grows further with the number of buffered packets, making it difficult to meet perfor-mance requirements in high-throughput settings. Moreover, to guarantee 𝑂 (1) time complexity for all operations, PIEO implements a queue of 𝑁 elements using 2 × √(𝑁 ) sublists 
+
+Figure 1: Mechanism of the pFabric Algorithm. 
+
+of size √(𝑁 ), resulting in a storage footprint of 2 × 𝑁 ele-ments and thus low space efficiency. DR-PIFO [ 8 ] attempts to extend PIFO’s expressiveness via dynamic reordering and forced-dequeue mechanisms; however, it requires support-ing deletion from an arbitrary position in the priority queue and searching the buffer for the head packet of a target flow. To date, no practical hardware implementation has been demonstrated. Similar challenges also arise in other dynamic-ordering algorithms. For example, in D3 [ 31 ], end hosts dy-namically adjust sending rates based on the remaining flow size and the remaining deadline. When link capacity be-comes insufficient, D3 employs flow quenching to reduce the scheduling priority of packets from selected already-buffered flows, which likewise requires the scheduler to dynamically reorder buffered packets. These limitations motivate a new abstraction that can efficiently update the service order of buffered packets. 
+
+## 3 UPDATE-IN-FIRST-OUT(UIFO) 
+
+In this section, we describe the design motivation, program-ming framework, and compatibility of UIFO. 
+
+## 3.1 Design Motivation 
+
+From the perspectives of transmission time and service order, both PIFO and PIEO share a common abstraction: a sched-uling algorithm operates directly on a sequence of packet-granularity elements, where each decision selects the single highest-priority element from a given candidate set. This semantics is sufficient for describing many classical sched-uling policies, but it exhibits a fundamental gap for a class of dynamic reordering algorithms. Such algorithms often make scheduling decisions at the granularity of flows or queues, rather than individual packets. Concretely, during runtime, the scheduler dynamically adjusts the service order across flows/queues based on flow-/queue-level state (e.g., es-timated remaining flow size, congestion feedback). Crucially, these adjustments should take effect immediately on packets that are already buffered, instead of only influencing future arrivals. Models that only rank packet-level elements can easily degenerate this semantics into “only affecting newly  
+
+> 3SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al.
+
+Figure 2: UIFO Programmable Model 
+
+enqueued packets,” thereby deviating from the intended al-gorithmic behavior. We further observe that PIEO’s dequeue process can be ab-stracted as selecting and dequeuing the highest-priority ele-ment from the subset of elements that satisfy the eligibility predicate. Similarly, in PIFO designs that support logical par-titioning [ 3 ], elements can be enqueued into a priority queue associated with a designated logical partition, while dequeue operations can be restricted to selecting the highest-priority element within a specific partition. Since logical partitions likewise correspond to restricted candidate sets, the mecha-nisms above can be unified under the same abstraction: select the highest-priority element to serve from a specified set of elements. This unified view exposes the common structure of existing abstractions: they implicitly include a subset-selection step (where a subset is formed via an eligibility predicate or logical partitioning), followed by packet-level scheduling that selects the highest-priority packet within the chosen subset. The key problem, however, is that nei-ther the subset-selection itself nor the relative service order across subsets is explicitly modeled or programmable. As a result, it is difficult to express dynamic ordering policies at the flow/queue granularity—especially those requiring re-ordering of already-buffered packets. In other words, while PIFO/PIEO can “assign packets to a subset,” they lack an abstraction for “how subsets should be scheduled.” Eligibil-ity predicates and logical partitioning address classification, but they do not elevate subset scheduling into a first-class programmable object. Motivated by this observation, we propose adding an explicit layer of scheduling logic over ele-ment subsets, on top of the existing abstraction of “selecting the highest-priority element within a set.” This enables the scheduler to not only select packets within a subset, but also decide which subset to serve first. 
+
+## 3.2 UIFO Programmable Model 
+
+This section presents the programmable scheduling model of UIFO. UIFO explicitly distinguishes inter-class scheduling and intra-class scheduling, decomposing scheduling logic into two layers. Accordingly, it introduces two types of schedulable objects—Class and Element—which correspond to inter-class and intra-class scheduling, respectively. The scheduler is built upon two priority queues that order these objects by their rank values. To ensure deterministic schedul-ing behavior, we require that the IDs of schedulable objects be unique within their respective priority queues. Each packet is represented as an Element, whose scheduling attributes are defined as follows: 
+
+• Element ID , which uniquely identifies a packet; 
+
+• Element Rank (𝑒.𝑟𝑎𝑛𝑘 ), the packet priority computed by the scheduling algorithm; 
+
+• Class ID , which indicates the Class to which the packet belongs; 
+
+• Class Rank (𝑐.𝑟𝑎𝑛𝑘 ), which specifies the class-level priority of the packet’s associated Class. Fig. 2 illustrates the programming framework of UIFO. UIFO consists of a two-level priority structure with two layers of semantics: 
+
+• Intra-class scheduling . Each Class 𝑐 is associated with an element_list , which stores all Elements belong-ing to that class. The element_list is ordered by 𝑒.𝑟𝑎𝑛𝑘 ,enabling packet-level scheduling within the class. 
+
+• Inter-class scheduling . All Classes are managed by one unified class_list , which is ordered by 𝑐.𝑟𝑎𝑛𝑘 to control the service order among classes. Each class in class_list is uniquely associated with exactly one 
+
+element_list .Since each packet carries its associated Class ID and the cor-responding 𝑐.𝑟𝑎𝑛𝑘 upon enqueue, the arrival of a new packet belonging to an existing class inevitably requires updating that class’s priority in class_list , thereby changing the sched-uling order across classes. Such class-level priority updates are key to enabling UIFO’s dynamic scheduling semantics. UIFO defines its scheduling behavior using two fundamental primitives.  
+
+> 4Programmable Packet Scheduling with Dynamic Reordering at Line Rate SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA
+
+Enqueue. The enqueue operation 𝑒𝑛𝑞𝑢𝑒𝑢𝑒 (𝑒 ) inserts an el-ement 𝑒 into the scheduling model. Each element 𝑒 carries its packet-level priority 𝑒.𝑟𝑎𝑛𝑘 , as well as its associated class 
+
+𝑐 and the corresponding 𝑐.𝑟𝑎𝑛𝑘 . The operation proceeds as follows: (1) Element-level insertion: the element 𝑒 is inserted into the element_list of its associated class 𝑐 and order it by 
+
+𝑒.𝑟𝑎𝑛𝑘 (Push-In); (2) Class-level update: if class 𝑐 already exists in class_list ,update its scheduling order according to the new 𝑐.𝑟𝑎𝑛𝑘 ;otherwise, class 𝑐 is inserted into class_list with prior-ity 𝑐.𝑟𝑎𝑛𝑘 (Update-In); (3) If the class priority does not change, the relative order-ing of classes remains unchanged (Hold). 
+
+Dequeue. The dequeue operation 𝑑𝑒𝑞𝑢𝑒𝑢𝑒 () follows the rules below: (1) Select the highest-priority (head) class 𝑐 from class_list 
+
+(First-Index); (2) From the corresponding element_list of class 𝑐 , de-queue the element 𝑒 with the highest packet-level pri-ority (First-Out); (3) If the element_list of class 𝑐 becomes empty after de-queuing, class 𝑐 is dequeuing from class_list ; otherwise, the ordering of classes remains unchanged (First-Out). Therefore, at any time, UIFO follows the scheduling principle of serving the element with the highest packet-level priority from the class with the highest class-level priority. Structurally, UIFO is a two-level scheduling data structure: the outer level schedules among classes, while the inner level performs packet-level scheduling within each class. Upon enqueue, an element insertion simultaneously triggers a class-priority update and a packet-level insertion, tightly coupling state updates with scheduling decisions. When the service order across classes changes, the effect is equivalent to reordering multiple element_list s, thereby dynamically reshaping the service order of buffered packets without ex-plicitly relocating individual packets. This property allows UIFO to preserve fine-grained packet-level control (e.g., dif-ferent packets within the same flow may still have differ-ent priorities), while enabling flow-/queue-level dynamic decisions to take effect immediately. As a result, UIFO nat-urally expresses dynamic-ordering algorithms that depend on flow-/queue-level state updates. A detailed analysis of UIFO’s expressiveness for additional algorithms is provided in Section 4. 
+
+## 3.3 Compatibility 
+
+This section discusses the relationship between UIFO and two representative programmable scheduling models, namely PIFO and PIEO. PIFO can be viewed as a single-level programmable schedul-ing model whose core data structure is a queue that maintains a total order over elements according to their priorities. The scheduler always dequeues the globally highest-priority el-ement. When logical partitioning is not considered, PIFO’s scheduling behavior is fully determined by the packet prior-ity, which can be mapped onto UIFO’s two-level scheduling structure via priority field segmentation . Specifically, the pri-ority field of each element in PIFO is split into a high-order field and a low-order field: 
+
+• The high-order field determines the class of an element and serves as the 𝑐.𝑟𝑎𝑛𝑘 of that class, which is used to order classes in class_list ;
+
+• The low-order field is used as the packet-level prior-ity, which orders elements within the corresponding 
+
+element_list .Under this mapping, UIFO’s class-level scheduling and packet-level scheduling together form an equivalent total ordering: the head class in class_list necessarily corresponds to the set of elements with the current globally highest priority, and the head element in that class’s element_list is exactly the highest-priority element in the entire system. Therefore, under this configuration, UIFO’s scheduling decisions are strictly identical to those of the original PIFO. When PIFO enables logical partitioning, its scheduling behav-ior can be described as follows: upon enqueue, an element is inserted into the priority queue of a designated partition; upon dequeue, the scheduler selects the highest-priority ele-ment within a specified partition. This mechanism can also be naturally mapped to UIFO. Specifically, each logical parti-tion is mapped to a class; all classes are ordered in class_list 
+
+according to FIFO. The per-partition priority queue corre-sponds to UIFO’s element_list , which is ordered by packet-level priority. To dequeue from a designated logical partition, it suffices to temporarily elevate the priority of the corre-sponding class to the highest value, thereby ensuring that the scheduler selects and dequeues the highest-priority ele-ment within that class. As a result, under this mapping, UIFO fully reproduces PIFO’s scheduling semantics in the logical partitioning function. In the PIEO model, the eligibility predicate is typically de-fined by send time : a packet is eligible for scheduling only if its send time is no later than the current time. UIFO can express PIEO equivalently by using send time as the criterion for class construction. Specifically, packets with the same send time—or whose send times fall within the same time interval—are mapped to the same class, whose priority is determined by the send time. Upon enqueue, each packet is assigned to the element_list of the corresponding class based on its send time. At any scheduling instant, the head class in class_list necessarily corresponds to the group of packets 
+
+> 5
+
+SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al. 
+
+Table 1: Comparison of Scheduling Model Abstractions                          
+
+> Model Scheduling Object Element Classification Outer Scheduling Object Inner Packet Selection Rule Supports Dynamic Reordering PIFO[21] Packet No explicit classification None By per-packet priority No Logical Partition PIFO[3] Packet Logical partition Logical partition By per-packet priority No PIEO[20] Packet Eligibility predicate Eligibility set By per-packet priority No UIFO Class + Packet Programmable class Explicit class Per-packet priority within class Yes
+
+with the earliest send time. When the send time of this class satisfies the eligibility condition, all packets in its element_list 
+
+become eligible for scheduling. Since the element_list is or-dered by packet-level priority, the packet selected from this class is exactly the highest-priority packet among all eligible packets. Therefore, under this configuration, UIFO’s sched-uling behavior is consistent with the scheduling semantics of PIEO. It is worth noting that, in PIEO, update operations are typi-cally performed at the granularity of individual packets. A packet’s send time or priority is updated by dequeue(f) and enqueue(f) opeartions, thereby modifying the scheduling or-der. In contrast, UIFO performs updates at the granularity of a class, which may consist of multiple packets. A single update to a class’s priority can simultaneously affect the ser-vice order of all buffered packets belonging to that class. This class-granular update mechanism preserves the scheduling semantics of PIEO, while significantly reducing the number of update operations, thereby lowering implementation com-plexity and improving scheduling efficiency. To facilitate understanding the relationship between PIFO, PIEO, their variants, and UIFO from a unified perspective, Table 1 summarizes a comparative abstraction of each model. As shown, despite differences in classification mechanisms between PIFO, PIEO, and logical partition PIFO, their core functionality revolves around performing packet-level order-ing within a set. In contrast, UIFO explicitly models the set as a schedulable class, thus introducing programmability for class-level scheduling order. In summary, as shown in Table 1, PIFO, PIEO, and PIFO with logical partitioning can be abstracted as performing packet-level priority selection within a given set of elements, with their primary differences lying in how the candidate set is constructed. UIFO explicitly models the element set as schedulable classes and modifies the service order across sets by updating class-priority, thereby introducing the capability of reordering buffered data packets while maintaining com-patibility with packet-level scheduling semantics—a func-tion not natively supported by PIFO and PIEO. Furthermore, when implementing flow-level scheduling equivalent to that of PIFO/PIEO, UIFO can model elements as the head pack-ets of each flow queue to reproduce their flow-scheduling behaviors. When expressing algorithms that rely on flow state updates, UIFO can also model elements as intra-flow packets and reflect changes in flow states through class-level priority updates, thereby achieving dynamic adjustment of the inter-flow scheduling order. Therefore, the scheduling se-mantics of PIFO and PIEO can both be implemented by UIFO under specific configurations, and UIFO provides enhanced runtime update capabilities. 
+
+## 4 THE EXPRESSIVENESS OF UIFO 
+
+In this section, we express a variety of dynamic-ordering and static-ordering algorithms using the UIFO model. Leveraging the two primitive operations introduced in Section 3.2, we show how UIFO can be used to implement these algorithms. 
+
+## 4.1 pFabric 
+
+pFabric [ 2 ] decouples flow scheduling from rate control and dynamically adjusts flow scheduling priorities to minimize average FCT. It is a work-conserving, runtime-state-driven dynamic-ordering algorithm whose scheduling decisions are naturally made at the granularity of flows, rather than individual packets. UIFO can express pFabric’s scheduling semantics in a direct and natural manner. 
+
+enqueue(e):{ c = Class(flow) c.rank = remaining_size(flow) class_list.enqueue(c) # update c.rank c.element_list.enqueue(e) }dequeue():{ c = class_list.head e = c.element_list.dequeue() if(c.element_list empty): class_list.dequeue() }
+
+Specifically, we define class at the granularity of flows: all packets belonging to the same flow are mapped to the same class, and element 𝑒 is modeled as an intra-flow data packet. The 𝑐.𝑟𝑎𝑛𝑘 is determined by the remaining size of the flow, i.e., 𝑐.𝑟𝑎𝑛𝑘 = remaining _size (flow ). For intra-class sched-uling, pFabric does not impose packet-level prioritization; therefore, the element_list within each class follows FIFO order. When a packet arrives, it carries an updated (smaller) re-maining flow size. The 𝑒𝑛𝑞𝑢𝑒𝑢𝑒 (𝑒 ) operation triggers an Update-In on the corresponding class in class_list , thereby  
+
+> 6Programmable Packet Scheduling with Dynamic Reordering at Line Rate SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA
+
+dynamically adjusting the scheduling order among flows. As a result, the class at the head of class_list always rep-resents the flow with the smallest remaining size. During dequeue, UIFO’s 𝑑𝑒𝑞𝑢𝑒𝑢𝑒 () operation first selects the class with the smallest class rank (i.e., the highest priority), and then dequeues a packet from the corresponding element_list .Consequently, at each scheduling decision, UIFO guarantees that the selected packet belongs to the flow with the small-est remaining size among all buffered flows, thereby strictly adhering to pFabric’s scheduling semantics. 
+
+## 4.2 Priority-based Flow Control 
+
+Priority-based Flow Control (PFC) [ 14 ] is a widely deployed lossless networking mechanism in datacenter networks. When a network device detects congestion, PFC can temporarily pause the transmission of selected priority queues, ensuring that higher-priority traffic is delivered in a timely manner. PFC pause frames explicitly carry both the priority queues to be paused and the duration of the pause. As a result, PFC’s scheduling behavior depends on runtime state updates and allows the output link to remain idle during pause intervals, classifying it as a non-work-conserving dynamic-ordering scheduling algorithm. UIFO can express PFC in a natural and direct manner. Specif-ically, each priority queue is mapped to a class, and packets belonging to the same queue are assigned to the same class, with element 𝑒 modeled as the head packet of each flow. Since packets within a queue do not require further prioriti-zation, the corresponding element_list follows FIFO order for intra-class scheduling. The 𝑐.𝑟𝑎𝑛𝑘 is used to characterize the transmission time of the queue, thereby precisely capturing PFC’s pause semantics. 
+
+enqueue(e):{ c = Class(queue) if (pause queue_id): c.rank = current.time+pause.time class_list.enqueue(c) # update c.rank else: c.rank = send.time class_list.enqueue(c) # hold c.rank e.rank = 1 c.element_list.enqueue(e) }dequeue():{ c = class_list.head if(c.rank <= current.time): e = c.element_list.dequeue() if(c.element_list empty): class_list.dequeue() }
+
+Upon receiving a PFC pause frame targeting a specific queue, the scheduler computes a new send time for that queue based on the current time and the pause duration, thereby deferring its transmission. The priority update is realized by perform-ing an enqueue(e) operation on the corresponding class in 
+
+class_list . Since PFC pause frames are control frames rather than data packets, updating the class priority does not re-quire inserting any element into the associated element_list .Under normal operation, the queue’s scheduled send time remains unchanged. When data packets arrive, they are mapped to the corresponding class based on their queue and inserted into the associated element_list . During dequeue, the scheduler simply checks whether the 𝑐. rank of the head class in class_list satisfies the send-time condition. If the class rank is no greater than the current time, one packet is de-queued from that class’s element_list ; otherwise, no packet is transmitted. Through this mechanism, UIFO precisely defers the transmission of all packets in the specified queue until the send-time condition is satisfied. 
+
+## 4.3 Worst-case Fair Weighted Fair Queuing 
+
+WF2Q+ (Worst-case Fair Weighted Fair Queuing) [ 5 ] is a clas-sic fairness-oriented scheduling algorithm. During schedul-ing, WF2Q+ maintains a global virtual time and, at any sched-uling instant, selects for transmission the packet with the smallest Virtual Finish Time (VFT) from the subset of packets whose Virtual Start Time (VST) satisfies VST ≤ current vir-tual time. Since there may exist instants at which no packet satisfies this condition, WF2Q+ is a non-work-conserving scheduler. For each packet, both VST and VFT are deter-mined at enqueue time and remain unchanged throughout its residence in the queue; thus, WF2Q+ can also be regarded as a static-ordering scheduling algorithm. WF2Q+ can be naturally mapped onto the UIFO program-ming model. We use VST as the criterion for class construc-tion, grouping packets with the same VST into the same class, where element 𝑒 is modeled as the head packet of each flow. The 𝑐.𝑟𝑎𝑛𝑘 is directly determined by the corresponding VST, while packets within a class are ordered by their VFT, thereby realizing the scheduling order required by WF2Q+. The computation of VST and VFT follows the same method used in the PIEO model [20]. 
+
+enqueue(e):{ e.VST = calculate_VST(e) c = Class(VST) c.rank = e.VST class_list.enqueue(c) # update c.rank e.rank = calculate_VFT(e) c.element_list.enqueue(e) }dequeue(): same with PFC 's dequeue function.  
+
+> 7SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al.
+
+Upon enqueue, the packet’s VST is used to determine its corresponding class and is set to the 𝑐.𝑟𝑎𝑛𝑘 of that class. The packet is then inserted into the element_list of that class, where it is ordered by its VFT. During dequeue, the sched-uler first selects the class with the smallest 𝑐.𝑟𝑎𝑛𝑘 . When the VST of this class is less than or equal to the current virtual time, the packet with the smallest VFT is dequeued from the 
+
+element_list . Through this mechanism, UIFO ensures that packets are always selected from the set with the smallest VST, and within that set, the packet with the earliest VFT is chosen for transmission. This guarantees that the scheduling behavior strictly follows the WF2Q+ semantics. It is important to note that, unlike dynamic ordering algo-rithms such as pFabric or PFC, which depend on runtime state updates, WF2Q+ does not require reordering of buffered packets. The scheduling order is fully determined upon en-queue. Therefore, WF2Q+ does not rely on the update capa-bility of 𝑐.𝑟𝑎𝑛𝑘 in UIFO, and it serves as a natural instance of UIFO’s compatibility with PIFO/PIEO-model static-ordering algorithms. This further demonstrates that, while UIFO sup-ports dynamic reordering semantics, it can seamlessly ac-commodate classical static ordering algorithms. 
+
+## 4.4 Deficit Round Robin 
+
+Deficit Round-Robin (DRR)[ 19 ] achieves fair service across multiple flows by performing round-robin scheduling among them, ensuring that each flow receives its fair share of service. DRR is a work-conserving scheduling algorithm, and can be viewed as a static-ordering algorithm. In UIFO, we map each flow to a class and element 𝑒 is modeled as an intra-flow data packet. Packets within a class are scheduled in FIFO order, while classes are scheduled in a round-robin fashion: 
+
+enqueue(e):{ c = Class(flow) if(c not in class_list): c.rank = size(class_list) + 1 else: c.rank = c.rank class_list.enqueue(c) # update c.rank e.rank = 1 c.element_list.enqueue(e) }dequeue():{ c = class_list.head c.deficit_counter += quantum[c] while(c.element_list not empty & (c.deficit_counter >= size(c.element_list.head))): e = c.element_list.dequeue() c.deficit_counter -= size(e) if(c.element_list empty): c.deficit_counter = 0 class_list.dequeue() else: c.rank += size(class_list) class_list.enqueue(c) # update c.rank }
+
+Upon enqueue, if the flow to which the arriving packet 𝑒 
+
+belongs is empty—i.e., the corresponding class does not yet exist in class_list —the scheduler inserts this class at the tail of class_list . Otherwise, the relative ordering among classes is preserved, and the packet is simply inserted into the ele-ment_list of its associated class. During dequeue, the sched-uler selects the class at the head of class_list . If its element_list 
+
+is non-empty and the current deficit is sufficient to transmit the head packet, the packet is dequeued and the deficit is updated accordingly. If the element_list becomes empty, the corresponding class is removed from class_list . If the deficit is insufficient, the priority of the class is updated to the lowest value, causing it to move to the tail of class_list to wait for the next scheduling round. Under this mapping, UIFO accurately reproduces the sched-uling semantics of DRR: flows are served in a round-robin manner, and whether a flow is scheduled depends on its deficit state. Since DRR does not rely on runtime state up-dates to reorder already-buffered packets, it does not require dynamic updates of 𝑐.𝑟𝑎𝑛𝑘 in UIFO. Instead, DRR is naturally supported as a static-ordering algorithm that operates at the flow granularity. 
+
+## 4.5 Other examples 
+
+For strict-priority algorithms that require only a single-level scheduling model, UIFO can express them by segmenting packet priorities into classes or by using the full priority field as the class classification criterion. Examples include EDF [ 26 ], LSTF [ 27 ], SJF [ 28 ], and SRTF [ 29 ]. Moreover, to address starvation issues inherent in strict-priority schedul-ing, UIFO can periodically update the ranks of low-priority classes to grant them service opportunities, thereby miti-gating starvation without altering the overall scheduling framework. UIFO supports scheduling over both class and element ob-jects, and therefore is structurally well suited to express hierarchical scheduling algorithms. Since the element_list 
+
+at the second level is functionally equivalent to a PIFO, it can be generalized into a scheduling tree. In this design, the first-level scheduler selects among different scheduling trees, while finer-grained packet-level or sub-class-level scheduling is performed within each tree. By adjusting the scheduling order of classes, the scheduler can control the service order among different scheduling trees, thereby enabling multi-level hierarchical scheduling policies.  
+
+> 8Programmable Packet Scheduling with Dynamic Reordering at Line Rate SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA
+
+The above examples demonstrate that UIFO can uniformly express scheduling algorithms operating at the granular-ity of packets, flows, or queues, encompassing both work-conserving and non-work-conserving algorithms, as well as static ordering and dynamic reordering semantics. By enabling scheduling over sets of schedulable objects and supporting priority updates over these sets, UIFO signifi-cantly extends the expressiveness of programmable data-plane scheduling abstractions while remaining compatible with existing models such as PIFO and PIEO. 
+
+## 5 HARDWARE IMPLEMENTATION 
+
+In this section, we describe the hardware implementation architecture of UIFO. To deploy UIFO in a practical pro-grammable data plane, it is necessary to clarify how UIFO is integrated at the hardware system level. Fig. 3 illustrates the system-level integration of UIFO within the scheduling stage of a programmable data plane. It is important to em-phasize that we intentionally unifies the classification results produced by the packet classifier with the notion of Class in UIFO under a single abstraction. The classifier maps pack-ets to logical categories—such as flows, queues, or priority groups—based on packet header fields and relevant state. Once classification is completed, subsequent scheduling de-cisions naturally operate at the granularity defined by this classification. From a semantic perspective, the classification outcome itself therefore defines the schedulable object. In UIFO, the scheduler directly treats the classification result as a class and performs scheduling and update operations ac-cordingly. This paper does not incorporate the classification logic itself into the scheduling model; instead, it unifies the representation of classification outcomes and schedulable ob-jects. This design choice improves the consistency between scheduling semantics and system implementation. UIFO as-sumes that classification results are provided externally and performs scheduling solely based on these results. Packets first pass through the parser [ 11 ] and classifier, where the Element ID and relevant metadata are extracted. Sub-sequently, the element rank calculator and the class rank calculator compute 𝑒.𝑟𝑎𝑛𝑘 and 𝑐.𝑟𝑎𝑛𝑘 , respectively. Packets carrying these attributes then enter the UIFO scheduling module. Upon dequeue, the scheduler retrieves the corre-sponding packet from the packet buffer using the Element ID and transmits it. The implementation of UIFO must simultaneously satisfy three key objectives: (1) supporting dynamic updates to class-level priorities; (2) enabling precise indexing and scheduling from class to element_list ; and (3) sustaining line-rate pro-cessing in a programmable data plane. To this end, we adopt a two-level, heterogeneous priority-queue architecture in 
+
+Figure 3: System Level Application For UIFO 
+
+hardware, with separate priority queues dedicated to inter-class scheduling and intra-class scheduling, respectively. Since the first-level scheduling in UIFO operates on class objects and must support dynamic updates to 𝑐.𝑟𝑎𝑛𝑘 , the corresponding priority queue is required to support update operations. In hardware, an update operation can be decom-posed into two steps: deleting and reinserting the element. Existing priority queues that support deletion are typically implemented using one-dimensional structures [ 17 , 23 , 24 ], such as shift registers, systolic arrays, or hybrid designs [ 16 ]. In our implementation, we directly adopt the priority queue proposed in prior work [ 24 ] by others as the base module. Throughout this paper, we refer to this structure as UG-PQ (Update and Group-Sorted Priority Queue). UG-PQ is built on a one-dimensional hybrid architecture, enabling simulta-neous element’s priority updates during enqueue operations. We do not modify the internal structure of UG-PQ in this work; its design details are not part of our contributions. In UIFO, UG-PQ is used to maintain class_list , enabling ordering and updates across classes. The second-level scheduler is responsible for packet-level ordering. Since each class corresponds to an independent 
+
+element_list , the overall structure constitutes a Multi-Priority-Queue Group (MPQG) composed of multiple priority queues. The MPQG must support: (1) precise indexing of the corre-sponding priority queue based on Class ID ; (2) insertion and dequeuing within that queue according to 𝑒.𝑟𝑎𝑛𝑘 ; and (3) adoption of a multi-list shared-memory structure to improve resource utilization. The bitmap-tree-based priority queue with logical partitioning [ 3 ] satisfies these requirements. It indexes Element IDs into the corresponding priority buckets (PB) based on Class ID and e.rank , and uses linked lists to store elements belonging to the same PB. Therefore, we inte-grate the UG-PQ with a bitmap-tree-based MPQG to realize UIFO. The overall hardware architecture is shown in Fig. 4. Upon enqueue, the Class ID and 𝑐.𝑟𝑎𝑛𝑘 are inserted into the UG-PQ, which performs class ordering and priority updates. For classes with identical 𝑐.𝑟𝑎𝑛𝑘 values, their relative order in the UG-PQ follows a FIFO discipline. If the value of 𝑐.𝑟𝑎𝑛𝑘 
+
+remains unchanged before and after the update, the relative position of the class in the UG-PQ is preserved. In parallel, the Element ID is indexed by its Class ID and 𝑒.𝑟𝑎𝑛𝑘 and  
+
+> 9SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al.
+
+Table 2: Different Model Configurations                         
+
+> Model Class Count Class Priority Count Predicate Count Logical Partition Count Element Priority Count Queue Capacity UIFO 256 256 ——256 128–65536 PIEO [20] ——256 —256 128–65536 PIFO-BBQ [3] ———256 256 128–65536
+
+Figure 4: UIFO Hardware Implementation 
+
+inserted into the corresponding PB in the MPQG. During dequeue, the scheduler first obtains the head class from the UG-PQ, then uses the bitmap-tree in conjunction with the Hi-erarchical Find-First Set principle to locate the head element of the priority queue corresponding to that class. When the 
+
+element_list of the head class becomes empty, the first-level bitmap-tree triggers a pop operation on the UG-PQ, thereby removing the class. A single operation on the UG-PQ requires three clock cy-cles. We accordingly modify the bitmap-tree-based MPQG so that each MPQG operation also completes in three cycles, eliminating data hazards due to pipeline techniques. For the leaf-level PB in the bitmap-tree-based MPQG, we employ a shared singly linked-list implementation, which helps re-duce SRAM overhead. In terms of capacity configuration, if UIFO supports 𝑀 classes and 𝑅 element priority levels with a total queue capacity of 𝑁 , the MPQG conceptually contains 
+
+𝑀 × 𝑅 FIFO queues. Owing to the shared-storage design, the effective maximum capacity of each FIFO queue remains 𝑁 ,thereby improving storage utilization while preserving full functionality. 
+
+## 6 EVALUATION 
+
+We implement the above hardware architecture in Verilog and evaluate it on both a Xilinx XCVU13P FPGA platform and a 28nm ASIC process. We implement three designs—UIFO, PIEO, and PIFO-BBQ with logical partitioning [ 3]—and con-duct a comparative analysis of their resource overhead and performance. It is worth noting that different designs may use different types of on-chip memory in FPGA synthesis results, such as URAM, BRAM, or LUTRAM. To avoid bias caused by differences in memory types, we directly extract the actual SRAM usage from the RTL code to account for storage overhead across all designs. UG-PQ [ 24 ] can trade off between area and critical path length by configuring differ-ent numbers of shift registers within the systolic unit, while keeping the queue capacity unchanged. In our implementa-tion, each systolic unit contains only 2 shift registers to min-imize the critical path, which corresponds to the maximum area configuration. For the MPQG, we follow the conclusions in [ 3 ] and select the parameter configuration that yields the best performance, setting the bitmap width to 4. The param-eter configurations for the three models are summarized in Table 2. Under these configurations, UIFO can support either a PIEO with equivalent functionality or a PIFO with the same number of logical partitions. 
+
+## 6.1 Scalability 
+
+In this section, we evaluate and compare the logic and storage resource overheads of the three scheduling model implemen-tations. The comparison results are shown in Fig.5. In terms of LUT and FF usage, as the queue capacity increases, both PIFO-BBQ and UIFO remain largely unchanged. This is be-cause packet elements are primarily stored in the MPQG implemented using a bitmap-tree structure; consequently, SRAM usage grows with queue capacity, while LUT and FF overheads remain relatively constant. However, UIFO incurs higher LUT and FF overhead than PIFO-BBQ: its LUT usage is approximately 6×–9× that of PIFO-BBQ, and its FF usage is about 2×–4×. This increase stems from UIFO’s additional pri-ority queue that supports update operations. Since changes in queue capacity do not affect the number of classes or class priorities, the overhead of this structure remains constant. As queue capacity increases, UIFO and PIFO-BBQ exhibit similar SRAM scaling trends, with UIFO consistently using slightly less SRAM. This reduction is due to our use of a singly linked-list implementation for the MPQG. In practice, although PIFO-BBQ supports logical partitioning, it does not provide explicit control logic for selecting which logical par-tition to schedule. UIFO, by introducing explicit class-level scheduling and supporting dynamic class-priority updates, adds extra control logic overhead, which can be viewed as the cost of richer scheduling semantics. Compared with PIEO, UIFO consistently incurs lower LUT 
+
+> 10
+
+Programmable Packet Scheduling with Dynamic Reordering at Line Rate SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA 27 28 29 210 211 212 213 214 215 216 
+
+> Capacity(Number of Elements)
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> 4.0
+> LUT Consumption
+> 1e5
+> PIEO
+> PIFO-BBQ
+> UIFO
+
+(a) LUT consumption 27 28 29 210 211 212 213 214 215 216  
+
+> Capacity(Number of Elements)
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> 4.0
+> FF Consumption
+> 1e4
+> PIEO
+> PIFO-BBQ
+> UIFO
+
+(b) FF consumption 27 28 29 210 211 212 213 214 215 216  
+
+> Capacity(Number of Elements)
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+> 8
+> SRAM Consumption(bit)
+> 1e6
+> PIEO
+> PIFO-BBQ
+> UIFO
+
+(c) SRAM consumption 
+
+Figure 5: Comparison of Resource Overhead Among Three Models 
+
+overhead, and as queue capacity increases, PIEO’s FF usage eventually exceeds that of UIFO. This is because PIEO re-lies on comparator-based structures for element scheduling, whose logic overhead necessarily grows with queue capacity. By contrast, UIFO’s SRAM overhead mainly arises from the MPQG implementation, where bitmap and counter struc-tures are maintained at each level; therefore, for small queue capacities, PIEO may use less SRAM. However, to guarantee constant-time operations, PIEO allocates twice the actual required SRAM capacity, causing its SRAM usage to grow faster than that of UIFO as queue capacity increases. Finally, we note that when UIFO is configured in compatibil-ity modes equivalent to PIEO or PIFO, its LUT and FF usage remains largely constant as queue capacity scales, and its SRAM growth trend matches that of PIFO-BBQ. This obser-vation indicates that the generalized abstraction provided by UIFO does not introduce unnecessary control complexity. 
+
+## 6.2 Scheduling rate 
+
+This section primarily evaluates the scheduling performance of UIFO in comparison with other schedulers. Fig. 6 shows the maximum operating frequency of the three models as the queue capacity increases. As queue capacity grows, cir-cuit complexity increases and FPGA routing becomes more challenging, which inevitably leads to a reduction in clock frequency. We observe that PIFO-BBQ, implemented using a tree-based and pipelined structure, has its critical path in the Find-First-Set logic. As long as the bitmap width at each level remains unchanged, its timing performance is largely insensitive to queue capacity. In contrast, PIEO employs a compare-and-shift architecture, whose critical path delay increases rapidly with queue capacity. For UIFO, when the queue capacity is small, its operating frequency is compara-ble to that of PIFO-BBQ, reaching approximately 300 MHz. As queue capacity increases, UIFO’s operating frequency decreases slightly due to higher routing complexity. Over-all, however, UIFO maintains timing performance close to that of BBQ while significantly outperforming PIEO, despite providing substantially richer scheduling capabilities. The 27 28 29 210 211 212 213 214 215 216 
+
+> Capacity(Number of Elements)
+> 100
+> 150
+> 200
+> 250
+> 300
+> 350
+> Fmax/MHz
+> PIEO
+> PIFO-BBQ
+> UIFO
+
+Figure 6: Maximum Operating Clock Frequency of Three Models 
+
+priority queue in UIFO that supports update operations is still implemented using a compare-and-shift architecture[ 16 ]and requires three cycles to complete a single operation. As a result, UIFO’s throughput is approximately one-third that of PIFO-BBQ. As shown in Fig. 6, the minimum through-put achieved by UIFO is 74 Mpps. Under the configuration listed in Table 2, UIFO is able to sustain line-rate operation at 100 Gbps for packets larger than 169 bytes. 
+
+## 6.3 ASIC Implementation 
+
+In this section, we evaluate the area overhead and perfor-mance of UIFO under different configurations using a 28nm ASIC process. We synthesize two representative parameter configurations and queue capacities, with the results sum-marized in Table 3. The synthesis results show that SRAM accounts for the dominant portion of the overall area over-head. This is primarily because implementing the MPQG requires a large amount of on-chip storage to maintain el-ement counters and corresponding bitmaps at each node of the indexing tree. As the number of supported element priority and the number of classes increase, the number of levels in the bitmap-tree grows, and the size of SRAM in-creases accordingly, thus becoming the dominant factor in 
+
+11 SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al. 
+
+Table 3: ASIC Synthesis Results                                  
+
+> Class Class Element Element Critical Area (mm 2)Num Rank Num Rank Path (ns) Logic SRAM Total 64 64 4096 64 1.21 0.0140 0.0798 0.0938 256 256 65536 256 2.07 0.0553 1.5015 1.5568 4096 4096 65536 16 2.12 1.2639 1.4762 2.7401
+
+area overhead. Under the configuration with a queue capac-ity of 65536, UIFO exhibits a critical path delay of 2.12 ns, enabling a throughput of 148.8 Mpps. This result indicates that even under large-capacity configurations, UIFO is able to sustain 100Gbps line-rate operation requirements. 
+
+## 7 REALATED WORK 
+
+Existing hardware-realizable programmable packet sched-uling models mainly fall into two categories: PIFO [ 21 ] and PIEO [ 20 ]. Since the introduction of the PIFO programmable packet scheduling model in 2016, a large body of follow-up work has focused on improving queue scalability and throughput, proposing various exact implementations such as SIMD PQ [ 4 ], BMW-Tree [ 33 ], and BBQ [ 3 ]. In addition, another line of work trades priority ordering accuracy for higher performance and scalability, including SP-PIFO [ 1], PCQ [ 18 ], Gearbox [ 10 ], AIFO [ 34 ], and Sifter [ 9 ]. However, all these efforts primarily target efficient implementations of the PIFO abstraction. From the perspective of supported scheduling algorithms, their semantics remain confined to packet-level ordering, making it difficult to express dynamic reordering algorithms that depend on runtime state updates. To overcome the semantic limitations of PIFO, PIEO [ 20 ]was proposed in 2019. PIEO observes that PIFO cannot nat-urally express algorithms that simultaneously specify both transmission timing and service order, and introduces an 
+
+eligibility predicate to construct a subset of schedulable ele-ments, from which the highest-priority packet is selected for scheduling. This design broadens the range of expressible scheduling policies. Subsequent approximate designs, such as PIPO [ 35 ] and CIPO [ 13 ] still fail to precisely implement dynamic reordering algorithms. Prior work has largely concentrated on improving the scala-bility of PIFO and PIEO, whereas UIFO addresses their fun-damental semantic limitations. By rethinking programmable scheduling from an abstraction perspective, UIFO strictly preserves compatibility with and generalizes existing PIFO and PIEO models, while enabling expressive and efficient support for dynamic ordering algorithms. 
+
+## 8 DISCUSSION 
+
+From a data-structure perspective, UIFO more closely re-sembles a dictionary abstraction [ 25 ]. In particular, UIFO requires the uniqueness of classes within the scheduler, a property that aligns well with dictionary data structures: a dictionary maintains a one-to-one mapping between keys and values while enforcing key uniqueness, and inserting an already existing key results in updating its associated value rather than creating a new entry. Viewed at an abstract level, a priority queue that supports update operations can thus be regarded as an ordered dictionary. UIFO leverages this property to enable dynamic updates to the priorities of schedulable objects at the class level. From an implementation standpoint, UIFO combines a first-level update-enabled priority queue with a second-level PIFO-BBQ structure based on logical partitioning, allowing the two-level scheduling semantics defined by UIFO to be real-ized precisely in hardware. This observation suggests that UIFO’s hardware realization can be built by reusing and com-posing existing data-structure designs. Finally, UIFO’s class-oriented scheduling mechanism need be tightly integrated with programmable parsers and classifiers based on the RMT architecture [ 6 ], so that classes can be dynamically constructed and prioritized according to packet attributes. We believe that this design not only enhances the expressiveness of the scheduling model itself, but also further expands the flexibility of programmable data planes in queue management and scheduling, providing a unified abstraction foundation for more sophisticated scheduling policies and network functions in the future. 
+
+## 9 CONCLUSION 
+
+This paper proposes UIFO (Update-In-First-Out), a new pro-grammable packet scheduling model that introduces a two-level scheduling structure over classes and packets. By ele-vating scheduling decisions from packet-level ordering to set-level scheduling and enabling dynamic updates to class priorities, UIFO significantly extends the expressive power of programmable schedulers. In terms of scheduling seman-tics, UIFO is strictly compatible with and generalizes existing PIFO and PIEO models, while naturally supporting dynamic-ordering algorithms that depend on runtime state changes. We believe that UIFO provides a set-oriented scheduling abstraction, which not only facilitates the extension of flexi-bility in scheduling for programmable data planes, but also lays the foundation for realizing more complex and dynamic network scheduling policies under hardware constraints. 
+
+## ACKNOWLEDGMENTS 
+
+ChatGPT was used solely for language translation. The au-thors take full responsibility for the content of this manu-script. 
+
+> 12
+
+Programmable Packet Scheduling with Dynamic Reordering at Line Rate SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA 
+
+## REFERENCES 
+
+[1] Albert Gran Alcoz, Alexander Dietmüller, and Laurent Vanbever. 2020. SP-PIFO: approximating push-in first-out behaviors using strict-priority queues. In Proceedings of the 17th Usenix Conference on Net-worked Systems Design and Implementation (NSDI’20) . USENIX Associ-ation, USA, 59–76. [2] Mohammad Alizadeh, Shuang Yang, Milad Sharif, Sachin Katti, Nick McKeown, Balaji Prabhakar, and Scott Shenker. 2013. pFabric: min-imal near-optimal datacenter transport. In Proceedings of the ACM SIGCOMM 2013 Conference on SIGCOMM (SIGCOMM ’13) . Associa-tion for Computing Machinery, New York, NY, USA, 435–446. https: //doi.org/10.1145/2486001.2486031 [3] Nirav Atre, Hugo Sadok, and Justine Sherry. 2024. BBQ: a fast and scalable integer priority queue for hardware packet scheduling. In 
+
+Proceedings of the 21st USENIX Symposium on Networked Systems Design and Implementation (NSDI’24) . USENIX Association, USA, Article 26, 21 pages. [4] Imad Benacer, François-Raymond Boyer, and Yvon Savaria. 2018. A Fast, Single-Instruction–Multiple-Data, Scalable Priority Queue. IEEE Transactions on Very Large Scale Integration (VLSI) Systems 26, 10 (2018), 1939–1952. https://doi.org/10.1109/TVLSI.2018.2838044 [5] Jon C. R. Bennett and Hui Zhang. 1996. Hierarchical packet fair queue-ing algorithms. In Conference Proceedings on Applications, Technolo-gies, Architectures, and Protocols for Computer Communications (SIG-COMM ’96) . Association for Computing Machinery, New York, NY, USA, 143–156. https://doi.org/10.1145/248156.248170 [6] Pat Bosshart, Glen Gibb, Hun-Seok Kim, George Varghese, Nick McK-eown, Martin Izzard, Fernando Mujica, and Mark Horowitz. 2013. For-warding Metamorphosis: Fast Programmable Match-Action Processing in Hardware for SDN. In Proceedings of the ACM SIGCOMM 2013 Con-ference on Applications, Technologies, Architectures, and Protocols for Computer Communication (SIGCOMM ’13) . Association for Comput-ing Machinery, New York, NY, USA, 99–110. https://doi.org/10.1145/ 2486001.2486011 [7] A. Demers, S. Keshav, and S. Shenker. 1989. Analysis and simula-tion of a fair queueing algorithm. In Symposium Proceedings on Com-munications Architectures &amp; Protocols (SIGCOMM ’89) . Associ-ation for Computing Machinery, New York, NY, USA, 1–12. https: //doi.org/10.1145/75246.75248 [8] Mostafa Elbediwy, Bill Pontikakis, Alireza Ghaffari, Jean-Pierre David, and Yvon Savaria. 2024. DR-PIFO: A Dynamic Ranking Packet Sched-uler Using a Push-In-First-Out Queue. IEEE Transactions on Network and Service Management 21, 1 (2024), 355–371. https://doi.org/10.1109/ TNSM.2023.3304894 [9] Peixuan Gao, Anthony Dalleggio, Jiajin Liu, Chen Peng, Yang Xu, and H. Jonathan Chao. 2024. Sifter: an inversion-free and large-capacity programmable packet scheduler. In Proceedings of the 21st USENIX Symposium on Networked Systems Design and Implementation (NSDI’24) .USENIX Association, USA, Article 5, 20 pages. [10] Peixuan Gao, Anthony Dalleggio, Yang Xu, and H. Jonathan Chao. 2022. Gearbox: A Hierarchical Packet Scheduler for Approximate Weighted Fair Queuing. In 19th USENIX Symposium on Networked Systems Design and Implementation (NSDI 22) . USENIX Association, Renton, WA, 551–565. https://www.usenix.org/conference/nsdi22/ presentation/gao-peixuan [11] Glen Gibb, George Varghese, Mark Horowitz, and Nick McKeown. 2013. Design principles for packet parsers. In Proceedings of the Ninth ACM/IEEE Symposium on Architectures for Networking and Communi-cations Systems (ANCS ’13) . IEEE Press, 13–24. [12] Pawan Goyal, Harrick M. Vin, and Haichen Chen. 1996. Start-time fair queueing: a scheduling algorithm for integrated services packet switching networks. In Conference Proceedings on Applications, Tech-nologies, Architectures, and Protocols for Computer Communications (SIGCOMM ’96) . Association for Computing Machinery, New York, NY, USA, 157–168. https://doi.org/10.1145/248156.248171 [13] Feng Guo, Shidong Sun, Junjie Hu, Ning Zhang, and Zhiqiang Lv. 2024. CIPO: Efficient, lightweight and programmable packet schedul-ing. Computer Networks 245 (2024), 110355. https://doi.org/10.1016/j. comnet.2024.110355 [14] IEEE. 2011. 802.1Qbb Priority-based Flow Control (PFC). Online. (2011). Available: https://1.ieee802.org/dcb/802-1qbb/. [15] Radhika Mittal, Rachit Agarwal, Sylvia Ratnasamy, and Scott Shenker. 2016. Universal packet scheduling. In Proceedings of the 13th Usenix Conference on Networked Systems Design and Implementation (NSDI’16) .USENIX Association, USA, 501–521. [16] Sung-Whan Moon, Kang G. Shin, and Jennifer Rexford. 2000. Scal-able Hardware Priority Queue Architectures for High-Speed Packet Switches. IEEE Trans. Comput. 49, 11 (Nov. 2000), 1215–1227. https: //doi.org/10.1109/12.895938 [17] Antti Nurmi, Per Lindgren, Tom Szymkowiak, and {Timo D.} Hämäläi-nen. 2023. AnTiQ: A Hardware-Accelerated Priority Queue Design with Constant Time Arbitrary Element Removal. In Proceedings -2023 26th Euromicro Conference on Digital System Design, DSD 2023 (Proceedings : Euromicro Conference on Digital System Design) , Smail Niar, Hamza Ouarnoughi, and Amund Skavhaug (Eds.). IEEE, United States, 462–469. https://doi.org/10.1109/DSD60849.2023.00070 Pub-lisher Copyright: © 2023 IEEE.; Euromicro Conference on Digital Sys-tem Design ; Conference date: 06-09-2023 Through 08-09-2023. [18] Naveen Kr. Sharma, Chenxingyu Zhao, Ming Liu, Pravein G Kannan, Changhoon Kim, Arvind Krishnamurthy, and Anirudh Sivaraman. 2020. Programmable calendar queues for high-speed packet sched-uling. In Proceedings of the 17th Usenix Conference on Networked Sys-tems Design and Implementation (NSDI’20) . USENIX Association, USA, 685–700. [19] M. Shreedhar and George Varghese. 1995. Efficient fair queueing using deficit round robin. In Proceedings of the Conference on Applications, Technologies, Architectures, and Protocols for Computer Communication (SIGCOMM ’95) . Association for Computing Machinery, New York, NY, USA, 231–242. https://doi.org/10.1145/217382.217453 [20] Vishal Shrivastav. 2019. Fast, scalable, and programmable packet scheduler in hardware. In Proceedings of the ACM Special Interest Group on Data Communication (SIGCOMM ’19) . Association for Computing Machinery, New York, NY, USA, 367–379. https://doi.org/10.1145/ 3341302.3342090 [21] Anirudh Sivaraman, Suvinay Subramanian, Mohammad Alizadeh, Sharad Chole, Shang-Tse Chuang, Anurag Agrawal, Hari Balakrishnan, Tom Edsall, Sachin Katti, and Nick McKeown. 2016. Programmable Packet Scheduling at Line Rate. In Proceedings of the 2016 ACM SIG-COMM Conference (SIGCOMM ’16) . Association for Computing Ma-chinery, New York, NY, USA, 44–57. https://doi.org/10.1145/2934872. 2934899 [22] Anirudh Sivaraman, Keith Winstein, Suvinay Subramanian, and Hari Balakrishnan. 2013. No silver bullet: extending SDN to the data plane. In Proceedings of the Twelfth ACM Workshop on Hot Topics in Networks (HotNets-XII) . Association for Computing Machinery, New York, NY, USA, Article 19, 7 pages. https://doi.org/10.1145/2535771.2535796 [23] Yi Tang and Neil W. Bergmann. 2015. A Hardware Scheduler Based on Task Queues for FPGA-Based Embedded Real-Time Systems. IEEE Trans. Comput. 64, 5 (2015), 1254–1267. https://doi.org/10.1109/TC. 2014.2315637 [24] Zekun Wang, Binghao Yue, Weitao Pan, Jianyi Shi, and Yue Hao. 2026. A Grouped Sorting Queue Supporting Dynamic Updates for Timer Management in High-Speed Network Interface Cards. (2026). 13 SIGCOMM’26, August 17–21, 2026, Denver, Colorado, USA Zekun Wang.et al. 
+
+arXiv:cs.DS/2601.09081 https://arxiv.org/abs/2601.09081 [25] Wikipedia. 2026. Abstract Dictionary Data Type. Online. (2026). Available: https://en.wikipedia.org/wiki/Associative_array. [26] Wikipedia. 2026. Earliest Deadline First. Online. (2026). Available: https://en.wikipedia.org/wiki/Earliest_deadline_first_scheduling. [27] Wikipedia. 2026. Least slack time scheduling. Online. (2026). Available: https://en.wikipedia.org/wiki/Least_slack_time_scheduling. [28] Wikipedia. 2026. Shortest Job First. Online. (2026). Available: https: //en.wikipedia.org/wiki/Shortest_job_first. [29] Wikipedia. 2026. Shortest Remaining Time First. Online. (2026). Avail-able: https://en.wikipedia.org/wiki/Shortest_remaining_time. [30] Wikipedia. 2026. Token Bucket. Online. (2026). Available: https: //en.wikipedia.org/wiki/Token_bucket. [31] Christo Wilson, Hitesh Ballani, Thomas Karagiannis, and Ant Rowtron. 2011. Better never than late: meeting deadlines in datacenter networks. In Proceedings of the ACM SIGCOMM 2011 Conference (SIGCOMM ’11) .Association for Computing Machinery, New York, NY, USA, 50–61. https://doi.org/10.1145/2018436.2018443 [32] K. Yamakoshi, E. Oki, and N. Yamanaka. 2002. Dynamic deficit round-robin scheduler for 5-Tb/s switch using wavelength routing. In Work-shop on High Performance Switching and Routing, Merging Optical and IP Technologie . 204–208. https://doi.org/10.1109/HPSR.2002.1024236 [33] Ruyi Yao, Zhiyu Zhang, Gaojian Fang, Peixuan Gao, Sen Liu, Yibo Fan, Yang Xu, and H. Jonathan Chao. 2023. BMW Tree: Large-scale, High-throughput and Modular PIFO Implementation using Balanced Multi-Way Sorting Tree. In Proceedings of the ACM SIGCOMM 2023 Conference (ACM SIGCOMM ’23) . Association for Computing Machinery, New York, NY, USA, 208–219. https://doi.org/10.1145/3603269.3604862 [34] Zhuolong Yu, Chuheng Hu, Jingfeng Wu, Xiao Sun, Vladimir Braver-man, Mosharaf Chowdhury, Zhenhua Liu, and Xin Jin. 2021. Pro-grammable packet scheduling with a single queue. In Proceedings of the 2021 ACM SIGCOMM 2021 Conference (SIGCOMM ’21) . As-sociation for Computing Machinery, New York, NY, USA, 179–193. https://doi.org/10.1145/3452296.3472887 [35] Chuwen Zhang, Zhikang Chen, Haoyu Song, Ruyi Yao, Yang Xu, Yi Wang, Ji Miao, and Bin Liu. 2021. PIPO: Efficient Programmable Scheduling for Time Sensitive Networking. https://doi.org/10.1109/ ICNP52444.2021.9651944 [36] Hui Zhao, Wenjia Niu, Yifang Qin, Song Ci, Hui Tang, and Tao Lin. 2012. Traffic Load-Based Dynamic Bandwidth Allocation for Balancing the Packet Loss in DiffServ Network. (2012), 99–104. https://doi.org/ 10.1109/ICIS.2012.113 14
