@@ -1,0 +1,1517 @@
+Title: Bipartite matching under communication constraints
+
+URL Source: https://arxiv.org/pdf/2604.10744v1
+
+Published Time: Tue, 14 Apr 2026 01:24:32 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+> 1
+
+# Bipartite matching under communication constraints 
+
+Moonmoon Mohanty ∗, Student Member, IEEE , Gautham Bolar ∗, Preetam Patil ∗, Ayalvadi Ganesh †, Jean-Francois Chamberland ‡, Senior Member, IEEE , Parimal Parag ∗, Senior Member, IEEE 
+
+Abstract 
+
+In modern data center networks, thousands of hosts contend for shared link capacity; the scale of these systems makes centralized scheduling impractical. This article models such scheduling as a bipartite matching problem under communication constraints: senders express interest in forming connections, and receivers respond using only locally available information. A class of single-round probabilistic matching algorithms is proposed, built on two key ideas: degree-biased sampling, where senders use receiver degrees to inform their random selection; and random thinning, where senders report only a random subset of their connections. Analytical performance guarantees are established for random graph models. In sparse regimes, degree-biased sampling yields a higher expected matching size than prior communication-constrained algorithms; in denser settings, a counterintuitive phenomenon emerges where deliberately restricting available connections through thinning increases the expected number of matches. Combining thinning to degree two with greedy selection produces an algorithm that requires no parameter tuning and, in packet-level simulations with production traffic traces, significantly extends the network stability region. Although motivated by data center network scheduling, the underlying framework of bipartite matching under local information constraints is portable to other resource allocation settings. 
+
+I. I NTRODUCTION 
+
+Resource allocation and scheduling in large-scale computing clusters increasingly depend on distributed decision-making. In modern data center networks (DCNs), thousands of hosts equipped with graphics processing units (GPUs) exchange data across high-bandwidth, multi-path fabrics, yet the sheer scale of these systems makes centralized coordination impractical. This mismatch between the need for efficient resource assignment and the constraints on information exchange motivates the study of matching-based allocation under limited communication. Within DCNs, traffic is heterogeneous: short coordination flows demand minimal latency, while massively parallel workloads, such as distributed training and large-scale data processing, generate bulk transfers that require sustained throughput [1]–[4]. At scale, these competing demands strain receiver-side resources, particularly when many senders target the same host. Traditional reactive congestion control, which relies on delay or packet-drop feedback, cannot resolve such contention efficiently [5]. As device density continues to grow, centralized solutions that were once practical are becoming untenable, driving a shift toward distributed resource-allocation frameworks where local decisions must be made with only partial information. Motivated by these trends, we consider settings in which resource allocation can be abstracted as a bipartite matching problem under communication constraints. The literature on bipartite matching is extensive, featuring classic approaches such as the Hungarian algorithm for assignment problems and the Hopcroft–Karp algorithm for maximum matchings [6]–[9]. These algorithms require complete knowledge of the graph; in particular, the augmenting-path computations central to Hopcroft–Karp cannot be carried out with only local information. When full knowledge is unavailable, different procedures must be adopted, often at the expense of achieving a maximum matching. While several threads of related work address aspects of distributed matching, from randomized load balancing to multi-round graph algorithms to online assignment, the specific regime of single-round structural matching under communication constraints has received comparatively little attention. Existing work on distributed matching often assumes agents hold preference orderings or value functions over potential partners [10]–[12], whereas in DCN scheduling the problem is purely structural: edges represent feasible sender–receiver pairs, and the objective is to find a large matching using only local information exchange. This article aims to bridge this gap by introducing a class of single-round bipartite matching algorithms with performance guarantees for random graph models representative of DCN traffic. Specifically, nodes possess only local knowledge of the graph and exchange minimal coordination messages. Senders declare their intentions to connect, receivers respond with local degree information, and senders then select a receiver through a probabilistic sampling process biased by the degrees of adjacent receivers. This degree-biased approach yields a higher mean number of matches than existing communication-constrained algorithms, particularly in sparse-traffic regimes [13], [14]. In denser settings, an interesting phenomenon arises. With centralized knowledge, additional edges in the connectivity graph promote a larger maximum matching. However, when only local information is available, random thinning, where senders report only a random subset of their connections, can actually increase the expected number of matches. We investigate this     
+
+> Authors ∗are with the Department of Electrical Communication Engineering and the Centre for Networked Intelligence, Indian Institute of Science, Bangalore, Karnataka 560012, India. Author †is with the School of Mathematics, University of Bristol, Bristol BS8 1UG, UK. Author ‡is with the Electrical and Computer Engineering, Texas A&M University, College Station, TX 77843, USA. Email: {moonmoonm, gauthamb, preetampatil, parimal }@iisc.ac.in, a.ganesh@bristol.ac.uk, chmbrlnd@tamu.edu.
+> arXiv:2604.10744v1 [cs.DC] 12 Apr 2026 2
+
+phenomenon through parameter optimization and empirical study, with potential applications to dense DCN workloads such as distributed training [15], web search [1], [16], and large-scale data processing [17]–[19]. Multiple-round matching protocols can increase the expected matching size [13], [14], [20], but each additional round incurs control-message overhead that burdens latency-sensitive short flows and, in some designs, introduces nontrivial matching delays. In practice, real-time systems cannot afford such overheads, making fast, single-round algorithms far more attractive for deployment. 
+
+A. Related Work 
+
+The present work draws on three threads of research: randomized load balancing through restricted choices, distributed matching under locality constraints, and matching-based scheduling in data center networks (DCNs). We survey each in turn and explain how they inform the algorithms proposed in this article. A foundational insight in resource allocation is the power of two choices : when placing n balls into n bins, selecting the less loaded of two randomly chosen bins reduces the maximum load from Θ(log n/ log log n) to Θ(log log n), an exponential improvement [21], [22]. This result demonstrates that even minimal local information can dramatically improve the outcome of a random allocation process. Our degree-biased sampling mechanism is motivated by the same principle: senders use the degrees of adjacent receivers to bias their random selection, analogous to choosing the less loaded bin. Similarly, random thinning, in which senders report only a random subset of their connections, can be viewed as a deliberate restriction of the choice set to facilitate rapid decentralized decisions. There is, however, a fundamental structural difference: the balls-into-bins framework is inherently sequential and persistent (balls arrive one at a time and bins accumulate load), whereas our setting requires a one-shot combinatorial matching in which all senders act simultaneously and each receiver can be matched to at most one sender. This distinction means that the quantitative gains from limited choices do not transfer directly, but the qualitative lesson that a small amount of local information substantially outperforms purely random allocation remains central to our approach. As noted above, classical matching algorithms require complete knowledge of the graph. When only local communication is available, a natural question is what can be achieved in a bounded number of synchronous rounds, where each node exchanges messages only with its immediate neighbors. In this setting, Israeli and Itai [23] show that a maximal matching can be computed in O(log n) randomized rounds, and Linial [24] establishes that even basic symmetry-breaking tasks require Ω(log ∗ n) rounds. Computing a maximum (as opposed to maximal) matching is harder still, as augmenting paths may span the entire graph. These results delineate a fundamental tension between the locality of information and the quality of the matching. In the online setting, Karp, Vazirani, and Vazirani [25] establish a tight competitive ratio of 1 − 1/e for bipartite matching when one side arrives sequentially and decisions are irrevocable. Although our model is not online in the adversarial sense, it shares the theme of irrevocable commitment under incomplete information: each sender must choose a single receiver based on local data, without knowledge of other senders’ decisions. Our single-round constraint is more restrictive than what these models typically consider, making performance guarantees in this regime particularly meaningful. Turning to DCN transport protocols, in [26] Alizadeh et al. propose pFabric, which provides near-optimal message/flow 1
+
+completion time (FCT), but requires specialized hardware for embedding scheduling policies within the network fabric. A centralized time-slot allocation and path assignment algorithm to achieve a zero-queue network is proposed in Fastpass [4], but centralized schedulers do not scale well, and the matching delay becomes significant compared to the transmission time for short flows. To address these shortcomings, recent distributed protocols prioritize the transmission of short flows in a manner that circumvents the connection setup delay and its associated round trip time (RTT), whereas receiver-driven flow control is used for sustained connections [27]–[29]. Receiver-driven flow control works well for parallel computations over DCNs because the compute node can rapidly detect and react to local congestion [5]. The pHost distributed protocol by Gao et al. [27] was designed to address the shortcomings of Fastpass. It seeks to minimize FCT in data centers without specialized hardware requirements, assigning high priority to short flow transmissions and lower priority to long flows that require grants from the receiver. Extending this approach, Montazeri et al. introduce Homa [29], which improves upon pHost by leveraging multiple priority classes (supported by switch priority queues) for short as well as long flows; Homa attains high network utilization through controlled overcommitment. Underlying these schemes is a tension between the need for fast feedback through control packets and the congestion produced by larger payloads. The scheduling in many such protocols reduces to matching problems in bipartite graphs, bringing the locality constraints discussed above into direct contact with practical system design. There is a rich body of research on matching algorithms for network resource allocation [13], [20], [30]–[34]. Parallel iterative matching (PIM) [13], a commonly used algorithm in switch fabrics, proceeds in fixed time slots of matching and transmission phases. PIM converges to a maximum matching in approximately log( n) rounds of matching request–responses in an n-port switch. However, such an approach is impractical for DCNs with higher RTTs and large n (number of sender–receiver pairs). Round-robin schemes such as iSLIP [20] avoid the randomness of PIM but require knowledge of the system size n and assume that every input has traffic for every output; 
+
+> 1‘Flow’ and ‘message’ have been used interchangeably in the literature to refer to application payload. We use the term message to indicate the payload comprising one or more network packets. 3
+
+when the connectivity graph is sparse or irregular, as is typical in DCN workloads, these assumptions break down. Data center parallel iterative matching (dcPIM) [14] adapts PIM to DCNs. For sparse traffic, dcPIM achieves a high probability of matching within a fixed number of rounds, but the overhead of multiple matching rounds per transmission phase is significant. In practice, dcPIM seeks to circumvent this overhead through pipelining, wherein the matching phase for the next transmission round happens in parallel with the current transmission phase. 
+
+B. Contributions 
+
+This article frames resource allocation as bipartite matching under communication constraints, an abstraction that is portable across application domains including load balancing, network routing, server farms with data locality, and virtual machine migration. The main contributions are as follows.  
+
+> •
+
+Single-round matching algorithms under communication constraints. A class of probabilistic bipartite matching algorithms is proposed in which senders disclose their interest in forming connections, receivers share local degree information, and senders then make a single randomized selection. The entire protocol completes in one round of message exchange.  
+
+> •
+
+Random thinning for dense graphs. A preemptive thinning step is introduced in which senders report only a random subset of their connections. For dense connectivity graphs, restricting the choice set in this way increases the expected matching size, even though fewer edges are available to the algorithm.  
+
+> •
+
+Degree-biased sampling. Senders bias their random selection toward receivers with smaller degrees, producing a larger expected number of matches than uniform selection. This mechanism is shown to be particularly effective in sparse-traffic regimes.  
+
+> •
+
+Robustness to degree distribution. The mean matching fraction is shown to be insensitive to the sender out-degree distribution, depending only on the probability that the out-degree is nonzero. This property makes the algorithms robust under heterogeneous traffic conditions. Analytical performance guarantees are established for random bipartite graph models, including asymptotic results in the Poisson degree regime. Numerical comparisons against baseline algorithms and established benchmarks complement the theoretical analysis. 
+
+Notation. We denote the set of natural numbers by N, and the non-negative integers by Z+, and the cardinality of X by |X|.II. S YSTEM MODEL 
+
+We consider a data center network (DCN) with N hosts interconnected through a Clos-like fat-tree topology [35], which provides multiple equal-length paths between any sender–receiver pair. Each host connects to the network through a Top-of-the-Rack (ToR) switch via an edge link. We refer to the collection of inter-switch links as the core network. Since a host can act as both a sender and a receiver simultaneously, the network is modeled as an N × N system comprising N senders and 
+
+N receivers. We assume that the core network has sufficient capacity to support full cross-section bandwidth and that packets can be sprayed over multiple parallel paths for load balancing, as in prior work [14], [29]. Congestion is therefore negligible in the core, and the physical network provides full connectivity: every sender can reach every receiver. The bottleneck lies at the edge links: both the sender’s uplink and the receiver’s downlink have finite capacity, so each can sustain at most one bulk transfer at a time. Application traffic in modern DCNs comprises a large number of latency-sensitive short messages (control traffic, remote procedure calls) and a smaller number of bandwidth-intensive long messages. Since short and long messages share the same links, long messages can delay short messages through head-of-line blocking in the absence of prioritization. Following prior proposals [14], [29], switch priority classes provide preferential treatment to short messages. Each ToR switch maintains separate virtual buffers per priority class, and short messages are served before long messages. We therefore focus on the scheduling of long messages. Although the physical network is fully connected, not every sender has data destined for every receiver at any given time. The sender–receiver pairs with outstanding long messages define a feasible graph , which is typically a sparse subgraph of the complete bipartite graph. Because each edge link is dedicated to a single partner during each transmission phase, coordinating sender–receiver assignments reduces to finding a matching in this feasible graph. 
+
+A. Mathematical abstraction 
+
+The system comprises a set of senders U and a set of receivers V , both of equal cardinality N = |U | = |V |. An edge (u, v )
+
+indicates that sender u has at least one outstanding long message for receiver v; the resulting bipartite graph is G = ( U, V, E ).We write u ∼ v, and call u and v neighbors, if (u, v ) ∈ E. The neighborhood of node x is Nx ≜ {y : x ∼ y}, and its degree is deg( x) ≜ |N x|. We make the following assumption about this graph. 
+
+Assumption 1. The bipartite graph G = ( U, V, E ) is a D-out random graph, for a random variable D with a given distribution on {0, 1, 2, . . . , N }. This random graph is defined as follows. First, nodes u ∈ U sample degrees Du that are i.i.d. with the 4
+
+same distribution as D. Then, conditional on Du, node u samples its neighbors in V independently and uniformly at random, and independently of the choices of other nodes. An example of a D-out random graph is the bipartite Erd˝ os-R´ enyi random graph G(N, N, p ), which is obtained by taking 
+
+D to have the binomial distribution, Bin( N, p ), with parameters N and p. The bipartite graph models only long-message connectivity; the effect of short messages on pair availability can be incorporated by thinning the out-degree distribution, but this extension is not treated explicitly here. Since each edge link serves at most one partner at a time, any feasible set of communicating sender–receiver pairs corresponds to a matching in G. The main focus of this paper is on finding matchings of large cardinality in order to reduce latency in message transmission. 
+
+B. Problem formulation 
+
+The goal is to find a matching of large cardinality in G using only local information. Specifically, each sender u ∈ U knows only its two-hop neighborhood in G, i.e., all nodes and edges within graph distance 2. Based on this knowledge, the sender 
+
+u selects a single neighbor v ∈ N u to which it sends a grant. Each receiver v that has received at least one grant accepts exactly one, based on no knowledge of G beyond the received grants. This grant-and-accept protocol, whose communication stages are detailed in Section III, establishes a matching. Finding a matching of maximum cardinality under these constraints is intractable in general, motivating the probabilistic approach developed in the following section. III. B IPARTITE MATCHING ALGORITHMS 
+
+Recall from Section II that the feasible graph G = ( U, V, E ) captures all sender–receiver pairs with outstanding long messages, and that a matching in this graph determines the set of concurrent transmissions. Although this graph is typically sparse, notifying all feasible receivers can still generate significant control traffic in large systems; the problem is especially acute for dense workloads. To reduce communication and computational cost, we propose that each sender establish links with only a small random subset of its feasible receivers; we call these its intended receivers and the resulting subgraph the 
+
+intention graph .Our goal is to jointly optimize the choice of intended receivers and the matching on the intention graph. Our proposed algorithms build upon existing matching algorithms for DCN transport protocols [13], [14], which we review below. 
+
+A. Existing iterative matching algorithms 
+
+The prototypical communication-constrained algorithm, depicted in Fig. 1, comprises the following stages.  
+
+> •
+
+Stage 0 (NOTIFY): Every sender sends a notification control message to all receivers with which it seeks to connect.  
+
+> •
+
+Stage 1 (REQuest): Each receiver sends a request control message (REQ) to all senders from which it received a notification.  
+
+> •
+
+Stage 2 (GRANT): Each sender selects one of the received REQs uniformly at random and sends a grant control message (GRANT) to the corresponding receiver.  
+
+> •
+
+Stage 3 (ACCEPT): Each receiver selects one of the received GRANTs uniformly at random and transmits an accept control message (ACCEPT) to the corresponding sender. Both the sender and the receiver mark themselves as matched. The above matching algorithm takes approximately two round-trip times (RTTs), assuming instantaneous control message processing and synchronized nodes [14]. To hide this overhead, the transmission stage of one phase can be pipelined with the matching stage of the next, as the control messages are much smaller than data packets [14]. One drawback of the above algorithm is that it can generate excessive control messages because senders notify all feasible receivers. This can be avoided by having senders only transmit notifications to subsets of their feasible receivers. We incorporate this into our proposed algorithm by sparsifying the communication graph before implementing matching. 
+
+B. Degree-biased algorithms 
+
+We introduce a one-parameter family of degree-biased (DB) matching algorithms which share much of their architecture with the pre-existing matching framework described above, but incorporate the following innovations. In the NOTIFY stage, senders only notify a subset of their neighbors, chosen independently without coordination. Thus, this step is decentralized and yields a random subgraph of the initial communication graph. In the REQ stage, receivers include their degree in the intention graph (the number of senders from which they have received notifications) in their reply. This small overhead enables significant gains. In the GRANT stage, every sender selects a receiver at random according to a probability distribution that considers their degrees, biasing its choice in favor of low-degree receivers. Empirical results show that this strategy leads to significant performance gains. Figures 1 and 2 offer an illustrative example with six hosts to highlight the key differences between the degree-biased (Fig. 2) and pre-existing (Fig. 1) algorithms. In both figures, the nodes on the left correspond to senders and the nodes on the right to receivers. At the onset of the process, in the pre-existing algorithm depicted in Fig. 1, every sender notifies all receivers 5   
+
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> NOTIFY REQ GRANT ACCEPT
+
+## Notify stage Request stage Grant stage Accept stage      
+
+> Figure 1. Existing matching algorithm on a 6×6system. Senders notify all feasible receivers; uniform random selection at the GRANT stage causes collisions at receivers 1and 2, yielding only three matched pairs.
+
+with which it can feasibly connect. But in our proposed algorithm, if a sender has an excessive number of notifications to send (node 3 in our example in Fig. 2), it subsamples from them and only sends the selected notifications. This thinning process takes place in every resource allocation round. The receivers acknowledge notifications by sending requests (REQs) to senders. In our proposed algorithm, they include the additional information of their degrees (number of sender neighbors) in these REQ messages. In the GRANT stage, each sender selects one receiver from among its graph neighbors. This selection is made uniformly at random in existing protocols, but favors low-degree neighbors in our algorithm. We have depicted this by showing senders {5, 6} connect to receivers {5, 6} under the DB (α) rule in Fig. 2, but connect to {4, 2} in Fig. 1. To fully describe our degree-biased algorithm, we need to specify how senders prune their neighborhoods at the NOTIFY stage, and how they choose which receivers to select at the GRANT stage. At the NOTIFY stage, senders use random thinning to achieve a desired degree distribution. Each sender u ∈ U independently samples an out-degree Du from a specified distribution, then selects min( Du, |N u|) of its feasible receivers uniformly at random. The resulting intention graph is a D-out random bipartite graph as defined in Assumption 1. 
+
+Definition 1 (Thinning) . We refer to the subsampling procedure at the NOTIFY stage as thinning : each sender u ∈ U
+
+independently samples an out-degree Du from a specified distribution and retains min( Du, |N u|) of its feasible receivers, chosen uniformly at random. To inform the random selection process at the GRANT stage, we introduce a suitable class of discrete probability laws, as detailed below. 123456123456123456123456123456123456123456123456   
+
+> NOTIFY REQ GRANT ACCEPT
+
+## Notify stage Request stage Grant stage Accept stage        
+
+> Figure 2. Degree-biased matching on the same 6×6system. Sender 3thins one edge (dashed) at the NOTIFY stage; degree-biased selection at the GRANT stage spreads grants across receivers, yielding six matched pairs.
+
+Definition 2 (DB (α) selection) . Consider a bipartite graph G = ( U, V, E ) with senders U , receivers V , edges E ⊆ U × V ,and a parameter α ∈ R ∪ {−∞} . The DB (α) algorithm defines a probability mass function (PMF) on Nu for each u ∈ U6
+
+with non-zero degree: 
+
+γuv (α) ≜ 1{u∼v}
+
+deg( v)α
+
+P 
+
+> w∈N u
+
+deg( w)α . (1) We note that the computation of this PMF at node u ∈ U relies on knowledge of Nu, the neighbors of sender u, and on 
+
+{deg( v) : v ∈ N u}, the size of the neighborhood of each receiver v in the neighborhood of sender u. This local information is gathered in the NOTIFY and REQ stages, as described above. A natural question is to find the exponent α∗ in the one-parameter family DB (α) that maximizes the mean matching size, averaged over the ensemble of D-out random graphs. Formally, we can pose this problem as follows. 
+
+Problem 1. Let D be a random variable with a specified distribution. Let LN (α) be the cardinality of the matching in a bipartite random D-out graph on N nodes induced by the DB (α) algorithm (or equivalently, by the PMFs (γu(α) : u ∈ U, deg( u)̸ = 0) ). Find the exponent α∗ ∈ R that maximizes the mean fraction of matched receivers as the number of receivers N tends to infinity, i.e. 
+
+α∗ ≜ arg max 
+
+
+
+lim inf  
+
+> N→∞
+
+1
+
+N ELN (α) : α ∈ R
+
+
+
+. (2) A key step in solving this problem is evaluating the limiting mean matching fraction, lim N →∞ 1 
+
+> N
+
+ELN (α), for all α ∈ R;as part of this effort, we show the existence of this limit in certain cases. Observe that the DB (α) algorithm favors receivers with higher degree when α > 0 and with lower degree when α < 0. As selecting receivers with higher degrees leads to poor matching performance, we focus solely on the case α ⩽ 0. In the next section, we compute the limiting mean matching fraction for the extreme cases, α = 0 and α = −∞ , and augment this with numerical evaluations for intermediate values of α.IV. P ERFORMANCE ANALYSIS OF DB( α)In this section, we derive expressions for the mean matching size under the DB (α) rule for selection of receivers, obtaining closed-form expressions when α is equal to zero or negative infinity. Note that α = 0 corresponds to selecting uniformly at random among receivers neighboring the sender, while α = −∞ corresponds to restricting the selection to neighboring receivers with the smallest degree. For these two cases, the DB (α) rule is equivalent to selecting a receiver uniformly at random from the admissible set. 
+
+Assumption 2 (Intention graph) . The intention graph G = ( U, V, E ) is a D-out random bipartite graph, i.e., the sender degrees 
+
+(Du, u ∈ U ) are i.i.d. copies of min {D, N }, where D is a specified random variable on Z+ and N = |U | = |V |. Moreover, conditional on Du, the neighbors of u are chosen independently and uniformly at random from V , independent of the choices of other senders. 
+
+Remark 1. By Assumption 2, the conditional expectation E[1{v∈N u} | Du] equals Du/N . Hence, by the tower property of nested expectation, 
+
+E1{u∼v} = E[E[1{v∈N u} | Du]] = E[Du]
+
+N = EDN . (3) Moreover, for fixed v ∈ V , the random variables 1{u∼v} are i.i.d. across u ∈ U , since distinct senders choose neighbors independently. Hence, deg( v) = P 
+
+> u∈U
+
+1{u∼v} is a Bin( N, ED/N ) random variable for each v ∈ V .The following lemma will be useful in analyzing the performance of our matching algorithms. 
+
+Lemma 1. Let u ∈ U and v ∈ V . Let D∗ 
+
+> u
+
+be a random variable with the conditional distribution of the degree of u given that u ∼ v. Then, D∗ 
+
+> u
+
+has the size-biased distribution, i.e., for each k ∈ { 1, . . . , N }
+
+P {D∗ 
+
+> u
+
+= k} = P ({Du = k} | { u ∼ v}) = kP {D = k}
+
+ED .
+
+Proof: By the conditional probability formula, 
+
+P {D∗ 
+
+> u
+
+= k} = P {Du = k} E[1{u∼v} | { Du = k}]
+
+E1{u∼v}
+
+.
+
+The claim follows from Remark 1. 
+
+Definition 3. Under the DB (α) selection rule, let ξuv (α) indicate the event that sender u selects receiver v for a grant. Let 
+
+ψv (α) indicate the event that receiver v is not matched to any sender. Finally, let LN (α) denote the size of the matching obtained. 
+
+Remark 2. As each sender issues a grant to a single receiver, a receiver is matched if and only if it receives at least one grant. Hence, 
+
+ψv (α) = Y
+
+> u∈N v
+
+(1 − ξuv (α)) , LN (α) = X
+
+> v∈V
+
+(1 − ψv (α)) .7
+
+A. Uniform selection: α = 0 
+
+Theorem 1. Suppose G = ( U, V, E ) satisfies Assumption 2. Then, the mean matching fraction under the DB (0) algorithm is given by 
+
+1
+
+N ELN (0) = 1 −
+
+
+
+1 − 1 − P {D = 0 }
+
+N
+
+N
+
+. (4) 
+
+Remark 3. The mean matching fraction under DB (0) is insensitive to the out-degree distribution and depends only on the probability that the out-degree is non-zero. If thinning does not change this probability, then it has no effect on the mean matching fraction under this rule. 
+
+Proof: Fix v ∈ V and consider u ∈ U . If Du = 0 , then u cannot issue a grant to v. Otherwise, as it only issues a grant to a single receiver, it picks v with probability 1/N . (While u first picks a neighborhood and then picks a node within this neighborhood, by symmetry, each node in V is equally likely to be chosen at the end of this two-step process.) Hence, the overall probability that u issues a grant to v is 
+
+E[ξuv (0)] = 1 − P {Du = 0 }
+
+N . (5) Another way to see this is to note that the event u ∼ v has probability ED/N and, conditional on this event, u chooses v for a grant with probability 1/D ∗
+
+> u
+
+, where D∗ 
+
+> u
+
+has the size-biased distribution from Lemma 1. Hence, using Lemma 1, 
+
+E[ξuv (0)] = E[ξuv (0) 1{v∈N u}] = E1{u∼v}E[ξuv (0) | v ∈ N u]= EDN
+
+> N
+
+X
+
+> k=1
+
+1
+
+k P {D∗ = k} = 1
+
+N
+
+> N
+
+X
+
+> k=1
+
+P {D = k} ,
+
+which coincides with the expression in (5). Moreover, by the independence of sender neighborhoods in Assumption 2, 
+
+(ξuv (0) , u ∈ U ) are the indicators of mutually independent events. Hence, 
+
+E[ψv (0)] = Y
+
+> u∈U
+
+(1 − E[ξuv (0)]) = 
+
+
+
+1 − 1 − P {D = 0 }
+
+N
+
+N
+
+,
+
+and (4) follows from Remark 2. 
+
+Corollary 1. Two easy special cases for sender degree distributions for a fixed positive mean ED are as follows. (a) For deterministic sender degree D = ED ∈ N, the mean matching fraction is 
+
+1
+
+N ELN (0) = 1 −
+
+
+
+1 − 1
+
+N
+
+N
+
+.
+
+The limiting mean matching fraction is 
+
+lim  
+
+> N→∞
+
+1
+
+N ELN (0) = 1 − 1
+
+e .
+
+(b) For binomial sender degree distribution Bin( N, ED/N ), the mean matching fraction is 
+
+1
+
+N ELN (0) = 1 − 1 − 1 − (1 − EDN )N
+
+N
+
+!N
+
+.
+
+The limiting mean matching fraction is 
+
+lim  
+
+> N→∞
+
+1
+
+N ELN (0) = 1 − e−1+ e−ED
+
+.
+
+B. Asymptotic independence 
+
+We can no longer carry out exact calculations when α̸ = 0 , because grant decisions of distinct senders may no longer be independent. Nevertheless, they are independent for senders with disjoint neighborhoods. This fact lets us approximate matching probabilities under DB (α) with simpler expressions calculated under an independence assumption. In the following, we focus on the limiting regime in which N tends to infinity, while the sender degree distribution remains fixed. Let ED and 
+
+E[D2] denote its first and second moments. 
+
+Lemma 2. Fix ϵ > 0 and v ∈ V , and suppose that 
+
+deg( v) < min 
+
+(s 
+
+N (ED)2
+
+(ED2)2 , 3
+
+s
+
+ϵN (ED)2
+
+(ED2)2
+
+)
+
+.8
+
+Then, E[ψv (α) | N v ], the conditional probability that node v is unmatched given its neighborhood, is upper bounded by 
+
+eϵ(1 − E[ξuv (α) | N v , u ∈ N v ]) deg( v) + 12
+
+> 3
+
+s
+
+ϵ2(ED2)2
+
+N (ED)2 .
+
+Proof: When deg( v) ∈ { 0, 1}, the statement of the lemma is immediate. For each receiver v with deg( v) ⩾ 2, we define the good event 
+
+Gv ≜
+
+n [
+
+> {k,ℓ }⊆N v
+
+(Nk ∩ N ℓ \ { v}) = ∅
+
+o
+
+. (6) Recall from Remark 2 that ψv (α), the indicator of the event that receiver v remains unmatched, equals Q
+
+> u∈N v
+
+ 1 − ξuv (α).As this product is bounded above by 1, we obtain 
+
+E[ψv (α) | N v ] = E
+
+" Y
+
+> u∈N v
+
+(1 − ξuv (α)) Nv
+
+#
+
+⩽ E Y
+
+> u∈N v
+
+(1 − ξuv (α)) 1Gv Nv
+
+!
+
++ E[1Gcv | N v ]
+
+⩽ E Y
+
+> u∈N v
+
+(1 − ξuv (α)) Gv , Nv
+
+!
+
++ P (Gcv | N v ).
+
+Note that, conditioned on the sender set Nv and the good event Gv , the random variables (ξuv (α), u ∈ N v ) are mutually independent. Using this independence, the expression above, and the fact that 1 − ξuv (α) ⩾ 0, we obtain 
+
+E[ψv (α) | N v ] ⩽ Y
+
+> u∈N v
+
+E[1 − ξuv (α) | Gv , Nv ] + P (Gcv | N v )= Y
+
+> u∈N v
+
+E[(1 − ξuv (α)) 1Gv | N v ]
+
+P (Gv | N v ) + P (Gcv | N v )
+
+⩽ Y
+
+> u∈N v
+
+E[(1 − ξuv (α)) | N v ]
+
+P (Gv | N v ) + P (Gcv | N v ).
+
+(7) Next, we derive an upper bound on P (Gcv |N v ). Fix distinct senders k, ℓ ∈ N v and notice that the receiver sets Nk and Nℓ
+
+are independent. Moreover, conditional on k, ℓ ∈ N v , deg( k) and deg( ℓ) have the size-biased distribution D∗. Hence, 
+
+E |N k ∩ N ℓ \ { v}| = X 
+
+> w∈V\{ v}
+
+P {w ∈ N k} P {w ∈ N ℓ}
+
+= ( N − 1) 
+
+ ED∗ − 1
+
+N − 1
+
+2
+
+⩽ (ED∗)2
+
+N = (ED2)2
+
+N (ED)2 ,
+
+where we have used Lemma 1 to obtain the last equality. Consequently, by the union bound, we get 
+
+E
+
+h
+
+∪{k,ℓ }⊆N v Nk ∩ N ℓ \ { v} Nv
+
+i
+
+⩽ E
+
+h X
+
+> {k,ℓ }⊆N v
+
+|N k ∩ N ℓ \ { v}| Nv
+
+i
+
+⩽
+
+|N v |
+
+2
+
+ (ED2)2
+
+N (ED)2 .
+
+We observe that, from the definition of Gv in (6), we have Gcv =
+
+n S 
+
+> {k,ℓ }⊆N v
+
+(Nk ∩ N ℓ \ { v}) ⩾ 1
+
+o
+
+. Therefore, by Markov’s inequality, 
+
+P (Gcv | N v ) ⩽ E
+
+h
+
+∪{k,ℓ }⊆N v Nk ∩ N ℓ \ { v} Nv
+
+i
+
+⩽ deg( v)2
+
+2N
+
+(ED2)2
+
+(ED)2 ,
+
+(8) where we used |N v | = deg( v) in the bound for the binomial coefficient. Substituting (8) into (7), and noting that E[ξuv (α) | N v ]
+
+is the same for all senders u ∈ N v by symmetry, we get that 
+
+E[ψv (α) | N v ] ⩽ deg( v)2(ED2)2
+
+2N (ED)2
+
++
+
+ 1 − E[ξuv (α) | N v , u ∈ N v ]1 − deg( v)2(ED2)2 
+
+> 2N(ED)2
+
+deg( v)
+
+.
+
+(9) 9
+
+By assumption, we have deg( v)2(ED2)2/(2 N (ED)2) < 1/2. Combining this with the fact that 1 − x ⩾ e−2x on [0 , 1/2] , we obtain 
+
+1 − deg( v)2(ED2)2
+
+2N (ED)2
+
+− deg( v)
+
+⩽ exp 
+
+ deg( v)3(ED2)2
+
+N (ED)2
+
+
+
+.
+
+Also by assumption, deg( v) < 3
+
+q ϵN (ED)2 
+
+> (ED2)2
+
+and, hence, 
+
+deg( v)3(ED2)2
+
+N (ED)2 < ϵ, (ED2)2 deg( v)2
+
+2N (ED)2 < 12
+
+> 3
+
+s
+
+ϵ2(ED2)2
+
+N (ED)2 .
+
+Substituting these results in (9), we obtain the claim of the lemma. 
+
+Remark 4. From Remark 1, deg( v) is a Bin( N, ED/N ) random variable. Therefore, the assumption in Lemma 2 that deg( v)
+
+is bounded by the minimum of the two stated terms holds with high probability as N tends to infinity. The additive error term in the lemma tends to zero as N tends to infinity, and the multiplicative factor eϵ can be made arbitrarily close to 1 by choosing ϵ small. Hence, the lemma says that we can approximate the conditional probability of receiver v being unmatched, given its neighborhood Nv , by the product of probabilities that it is unmatched to each of its neighbors. Thus, the selection indicators (ξuv (α) : u ∈ N v ) become asymptotically independent, with error bounded by the lemma. 
+
+C. Greedy selection: α = −∞ 
+
+In this section, we derive a lower bound on the mean matching size when employing the degree-biased algorithm with exponent α = −∞ . In this case, a sender u restricts its grant to receivers with the smallest degree among its neighbors. If there is more than one such receiver, one is chosen uniformly at random. We first introduce some notation. 
+
+Definition 4. For a Binomial random variable with parameters (N, p ), we denote its probability mass function by q(N, p ), its distribution function by Q(N, p ), and its complementary distribution function by ¯Q(N, p ). That is, for 0 ⩽ k ⩽ N ,
+
+qk(N, p ) ≜
+
+Nk
+
+
+
+pk(1 − p)N −k,Qk(N, p ) ≜
+
+> k
+
+X
+
+> ℓ=0
+
+qℓ(N, p ),
+
+¯Qk(N, p ) ≜ 1 − Qk(N, p ).
+
+Lemma 3. Suppose X has a Binomial distribution with parameters N and p > 0. Then, for all θ ∈ R,
+
+E
+
+ θX+1 
+
+X + 1 
+
+
+
+= (1 − p + pθ )N +1 − (1 − p)N +1 
+
+(N + 1) p .
+
+Proof: Since the distribution of X is Binomial with parameters (N, p ), we can write 
+
+E
+
+ θX+1 
+
+X + 1 
+
+
+
+=
+
+> N
+
+X
+
+> k=0
+
+1
+
+k + 1 
+
+Nk
+
+
+
+θk+1 pk(1 − p)N −k.
+
+Using the fact that N +1 
+
+> k+1
+
+ Nk
+
+ =  N +1 
+
+> k+1
+
+ and a change of variables in the summation index, we can rewrite the above equation as 
+
+E
+
+ θX+1 
+
+X + 1 
+
+
+
+= 1(N + 1) p 
+
+> N+1
+
+X
+
+> k=1
+
+N + 1 
+
+k
+
+
+
+(θp )k(1 − p)N +1 −k.
+
+The expression is then obtained from the binomial expansion of (1 − p + pθ )N +1 .
+
+Lemma 4. Fix sender u ∈ U with out-degree Du. Suppose that the residual degrees of its neighbors, namely the number of their neighbors excluding u, are mutually independent Bin( N − 1, ED/N ) random variables. Under the DB( −∞ ) rule, we have 
+
+Eξuv (−∞ ) | N u, deg( v) = s
+
+= 1{u∈N v }
+
+¯Qs−2(N − 1, EDN )Du − ( ¯Qs−1(N − 1, EDN )) Du
+
+Duqs−1(N − 1, EDN )
+
+where the expression is understood to be zero when s − 1 lies outside the support of the residual degree distribution. Remark 5. Each sender w ∈ U with degree Dw, w̸ = u, includes v ∈ V in its neighborhood with probability Dw/N conditional on its degree and, therefore, with unconditional probability ED/N . Moreover, choices by distinct nodes in U are mutually 10 
+
+independent. Hence, the neighbors of u have the residual degree distribution claimed in the lemma, and the real content of the assumption is their independence. Now, independence does not hold in general for finite N , unless the out-degree distribution is Binomial, in which case we have a bipartite Erd˝ os-R´ enyi random graph. Nevertheless, it is reasonable to expect asymptotic independence under mild conditions on the distribution of D, such as the finiteness of some number of moments. For example, it is known that the configuration model exhibits local weak (or Benjamini-Schramm) convergence to a Galton-Watson tree, which implies independence of node degrees; see, e.g., [36, Theorem 4.1]. We were unable to find similar results for bipartite graphs, and the pursuit of one is well outside the scope of this paper, but Lemma 2 suggests that our assumption is plausible. 
+
+Proof: Fix receiver v ∈ V with deg( v) = s. The lemma holds trivially if s = 0 . Therefore, we assume s ⩾ 1 without loss of generality. Under DB (−∞ ), sender u can issue a grant to receiver v only if v has the smallest degree among the neighbors of u. Let χuv be the indicator of this event, i.e., 
+
+χuv = 1{u∈N v }
+
+Y
+
+> w∈N u
+
+1{deg( w)⩾deg( v)}.
+
+Conditional on this event, v is chosen for a grant with probability 1/K u(s), where Ku(s) is the number of neighbors of u
+
+with degree s:
+
+Ku(s) ≜ |{ w ∈ N u : deg( w) = s}| .
+
+For all neighbors w of u to have deg( w) ⩾ s, they must all have residual degree at least s − 1. By the assumption in the lemma that the residual degrees of the neighbors of u are independent Binomial random variables, we obtain 
+
+E[χuv | N u, deg( v) = s]= 1{u∈N v } ¯Qs−2
+
+
+
+N − 1, EDN
+
+Du−1
+
+. (10) This assumption further implies that for any sender u ∈ N v , conditional on its degree Du, the event χuv = 1 , and deg( v) = s,the random variable Ku(s) − 1 has a Binomial distribution with parameters 
+
+
+
+Du − 1, qs−1(N − 1, ED/N )¯Qs−2(N − 1, ED/N )
+
+
+
+.
+
+Hence, by Lemma 3, 
+
+E
+
+h χuv 
+
+Ku(s) χuv , Nu, deg( v) = s
+
+i
+
+=
+
+χuv 
+
+
+
+1 −  1 − qs−1(N −1,ED/N )¯Qs−2(N −1,ED/N )
+
+Du
+
+
+
+Duqs−1(N − 1, ED/N )/ ¯Qs−2(N − 1, ED/N )= χuv 
+
+¯Qs−2
+
+ N − 1, EDN
+
+
+
+1 −   ¯Qs−1(N −1, EDN )¯Qs−2(N −1, EDN )
+
+Du
+
+
+
+Duqs−1(N − 1, EDN ) .
+
+(11) Since u chooses v for a grant with probability 1/K u(s) if v is a minimum-degree neighbor of u, and with probability zero otherwise, we see that 
+
+E[ξuv (−∞ ) | χuv , Nu, deg( v) = s]= E
+
+h χuv 
+
+Ku(s) χuv , Nu, deg( v) = s
+
+i
+
+. (12) Taking expectations on both sides of (12) conditional on Nu, deg( v) = s, using (10) and (11), we obtain from the tower property of conditional expectation that 
+
+E[ξuv (−∞ ) | N u, deg( v) = s]= E
+
+"
+
+E
+
+"
+
+χuv 
+
+Ku(s) χuv , Nu, deg( v) = s
+
+#
+
+Nu, deg( v) = s
+
+#
+
+= 1{u∈N v }
+
+¯Qs−2(N − 1, EDN )Du − ¯Qs−1(N − 1, EDN )Du
+
+Duqs−1(N − 1, EDN ) ,
+
+as claimed. We now consider a sparse graph asymptotic regime in which N , the number of senders (and receivers), tends to infinity, while the mean degree, ED, remains constant. In this regime, the receiver degree distribution tends to a Poisson distribution. This motivates us to define the following. 
+
+Definition 5. Denote by π and Π the probability mass function and distribution function respectively of a Poisson random variable with parameter ED. The dependence of π and Π on ED is suppressed in the notation. 11 
+
+Using Lemmas 2 and 4, we derive the conditional probability that a receiver v is unmatched in the limiting regime under consideration. The out-degree distribution enters the result through its generating function. 
+
+Definition 6. Let GD denote the generating function of a random variable D with the out-degree distribution of senders, i.e., 
+
+GD (z) = E[zDu ] for u ∈ U .
+
+Theorem 2. Consider a limiting regime in which N tends to infinity while the mean sender degree ED is a constant that does not depend on N . Then, 
+
+lim inf  
+
+> N→∞
+
+1
+
+N ELN (−∞ ) ⩾ 1 −
+
+> ∞
+
+X
+
+> s=0
+
+e−ED (ED)s
+
+s! (1 − f (s)) s,
+
+where f : Z+ → [0 , 1] is defined by f (0) ≜ 0 and, for s ⩾ 1,
+
+f (s) ≜ GD ( ¯Πs−2) − GD ( ¯Πs−1)
+
+EDπ s−1
+
+. (13) 
+
+Proof: We recall that conditional on u ∈ N v , the random variable Du has the size-biased distribution given in Lemma 1. Hence, we see from the definition of GD that 
+
+E
+
+h zDu
+
+Du
+
+u ∈ N v
+
+i
+
+=
+
+> N
+
+X
+
+> k=1
+
+kP {Du = k}
+
+EDzk
+
+k
+
+= GD (z) − E1{D=0 }
+
+ED .
+
+(14) Conditioning on u ∈ N v and then taking the expectation over Nu on both sides of the result in Lemma 4, and using the tower property of conditional expectation and (14), we obtain that 
+
+Eξuv (−∞ ) | u ∈ N v , deg( v) = s
+
+= GD ( ¯Qs−2(N − 1, EDN )) − GD ( ¯Qs−1(N − 1, EDN )) 
+
+EDq s−1(N − 1, EDN ) . (15) In the limiting regime considered, the Binomial distribution with parameters N − 1 and ED/N converges to a Poisson distribution with parameter ED, i.e., for each k ∈ Z+,
+
+lim   
+
+> N→∞
+
+qk
+
+
+
+N − 1, EDN
+
+
+
+= πk, lim   
+
+> N→∞
+
+Qk
+
+
+
+N − 1, EDN
+
+
+
+= Π k.
+
+Letting N → ∞ in (15), substituting these limiting distribution results, using continuity of the generating function GD and the definition of f (s) in (13), it follows that for any sender-receiver pair (u, v ),
+
+lim   
+
+> N→∞
+
+E[ξuv (−∞ ) | u ∈ N v , deg( v) = s] = f (s). (16) Recall from Remark 1 that deg( v) has a Bin( N, ED/N ) distribution, which converges to a Pois( ED) distribution as N → ∞ 
+
+when ED is fixed. It follows that for any ϵ > 0, the probability that deg( v) exceeds 
+
+min 
+
+np N (ED)2/(ED2)2, 3
+
+pϵN (ED)2/(ED2)2
+
+o
+
+decays exponentially in 3
+
+√N . Thus, substituting (16) into Lemma 2, we obtain for ϵ > 0 that 
+
+lim sup  
+
+> N→∞
+
+E[ψv (−∞ ) | deg( v) = s] ⩽ eϵ
+
+1 − f (s)
+
+s
+
+.
+
+As this bound is the same for all receivers v ∈ V and holds for arbitrary ϵ > 0, the claim follows by letting ϵ → 0 and summing over receiver degrees with the limiting Pois( ED) weights. 
+
+Corollary 2. When the out-degree distribution is deterministic or Poisson, f (s) simplifies as follows. 
+
+f (s) = 
+
+  
+
+> ¯ΠEDs−2−¯ΠEDs−1
+> EDπ s−1
+
+, D ≡ ED,   
+
+> e−EDΠs−2−e−EDΠs−1
+> EDπ s−1
+
+, D ∼ Pois( ED).12 
+
+V. N UMERICAL EVALUATIONS 
+
+We briefly recall key terminology. The input to the matching problem is a bipartite feasible graph , whose edges (u, v ) denote which senders u ∈ U have messages for which receivers v ∈ V . The feasible graph may be subjected to thinning (Definition 1) to obtain an intention graph , which is the input to the DB (α) algorithm. In Section IV, we assumed that the intention graph is a D-out random graph, i.e., that sender degrees are i.i.d. and, conditional on its degree, each sender chooses its neighbors independently and uniformly at random. Under this assumption, we derived an expression for the mean matching size under the DB (0) algorithm and a lower bound under the DB (−∞ ) algorithm, in Theorems 1 and 2 respectively. We simplified these results, obtaining closed form results in Corollaries 1 and 2, for sender degree D that were either deterministic or had a Binomial distribution. We now compare these analytical results with empirical results from numerical simulations. All our simulations are carried out for a system with an equal number N = 144 of senders and receivers. Edges are generated according to the D-out random graph model to obtain a feasible graph, which may (or may not) be thinned to obtain the intention graph. The DB( α) algorithm is applied to the intention graph to obtain a matching. Each plot in this section is based on 1,000 replicates. In Fig. 3, we depict results for DB( 0) and DB( −∞ ) algorithms applied to bipartite Erd˝ os-R´ enyi intention graphs, which have Bin( N, p ) out-degree distributions. We plot the fraction of nodes that are successfully matched against the mean degree, 
+
+ED = N p . We plot the theoretical prediction from Corollaries 1 and 2 as well as the mean and first and third quartiles from 
+
+1,000 simulations. 
+
+2 4 6 8 10 
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+# ED = d 
+
+> Matching fraction
+> mean
+> mean(theory)
+> lower quartile
+> upper quartile
+> (a) DB (0) algorithm
+
+2 4 6 8 10 
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+# ED = d            
+
+> Matching fraction
+> mean
+> mean(theory)
+> lower quartile
+> upper quartile
+> (b) DB (−∞ )algorithm Figure 3. Fraction of nodes matched versus mean degree for D-out random graphs with D∼Bin( N, d/N ). Theoretical predictions closely track the empirical mean, and the tight inter-quartile range over 1,000 runs at N= 144 confirms good prediction.
+
+For DB (0) , the theoretical predictions from Corollary 1 are exact for finite N and match the empirical results up to simulation noise. For DB (−∞ ), the lower bound from Corollary 2, derived in the limiting regime N → ∞ , already provides an excellent approximation at N = 144 . Furthermore, the inter-quartile range is small, i.e., the empirical matching fraction concentrates close to its mean. This is of great practical relevance, as it shows that the mean performance prediction can (nearly) be treated as a performance guarantee that will hold across most random problem instances. These findings are echoed in Fig. 4, which depicts results for random bipartite graphs with deterministic sender degrees. Again, we plot the fraction of matched nodes against mean node degree, and compare the theoretical prediction from Corollaries 1 and 2 with the empirical mean and first and third quartiles from 1,000 simulations. Observe from Fig. 3 that, while the matching fraction increases slightly with mean degree before saturating when α = 0 , it decreases with mean degree when α = −∞ , except for a brief initial increase. This difference is more pronounced for random graphs with deterministic sender degrees, shown in Fig. 4. Here, the matching fraction under DB (0) remains insensitive to the out-degree, consistent with Corollary 1, while it decreases with out-degree under DB (−∞ ).These observations are explained as follows. Under DB (−∞ ), each sender restricts its grant to a neighbor of minimum degree. As the mean sender degree increases, the receiver degree distribution concentrates at higher values, so the few receivers with the smallest degrees attract grants from disproportionately many senders, leading to collisions. Under DB (0) , grants are spread uniformly across all neighbors, avoiding this bottleneck but forgoing the advantage of targeting under-demanded receivers at low mean degrees. This motivates us to explore the optimal choice of the DB algorithm parameter, α.13 
+
+2 4 6 8 10 
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+# ED = d
+
+> Matching fraction
+
+mean 
+
+mean(theory) 
+
+lower quartile 
+
+upper quartile  
+
+> (a) DB (0) algorithm
+
+2 4 6 8 10 
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+# ED = d
+
+> Matching fraction
+
+mean 
+
+mean(theory) 
+
+lower quartile 
+
+upper quartile           
+
+> (b) DB (−∞ )algorithm Figure 4. Fraction of nodes matched versus mean degree for D-out random graphs with deterministic D=d. The empirical mean over 1,000 runs at
+> N= 144 agrees well with theory, and the narrow inter-quartile range attests to good concentration.
+
+−14 −12 −10 −8 −6 −4 −2 0
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+# Exponent α
+
+> Mean matching fraction
+
+d = 2 
+
+d = 3 
+
+d = 4 
+
+d = 8     
+
+> (a) D∼Bin( N, d/N )
+
+−14 −12 −10 −8 −6 −4 −2 0
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+# Exponent α
+
+> Mean matchig fraction
+
+d = 2 
+
+d = 3 
+
+d = 4 
+
+d = 8       
+
+> (b) Deterministic D=d
+> Figure 5. Mean matching fraction versus exponent αin D-out random graphs. Under degree-biased selection, higher mean sender degree can counterintuitively reduce matching performance.
+
+In Fig. 5, we plot the mean matching fraction as a function of exponent α ∈ (−∞ , 0] , for mean sender degrees ED ∈{2, 3, 4, 8}. Fig. 5a shows results for Erd˝ os-R´ enyi random graphs, and Fig. 5b for random graphs with deterministic sender degrees. We also plot (dotted lines) the mean fraction of nodes matched in the maximum matching in the simulated random graphs, as omniscient upper bounds. We see that this quantity increases rapidly with the mean degree; for ED ⩾ 4, the maximum matching is close to perfect. This shows that there is a gap between our algorithm and the best centralized algorithm. It is an open question whether there is any single-round decentralized algorithm that can close this gap. Next, note that as α becomes more negative, the mean matching size increases for small mean degrees, but first increases and then decreases for large mean degrees. These findings are consistent with Fig. 3 and Fig. 4, and highlight that low-degree receivers become bottlenecks if both −α and the mean degree are large. This observation points to an algorithmic opportunity to improve performance through the preemptive sparsification of the 
+
+feasible communication graph to obtain an intention graph. Such sparsification yields the added benefit of reducing the number of control messages needed. The following are two natural sparsification mechanisms: (a) Bern( q) thinning , where each edge is retained with probability q, independent of other edges, and (b) max( k) thinning , where each sender with more than k edges 14 
+
+retains exactly k of them, chosen uniformly at random, while senders with k or fewer edges retain all of them. 
+
+−14 −12 −10 −8 −6 −4 −2 0
+
+0.5
+
+0.55 
+
+0.6
+
+0.65 
+
+0.7
+
+0.75 
+
+# Exponent α
+
+> Mean matching fraction
+
+(d,k ) = (4 ,2) 
+
+(d,k ) = (4 ,3) 
+
+(d,k ) = (4 ,4) 
+
+(d,k ) = (8 ,2) 
+
+(d,k ) = (8 ,3) 
+
+(d,k ) = (8 ,4)    
+
+> (a) Binomial Dwith max( k)
+
+−14 −12 −10 −8 −6 −4 −2 0
+
+0.5
+
+0.55 
+
+0.6
+
+0.65 
+
+0.7
+
+0.75 
+
+# Exponent α
+
+> Mean matching fraction
+
+(d,k ) = (4 ,2) 
+
+(d,k ) = (4 ,3) 
+
+(d,k ) = (4 ,4) 
+
+(d,k ) = (8 ,2) 
+
+(d,k ) = (8 ,3) 
+
+(d,k ) = (8 ,4)                  
+
+> (b) Deterministic Dwith Bern( k/d )
+> Figure 6. Mean matching fraction versus exponent αin D-out random graphs having ED=dwith thinning for k∈ { 2,3,4}. Preemptive thinning to low out-degree consistently improves decentralized matching performance, with max(2) yielding the strongest results.
+
+We have depicted the effect of thinning on the size of the matching obtained by the DB( α) algorithm in Fig. 6, for different values of α, the mean degree ED, and the thinning parameter. Fig. 6a shows results for max( k) thinning of Erd˝ os-R´ enyi random graphs and Fig. 6b for Bernoulli thinning of random graphs with deterministic out-degrees. Note that Bern( q) thinning of a 
+
+G(n, n, p ) graph yields a G(n, n, pq ) graph, while max( k) thinning of a d-out random graph yields a min( d, k )-out random graph. Since these cases reduce to previously considered graph families, we omit the corresponding plots. We see from the figure that max(2) thinning yields the best performance across a range of parameter values. An intuitive explanation is that, as seen in Fig. 5, the 2-out random graph achieves the best performance in the class of random graphs with deterministic out-degrees, and max(2) thinning yields intention graphs that approximate 2-out random graphs, especially when applied to dense feasible graphs. In light of the above, we now compare the performance of the DB( −∞ ) algorithm on random feasible graphs sparsified by 
+
+max(2) thinning with the performance of the optimal DB( α) algorithm on unthinned graphs. In order to do so, we numerically obtain the optimal exponent α∗(ED) for the values of ED used in Fig. 5, for random graphs with Binomial and deterministic out-degree distributions. The results are shown in Tables I and II, for Binomial and deterministic out-degrees, respectively, along with the corresponding mean matching fractions. The tables also show the performance of the DB( 0) and DB( −∞ )algorithms for ease of comparison, along with the performance obtained by using max(2) thinning followed by the DB( −∞ )algorithm. We see that the optimal parameter, α∗, is non-decreasing in the mean sender degree, ED, in both random graph families; as mean degree increases, randomly choosing a neighboring receiver to issue a GRANT becomes progressively preferable to greedily choosing the neighbor of lowest degree. We also see from the final column that applying the DB( −∞ ) algorithm to the intention graph obtained by subjecting the feasible graph to max(2) thinning yields performance that is both robust across mean degrees and that is close to or better than the performance obtained by using DB( α∗) on the unthinned graph. This observation leads us to advocate the use of max(2) 
+
+thinning followed by DB( −∞ ) matching as a robust algorithm for decentralized matching, with no need for fine-tuning.     
+
+> Table I MEAN MATCHING FRACTION UNDER DB (α)FOR ERD ˝OS -R ´ ENYI RANDOM GRAPHS
+
+Mean matching DB (α) max(2)+ 
+
+ED Uniform Optimal Greedy α∗ DB (−∞ )(α = 0) (α = α∗) (α = −∞ )
+
+2 0.581 0.681 0.681 −∞ 0.678 
+
+3 0.618 0.704 0.694 −3.9 0.716 
+
+4 0.626 0.695 0.655 −2.4 0.728 
+
+8 0.633 0.661 0.455 −1.4 0.731 15                                    
+
+> Table II MEAN MATCHING FRACTION UNDER DB (α)FOR RANDOM GRAPHS WITH DETERMINISTIC SENDER DEGREE
+> Mean matching DB (α)max(2)+
+> EDUniform Optimal Greedy α∗DB (−∞ )(α= 0) (α=α∗)(α=−∞ )
+> 20.633 0.737 0.729 −4.40.737
+> 30.633 0.722 0.688 −2.70.737
+> 40.633 0.700 0.625 −2.00.737
+> 80.633 0.661 0.431 −1.30.737
+
+VI. S YSTEM SIMULATIONS FOR DCN S
+
+In this section, we evaluate one algorithm from the family proposed above: DB (−∞ ) with max(2) thinning, which we henceforth call the 2CGS (2-choice with greedy selection) algorithm. This variant offers a favorable balance between matching quality and communication overhead. We perform packet-level system simulations to evaluate the performance of 2CGS in the DCN context. The results demonstrate that 2CGS achieves competitive throughput and latency with significantly lower message complexity than existing protocols. We implement 2CGS within the Yet Another Packet Simulator (YAPS) [37] and compare it against two matching-based transport protocols. The first is the one-round version of dcPIM [14], denoted 1r-dcPIM, whose matching algorithm is DB (0) 
+
+(i.e., uniform selection). The second is iSLIP [20], a deterministic round-robin matching algorithm. Much like PIM, iSLIP operates in three stages: (1) Request, (2) Grant, and (3) Accept. Senders and receivers maintain their individual fixed round-robin arbitration orders. In the Grant stage, each receiver selects the highest-priority requesting sender; in the Accept stage, each sender accepts the highest-priority granting receiver. A receiver’s pointer advances only when its grant is accepted; a sender’s pointer advances unconditionally. We consider a two-tier leaf-spine topology consisting of nine Top-of-Rack (ToR) switches, four spine switches, and sixteen hosts per ToR, similar to [14]. Each host has a 100 Gbps access link to the ToR, and each ToR is connected to all spine switches with a 400 Gbps link. All links have a propagation delay of 200 ns. Each switch has a processing latency of 450 ns and a 500 kB buffer per output port ( ≈ 10 × BDP), where the bandwidth-delay product (BDP) is the maximum amount of data that can be in flight between a sender-receiver pair at any given moment. Each sender-receiver pair is associated with its own independent Poisson arrival process, which determines the edges of the (evolving) feasible graph. At each arrival event, a message size is sampled randomly from a representative workload trace; we evaluate system performance on the following two workload traces: (a) IMC10 [27], and (b) SGD [38]. Both are obtained from production networks, and exhibit a heavy-tailed distribution [39]: short messages of size at most one BDP make up the predominant fraction of messages, but the bulk of the traffic volume is due to long messages of size greater than one BDP. The network load is defined as the ratio of the arrival data rate to the access link data rate. We choose arrival rates to generate target network loads within the interval [0 .3, 0.85] , representing traffic intensities ranging from light to heavy. In all three algorithms, short messages are prioritized and do not require matching before transmission, whereas long messages are transmitted only when the corresponding sender-receiver pairs have been matched, adhering to a receiver-driven grant mechanism for dcPIM [14] and 2CGS , and a sender-driven grant mechanism for iSLIP [20]. Hence, an edge between a sender-receiver pair is added to the feasible graph in our system simulation only when a long message arrives between them. Control messages are transmitted with the highest priority. The distributed matching algorithm is implemented at the hosts, and the leaf-spine switches only forward packets from source to destination. The matching and transmission phases are pipelined as in dcPIM [14], to improve utilization and reduce delays. The flow completion time (FCT) is the total time taken to transfer a message from the sender to the receiver. The optimal FCT is attained when there are no other messages in the system. We evaluate our algorithm on the following two metrics: (a) normalized throughput, defined as the ratio of the successful data transfer rate to the access link rate, and (b) normalized FCT, defined as the ratio of the observed FCT to the optimal FCT [14]. By definition, the successful data transfer rate must be equal to the arrival rate in a stable system. Hence, the stability region is the set of network loads for which the two are equal. A matching algorithm that improves the mean matching size increases the number of messages that can be served in each data transmission phase, leading to an enlarged stability region. This is illustrated in Figs. 7 and 8, where we depict various performance metrics for the 2CGS , 1r-dcPIM, and iSLIP algorithms on the IMC10 and SGD workloads, respectively. We see from Figs. 7a and 8a that, while all three algorithms achieve the same mean matching fraction at low loads, 1r-dcPIM beats iSLIP at moderate load, while 2CGS beats both at higher loads (on both the IMC10 and SGD workloads). Observe from Figs. 7b and 8b for the IMC10 and SGD workloads that the differences in mean matching are reflected in throughput: 
+
+2CGS achieves higher normalized throughput than 1r-dcPIM, which in turn beats iSLIP, with the differences becoming more pronounced as the network load increases. As noted above, the stability region is precisely the range of loads for which 16      
+
+> 0.30.40.50.60.70.8
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+## Network load      
+
+> Mean matching fraction  1r-dcPIM
+> 2CGS
+> iSLIP
+> (a) Mean matching fraction
+> 0.30.40.50.60.70.8
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+
+## Network load     
+
+> Normalized throughput  1r-dcPIM
+> 2CGS
+> iSLIP
+> (b) Normalized throughput
+> 0.30.40.50.60.7
+> 2
+> 4
+> 6
+
+## Network load     
+
+> Normalized FCT (mean)  1r-dcPIM
+> 2CGS
+> iSLIP
+> (c) Short message FCT
+> 0.30.40.50.60.7
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+
+## Network load   
+
+> Normalized FCT (mean)  1r-dcPIM
+> 2CGS
+> iSLIP
+> (d) Long message FCT Figure 7. Performance comparison of 2CGS , 1r-dcPIM, and iSLIP for IMC10 workload in leaf-spine architecture.
+
+throughput and network load are equal. Inspecting Figs. 7b and 8b suggests that the stability region extends to loads of around 
+
+0.4–0.5 for iSLIP, around 0.5 for 1r-dcPIM and around 0.6 for 2CGS , but it is hard to pinpoint the precise onset of instability. It is easier to discern in Figs. 7d and 8d, where we see the flow completion time of long messages starting to increase sharply for loads above 0.4 for iSLIP, above 0.5 for 1r-dcPIM, and above around 0.6 for 2CGS .In summary, all three algorithms perform well within their respective stability regions, but differ in the maximum load for which they are stable, driven by differences in the sizes of matchings that they obtain. It also appears from the figures that the stability region is a characteristic of the algorithm and not sensitive to the nature of the workload (IMC10 or SGD). Figs. 7c and 8c show that even the FCT of short messages suffers from the onset of instability, albeit much less than for long messages (note the different scales for the y-axes). This is surprising, given that short messages are prioritized and should not see the growing long message queues. A possible explanation is a growth in control messages, which have even higher priority, occasioned by instability in the long message queues. This is supported by Fig. 9, which shows the number of control messages for different choices of network loads and matching algorithms. Indeed, the number of control messages grows sharply beyond the stability region for all three algorithms, lending support to the hypothesis that the resulting congestion delays short messages. VII. C ONCLUSION 
+
+The work presented here is motivated by the challenge of scheduling latency-sensitive communications between hosts in large data center networks, where centralized coordination is infeasible due to scale. We abstracted this scheduling problem as one of decentralized bipartite matching and proposed a family of single-round probabilistic algorithms built on two complementary ideas: random thinning of the communication graph and degree-biased receiver selection using only local information. 17 
+
+0.3 0.4 0.5 0.6 0.7
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+## Network load 
+
+> Mean matching fraction
+
+1r-dcPIM 
+
+2CGS 
+
+iSLIP 
+
+> (a) Mean matching fraction
+
+0.3 0.4 0.5 0.6 0.7
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+Network load 
+
+> Normalized throughput
+
+1r-dcPIM 
+
+2CGS 
+
+iSLIP 
+
+> (b) Normalized throughput
+
+0.3 0.4 0.5 0.6
+
+1
+
+1.2
+
+1.4
+
+1.6
+
+1.8
+
+2
+
+2.2
+
+## Network load 
+
+> Normalized FCT (mean)
+
+1r-dcPIM 
+
+2CGS 
+
+iSLIP 
+
+> (c) Short message FCT
+
+0.3 0.4 0.5 0.6
+
+0
+
+50 
+
+100 
+
+150 
+
+200 
+
+250 
+
+## Network load 
+
+> Normalized FCT (mean)
+
+1r-dcPIM 
+
+2CGS 
+
+iSLIP   
+
+> (d) Long message FCT Figure 8. Performance comparison of 2CGS , 1r-dcPIM, and iSLIP for SGD workload in leaf-spine architecture.
+
+On the theoretical side, we established closed-form asymptotic expressions for the mean matching fraction under both uniform selection, DB (0) , and greedy selection, DB (−∞ ), for D-out random graph models. A notable finding is that the mean matching fraction under uniform selection depends on the out-degree distribution only through the probability that a sender has at least one feasible receiver, making it insensitive to the shape of the degree distribution. Under greedy selection, targeting minimum-degree receivers yields gains in sparse regimes but suffers from a bottleneck effect as density increases: low-degree receivers attract disproportionately many grants, leading to collisions. Random thinning resolves this tension by sparsifying dense graphs before matching. Numerical evaluations on finite systems confirmed the tightness of the theoretical predictions and showed that thinning to a target degree of two, combined with greedy selection (the 2CGS algorithm) delivers robust performance across a wide range of graph models and parameters without requiring any tuning. System-level packet simulations using production workload traces demonstrated that 2CGS extends the stability region to approximately 60% network load, compared with roughly 50% for one-round dcPIM and 40 –50% for iSLIP, while incurring comparable control-message overhead within the stable operating regime. These results make 2CGS a promising candidate for further investigation in hardware deployment. REFERENCES [1] M. Alizadeh, A. Greenberg, D. A. Maltz, J. Padhye, P. Patel, B. Prabhakar, S. Sengupta, and M. Sridharan, “Data Center TCP (DCTCP),” ACM SIGCOMM Comp. Commun. Rev. , vol. 40, no. 4, pp. 63–74, Aug. 2010. [2] B. Vamanan, J. Hasan, and T. N. Vijaykumar, “Deadline-aware datacenter TCP (D2TCP),” ACM SIGCOMM Comp. Commun. Rev. , vol. 42, no. 4, pp. 115–126, Oct. 2012. [3] T. Das and K. M. Sivalingam, “TCP improvements for data center networks,” in Inter. Conf. COM. Sys. NET. (COMSNETS) , vol. 5, Jan. 2013, pp. 1–10. 18 
+
+0.3 0.4 0.5 0.6
+
+150 
+
+200 
+
+250 
+
+300 
+
+350 
+
+Network load 
+
+> Control messages (million)
+
+1r-dcPIM 
+
+2CGS 
+
+iSLIP 
+
+(a) IMC10 workload 
+
+0.3 0.4 0.5 0.6
+
+200 
+
+300 
+
+400 
+
+500 
+
+600 
+
+Network load 
+
+> Control messages (million)
+
+1r-dcPIM 
+
+2CGS 
+
+iSLIP 
+
+(b) SGD workload Figure 9. Total number of control messages generated by 2CGS , 1r-dcPIM, and iSLIP for the IMC10 and SGD workloads under different network loads in a leaf-spine architecture. [4] J. Perry, A. Ousterhout, H. Balakrishnan, D. Shah, and H. Fugal, “Fastpass: a centralized “zero-queue” datacenter network,” ACM SIGCOMM Comp. Commun. Rev. , vol. 44, no. 4, pp. 307–318, Oct. 2014. [5] J. Ousterhout, “It’s time to replace TCP in the datacenter,” Jan. 2023. [6] H. W. Kuhn, “The Hungarian method for the assignment problem,” Naval res. logist. quart. , vol. 2, no. 1-2, pp. 83–97, Mar. 1955. [7] L. R. F. Jr and D. R. Fulkerson, “A simple algorithm for finding maximal network flows and an application to the Hitchcock problem,” Canadian J. Math. , vol. 9, pp. 210–218, 1957. [8] J. Munkres, “Algorithms for the assignment and transportation problems,” J. Soc. Indust. Appl. Math. , vol. 5, no. 1, pp. 32–38, Mar. 1957. [9] J. E. Hopcroft and R. M. Karp, “An n5/2 algorithm for maximum matchings in bipartite graphs,” SIAM J. Comput. , vol. 2, no. 4, pp. 225–231, Dec. 1973. [10] S. Dobzinski, N. Nisan, and S. Oren, “Economic efficiency requires interaction,” in Symposium on Theory of computing (STOC) . ACM, 2014, pp. 233–242. [11] E. Anshelevich and W. Zhu, “Tradeoffs between information and ordinal approximation for bipartite matching,” Theory of Computing Systems , vol. 63, no. 7, pp. 1499–1530, 2019. [12] S. Assadi, S. C. Liu, and R. E. Tarjan, “An auction algorithm for bipartite matching in streaming and massively parallel computation models,” in 
+
+Symposium on Simplicity in Algorithms (SOSA) . SIAM, 2021, pp. 165–171. [13] T. E. Anderson, S. S. Owicki, J. B. Saxe, and C. P. Thacker, “High-speed switch scheduling for local-area networks,” ACM Trans. Comput. Sys. , vol. 11, no. 4, pp. 319–352, Nov. 1993. [14] Q. Cai, M. T. Arashloo, and R. Agarwal, “dcPIM: near-optimal proactive datacenter transport,” in ACM Spec. Int. Gr. Data Commun. (SIGCOMM) ,Aug. 2022, pp. 53–65. [15] W. Wang, M. Ghobadi, K. Shakeri, Y. Zhang, and N. Hasani, “Rail-only: A low-cost high-performance network for training LLMs with trillion parameters,” in IEEE Symp. High-Perf. Interconn. (HOTI) , Aug. 2024, pp. 1–10. [16] J. Dean and S. Ghemawat, “Mapreduce: Simplified data processing on large clusters,” Communications of the ACM , vol. 51, no. 1, pp. 107–113, 2008. [17] A. Greenberg, J. R. Hamilton, N. Jain, S. Kandula, C. Kim, P. Lahiri, D. A. Maltz, P. Patel, and S. Sengupta, “VL2: a scalable and flexible data center network,” ACM SIGCOMM Comp. Commun. Rev. , vol. 39, no. 4, pp. 51–62, Oct. 2009. [18] K. Shvachko, H. Kuang, S. Radia, and R. Chansler, “The hadoop distributed file system,” in Symposium on Mass Storage Systems and Technologies (MSST) . IEEE, 2010, pp. 1–10. [19] M. Zaharia, R. S. Xin, P. Wendell, T. Das, M. Armbrust, A. Dave, X. Meng, J. Rosen, S. Venkataraman, M. J. Franklin et al. , “Apache spark: A unified engine for big data processing,” Communications of the ACM , vol. 59, no. 11, pp. 56–65, 2016. [20] N. McKeown, “The iSLIP scheduling algorithm for input-queued switches,” IEEE/ACM Trans. Netw. , vol. 7, no. 2, pp. 188–201, Apr. 1999. [21] Y. Azar, A. Z. Broder, A. R. Karlin, and E. Upfal, “Balanced allocations,” SIAM J. Comput. , vol. 29, no. 1, pp. 180–200, 1999. [22] M. Mitzenmacher, “The power of two choices in randomized load balancing,” IEEE Trans. Parallel Distrib. Syst. , vol. 12, no. 10, pp. 1094–1104, 2001. [23] A. Israeli and A. Itai, “A fast and simple randomized parallel algorithm for maximal matching,” Inf. Process. Lett. , vol. 22, no. 2, pp. 77–80, 1986. [24] N. Linial, “Locality in distributed graph algorithms,” SIAM J. Comput. , vol. 21, no. 1, pp. 193–201, 1992. [25] R. M. Karp, U. V. Vazirani, and V. V. Vazirani, “An optimal algorithm for on-line bipartite matching,” in ACM Symp. Theory Comput. (STOC) , vol. 22, May 1990, pp. 352–358. [26] M. Alizadeh, S. Yang, M. Sharif, S. Katti, N. McKeown, B. Prabhakar, and S. Shenker, “pFabric: minimal near-optimal datacenter transport,” ACM SIGCOMM Comp. Commun. Rev. , vol. 43, no. 4, pp. 435–446, Aug. 2013. [27] P. X. Gao, A. Narayan, G. Kumar, R. Agarwal, S. Ratnasamy, and S. Shenker, “pHost: distributed near-optimal datacenter transport over commodity network fabric,” in ACM Conf. Emerg. Net. Expts. Tech. (CONEXT)” , vol. 11, Dec. 2015, pp. 1–12. [28] M. Handley, C. Raiciu, A. Agache, A. Voinescu, A. W. Moore, G. Antichi, and M. W´ ojcik, “Re-architecting datacenter networks and stacks for low latency and high performance,” in ACM Spec. Int. Gr. Data Commun. (SIGCOMM) , Aug. 2017, pp. 29–42. [29] B. Montazeri, Y. Li, M. Alizadeh, and J. Ousterhout, “Homa: a receiver-driven low-latency transport protocol using network priorities,” in ACM Spec. Int. Gr. Data Commun. (SIGCOMM) , Aug. 2018, pp. 221–235. [30] N. McKeown, P. Varaiya, and J. Walrand, “Scheduling cells in an input-queued switch,” Electron. Lett. , vol. 29, no. 25, pp. 2174–2175, Dec. 1993. [31] D. Shah and D. Wischik, “Optimal scheduling algorithms for input-queued switches,” in IEEE Inter. Conf. Comp. Commun. (INFOCOM) , vol. 25, Apr. 2006, pp. 1–11. 19 
+
+[32] N. McKeown, A. Mekkittikul, V. Anantharam, and J. Walrand, “Achieving 100% throughput in an input-queued switch,” IEEE Trans. Commun. , vol. 47, no. 8, pp. 1260–1267, Aug. 1999. [33] R. Vaze, “Online knapsack problem and budgeted truthful bipartite matching,” in IEEE Inter. Conf. Comp. Commun. (INFOCOM) , May 2017, pp. 1–9. [34] P. R. Jhunjhunwala and S. T. Maguluri, “Low-complexity switch scheduling algorithms: delay optimality in heavy traffic,” IEEE/ACM Trans. Netw. ,vol. 30, no. 1, pp. 464–473, Feb. 2022. [35] M. Al-Fares, A. Loukissas, and A. Vahdat, “A scalable, commodity data center network architecture,” SIGCOMM Comput. Commun. Rev. , vol. 38, no. 4, pp. 63–74, 2008. [36] R. van der Hofstad, Random Graphs and Complex Networks, vol. 2 . Cambridge University Press, 2024. [37] NetSys/YAPS. (2024, Jul.) Yet another packet simulator. [Online]. Available: https://github.com/NetSys/simulator [38] V. Dukic, S. A. Jyothi, B. Karlaˇ s, M. Owaida, C. Zhang, and A. Singla, “Is advance knowledge of flow sizes a plausible assumption?” in USENIX Conf. Netw. Sys. Des. Impl. (NSDI) , Feb. 2019, pp. 565–580. [39] T. Benson, A. Akella, and D. A. Maltz, “Network traffic characteristics of data centers in the wild,” in ACM SIGCOMM Conf. Internet Meas. (IMC) ,vol. 10, Nov. 2010, pp. 267–280.

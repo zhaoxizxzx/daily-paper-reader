@@ -6,37 +6,44 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-14
-- 运行时间：2026-04-14 20:10:31 UTC
+- 最新运行日期：2026-04-15
+- 运行时间：2026-04-15 20:32:56 UTC
 - 运行状态：成功
-- 本次总论文数：5
+- 本次总论文数：8
 - 精读区：1
-- 速读区：4
+- 速读区：7
 
 ### 今日简报（AI）
-今日聚焦网络性能前沿，深度解析了支持线速动态重排序的可编程分组调度技术。
-重点揭示了动态重排序在提升调度灵活性上的突破，并同步探讨了网内计算风险验证与 HPC 拥塞特性。
-建议优先研读 8.0 分的精读论文，掌握利用可编程数据平面解决复杂流量管理难题的核心思路。
-- 详情：[/202604/14/README](/202604/14/README)
+今日深度解析 IPFS 的 NAT 穿透实测表现，并速览网络计算验证与时钟同步等 8 项前沿进展。
+- 详情：[/202604/15/README](/202604/15/README)
 
 ### 精读区论文标签
-1. [Programmable Packet Scheduling with Dynamic Reordering at Line Rate](/202604/14/2604.11453v1-programmable-packet-scheduling-with-dynamic-reordering-at-line-rate)  
-   标签：评分：8.0/10、query:netmes
-   evidence：用于高速交换机线速处理的可编程硬件调度模型
+1. [Large-Scale Measurement of NAT Traversal for the Decentralized Web: A Case Study of DCUtR in IPFS](/202604/15/2604.12484v1-large-scale-measurement-of-nat-traversal-for-the-decentralized-web-a-case-study-of-dcutr-in-ipfs)  
+   标签：评分：9.0/10、query:netmes
+   evidence：P2P网络中NAT穿越的大规模测量研究
 
 ### 速读区论文标签
-1. [Verifying In-Network Computing Systems for Design Risks](/202604/14/2604.10186v1-verifying-in-network-computing-systems-for-design-risks)  
+1. [Verifying In-Network Computing Systems for Design Risks](/202604/15/2604.10186v2-verifying-in-network-computing-systems-for-design-risks)  
    标签：评分：7.0/10、query:netmes
-   evidence：验证基于可编程交换机和网络计算构建的系统
-2. [Characterizing the Impact of Congestion in Modern HPC Interconnects](/202604/14/2604.11432v1-characterizing-the-impact-of-congestion-in-modern-hpc-interconnects)  
+   evidence：验证可编程交换机上的网络内计算
+2. [Understanding Large-Scale HPC System Behavior Through Cluster-Based Visual Analytics](/202604/15/2604.11965v1-understanding-large-scale-hpc-system-behavior-through-cluster-based-visual-analytics)  
    标签：评分：7.0/10、query:netmes
-   evidence：表征高性能计算互连网络中的拥塞和流量模式
-3. [Attribution-Driven Explainable Intrusion Detection with Encoder-Based Large Language Models](/202604/14/2604.06266v1-attribution-driven-explainable-intrusion-detection-with-encoder-based-large-language-models)  
+   evidence：用于监控大规模HPC系统行为的可扩展可视化分析
+3. [Improving Network Clock Synchronization by Marking Congestion](/202604/15/2604.12961v1-improving-network-clock-synchronization-by-marking-congestion)  
+   标签：评分：7.0/10、query:netmes
+   evidence：用于同步的网络内拥塞指示和过滤机制
+4. [ESN-DAGMM: A Lightweight Framework for Unsupervised Time-Series Data Monitoring in 5G O-RAN Networks](/202604/15/2604.12972v1-esn-dagmm-a-lightweight-framework-for-unsupervised-time-series-data-monitoring-in-5g-o-ran-networks)  
+   标签：评分：7.0/10、query:netmes
+   evidence：5G O-RAN网络的无监督时间序列数据监控
+5. [Tracing the Chain: Deep Learning for Stepping-Stone Intrusion Detection](/202604/15/2604.08800v1-tracing-the-chain-deep-learning-for-stepping-stone-intrusion-detection)  
    标签：评分：6.0/10、query:netmes
-   evidence：在 SDN 中使用流级流量特征进行入侵检测
-4. [Blink: CPU-Free LLM Inference by Delegating the Serving Stack to GPU and SmartNIC](/202604/14/2604.07609v1-blink-cpu-free-llm-inference-by-delegating-the-serving-stack-to-gpu-and-smartnic)  
+   evidence：用于网络流关联和入侵检测的深度学习方法
+6. [Bipartite matching under communication constraints](/202604/15/2604.10744v1-bipartite-matching-under-communication-constraints)  
    标签：评分：6.0/10、query:netmes
-   evidence：数据中心中基于智能网卡（SmartNIC）的请求处理
+   evidence：数据中心网络调度的采样算法
+7. [Learning Low-Dimensional Representation for O-RAN Testing via Transformer-ESN](/202604/15/2604.12958v1-learning-low-dimensional-representation-for-o-ran-testing-via-transformer-esn)  
+   标签：评分：6.0/10、query:netmes
+   evidence：评估O-RAN中的高维关键性能指标
 
 
 <div class="dpr-home-promo-card">

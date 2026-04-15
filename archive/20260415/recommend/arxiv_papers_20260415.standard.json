@@ -1,0 +1,323 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-15T20:31:47.183950+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 7,
+    "quick_skim_target": 11,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2604.12484v1",
+      "title": "Large-Scale Measurement of NAT Traversal for the Decentralized Web: A Case Study of DCUtR in IPFS",
+      "abstract": "The promise of decentralized peer-to-peer (P2P) systems is fundamentally gated by the challenge of Network Address Translation (NAT) traversal, with existing solutions often reintroducing the very centralization they seek to avoid. This paper presents the first large-scale measurement study of a fully decentralized NAT traversal protocol, Direct Connection Upgrade through Relay (DCUtR), within the production libp2p-based InterPlanetary File System (IPFS) network. Drawing on over 4.4 million traversal attempts from 85,000+ distinct networks across 167 countries, we provide an empirical analysis of modern P2P connectivity. We establish a conditional success rate of $70\\% \\pm 7.1\\%$ for the hole-punching stage, given that prerequisite relay reservation and public address discovery succeed, providing a crucial new benchmark for the field. Critically, we empirically challenge the long-held belief of UDP's superiority for NAT traversal, demonstrating that DCUtR's high-precision, RTT-based synchronization yields statistically indistinguishable success rates for both TCP and QUIC ($\\sim70\\%$). Our analysis further validates the protocol's design for permissionless environments by showing that success is independent of relay characteristics and that the mechanism is highly efficient, with $97.6\\%$ of successful connections established on the first attempt. Building on this analysis, we propose a concrete roadmap of protocol enhancements aimed at achieving universal connectivity and contribute our complete dataset to foster further research in this domain.",
+      "authors": [
+        "Dennis Trautwein",
+        "Cornelius Ihle",
+        "Moritz Schubotz",
+        "Corinna Breitinger",
+        "Bela Gipp"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.PF"
+      ],
+      "published": "2026-04-14T09:09:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.12484v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "large-scale measurement study of NAT traversal in P2P networks",
+      "llm_evidence_cn": "P2P网络中NAT穿越的大规模测量研究",
+      "llm_evidence": "P2P网络中NAT穿越的大规模测量研究",
+      "canonical_evidence": "P2P网络中NAT穿越的大规模测量研究",
+      "llm_tldr_en": "Presents a large-scale empirical measurement of the DCUtR NAT traversal protocol in the IPFS network.",
+      "llm_tldr_cn": "对IPFS网络中的DCUtR NAT穿越协议进行了大规模实证测量研究。",
+      "llm_tldr": "对IPFS网络中的DCUtR NAT穿越协议进行了大规模实证测量研究。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.10186v2",
+      "title": "Verifying In-Network Computing Systems for Design Risks",
+      "abstract": "The emergence of programmable switches has brought in-network computing (INC) into the spotlight in recent years. By offloading computation directly onto the data transmission process, INC improves network utilization, reduces latency to sub-RTT levels, saves link bandwidth, and maintains throughput. However, INC disrupts the transparency of traditional networks, forcing developers to consider network exceptions like packet loss and out-of-order. If not properly handled, these exceptions can lead to violations of application properties, such as cache consistency and lock exclusion. Usual testing cannot exhaustively cover these exceptions, raising doubts about the correctness of INC systems and hindering their deployment in the industry. This paper presents INCGuard, the first general-purpose tool for verifying INC systems. INCGuard provides a high-level specification language and saves developers 67.2% lines of code on average. To help better understand the behavior of the system, INCGuard offers configurable network environments. INCGuard enables developers to express INC-specific correctness properties. INCGuard translates developer-specified systems into state transition representations, performs model checking to detect potential design risks, and reports violation traces to developers. We propose optimizations for INC-specific scenarios to address the challenge of state space explosion. We modeled seven INC systems and identified their risks with INCGuard in seconds. We further reproduce them in real systems to confirm the validity of our verification result.",
+      "authors": [
+        "Tianyu Bai",
+        "Ying Zhang",
+        "Xiaoxi Zhang",
+        "Wenfei Wu"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-11T12:41:16+00:00",
+      "link": "https://arxiv.org/pdf/2604.10186v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "verifying in-network computing on programmable switches",
+      "llm_evidence_cn": "验证可编程交换机上的网络内计算",
+      "llm_evidence": "验证可编程交换机上的网络内计算",
+      "canonical_evidence": "验证可编程交换机上的网络内计算",
+      "llm_tldr_en": "INCGuard verifies in-network computing systems to handle network exceptions like packet loss in programmable switches.",
+      "llm_tldr_cn": "INCGuard 验证可编程交换机中的网络内计算系统，以处理丢包等网络异常。",
+      "llm_tldr": "INCGuard 验证可编程交换机中的网络内计算系统，以处理丢包等网络异常。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.08800v1",
+      "title": "Tracing the Chain: Deep Learning for Stepping-Stone Intrusion Detection",
+      "abstract": "Stepping-stone intrusions (SSIs) are a prevalent network evasion technique in which attackers route sessions through chains of compromised intermediate hosts to obscure their origin. Effective SSI detection requires correlating the incoming and outgoing flows at each relay host at extremely low false positive rates -- a stringent requirement that renders classical statistical methods inadequate in operational settings. We apply ESPRESSO, a deep learning flow correlation model combining a transformer-based feature extraction network, time-aligned multi-channel interval features, and online triplet metric learning, to the problem of stepping-stone intrusion detection. To support training and evaluation, we develop a synthetic data collection tool that generates realistic stepping-stone traffic across five tunneling protocols: SSH, SOCAT, ICMP, DNS, and mixed multi-protocol chains. Across all five protocols and in both host-mode and network-mode detection scenarios, ESPRESSO substantially outperforms the state-of-the-art DeepCoFFEA baseline, achieving a true positive rate exceeding 0.99 at a false positive rate of $10^{-3}$ for standard bursty protocols in network-mode. We further demonstrate chain length prediction as a tool for distinguishing malicious from benign pivoting, and conduct a systematic robustness analysis revealing that timing-based perturbations are the primary vulnerability of correlation-based stepping-stone detectors.",
+      "authors": [
+        "Nate Mathews",
+        "Nicholas Hopper",
+        "Matthew Wright"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-09T22:26:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.08800v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "deep learning for flow correlation and intrusion detection in networks",
+      "llm_evidence_cn": "用于网络流关联和入侵检测的深度学习方法",
+      "llm_evidence": "用于网络流关联和入侵检测的深度学习方法",
+      "canonical_evidence": "用于网络流关联和入侵检测的深度学习方法",
+      "llm_tldr_en": "Applies deep learning to correlate network flows for detecting stepping-stone intrusions.",
+      "llm_tldr_cn": "应用深度学习技术进行网络流关联，以检测跳板攻击入侵。",
+      "llm_tldr": "应用深度学习技术进行网络流关联，以检测跳板攻击入侵。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.11965v1",
+      "title": "Understanding Large-Scale HPC System Behavior Through Cluster-Based Visual Analytics",
+      "abstract": "In high-performance computing (HPC) environments, system monitoring data is often unlabeled and high-dimensional, making it difficult to reliably detect and understand anomalous computing nodes. The growing scale and dimensionality of the collected datasets present significant challenges for analysis and visualization tasks. We present a scalable, interactive visual analytics system to support exploration, explanation, and comparison of compute node behaviors in HPC systems. Our approach integrates an analysis workflow combining two-phase dimensionality reduction with contrastive learning and multi-resolution dynamic mode decomposition to capture inter- and intra-cluster variations. These analyses are embedded in an interactive interface that enables users to explore clusters, compare temporal patterns, and iteratively refine hypotheses through customizable visual encodings and baselines. By integrating metrics such as CPU utilization and memory activity, the system offers a holistic view of large-scale system behavior. We demonstrate the utility of our tool through two case studies. In both cases, our system automatically identified meaningful node clusters and revealed subtle behavioral differences within and across node groups. Expert feedback confirmed the effectiveness of our tool in enhancing anomalous behavior detection and interpretation. Our work advances scalable visual analysis for HPC monitoring and has broader implications for cloud, edge computing, and distributed infrastructures where interpretability and behavior analysis are critical to operational efficiency.",
+      "authors": [
+        "Allison Austin",
+        "Shilpika",
+        "Yan To Linus Lam",
+        "Yun-Hsin Kuo",
+        "Venkatram Vishwanath",
+        "Michael E. Papka",
+        "Kwan-Liu Ma"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-13T18:57:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.11965v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "scalable visual analytics for monitoring large-scale HPC system behavior",
+      "llm_evidence_cn": "用于监控大规模HPC系统行为的可扩展可视化分析",
+      "llm_evidence": "用于监控大规模HPC系统行为的可扩展可视化分析",
+      "canonical_evidence": "用于监控大规模HPC系统行为的可扩展可视化分析",
+      "llm_tldr_en": "Presents a visual analytics system for detecting anomalies and monitoring compute node behaviors in HPC clusters.",
+      "llm_tldr_cn": "介绍了一种可视化分析系统，用于检测HPC集群中的异常并监控计算节点行为。",
+      "llm_tldr": "介绍了一种可视化分析系统，用于检测HPC集群中的异常并监控计算节点行为。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.10744v1",
+      "title": "Bipartite matching under communication constraints",
+      "abstract": "In modern data center networks, thousands of hosts contend for shared link capacity; the scale of these systems makes centralized scheduling impractical. This article models such scheduling as a bipartite matching problem under communication constraints: senders express interest in forming connections, and receivers respond using only locally available information. A class of single-round probabilistic matching algorithms is proposed, built on two key ideas: degree-biased sampling, in which senders use receiver degrees to inform their random selection, and random thinning, in which senders report only a random subset of their connections. Analytical performance guarantees are established for random graph models. In sparse regimes, degree-biased sampling yields a higher expected matching size than prior communication-constrained algorithms; in denser settings, a counterintuitive phenomenon emerges where deliberately restricting available connections through thinning increases the expected number of matches. Combining thinning to degree two with greedy selection produces an algorithm that requires no parameter tuning and, in packet-level simulations with production traffic traces, significantly extends the network stability region. Although motivated by data center network scheduling, the underlying framework of bipartite matching under local information constraints is portable to other resource allocation settings.",
+      "authors": [
+        "Moonmoon Mohanty",
+        "Gautham Bolar",
+        "Preetam Patil",
+        "Ayalvadi Ganesh",
+        "Jean-Francois Chamberland",
+        "Parimal Parag"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.NI"
+      ],
+      "published": "2026-04-12T17:35:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.10744v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "sampling algorithms for data center network scheduling",
+      "llm_evidence_cn": "数据中心网络调度的采样算法",
+      "llm_evidence": "数据中心网络调度的采样算法",
+      "canonical_evidence": "数据中心网络调度的采样算法",
+      "llm_tldr_en": "Proposes degree-biased sampling and random thinning for bipartite matching in large-scale data centers.",
+      "llm_tldr_cn": "针对大规模数据中心，提出了基于度偏差采样和随机细化的二分匹配算法。",
+      "llm_tldr": "针对大规模数据中心，提出了基于度偏差采样和随机细化的二分匹配算法。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.12961v1",
+      "title": "Improving Network Clock Synchronization by Marking Congestion",
+      "abstract": "Achieving consistent time across devices in distributed systems often involves exchanging timestamped messages over a network. Precise time synchronization is crucial for applications such as cellular networks, industrial automation, and transactional databases. However, delay variation in synchronization packets-often caused by congestion from competing traffic-degrades synchronization accuracy. Detecting whether a packet experienced congestion can help improve synchronization through filtering and statistical methods.   We propose an in-network congestion indication and filtering mechanism for synchronization messages used in protocols such as the Network Time Protocol (NTP) and Precision Time Protocol (PTP). Network devices mark packets that experienced queuing, allowing clocks to correct errors caused by varying delays. Our approach requires only simple changes at switches or routers, avoiding deep packet inspection or protocol modifications.   The method is backward compatible, using standard but currently unused fields in IP, PTP, or NTP headers. We implement our method on a Tofino P4 target and demonstrate an improvement of over 80% in synchronization performance over a single hop. Moreover, we show that the performance of traditional statistical filters, such as min-RTT and median-delay, is improved by 90% over the one-hop hardware setup. We further demonstrate the effectiveness of our proposed method across multiple hops, both analytically and through simulation. Congestion marking improves the root-mean-squared clock offset estimation error by 30% to 80%, depending on network conditions and filtering techniques.",
+      "authors": [
+        "Yash Deshpande",
+        "Quirin Vogel",
+        "Laura Becker",
+        "Kaan Aykurt",
+        "Wolfgang Kellerer"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-14T16:55:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.12961v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "in-network congestion indication and filtering for synchronization",
+      "llm_evidence_cn": "用于同步的网络内拥塞指示和过滤机制",
+      "llm_evidence": "用于同步的网络内拥塞指示和过滤机制",
+      "canonical_evidence": "用于同步的网络内拥塞指示和过滤机制",
+      "llm_tldr_en": "Improves clock synchronization by using in-network congestion marking to filter delayed packets.",
+      "llm_tldr_cn": "通过网络内拥塞标记过滤延迟数据包，从而提高时钟同步精度。",
+      "llm_tldr": "通过网络内拥塞标记过滤延迟数据包，从而提高时钟同步精度。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12958v1",
+      "title": "Learning Low-Dimensional Representation for O-RAN Testing via Transformer-ESN",
+      "abstract": "Open Radio Access Network (O-RAN) architectures enhance flexibility for 6G and NextG networks. However, it also brings significant challenges in O-RAN testing with evaluating abundant, high-dimensional key performance indicators (KPIs). In this paper, we introduce a novel two-stage framework to learn temporally-aware low-dimensional representations of O-RAN testing KPIs. To be specific, stage one employs an information-theoretic H-score to train a hybrid self-attentive transformer and echo state network (ESN) reservoir, called Transformer-ESN, capturing temporal dynamics and producing task-aligned $8$-dimensional embeddings. Stage two evaluates these embeddings by training a lightweight multilayer perceptron (MLP) predictor exclusively on them for key target KPIs such as reference signal received quality (RSRQ) and spectral efficiency. Using real-world O-RAN testbed data (video streaming with interference), our approach demonstrates a significant advantage specifically when training samples are very limited. In this scenario, the low-dimensional representations learned from the Transformer-ESN yield mean square error (MSE) reductions of up to 41.9\\% for RSRQ and 29.9\\% for spectral efficiency compared to predictions from the original high-dimensional data. The framework exhibits high efficiency for O-RAN testing, significantly reducing testing complexities for O-RAN systems.",
+      "authors": [
+        "Jiongyu Dai",
+        "Raymond Zhao",
+        "Farhad Rezazadeh",
+        "Lizhong Zheng",
+        "Haining Wang",
+        "Lingjia Liu"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-04-14T16:54:25+00:00",
+      "link": "https://arxiv.org/pdf/2604.12958v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "evaluating high-dimensional key performance indicators in O-RAN",
+      "llm_evidence_cn": "评估O-RAN中的高维关键性能指标",
+      "llm_evidence": "评估O-RAN中的高维关键性能指标",
+      "canonical_evidence": "评估O-RAN中的高维关键性能指标",
+      "llm_tldr_en": "Introduces a Transformer-ESN framework to learn low-dimensional representations for O-RAN testing and monitoring.",
+      "llm_tldr_cn": "引入Transformer-ESN框架，为O-RAN测试和监控学习低维表示。",
+      "llm_tldr": "引入Transformer-ESN框架，为O-RAN测试和监控学习低维表示。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.12972v1",
+      "title": "ESN-DAGMM: A Lightweight Framework for Unsupervised Time-Series Data Monitoring in 5G O-RAN Networks",
+      "abstract": "Open Radio Access Network (O-RAN) is an important 5G network architecture enabling flexible communication with adaptive strategies for different verticals. However, testing for O-RAN deployments involve massive volumes of time-series data (e.g., key performance indicators), creating critical challenges for scalable, unsupervised monitoring without labels or high computational overhead. To address this, we present ESN-DAGMM, a lightweight adaptation of the Deep Autoencoding Gaussian Mixture Model (DAGMM) framework for time series analysis. Our model utilizes an Echo State Network (ESN) to efficiently model temporal dependencies, proving effective in O-RAN networks where training samples are highly limited. Combined with DAGMM's integratation of dimensionality reduction and density estimation, we present a scalable framework for unsupervised monitoring of high volume network telemetry. When trained on only 10% of an O-RAN video-streaming dataset, ESN-DAGMM achieved on average 269.59% higher quality clustering than baselines under identical conditions, all while maintaining competitive reconstruction error. By extending DAGMM to capture temporal dynamics, ESN-DAGMM offers a practical solution for time-series analysis using very limited training samples, outperforming baselines and enabling operator's control over the clustering-reconstruction trade-off.",
+      "authors": [
+        "Andrew J Chen",
+        "Raymond Zhao",
+        "Lingjia Liu"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-04-14T17:04:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.12972v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "unsupervised time-series data monitoring for 5G O-RAN networks",
+      "llm_evidence_cn": "5G O-RAN网络的无监督时间序列数据监控",
+      "llm_evidence": "5G O-RAN网络的无监督时间序列数据监控",
+      "canonical_evidence": "5G O-RAN网络的无监督时间序列数据监控",
+      "llm_tldr_en": "A lightweight framework for real-time monitoring of key performance indicators in 5G O-RAN architectures.",
+      "llm_tldr_cn": "一种用于5G O-RAN架构中关键性能指标实时监控的轻量级框架。",
+      "llm_tldr": "一种用于5G O-RAN架构中关键性能指标实时监控的轻量级框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
