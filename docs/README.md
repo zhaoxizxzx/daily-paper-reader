@@ -6,44 +6,35 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-15
-- 运行时间：2026-04-15 20:32:56 UTC
+- 最新运行日期：2026-04-16
+- 运行时间：2026-04-16 20:01:33 UTC
 - 运行状态：成功
-- 本次总论文数：8
-- 精读区：1
-- 速读区：7
+- 本次总论文数：4
+- 精读区：0
+- 速读区：4
 
 ### 今日简报（AI）
-今日深度解析 IPFS 的 NAT 穿透实测表现，并速览网络计算验证与时钟同步等 8 项前沿进展。
-- 详情：[/202604/15/README](/202604/15/README)
+今日速递 4 篇 AIOps 与流媒体优化论文，涵盖视频传输增强与微服务故障诊断。
+推荐关注 eBandit 的核驱动强化学习视频流方案，以及 TORAI 针对多源遥测数据的无监督根因分析。
+运维开发者可深入探索图嵌入与强化学习在复杂系统异常检测中的实战潜力。
+- 详情：[/202604/16/README](/202604/16/README)
 
 ### 精读区论文标签
-1. [Large-Scale Measurement of NAT Traversal for the Decentralized Web: A Case Study of DCUtR in IPFS](/202604/15/2604.12484v1-large-scale-measurement-of-nat-traversal-for-the-decentralized-web-a-case-study-of-dcutr-in-ipfs)  
-   标签：评分：9.0/10、query:netmes
-   evidence：P2P网络中NAT穿越的大规模测量研究
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Verifying In-Network Computing Systems for Design Risks](/202604/15/2604.10186v2-verifying-in-network-computing-systems-for-design-risks)  
+1. [eBandit: Kernel-Driven Reinforcement Learning for Adaptive Video Streaming](/202604/16/2604.08791v2-ebandit-kernel-driven-reinforcement-learning-for-adaptive-video-streaming)  
    标签：评分：7.0/10、query:netmes
-   evidence：验证可编程交换机上的网络内计算
-2. [Understanding Large-Scale HPC System Behavior Through Cluster-Based Visual Analytics](/202604/15/2604.11965v1-understanding-large-scale-hpc-system-behavior-through-cluster-based-visual-analytics)  
+   evidence：使用 eBPF 将网络监控移至 Linux 内核
+2. [TORAI: Unsupervised Fine-grained RCA using Multi-Source Telemetry Data](/202604/16/2604.13522v1-torai-unsupervised-fine-grained-rca-using-multi-source-telemetry-data)  
    标签：评分：7.0/10、query:netmes
-   evidence：用于监控大规模HPC系统行为的可扩展可视化分析
-3. [Improving Network Clock Synchronization by Marking Congestion](/202604/15/2604.12961v1-improving-network-clock-synchronization-by-marking-congestion)  
-   标签：评分：7.0/10、query:netmes
-   evidence：用于同步的网络内拥塞指示和过滤机制
-4. [ESN-DAGMM: A Lightweight Framework for Unsupervised Time-Series Data Monitoring in 5G O-RAN Networks](/202604/15/2604.12972v1-esn-dagmm-a-lightweight-framework-for-unsupervised-time-series-data-monitoring-in-5g-o-ran-networks)  
-   标签：评分：7.0/10、query:netmes
-   evidence：5G O-RAN网络的无监督时间序列数据监控
-5. [Tracing the Chain: Deep Learning for Stepping-Stone Intrusion Detection](/202604/15/2604.08800v1-tracing-the-chain-deep-learning-for-stepping-stone-intrusion-detection)  
+   evidence：用于微服务根因分析的多源遥测数据
+3. [From Load Tests to Live Streams: Graph Embedding-Based Anomaly Detection in Microservice Architectures](/202604/16/2604.06448v2-from-load-tests-to-live-streams-graph-embedding-based-anomaly-detection-in-microservice-architectures)  
    标签：评分：6.0/10、query:netmes
-   evidence：用于网络流关联和入侵检测的深度学习方法
-6. [Bipartite matching under communication constraints](/202604/15/2604.10744v1-bipartite-matching-under-communication-constraints)  
+   evidence：利用服务图进行微服务架构中的异常检测
+4. [SAKURAONE: An Open Ethernet-Based AI HPC System and Its Observed Workload Dynamics in a Single-Tenant LLM Development Environment](/202604/16/2604.13600v1-sakuraone-an-open-ethernet-based-ai-hpc-system-and-its-observed-workload-dynamics-in-a-single-tenant-llm-development-environment)  
    标签：评分：6.0/10、query:netmes
-   evidence：数据中心网络调度的采样算法
-7. [Learning Low-Dimensional Representation for O-RAN Testing via Transformer-ESN](/202604/15/2604.12958v1-learning-low-dimensional-representation-for-o-ran-testing-via-transformer-esn)  
-   标签：评分：6.0/10、query:netmes
-   evidence：评估O-RAN中的高维关键性能指标
+   evidence：开放以太网AI HPC系统中的工作负载动态观测
 
 
 <div class="dpr-home-promo-card">

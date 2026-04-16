@@ -1,0 +1,65 @@
+{
+  "label": "2026-04-16",
+  "date": "2026-04-16",
+  "generated_at": "2026-04-16T20:01:42",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202604/16/2604.08791v2-ebandit-kernel-driven-reinforcement-learning-for-adaptive-video-streaming",
+      "section": "quick",
+      "title_en": "eBandit: Kernel-Driven Reinforcement Learning for Adaptive Video Streaming",
+      "authors": "Mahdi Alizadeh",
+      "date": "2026-04-09",
+      "pdf": "https://arxiv.org/pdf/2604.08791v2",
+      "score": "7.0",
+      "evidence": "使用 eBPF 将网络监控移至 Linux 内核",
+      "tldr": "针对用户态自适应比特率（ABR）算法无法实时获取传输层信号且响应滞后的问题，本文提出eBandit框架。该框架利用eBPF技术将网络监控和ABR策略选择下沉至Linux内核，通过轻量级的epsilon-greedy多臂老虎机（MAB）算法，根据实时TCP指标动态评估并切换最优启发式策略。实验表明，eBandit在合成和真实移动网络环境下均显著提升了视频观看体验（QoE）。",
+      "tags": "query:netmes",
+      "abstract_en": "User-space Adaptive Bitrate (ABR) algorithms cannot see the transport layer signals that matter most, such as minimum RTT and instantaneous delivery rate, and they respond to network changes only after damage has already propagated to the playout buffer. We present eBandit, a framework that relocates both network monitoring and ABR algorithm selection into the Linux kernel using eBPF. A lightweight epsilon-greedy Multi-Armed Bandit (MAB) runs inside a sockops program, evaluating three ABR heuristics against a reward derived from live TCP metrics. On an adversarial synthetic trace eBandit achieves $416.3 \\pm 4.9$ cumulative QoE, outperforming the best static heuristic by $7.2\\%$. On 42 real-world sessions eBandit achieves a mean QoE per chunk of $1.241$, the highest across all policies, demonstrating that kernel-resident bandit learning transfers to heterogeneous mobile conditions.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/16/2604.13522v1-torai-unsupervised-fine-grained-rca-using-multi-source-telemetry-data",
+      "section": "quick",
+      "title_en": "TORAI: Unsupervised Fine-grained RCA using Multi-Source Telemetry Data",
+      "authors": "Luan Pham, Huong Ha, Xiuzhen Zhang, Hongyu Zhang",
+      "date": "2026-04-15",
+      "pdf": "https://arxiv.org/pdf/2604.13522v1",
+      "score": "7.0",
+      "evidence": "用于微服务根因分析的多源遥测数据",
+      "tldr": "针对微服务系统中因黑盒或不支持追踪的服务（盲点）导致调用图不完整，进而影响根因分析（RCA）准确性的问题，本文提出TORAI。这是一种无需调用图的无监督RCA方法，通过多源遥测数据衡量异常严重度，结合症状聚类、因果分析和假设检验来精确定位根因。实验表明，TORAI在存在盲点的情况下显著优于现有方法，能有效提供高准确度的根因建议。",
+      "tags": "query:netmes",
+      "abstract_en": "Existing multi-source root cause analysis (RCA) methods for microservice systems assume all services have traces to construct a service call graph. However, this assumption is not practical as microservice systems evolve rapidly and may contain blackbox services without traces, such as compiled software or unsupported services. We refer to these services as blind spots. In the presence of blind spots, the performance of existing multi-source RCA methods may be affected, as they only diagnose visible services on the call graph. To overcome this limitation, we propose TORAI, a novel unsupervised approach that effectively pinpoints fine-grained root causes without relying on the service call graph. Instead, TORAI first measures anomaly severity using available multi-source telemetry data. It then performs clustering to group services based on their severity symptoms and conducts causal analysis to rank services within each severity cluster. Finally, TORAI aggregates the cluster rankings and uses hypothesis testing to identify fine-grained root causes. TORAI provides an unsupervised approach that leverages available multi-source telemetry data for RCA without requiring a constructed service call graph or further intrusive actions, thus addressing the limitations of existing methods. Our experiments on three benchmark systems demonstrate that TORAI outperforms state-of-the-art baselines remarkably in the presence of blind spots. Performance on real-world failures further shows that TORAI can accurately pinpoint the root causes in top-3 recommendations.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/16/2604.06448v2-from-load-tests-to-live-streams-graph-embedding-based-anomaly-detection-in-microservice-architectures",
+      "section": "quick",
+      "title_en": "From Load Tests to Live Streams: Graph Embedding-Based Anomaly Detection in Microservice Architectures",
+      "authors": "Srinidhi Madabhushi, Pranesh Vyas, Swathi Vaidyanathan, Mayur Kurup, Elliott Nash, Yegor Silyutin",
+      "date": "2026-04-07",
+      "pdf": "https://arxiv.org/pdf/2604.06448v2",
+      "score": "6.0",
+      "evidence": "利用服务图进行微服务架构中的异常检测",
+      "tldr": "Prime Video针对直播和点播流量高峰，开发了一种基于图嵌入的微服务异常检测系统。该系统利用GCN-GAE模型从分钟级的有向加权服务图中学习节点表示，通过对比压力测试与实际活动中的嵌入向量余弦相似度来识别异常服务。研究不仅能准确识别故障相关服务，还具备早期预警能力，并在合成异常评估中表现出极高的精确率，为复杂微服务监控提供了新方案。",
+      "tags": "query:netmes",
+      "abstract_en": "Prime Video regularly conducts load tests to simulate the viewer traffic spikes seen during live events such as Thursday Night Football as well as video-on-demand (VOD) events such as Rings of Power. While these stress tests validate system capacity, they can sometimes miss service behaviors unique to real event traffic. We present a graph-based anomaly detection system that identifies under-represented services using unsupervised node-level graph embeddings. Built on a GCN-GAE, our approach learns structural representations from directed, weighted service graphs at minute-level resolution and flags anomalies based on cosine similarity between load test and event embeddings. The system identifies incident-related services that are documented and demonstrates early detection capability. We also introduce a preliminary synthetic anomaly injection framework for controlled evaluation that show promising precision (96%) and low false positive rate (0.08%), though recall (58%) remains limited under conservative propagation assumptions. This framework demonstrates practical utility within Prime Video while also surfacing methodological lessons and directions, providing a foundation for broader application across microservice ecosystems.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/16/2604.13600v1-sakuraone-an-open-ethernet-based-ai-hpc-system-and-its-observed-workload-dynamics-in-a-single-tenant-llm-development-environment",
+      "section": "quick",
+      "title_en": "SAKURAONE: An Open Ethernet-Based AI HPC System and Its Observed Workload Dynamics in a Single-Tenant LLM Development Environment",
+      "authors": "Fumikazu Konishi, Yuuki Tsubouchi, Hirofumi Tsuruta",
+      "date": "2026-04-15",
+      "pdf": "https://arxiv.org/pdf/2604.13600v1",
+      "score": "6.0",
+      "evidence": "开放以太网AI HPC系统中的工作负载动态观测",
+      "tldr": "SAKURAONE是SAKURA互联网研究中心开发的AI HPC集群，在TOP500中排名第49位。它是全球前100强中唯一采用全开放网络栈（800 GbE与SONiC）的系统，包含100个配备8路H100的节点。研究通过分析单一租户的大模型开发负载，揭示了从大规模初始训练向中规模迭代优化的资源利用动态，证明了开放以太网技术在超大规模AI计算中的可扩展性。",
+      "tags": "query:netmes",
+      "abstract_en": "SAKURAONE is a managed high performance computing (HPC) cluster developed and operated by the SAKURA Internet Research Center. It builds on the KOKARYOKU PHY bare metal GPU platform and is optimized for advanced workloads, including large language model (LLM) training. In ISC 2025 TOP500, SAKURAONE is ranked 49th by HPL and is the only top 100 system that uses a fully open networking stack - 800 GbE with SONiC - demonstrating the scalability of vendor-neutral technology. Measured performance is 33.95 PFLOP/s (HPL Rmax), 396.295 TFLOP/s (HPCG), and 339.86 PFLOP/s on HPL-MxP with FP8. The system consists of 100 nodes, each with eight NVIDIA H100 GPUs and a 2 PB all-flash Lustre file system, interconnected via a rail-optimized 800 GbE leaf-spine fabric with RoCEv2. Through exclusive use by a single research project, we observed the characteristics of development-related jobs. Consistent with previous HPC studies, small-scale jobs dominated in number, while a few large-scale jobs accounted for most GPU resource time. As the project progressed, resource use shifted from large-scale to mid-scale jobs, reflecting a transition from initial large-scale training to iterative refinement. These observations illustrate the real-world utilization dynamics of GPU clusters under unified project workloads.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
