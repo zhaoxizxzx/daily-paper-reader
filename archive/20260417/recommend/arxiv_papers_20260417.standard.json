@@ -1,0 +1,255 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-17T19:46:23.850988+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2604.14787v1",
+      "title": "Towards Trustworthy 6G Network Digital Twins: A Framework for Validating Counterfactual What-If Analysis in Edge Computing Resources",
+      "abstract": "Network Digital Twins (NDTs) enable safe what-if analysis for 6G cloud-edge infrastructures, but adoption is often limited by fragmented workflows from telemetry to validation. We present a data-driven NDT framework that extends 6G-TWIN with a scalable pipeline for cloud-edge telemetry aggregation and semantic alignment into unified data models. Our contributions include: (i) scalable cloud-edge telemetry collection, (ii) regime-aware feature engineering capturing the network's scaling behavior, and (iii) a validation methodology based on Sign Agreement and Directional Sensitivity. Evaluated on a Kubernetes-managed cluster, the framework extrapolates performance to unseen high-load regimes. Results show both Deep Neural Network (DNN) and XGBoost achieve high regression accuracy (R2 > 0.99), while the XGBoost model delivers superior directional reliability (Sa > 0.90), making the NDT a trustworthy tool for proactive resource scaling in out-of-distribution scenarios.",
+      "authors": [
+        "Julian Jimenez Agudelo",
+        "Paola Soto",
+        "Ayat Zaki-Hindi",
+        "Jean-Sébastien Sottet",
+        "Sébastien Faye",
+        "Nina Slamnik-Kriještorac",
+        "Johann Marquez-Barja",
+        "Miguel Camelo Botero"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-04-16T08:49:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.14787v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "scalable cloud-edge telemetry collection and network digital twins",
+      "llm_evidence_cn": "可扩展的云边遥测采集与网络数字孪生",
+      "llm_evidence": "可扩展的云边遥测采集与网络数字孪生",
+      "canonical_evidence": "可扩展的云边遥测采集与网络数字孪生",
+      "llm_tldr_en": "A data-driven framework for 6G network digital twins using scalable telemetry aggregation and validation.",
+      "llm_tldr_cn": "一种利用可扩展遥测聚合和验证的6G网络数字孪生数据驱动框架。",
+      "llm_tldr": "一种利用可扩展遥测聚合和验证的6G网络数字孪生数据驱动框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.14690v1",
+      "title": "Switching Efficiency: A Novel Framework for Dissecting AI Data Center Network Efficiency",
+      "abstract": "Communication is pivotal in LLM training, and a thorough analysis of the communication efficiency of AI data center (AIDC) network is essential for guiding the design of these capital-intensive clusters. However, conventional metrics are inadequate for such analysis, as they do not directly link network activity to computational progress and lack granularity to diagnose the impact of different network design patterns. To address this, we introduce a metric framework, the Switching Efficiency Framework, whose core metric - Switching Efficiency ($η$) - quantifies computationally effective data throughput per unit switching capacity. We further decompose $η$ into three factors - Data, Routing Efficiency, and Port Utilization to facilitate analysis of distinct communication bottlenecks.   Using this metric framework, we demonstrate how the symmetric, distributed switching of 3D-Torus and the centralized, hierarchical switching of Rail-Optimized architecture align with sparse or imbalanced LLM training traffic, and show that All-to-All traffic from Mixture-of-Experts models severely degrades their port utilization and routing efficiency. Our analysis also demonstrates how key design choices - such as adjusting switching resource allocation, expanding server size, adopting in-network computing, and multi-plane design - positively influence distinct facets of communication efficiency. Ultimately, the Switching Efficiency Framework provides an analytical tool for analyzing efficiency bottlenecks, thereby informing the design of future-generation AIDC networks.",
+      "authors": [
+        "Niangen Ye",
+        "Jiawen Zhu",
+        "Baojun Chen",
+        "Dong Wang",
+        "Jiang Sun",
+        "Weiqiang Sun",
+        "Weisheng Hu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-16T06:49:12+00:00",
+      "link": "https://arxiv.org/pdf/2604.14690v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "efficiency framework for AI data center networks and throughput analysis",
+      "llm_evidence_cn": "AI数据中心网络效率框架与吞吐量分析",
+      "llm_evidence": "AI数据中心网络效率框架与吞吐量分析",
+      "canonical_evidence": "AI数据中心网络效率框架与吞吐量分析",
+      "llm_tldr_en": "Introduces a framework to quantify and decompose switching efficiency in AI data center networks.",
+      "llm_tldr_cn": "引入了一个量化和分解AI数据中心网络交换效率的框架。",
+      "llm_tldr": "引入了一个量化和分解AI数据中心网络交换效率的框架。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.15128v1",
+      "title": "SCENIC: Stream Computation-Enhanced SmartNIC",
+      "abstract": "Although modern, AI-centric datacenters heavily rely on SmartNICs, existing devices impose a hard trade-off. Commercial SmartNICs provide high bandwidth and easy software integration, but offer limited support for customization and data processing offload. In contrast, research SmartNICs often suffer from low bandwidth, limited functionality, and poor software compatibility -- to the point that many are not actual NICs in a technical sense. This gap can be closed by treating the NIC datapath as a first-class stream computation substrate with shared hardware/software abstractions for a tight co-design of infrastructure and applications. To demonstrate this, we introduce SCENIC, an open-source datacenter SmartNIC. SCENIC implements a 200G network datapath over offloaded TCP/IP and RDMA stacks, as well as a fallback path for processing arbitrary network traffic. On top of the network logic, SCENIC combines on-datapath Stream Compute Units (SCUs) for data processing and embedded ARM cores for flexible control path manipulation with direct access to GPUs and SSDs. SCENIC is fully integrated with the OS, exposing native Linux network and RDMA verb interfaces, making the programmable datapath transparent to existing applications while enabling control of, e.g., user-defined offloads and programmable congestion control. SCENIC's performance matches commercial platforms, and we show its versatility through several use cases such as offloaded collective communication and network-to-GPU hash-based data partitioning.",
+      "authors": [
+        "Benjamin Ramhorst",
+        "Maximilian Jakob Heer",
+        "Luhao Liu",
+        "Heejae Kim",
+        "Jonas Dann",
+        "Jin-Soo Kim",
+        "Gustavo Alonso"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.DC",
+        "cs.NI"
+      ],
+      "published": "2026-04-16T15:13:48+00:00",
+      "link": "https://arxiv.org/pdf/2604.15128v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "SmartNIC for data processing offload and network datapath in datacenters",
+      "llm_evidence_cn": "用于数据中心数据处理卸载和网络数据通路的智能网卡",
+      "llm_evidence": "用于数据中心数据处理卸载和网络数据通路的智能网卡",
+      "canonical_evidence": "用于数据中心数据处理卸载和网络数据通路的智能网卡",
+      "llm_tldr_en": "Presents SCENIC, an open-source 200G SmartNIC designed for stream computation and datacenter offloading.",
+      "llm_tldr_cn": "介绍了SCENIC，一种专为流计算和数据中心卸载设计的开源200G智能网卡。",
+      "llm_tldr": "介绍了SCENIC，一种专为流计算和数据中心卸载设计的开源200G智能网卡。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12888v1",
+      "title": "Advancing Network Digital Twin Framework for Generating Realistic Datasets",
+      "abstract": "The integration of accurate and reproducible wireless network simulations is a key enabler for research on open, virtualized, and intelligent communication systems. Network Digital Twins (NDTs) provide a scalable alternative to costly and time-consuming measurement campaigns, while enabling controlled experimentation and data generation for data-driven network design. In this paper, we present an open and user-friendly NDT framework that integrates controllable vehicular mobility with the site-specific ray tracer Sionna and the discrete-event ns-3 network simulator, enabling virtualized end-to-end modeling of wireless networks across the radio, network, and application layers. The proposed framework is particularly well-suited for dynamic vehicular networks and urban deployments, supporting realistic mobility, traffic dynamics, and the extraction of cross-layer metrics. To promote open-source initiatives, we release both the NDT implementation and a representative dataset generated from realistic vehicular and urban scenarios. The framework and dataset facilitate reproducible experimentation and benchmarking of machine learning-based quality of service prediction, network optimization, and intelligent network management algorithms, lowering the entry barrier for research on virtual and open wireless network services.",
+      "authors": [
+        "Oscar Stenhammar",
+        "Sundeep Rangan",
+        "Gábor Fodor",
+        "Carlo Fischione"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "eess.SP"
+      ],
+      "published": "2026-04-14T15:37:54+00:00",
+      "link": "https://arxiv.org/pdf/2604.12888v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Network Digital Twins as an alternative to measurement campaigns",
+      "llm_evidence_cn": "网络数字孪生作为测量活动的替代方案",
+      "llm_evidence": "网络数字孪生作为测量活动的替代方案",
+      "canonical_evidence": "网络数字孪生作为测量活动的替代方案",
+      "llm_tldr_en": "Presents a Network Digital Twin framework for realistic dataset generation and virtualized network modeling.",
+      "llm_tldr_cn": "提出一种网络数字孪生框架，用于生成真实数据集和虚拟化网络建模。",
+      "llm_tldr": "提出一种网络数字孪生框架，用于生成真实数据集和虚拟化网络建模。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.13274v1",
+      "title": "Sequential Change Detection for Multiple Data Streams with Differential Privacy",
+      "abstract": "Sequential change-point detection seeks to rapidly identify distributional changes in streaming data while controlling false alarms. Existing multi-stream detection methods typically rely on non-private access to raw observations or intermediate statistics, limiting their usage in privacy-sensitive settings. We study sequential change-point detection for multiple data streams under differential privacy constraints. We consider multiple independent streams undergoing a synchronized change at an unknown time and in an unknown subset of streams, and propose DP-SUM-CUSUM, a differentially private detection procedure based on the summation of per-stream CUSUM statistics with calibrated Laplace noise injection. We show that DP-SUM-CUSUM satisfies sequential $\\varepsilon$-differential privacy and derive bounds on the average run length to false alarm and the worst-case average detection delay, explicitly characterizing the privacy--efficiency tradeoff. A truncation-based extension is also presented to handle distributional shifts with unbounded log-likelihood ratios. Simulations and experiments on an Internet of Things (IoT) botnet dataset validate the proposed approach.",
+      "authors": [
+        "Lixing Zhang",
+        "Liyan Xie",
+        "Ruizhi Zhang"
+      ],
+      "primary_category": "math.ST",
+      "categories": [
+        "math.ST",
+        "cs.CR"
+      ],
+      "published": "2026-04-14T20:08:07+00:00",
+      "link": "https://arxiv.org/pdf/2604.13274v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Sequential change detection for multiple data streams",
+      "llm_evidence_cn": "多数据流的序列变化检测",
+      "llm_evidence": "多数据流的序列变化检测",
+      "canonical_evidence": "多数据流的序列变化检测",
+      "llm_tldr_en": "Develops a differentially private procedure for detecting distributional changes in streaming data.",
+      "llm_tldr_cn": "开发了一种用于检测流数据分布变化的差分隐私程序。",
+      "llm_tldr": "开发了一种用于检测流数据分布变化的差分隐私程序。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.14957v1",
+      "title": "MLDAS: Machine Learning Dynamic Algorithm Selection for Software-Defined Networking Security",
+      "abstract": "Network security is a critical concern in the digital landscape of today, with users demanding secure browsing experiences and protection of their personal data. This study explores the dynamic integration of Machine Learning (ML) algorithms with Software-Defined Networking (SDN) controllers to enhance network security through adaptive decision mechanisms. The proposed approach enables the system to dynamically choose the most suitable ML algorithm based on the characteristics of the observed network traffic. This work examines the role of Intrusion Detection Systems (IDS) as a fundamental component of secure communication networks and discusses the limitations of SDN-based attack detection mechanisms. The proposed framework uses adaptive model selection to maintain reliable intrusion detection under varying network conditions. The study highlights the importance of analyzing traffic-type-based metrics to define effective classification rules and enhance the performance of ML models. Additionally, it addresses the risks of overfitting and underfitting, underscoring the critical role of hyperparameter tuning in optimizing model accuracy and generalization. The central contribution of this work is an automated mechanism that adaptively selects the most suitable ML algorithm according to real-time network conditions, prioritizing detection robustness and operational feasibility within SDN environments.",
+      "authors": [
+        "Pablo Benlloch",
+        "Oscar Romero",
+        "Antonio Leon",
+        "Jaime Lloret"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-16T12:53:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.14957v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "observing network traffic for SDN security",
+      "llm_evidence_cn": "为SDN安全观察网络流量",
+      "llm_evidence": "为SDN安全观察网络流量",
+      "canonical_evidence": "为SDN安全观察网络流量",
+      "llm_tldr_en": "Integrates ML with SDN controllers to adaptively select algorithms based on observed network traffic patterns.",
+      "llm_tldr_cn": "将机器学习与SDN控制器结合，根据观察到的网络流量特征自适应选择安全算法。",
+      "llm_tldr": "将机器学习与SDN控制器结合，根据观察到的网络流量特征自适应选择安全算法。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

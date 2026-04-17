@@ -1,0 +1,245 @@
+Title: Towards Trustworthy 6G Network Digital Twins: A Framework for Validating Counterfactual What-If Analysis in Edge Computing Resources
+
+URL Source: https://arxiv.org/pdf/2604.14787v1
+
+Published Time: Fri, 17 Apr 2026 00:43:22 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Towards Trustworthy 6G Network Digital Twins: A Framework for Validating Counterfactual What-If Analysis in Edge Computing Resources 
+
+Julian Jimenez Agudelo ∗, Paola Soto ∗, Ayat Zaki-Hindi †, Jean-S´ ebastien Sottet †, S´ ebastien Faye †,Nina Slamnik-Krijeˇ storac ∗, Johann Marquez-Barja ∗, Miguel Camelo Botero ∗∗University of Antwerp - imec, IDLab, Belgium 
+
+†Luxembourg Institute of Science and Technology (LIST), Luxembourg 
+
+©2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, including reprint-ing/republishing this material for advertising or promotional purposes, collecting new collected works for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. 
+
+Abstract —Network Digital Twins (NDTs) enable safe what-if analysis for 6G cloud–edge infrastructures, but adoption is often limited by fragmented workflows from telemetry to validation. We present a data-driven NDT framework that extends 6G-TWIN with a scalable pipeline for cloud–edge telemetry aggre-gation and semantic alignment into unified data models. Our contributions include: (i) scalable cloud–edge telemetry collection, (ii) regime-aware feature engineering capturing the network’s scaling behavior, and (iii) a validation methodology based on Sign Agreement and Directional Sensitivity. Evaluated on aKubernetes-managed cluster, the framework extrapolates per-formance to unseen high-load regimes. Results show both Deep Neural Network (DNN) and XGBoost achieve high regression accuracy ( R2 > 0.99 ), while the XGBoost model delivers superior directional reliability ( Sa > 0.90 ), making the NDT a trustworthy tool for proactive resource scaling in out-of-distribution scenarios. 
+
+Index Terms —Network Digital Twin, What-if Analysis, 6G, Re-source Orchestration, Edge Computing, Model Trustworthiness. 
+
+I. I NTRODUCTION 
+
+NDTs have emerged as a key enabler for future com-munication networks by providing a data-driven, interactive virtual replica of real network infrastructures. These twins support advanced emulation, scenario planning, impact analy-sis, and closed-loop optimization without directly affecting the physical network [1], [2]. In particular, NDTs enable what-if analysis by offering predictive insights into the effects of configuration changes, traffic load variations, and resource allocation decisions, capabilities that are essential for oper-ating the highly dynamic and distributed environments of 6G networks [3]–[5]. Despite this potential, the practical adoption of data-driven NDTs remains challenging. Existing research primarily fo-cuses either on high-level architectural definitions and func-tional/data decompositions [1], [6]–[8] or on specialized mod-els targeting narrow metrics with both real [9], [10] and synthetic data [11]–[13]. As a result, current approaches often overlook the End-to-End (E2E) operational workflows spanning data collection, preprocessing, and robust validation. This fragmentation limits the applicability of NDTs in real-world deployments where NDTs trustworthiness and robust-ness across varying operating regimes are critical. Furthermore, data collection is frequently treated as an implicit process, despite being the foundation of any data-driven twin. In the cloud–edge continuum, heterogeneous data sources, in format and semantic, and dynamic service placements introduce noise and non-stationarity that directly impact model reliability. Therefore, ensuring a scalable and secured telemetry framework is a fundamental prerequisite for maintaining the semantic consistency and traceability of training data across distributed monitoring points [2], [7]. In this paper, we address these limitations by proposing an E2E data-driven NDT framework that bridges the gap between raw data collection and operational validation for computing environments. The primary contributions of this work are as follows:  
+
+> •
+
+We extend the 6G-TWIN architecture [7] with a unified telemetry and harmonization pipeline that decouples raw metric exposure from semantic abstraction, enabling con-sistent multi-domain observability across the cloud–edge continuum.  
+
+> •
+
+We introduce a regime-aware feature engineering ap-proach that abstracts raw infrastructure metrics into scale-invariant indicators, enabling the NDT to extrapolate performance across heterogeneous workload intensities.  
+
+> •
+
+We define a formal validation methodology for counter-factual reasoning based on Sign Agreement and Direc-tional Sensitivity, providing a quantitative basis for as-sessing the trustworthiness of NDT signals in autonomous Management and Orchestration (MANO) loops.  
+
+> •
+
+Through an experimental validation on a Kubernetes-managed edge cluster, we show that while both DNN and gradient-boosted models achieve high predictive ac-curacy, regime-aware XGBoost provides superior direc-tional reliability under resource and workload transitions. The remainder of the paper is organised as follows: Section II details the data collection and harmonisation framework; Section III presents the functional modelling pipeline and feature abstractions; Section IV describes NDT operation and matched-pairs validation; Section V reports the experimental results; Section VI concludes. II. A D ATA COLLECTION FRAMEWORK FOR NDT This work builds upon the reference architecture proposed within the ITU [1], which defines a modular framework for realizing NDT through telemetry-driven data, model-based reasoning, and federated management.          
+
+> arXiv:2604.14787v1 [eess.SY] 16 Apr 2026 Network application
+> Physical network
+> Network Digital Twin
+> UE Infrastructure Computing resources
+> NDT management Unified data models
+> Unified Data
+> Repository
+> Capability exposure Intent input
+> Data collection Control
+> Functional models
+> Basic models Security mgmt
+> Topology mgmt
+> Model mgmt
+> Validation Optimization Visualization Fig. 1. ITU Reference architecture [1]
+
+A. ITU Reference Architecture 
+
+As illustrated in Fig. 1, the ITU-T high-level architecture enforces a clear separation of concerns across multiple layers: data acquisition and network control through interaction with the physical network via two different interfaces; real-world representation through the interaction of three key subsystems, an unified data and model repository and a management entity; an application layer that serves as the input for the require-ments of the NDT. These functions are coordinated by the MANO entity, enabling scalable and extensible deployment across heterogeneous network domains. The lowest layer comprises the physical infrastructure, sup-porting various types of networks including the Radio Access Network (RAN), Core Network (CN), and User Equipment (UE), supported by a device-to-edge-to-cloud continuum of computing resources. This layer provides potentially massive real-time operational data to the NDT layer, together with an actuation and execution interface that allows the NDT to enforce optimized configurations on physical elements, thereby closing the control loop. The NDT layer represents the virtual counterpart of the physical network and is structured into two complementary functional views: (i) a persistent view (real-time monitor-ing) , which maintains a continuously updated representation of the current network state using a Unified Data Repos-itory (UDR) and basic models; (ii) an on-demand view (what-if analysis) , which provides a sandbox environment for simulation and Artificial Intelligence (AI) training to assess hypothetical scenarios before real deployment. It relies on application-driven functional models, which may be either data- or simulation-based. The MANO layer provides the NDT lifecycle management by integrating Zero-Touch Network and Service Management (ZSM) principles. It orchestrates AI-driven workflows and ensures that NDT operations comply with high-level, intent-based policies, while also offering a unified interface for hu-man operators to monitor network performance and intervene in automated decision-making. However, the current version of the ITU architecture does not explicitly define the functional structure of the data collection pipeline nor its interaction with other architectural components. 
+
+B. Data Collection and Harmonization in 6G-TWIN 
+
+To address this gap, the 6G-TWIN data collection frame-work is extended as a multi-stage pipeline that bridges raw physical network observability with actionable Network Digi-tal Twin (NDT) models. This pipeline is explicitly partitioned into the Telemetry Data Layer (TDL) and the HDL, enabling tight synchronization across the cyber–physical continuum. 6G-TWIN defines an implementation-oriented functional ar-chitecture for 6G NDTs across the physical, digital, manage-ment, and application domains, refining the ITU-T vision into deployable functional blocks and interfaces [14]. This architectural extension is motivated by the limitations of existing generic telemetry frameworks when applied to 6G environments. While the IETF telemetry framework [15] specifies core delivery and streaming mechanisms, it lacks domain-specific abstractions required for high-fidelity NDT synchronization. Similarly, data-centric platforms such as Dis-tributed Data Stream Processing (DDSP) [16] provide scalable and real-time processing capabilities, but require adaptation to support telecommunications-specific data models and stringent latency constraints. The new proposed TDL and HDL transform the traditional 
+
+sense phase into a specialized data pipeline capable of integrat-ing heterogeneous operational data sources spanning physical and virtualized environments by separating raw telemetry ingestion from semantic refinement. As illustrated in Fig. 2, this dual-layered exposure framework replaces monolithic data collection approaches with a modular architecture optimized for efficient pre-processing, semantic alignment, and federated distribution. 
+
+C. Multi-domain Telemetry Data Layer (TDL) 
+
+The multi-domain TDL enables both real-time monitoring and historical analysis by collecting telemetry across man-agement, control, and data planes, including the underlying computing infrastructure. Beyond periodic polling, modern telemetry supports query-driven and streaming mechanisms, where measurement tasks are dynamically instantiated and ex-ported to analytics components [15]. By leveraging structured data models and high-throughput transport, these approaches expose fine-grained system state with controlled overhead. Programmable telemetry architectures, such as [17], further unify configuration, performance, and flow-level observability, providing a scalable foundation for adaptive NDTs. Extending beyond networking, the TDL incorporates the 
+
+computing domain to monitor cloud-native workloads hosted on Kubernetes (K8s) clusters [18]. This is facilitated through integration with Prometheus [19], which acts as the pri-mary time-series telemetry engine. By utilizing a pull-based scraping mechanism, Prometheus collects metrics from K8s nodes, pods, and specialized exporters (e.g., cAdvisor , Node Exporter ). These metrics, encompassing CPU/memory utiliza-tion, disk I/O, and microservice latency, are ingested into the TDL and normalized. This cross-domain observability allows the NDT to reason over the complex interdependencies between network throughput and the computational health of the host environment. Fig. 2. 6G-TWIN enhanced architecture including the Telemetry Data Layer (TDL) and Harmonization Data Layer (HDL) 
+
+D. Harmonization Data Layer (HDL) for Semantic and Cross-Domain Data Models Harmonization 
+
+The HDL serves as the functional engine transforming normalized telemetry into Smart Data Models (SDM) [20], bridging the gap between raw multi-domain data and the UDR 
+
+[6], [21]. This layer addresses the heterogeneity of the 6G cyber-physical continuum by unifying 3GPP radio and core network models with the ETSI NFV-MANO framework for computing resources. 1) Data Ingestion and Taxonomy Mapping: The HDL standardizes naming conventions and data formats across diverse domains using a structured taxonomy of At-tributes and Performance Measurements , also known as metamodels [21]. For instance, radio assets follow 3GPP standards (e.g., TS 28.622 [22]). For the computing domain, it aligns with ETSI GS NFV-IFA standards to model NFV-IFA 011 and 013 [23], [24]:  
+
+> •
+
+(Virtual) Computing Element (CE): Modeling Virtual Machines and containers via resource al-locations (CPU, memory, storage) and operational status.  
+
+> •
+
+Network Function (NF) and Network Services (NS): Representing individual functions (firewalls, routers) and their compositions (e.g., a VPN chain) as specialized Information Object Classess (IOCs).  
+
+> •
+
+Infrastructure & Storage: Mapping capacity and replication metrics from edge and cloud storage systems. Notice that NF and NS may be described as a pure CEs, e.g., number of CPU, memory, storage, bandwidth, or from a more high-level perspective containing properties associated with its function or domain, e.g., an Access and Mobility Management Function (AMF) or a router. An example of a schema to represent CE is presented in Fig. 3. 2) Format Alignment: To resolve discrepancies between heterogeneous vendors (e.g., RAN vs. Cloud Ser-vice Providers), the architecture adopts the SDM ap-proach.The proposed data model extends ETSI-defined  
+
+> Fig. 3. Example of metamodel schemas representing CEs in edge/cloud computing domains
+
+descriptors. Beyond standardising the data format, it describes the extensive context in which data are pro-vided, ensuring that virtualized infrastructure metrics (e.g., from K8s or Prometheus) are aligned with multi-domain network events. 3) Semantic Alignment The aforementioned SDM defi-nition ensures initial semantic consistency with respect to metric scales, units of measurement, and a standard-ized data format for subsequent exploitation. Building upon this foundation, semantic harmonization operates through complementary processes that enable consistent interpretation and comparability of measurements across diverse contexts and over time. Context-aware adapta-tion mechanisms such as Chorus [25] help ensure that sensor outputs measuring the similar or complementary physical quantity remain interpretable and operationally consistent across varying environmental or situational contexts. 4) Basic Models Representation: Once harmonized, the data is structured into basic models as a time-series graph capturing both temporal evolution and the re-lationships among network elements [6]. This graph encodes physical and logical dependencies across com-ponents, providing a coherent and contextualized rep-resentation of the network state for visualization and for guiding subsequent processing and analysis by the functional models. 5) Functional Model Support: Refined and harmonized Fig. 4. NDT Framework for Validating Counterfactual What-If Analysis in Edge Computing Resources 
+
+data is fed into Functional Models for ”what-if” analysis and predictive maintenance. In the computing domain, these models utilize harmonized data to forecast re-source exhaustion, optimize Virtual Network Function (VNF) placement, and detect anomalies in the compute-network chain to maintain end-to-end Service Level Agreement (SLA) requirements. 6) Data Space Governance: In multi-stakeholder 6G environments, the HDL prepares data for exchange within a Data Space (DS) . This framework ensures data sovereignty for both 3GPP radio data and MANO logs (aligned with NFV-MANO policies), enabling se-cure collaboration between Mobile Network Operators (MNOs) and cloud providers. Ultimately, the 6G-TWIN data collection framework serves as a unified semantic substrate, formally converging 3GPP Generic Network Resource Models ( via ETSI TS 128 622) and ETSI NFV-MANO specifications into a cohesive SDM ecosystem. This integration harmonizes the multi-domain TDL in the physical world with the HDL in the digital world, achieving a multidimensional abstraction of NFs and NSs across the edge-to-cloud continuum. These entities are rep-resented simultaneously as deterministic CEs (resource-level footprints) and high-level functional IOCs. This dual-lens representation, embedded within a sovereign DS governance framework, enables the NDT to reason over complex interdependencies between radio performance and the computational health of the virtualized infrastructure, a prerequisite for autonomous 6G orchestration. III. C ONSTRUCTING FUNCTIONAL MODELS FOR 
+
+COMPUTING -C ENTRIC NDT S
+
+Building upon the previously introduced TDL and HDL, this section presents the framework for constructing functional models in computing-centric NDTs. Although the Sense– Think–Plan–Act loop is native to the 6G-TWIN architecture, we instantiate it here for the edge computing use case by tightly coupling the collection layers with functional modeling blocks for counterfactual what-if analysis (cf. Fig. 4). This spe-cialization preserves generality, as the modeling and validation components remain domain-agnostic and extensible. In the Sense phase, multi-domain telemetry gathered and normalized by the TDL is harmonized by the HDL into regime-aware features. These representations feed the Think 
+
+phase, where basic and functional NDT models capture struc-tural and dynamic aspects of cloud–edge infrastructures, and a counterfactual engine evaluates controlled perturbations (e.g., pod scaling ±1, user shifts) to simulate alternative states. Trustworthiness is ensured through matched-pairs validation assessing directionality and ∆-accuracy between predicted and observed outcomes, producing a calibrated dataset. The resulting insights drive the Plan and Act phases via NDT-MANO, enabling informed scaling and orchestration decisions while keeping the modeling layer logically decoupled from runtime control. 
+
+A. Modeling Hierarchy: Structural and Behavioral Abstrac-tions 
+
+The modeling process follows a hierarchical approach that separates static system representation from dynamic behavior modeling. Basic Models provide a continuously synchro-nized structural representation of the physical and virtual infrastructure. Aligned with ETSI GS NFV-IFA specifications, these models describe: (i) Element-level properties , such as deterministic resource footprints of CEs (CPU, memory, stor-age, and bandwidth), and functional attributes of NFs; and (ii) System-level topologies , capturing placement constraints, resource sharing, and service chaining relationships. These models form the digital mirror of the infrastructure and are maintained through real-time updates stored in the UDR. 
+
+Functional Models extend this structural baseline by learn-ing the relationship between resource allocation, workload dynamics, and service-level performance. These models con-stitute the predictive core of the NDT, enabling forecasting of latency, saturation effects, and scaling behavior under varying conditions. Unlike basic models, functional models encode non-linear dependencies across the compute–network stack and are explicitly designed to support what-if reasoning. 
+
+B. Feature Construction and Regime-Aware Abstraction 
+
+To ensure model generalization across heterogeneous op-erating conditions, we employ a structured methodology for 
+
+regime-aware feature abstraction . This approach moves be-yond the ingestion of raw telemetry by deriving indicators that capture the underlying scaling physics and resource dynamics of the distributed environment. The pipeline is divided into two primary phases: statistical refinement and physics-informed feature engineering. 
+
+1) Regime-Specific Statistical Refinement: Prior to feature extraction, raw data is partitioned into discrete operational regimes defined by the intersection of workload intensity (e.g., user concurrency) and resource allocation (e.g., active pod counts). Within each regime, an automated anomaly removal process is executed using the Interquartile Range (IQR) method. By filtering outliers on a per-regime basis, the pipeline ensures that the models learn from steady-state system behavior rather than transient measurement artifacts or ”cold-start” noise, which can otherwise skew the learned scaling relationships. 
+
+2) Physics-Informed Feature Engineering: Rather than re-lying on absolute system counters, the pipeline constructs features that represent the ”pressure” and ”flow” of the in-frastructure. This abstraction strategy includes: • Resource Utilization Density: Metrics such as CPU and memory usage are processed to represent the load per unit of compute. This allows the model to learn load-to-performance relationships that are invariant to specific cluster sizes.  
+
+> •
+
+Congestion and Queue Dynamics: Indicators derived from the average queue depth and backlog time provide a direct signal of system saturation. These serve as proxy indicators for latent bottlenecks that raw throughput met-rics often fail to capture.  
+
+> •
+
+Scale-Invariant Transformations: By centering the fea-ture space on the relationship between demand (work-load) and capacity (allocated resources), the framework enables out-of-distribution (OOD) generalization . This allows the Digital Twin to maintain predictive validity when extrapolated to higher-intensity traffic regimes (e.g., 600 users) despite being trained on lower-intensity data (e.g., 200–400 users). Through this abstraction layer, the resulting functional mod-els become portable across different deployment sizes and hardware configurations. Additionally, the models provide reli-able ”What-If” projections for proactive infrastructure scaling and capacity planning by preserving the physical consistency of system behavior. 
+
+C. Model Outputs and Decision Interfaces 
+
+The functional models, acting as the core of the NDT, expose predictive outputs through standardized interfaces de-signed for proactive system orchestration. Rather than static performance monitoring, this layer provides dynamic mapping from system state to expected Quality of Service (QoS) metrics. 
+
+1) Predictive Estimations: The primary output is a point estimate of the target latency, denoted as y = f (x, c), where 
+
+x represents the current telemetry state and c denotes a specific infrastructure configuration (e.g., pod count). The models are optimized to provide high-fidelity inference even at the distribution tails, ensuring that the orchestrator can account for worst-case latency scenarios in high-concurrency regimes. 
+
+2) Counterfactual (What-If) Analysis: To support auto-mated decision-making, the NDT facilitates counterfactual reasoning . By perturbing the configuration vector c → c′
+
+(e.g., simulating a ±1 pod adjustment), the model generates relative performance trends. As evidenced in our experimental validation, these ”What-If” projections are verified against ground-truth matched pairs from the dataset. This allows the orchestrator to quantify the expected latency delta ( ∆y) before an actuation command is issued to the live environment. 
+
+3) Operational Decoupling: Critically, the functional layer remains agnostic to specific deployment policies or optimiza-tion objectives (e.g., cost vs. performance). By providing a pure performance estimation interface, also know as Analyz-ing NDT [26], the model preserves a separation of concerns: the NDT models the system physics, while the operational methodology, described in the following section, utilizes these predictions to derive optimal scaling trajectories. IV. M ETHODOLOGY FOR NDT O PERATION AND 
+
+TRUSTWORTHY EVALUATION 
+
+The operational lifecycle of a 6G-TWIN analytical instance governs how structural and functional models are instanti-ated, trained, validated, and used for decision support. This methodology ensures that predictive outputs generated by the NDT remain trustworthy when applied to operational what-if analysis and closed-loop actuation. 
+
+A. Initialization and Structural Synchronization 
+
+Upon instantiation, the NDT performs a consistency check on the Basic Model repository. If no valid synchronized state exists, the 6G-TWIN MANO triggers an infrastructure discovery procedure via the TDL. This process initiates the capture and normalization of new telemetry data, instantiating two distinct data flows. This decoupled approach ensures that data is simultaneously available for live structural mirroring, enabling real-time updates to the basic models, and persis-tent on-demand analysis, providing the historical telemetry required to train or refine functional models. Depending on the specific analytical objectives (e.g., the required time-window of observation), normalized telemetry is ingested and processed by the HDL and mapped into IOCs representing computing and networking entities, such as K8s nodes, pods, and service chains. These entities are then bound to live telemetry streams, establishing a high-fidelity structural mirror. This ”digital twin” of the infrastructure serves as the authoritative reference state for all subsequent modeling, what-if simulations, and closed-loop actuation. 
+
+B. Functional Model Training and Dataset Assembly 
+
+Functional model training is initiated on demand by the NDT MANO. A bounded and normalized telemetry window is extracted from the UDR and processed to generate train-ing datasets aligned with specific operating regimes. Feature construction follows the regime-aware abstractions defined in Section III, ensuring that learned relationships reflect system physics rather than transient correlations. Multiple model classes (e.g., tree-based and neural archi-tectures) may be trained in parallel, enabling comparative evaluation without committing to a single hypothesis. 
+
+C. Trustworthy Evaluation via Matched-Pairs Consistency 
+
+To assess suitability for operational what-if analysis, the framework introduces a Matched-Pairs Consistency evalu-ation methodology. Rather than relying solely on aggregate prediction errors, this approach evaluates model behavior across controlled transitions between paired operating regimes 
+
+RA → R B , where a single control variable is modified. Two complementary metrics are computed: 1) Sign Agreement ( Sa): the probability that the model correctly predicts the direction of change in the target Key Performance Indicator (KPI). 2) Directional Sensitivity: the consistency between pre-dicted and observed performance deltas across regime pairs. Based on these metrics, models are assigned a Qualitative Deployment Grade (Excellent, Reliable, or Unreliable). This grade acts as a deployment gate, ensuring that only models exhibiting stable directional behavior under perturbations are promoted to the active NDT runtime. 
+
+D. What-If Execution and Actuation 
+
+Validated models enable interactive what-if exploration. Once the (best) functional model is selected and deployed, the operators can start simulating hypothetical scaling actions or workload changes, which are evaluated by the functional model to predict performance trends and resource risks. When confidence thresholds are met, the NDT MANO can translate validated decisions into actuation commands, such as adjusting the K8s scheduler, thereby closing the loop between digital reasoning and physical execution. V. E XPERIMENTAL EVALUATION AND RESULTS 
+
+A. System Implementation and Experimental Campaign 
+
+The proposed framework is validated on a three-node K8s cluster (Table I) using Prefect for orchestration and KEDA 
+
+for workload-driven scaling. Telemetry ingestion and harmo-nization are realized through a unified data pipeline built on 
+
+Prometheus and Kafka , which jointly serve as a communica-tion bus and distributed streaming substrate. Prometheus col-lects raw infrastructure and service-level metrics, while Kafka enables durable and decoupled data dissemination across the cloud–edge continuum. Lightweight processing components perform online feature extraction and semantic alignment, ef-fectively instantiating both the TDL and HDL while preserving separation of concerns. The telemetry is persisted in InfluxDB , providing a his-torical basis for HDL-driven model lifecycle management. During training phases, the HDL processes these data streams to generate functional models (DNN and XGBoost), which are subsequently versioned and stored in a container reg-istry . Associated performance metadata (e.g., MAE, R2, and regime validity) are stored to ensure reproducible and traceable orchestration decisions. 
+
+Data Generation Strategy: A structured measurement cam-paign is conducted to characterize non-linear system behavior under load. A synthetic load generator issues continuous inference requests to a CIFAR-10 classification service across three workload regimes, 200, 400, and 600 concurrent users. For each workload, the service is scaled from 1 to 6 pods, covering operating points from saturation to over-provisioning. Telemetry is collected via the TDL at 20 ms resolution, yield-ing 259,016 samples. This granularity is required to capture queuing dynamics and tail latency behavior under contention. 
+
+B. Data Refinement and Regime-Aware Abstraction 
+
+The dataset consists of telemetry samples collected via the TDL, which performs real-time acquisition and persistence into InfluxDB and exposes streams through Kafka for online consumption. For functional model construction, the HDL re-trieves these measurements and applies a structured refinement pipeline.                                           
+
+> TABLE I SYSTEM INFRASTRUCTURE AND SOFTWARE ENVIRONMENT
+> Attribute Master Node Worker 1 Worker 2
+> CPU Cores 4 (AMD Ryzen 9) 8 (Intel i5-7260U) 8 (Intel i5-7260U) RAM (GB) 8832 OS / K8s Ubuntu 22.04 / Kubernetes v1.33.6 Component Version Component Version Prefect 2.20.18 KEDA 2.18.1 InfluxDB 2.x Kafka 3.x
+> TABLE II REGIME -A WARE FEATURE ENGINEERING
+> Raw Telemetry Derived Feature Physical Meaning
+> current_users ,pods Workload Intensity Demand per processing unit
+> avg_depth_on_enqueue ,pods Congestion Index Queue pressure per pod
+> avg_backlog_sec_est ,pods Backlog Flow Delay accumulation rate
+> avg_cpu_process_pct ,avg_cpu_system_pct Compute Pressure Aggregate CPU load
+> avg_mem_system_pct Memory Density Secondary bottleneck signal
+> avg_total_infer_ms Log-Target Scaling Tail variance stabilization
+
+Anomaly removal is applied independently for each 
+
+(users , pods ) operating regime using percentile-based trim-ming at the 1st and 99th percentiles of the target latency metric 
+
+avg_total_infer_ms . This removes transient cold-start effects and measurement artifacts, resulting in a refined dataset of 253,828 samples. The refined telemetry is mapped into a 7-dimensional regime-aware feature space designed to capture non-linear scaling dynamics. As detailed in Table II, raw metrics are nor-malized by the number of active pods to derive scale-invariant indicators such as workload intensity and congestion index. This abstraction allows the models to recognize equivalent operating states, for example 400 users on 4 pods and 200 users on 2 pods. To stabilize variance induced by heavy-tailed latency distributions, the target variable is log-transformed as 
+
+y′ = ln(1 + y).To evaluate out-of-distribution generalization, models are trained exclusively on the 200 and 400 user regimes and evaluated on the unseen 600 user regime. 
+
+C. Model Configuration and Performance Evaluation 
+
+Two functional model architectures are evaluated within the NDT, an XGBoost regressor and a DNN, both trained on the regime-aware feature space to predict log-transformed inference latency. 
+
+1) Architectural Configuration: The XGBoost model is configured with 2,000 estimators, a maximum depth of 8, and a learning rate of 0.05. The DNN consists of three fully connected layers with 256, 128, and 64 neurons, respectively, and incorporates batch normalization, dropout rates between 0.3 and 0.6, and a Huber loss optimized using Adam with a learning rate of 10 −3.
+
+2) NDT Quality Analysis: Model quality is evaluated on the unseen 600 user regime using the criteria defined in Table III. As summarized in Table IV, both models achieve an Excellent 
+
+quality grade. While overall accuracy is comparable, XGBoost exhibits superior robustness in high-latency regions. Fig. 5. True versus predicted latency for the unseen 600 user regime. The dashed diagonal indicates ideal prediction. TABLE III NDT Q UALITY GRADING CRITERIA 
+
+Quality Grade Constraint Type MAE Bound P95 Bound Excellent Absolute ≤ 50 ms ≤ 150 ms Relative ≤ 10% ≤ 25% 
+
+Good Absolute ≤ 100 ms ≤ 300 ms Relative ≤ 15% ≤ 40% 
+
+Weak Combined Criteria not satisfied                    
+
+> TABLE IV NDT P ERFORMANCE SUMMARY (600 U SER TEST REGIME )Model MAE (ms) RMSE (ms) R2P95 Error (ms) Grade XGBoost 8.97 18.08 0.9949 29.32 Excellent DNN 9.03 18.69 0.9945 50.35 Excellent
+
+3) Per-Regime Validation: Prediction accuracy remains sta-ble across pod allocations within the 600 user regime, as shown in Table VI. XGBoost maintains particularly high fidelity for 5 and 6 pod configurations. 
+
+D. Operational What-If Analysis 
+
+To evaluate the NDT for decision-oriented network and service management, we perform what-if reasoning by esti-mating latency deltas ∆ between observed operational regimes and hypothetical configuration or workload changes. Each transition is defined using matched ground-truth samples with similar nuisance conditions, ensuring consistent and physically meaningful delta computations. As shown in Table VII, the XGBoost-based NDT captures both direction and magnitude of performance changes. For horizontal scaling at 600 users, mean ∆ = −12 .85 ms for pods +1 and −0.01 ms for pods −1. For workload reductions, mean ∆ = −12 .24 ms ( 600 → 400 ) and −20 .50 ms ( 600 →
+
+200 ). Median deltas and P95 |∆| show strong alignment with                                                      
+
+> TABLE V TAIL PERFORMANCE ANALYSIS (600 U SER TEST REGIME )Threshold Model Samples MAE (ms) RMSE (ms) R2
+> P90 XGBoost 4,555 23.00 37.85 0.8952 DNN 4,555 51.28 54.49 0.7829
+> P95 XGBoost 2,278 30.43 48.53 0.8049 DNN 2,278 61.80 65.10 0.6490 TABLE VI PER -R EGIME ACCURACY (600 U SER TEST )Users Pods XGBoost MAE XGBoost R2DNN MAE DNN R2
+> 600 411.26 0.9881 8.96 0.9959 600 58.56 0.9956 9.23 0.9951 600 68.83 0.9955 9.02 0.9943
+
+observed changes and high sensitivity to system dynamics, confirming suitability for proactive network management and resource orchestration. The DNN shows limited response to counterfactual changes, with mean ∆ = 0 .60 ms (pods +1 ) and −0.92 ms (pods −1), and small deltas for workload reductions ( −0.09 ms for 600 →
+
+400 , 0.45 ms for 600 → 200 ). While adequate for static latency prediction, it lacks directional sensitivity required for reliable service management decisions under large operational shifts. In general, we can see that XGBoost model provides consistent directional predictions and accurately quantifies the impact of resource and workload changes, supporting closed-loop orchestration and operational what-if reasoning. The DNN remains limited to static predictions and cannot reliably capture causal effects of configuration or load modifications. VI. C ONCLUSIONS AND FUTURE WORK 
+
+This paper presented a telemetry driven approach to func-tional modeling within the 6G-TWIN reference architecture, TABLE VII COUNTERFACTUAL DELTA AND DIRECTIONAL SENSITIVITY ANALYSIS                                      
+
+> Scenario Model Mean ∆(ms) SaMAE ∆(ms) Sensitivity
+> pods +1 DNN 0.60 0.52 4.12 Negligible XGBoost -12.85 0.94 2.15 High
+> pods -1 DNN -0.92 0.48 6.84 Negligible XGBoost 24.85 0.91 3.42 High
+> users →200 DNN 0.45 0.55 5.11 Low XGBoost -20.50 0.98 1.88 High
+
+focusing on the evaluation of data driven models for E2E latency prediction in a NDT. The results showed that non-linear models such as eXtreme Gradient Boosting (XGBoost) and DNN can achieve high predictive accuracy, but may exhibit different biases and sensitivities that are not captured by aggregate error metrics alone. In particular, the evaluation under what-if scenarios demonstrated that models with similar pointwise accuracy can differ in their ability to estimate the impact of configuration and load changes, highlighting the need for evaluation criteria that reflect operational reliability rather than purely statistical performance. Future work will extend the proposed evaluation framework by incorporating additional classes of functional models and more complex what-if scenarios, including time dependent and multi dimensional variations. Further investigation will also focus on improving model robustness and reducing bias in high latency regimes, as well as on integrating evaluation outcomes more tightly with network management functions. These directions aim to strengthen the role of data driven digital twins as reliable decision support tools in future com-munication networks. ACKNOWLEDGMENT 
+
+The 6G-TWIN project has received funding from the Smart Networks and Services Joint Undertaking (SNS JU) under the European Union’s Horizon Europe research and innovation program under Grant Agreement No 101136314. REFERENCES [1] ITU-T, “Digital Twin Network - Requirements and Architecture,” International Telecommunication Union, Recommendation Y.3090, Feb. 2022. [Online]. Available: https://www.itu.int/rec/T-REC-Y.3090-202202-I/ [2] C. Zhou et al. , “Network digital twin: Concepts and reference architecture,” Internet Engineering Task Force (IETF), Internet-Draft draft-irtf-nmrg-network-digital-twin-arch-07, Sep. 2024, informational draft, expires 30 March 2025. [Online]. Available: https://www.ietf.org/archive/id/draft-irtf-nmrg-network-digital-twin-arch-07.html [3] S. Faye et al. , “Integrating network digital twinning into future ai-based 6g systems: The 6g-twin vision,” in 2024 Joint European Conference on Networks and Communications ’&’ 6G Summit (EuCNC/6G Summit) ,2024, pp. 883–888. [4] J. Wieme et al. , “Architectural design for digital twin networks,” Network , vol. 5, no. 3, 2025. [Online]. Available: https://www.mdpi.com/2673-8732/5/3/24 [5] S. M. Raza et al. , “A comprehensive survey of net-work digital twin architecture, capabilities, challenges, and requirements for edge–cloud continuum,” Computer Commu-nications , vol. 236, p. 108144, 2025. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S014036642500101X [6] A. Zaki-Hindi et al. , “Network digital twins for 6g: Defining data taxonomy and data models,” in 2024 IEEE Conference on Standards for Communications and Networking (CSCN) , 2024, pp. 124–128. [7] S. Faye et al. , “A functional framework for network digital twins,” in 
+
+2025 Joint European Conference on Networks and Communications & 6G Summit (EuCNC/6G Summit) , 2025, pp. 01–06. [8] Z. Yang et al. , “An architectural framework for 6g network digital twins system,” in Proceedings of the 30th Annual International Conference on Mobile Computing and Networking ,ser. ACM MobiCom ’24. New York, NY, USA: Association for Computing Machinery, 2024, p. 2437–2441. [Online]. Available: https://doi.org/10.1145/3636534.3696730 [9] N. U. Saqib et al. , “Digital twin enabled cellu-lar network management and prediction,” ICT Express ,vol. 10, no. 3, pp. 479–484, 2024. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S2405959524000249 [10] A. Zaki-Hindi et al. , “A modular network digital twin for radio coverage prediction: From theory to practice,” Sep. 2025. [Online]. Available: https://doi.org/10.5281/zenodo.17086138 [11] M. Polverini et al. , “Avoiding sdn application conflicts with digital twins: Design, models and proof of concept,” IEEE Transactions on Network and Service Management , vol. 23, pp. 2038–2050, 2026. [12] M. Ferriol-Galm´ es et al. , “Building a digital twin for network optimization using graph neural networks,” Computer Networks , vol. 217, p. 109329, 2022. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S1389128622003681 [13] P. Soto et al. , “Atari: A graph convolutional neural network approach for performance prediction in next-generation wlans,” Sensors ,vol. 21, no. 13, 2021. [Online]. Available: https://www.mdpi.com/1424-8220/21/13/4321 [14] 6G-TWIN Consortium, “D1.3 – Frameworks for Zero-Touch Service and Network Management and the Orchestration of its AI-based NF and NS,” 6G-TWIN, Public Deliverable D1.3, Dec. 2025. [Online]. Available: https://6g-twin.eu/resources/#deliverables [15] H. Song et al. , “Network telemetry framework,” Internet Engineering Task Force (IETF), RFC 9232, Informational 9232, May 2022. [Online]. Available: https://datatracker.ietf.org/doc/rfc9232/ [16] K. Padmanaban et al. , “Apache kafka on big data event streaming for enhanced data flows,” in 2024 8th International Conference on I-SMAC (IoT in Social, Mobile, Analytics and Cloud) (I-SMAC) , 2024, pp. 977– 983. [17] A. Gupta et al. , “Sonata: query-driven streaming network telemetry,” in Proceedings of the 2018 Conference of the ACM Special Interest Group on Data Communication , ser. SIGCOMM ’18. New York, NY, USA: Association for Computing Machinery, 2018, p. 357–371. [Online]. Available: https://doi.org/10.1145/3230543.3230555 [18] V. Venkatesan and C. Arunachalam, “Ai-driven digital twin frame-work for security threat simulation and compliance optimization,” in 
+
+2025 IEEE International Carnahan Conference on Security Technology (ICCST) , 2025, pp. 1–6. [19] H. B. Tsegaye et al. , “Sdn-integrated cloud-edge digital twin framework for real-time monitoring in additive manufacturing,” in 2025 IEEE 30th International Workshop on Computer Aided Modeling and Design of Communication Links and Networks (CAMAD) , 2025, pp. 1–6. [20] “Smart data models initiative,” 2026, available at https://smartdatamodels.org/, accessed February 2026. [21] J.-S. Sottet et al. , “A data space for 6g network digital twins: Challenges and opportunities,” in 2025 IEEE CSCN . IEEE, 2025, pp. 1–2. [22] ETSI TS 128 622, “Universal mobile telecommunications system (umts); lte; 5g; management and orchestration; generic network resource model (nrm) integration reference point (irp); information service (3gpp ts 28.622 release 18),” European Telecommunications Standards Institute (ETSI), Technical Specification (TS), 2024. [23] ETSI GS NFV-IFA 011, “Network functions virtualisation (nfv) release 4; management and orchestration; vnf descriptor and packaging spec-ification,” European Telecommunications Standards Institute (ETSI), Group Specification (GS), 2023. [24] ETSI GS NFV-IFA 013, “Network functions virtualisation (nfv) release 4; management and orchestration; os-ma-nfvo reference point - interface and information model specification,” European Telecommunications Standards Institute (ETSI), Group Specification (GS), 2023. [25] L. Zhang et al. , “Chorus: Harmonizing context and sensing signals for data-free model customization in iot,” arXiv e-prints , pp. arXiv–2512, 2025. [26] ETSI, “Zero-touch network and Service Management (ZSM); Net-work Digital Twin,” European Telecommunications Standards Institute (ETSI), ETSI Group Report ETSI GR ZSM 015, Feb 2024.

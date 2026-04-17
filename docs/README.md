@@ -6,35 +6,38 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-16
-- 运行时间：2026-04-16 20:01:33 UTC
+- 最新运行日期：2026-04-17
+- 运行时间：2026-04-17 19:47:24 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：0
+- 本次总论文数：6
+- 精读区：2
 - 速读区：4
 
 ### 今日简报（AI）
-今日速递 4 篇 AIOps 与流媒体优化论文，涵盖视频传输增强与微服务故障诊断。
-推荐关注 eBandit 的核驱动强化学习视频流方案，以及 TORAI 针对多源遥测数据的无监督根因分析。
-运维开发者可深入探索图嵌入与强化学习在复杂系统异常检测中的实战潜力。
-- 详情：[/202604/16/README](/202604/16/README)
+今日聚焦 6G 网络数字孪生与 AI 数据中心效率，深度解析了边缘计算与高性能网络架构的融合
+- 详情：[/202604/17/README](/202604/17/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [Towards Trustworthy 6G Network Digital Twins: A Framework for Validating Counterfactual What-If Analysis in Edge Computing Resources](/202604/17/2604.14787v1-towards-trustworthy-6g-network-digital-twins-a-framework-for-validating-counterfactual-what-if-analysis-in-edge-computing-resources)  
+   标签：评分：9.0/10、query:netmes
+   evidence：可扩展的云边遥测采集与网络数字孪生
+2. [Switching Efficiency: A Novel Framework for Dissecting AI Data Center Network Efficiency](/202604/17/2604.14690v1-switching-efficiency-a-novel-framework-for-dissecting-ai-data-center-network-efficiency)  
+   标签：评分：8.0/10、query:netmes
+   evidence：AI数据中心网络效率框架与吞吐量分析
 
 ### 速读区论文标签
-1. [eBandit: Kernel-Driven Reinforcement Learning for Adaptive Video Streaming](/202604/16/2604.08791v2-ebandit-kernel-driven-reinforcement-learning-for-adaptive-video-streaming)  
+1. [SCENIC: Stream Computation-Enhanced SmartNIC](/202604/17/2604.15128v1-scenic-stream-computation-enhanced-smartnic)  
    标签：评分：7.0/10、query:netmes
-   evidence：使用 eBPF 将网络监控移至 Linux 内核
-2. [TORAI: Unsupervised Fine-grained RCA using Multi-Source Telemetry Data](/202604/16/2604.13522v1-torai-unsupervised-fine-grained-rca-using-multi-source-telemetry-data)  
-   标签：评分：7.0/10、query:netmes
-   evidence：用于微服务根因分析的多源遥测数据
-3. [From Load Tests to Live Streams: Graph Embedding-Based Anomaly Detection in Microservice Architectures](/202604/16/2604.06448v2-from-load-tests-to-live-streams-graph-embedding-based-anomaly-detection-in-microservice-architectures)  
+   evidence：用于数据中心数据处理卸载和网络数据通路的智能网卡
+2. [Advancing Network Digital Twin Framework for Generating Realistic Datasets](/202604/17/2604.12888v1-advancing-network-digital-twin-framework-for-generating-realistic-datasets)  
    标签：评分：6.0/10、query:netmes
-   evidence：利用服务图进行微服务架构中的异常检测
-4. [SAKURAONE: An Open Ethernet-Based AI HPC System and Its Observed Workload Dynamics in a Single-Tenant LLM Development Environment](/202604/16/2604.13600v1-sakuraone-an-open-ethernet-based-ai-hpc-system-and-its-observed-workload-dynamics-in-a-single-tenant-llm-development-environment)  
+   evidence：网络数字孪生作为测量活动的替代方案
+3. [Sequential Change Detection for Multiple Data Streams with Differential Privacy](/202604/17/2604.13274v1-sequential-change-detection-for-multiple-data-streams-with-differential-privacy)  
    标签：评分：6.0/10、query:netmes
-   evidence：开放以太网AI HPC系统中的工作负载动态观测
+   evidence：多数据流的序列变化检测
+4. [MLDAS: Machine Learning Dynamic Algorithm Selection for Software-Defined Networking Security](/202604/17/2604.14957v1-mldas-machine-learning-dynamic-algorithm-selection-for-software-defined-networking-security)  
+   标签：评分：6.0/10、query:netmes
+   evidence：为SDN安全观察网络流量
 
 
 <div class="dpr-home-promo-card">
