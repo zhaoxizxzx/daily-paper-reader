@@ -1,0 +1,102 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-18T20:12:13.796638+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.14650v1",
+      "title": "PlanB: Efficient Software IPv6 Lookup with Linearized $B^+$-Tree",
+      "abstract": "IP lookup via Longest Prefix Match (LPM) is critical for packet forwarding. Unfortunately, conventional lookup algorithms are inefficient for IPv6 Forwarding Information Bases (FIBs), which are characterized by a set of long prefixes with diverse lengths. We observe that LPM inherently represents a two-dimensional (2D) search problem over both prefix values and prefix lengths, but existing algorithms mostly treat LPM as two separate levels of one-dimensional (1D) searches, causing poor lookup performance and high memory overhead. This paper presents PlanB, a novel scheme for high-speed IPv6 lookup. We transform the 2D LPM into an equivalent 1D search problem over elementary intervals, thereby unifying the search across prefix value and lengths. We then adapt a flat-array-based B-tree structure to the needs of LPM to propose the linearized $B^+$-tree, based on which we introduce an efficient search algorithm tailored to the properties of the transformed space. To maximize performance, we integrate PlanB with vectorization, batching, branch-free logic, and loop unrolling to fully exploit CPU parallelism. Extensive evaluation shows that PlanB achieves single-core performance of 390 Million Lookups Per Sec (MLPS) with real-world IPv6 FIBs on AMD processor, and scales to full-12-core performance of 3.4 Billion Lookups Per Sec (BLPS). This is 1.6$\\times$$\\sim$14$\\times$ higher than state-of-the-art software-based schemes (PopTrie, CP-Trie, Neurotrie and HBS).",
+      "authors": [
+        "Zhihao Zhang",
+        "Lanzheng Liu",
+        "Chen Chen",
+        "Huiba Li",
+        "Jiwu Shu",
+        "Windsor Hsu",
+        "Yiming Zhang"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.NI"
+      ],
+      "published": "2026-04-16T05:56:19+00:00",
+      "link": "https://arxiv.org/pdf/2604.14650v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "high-speed IPv6 lookup for packet forwarding",
+      "llm_evidence_cn": "用于数据包转发的高速IPv6查找",
+      "llm_evidence": "用于数据包转发的高速IPv6查找",
+      "canonical_evidence": "用于数据包转发的高速IPv6查找",
+      "llm_tldr_en": "Introduces PlanB, a high-speed IPv6 lookup scheme for efficient packet forwarding in networks.",
+      "llm_tldr_cn": "介绍了PlanB，一种用于网络中高效数据包转发的高速IPv6查找方案。",
+      "llm_tldr": "介绍了PlanB，一种用于网络中高效数据包转发的高速IPv6查找方案。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network traffic measurement methods for high-speed links",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.15261v1",
+      "title": "Expanding into Reality: Random Graphs for Datacenter Networks",
+      "abstract": "We design and deploy at Amazon the first production datacenter fabrics based on random graphs. While the cost and fault-tolerance benefits of such topologies have been long known, their practical realization has been hampered by a lack of scalable routing and cabling approaches. Our design, called RNG, has a new distributed routing protocol that exploits the properties of random graphs to find a large number of edge disjoint paths between endpoint pairs. A novel passive optical device that internally shuffles cable endpoints makes Amazon's cabling complexity similar to that of fat trees. We show that RNG fabrics match or exceed the performance of fat trees for a range of traffic patterns, despite being up to 45% cheaper. At Amazon, we made RNG the default datacenter fabric for most workloads.",
+      "authors": [
+        "Giacomo Bernardi",
+        "Ratul Mahajan",
+        "C. Seshadhri",
+        "Enrico Carlesso",
+        "Chinchu Merine Joseph",
+        "Saurabh Kumar",
+        "Pavan Manikonda",
+        "Luiza Popa",
+        "Randy Ram",
+        "Steven Robinson",
+        "Elizabeth Tennent"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-16T17:37:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.15261v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "production datacenter fabrics and traffic pattern performance",
+      "llm_evidence_cn": "生产数据中心架构与流量模式性能",
+      "llm_evidence": "生产数据中心架构与流量模式性能",
+      "canonical_evidence": "生产数据中心架构与流量模式性能",
+      "llm_tldr_en": "Deploys random graph-based datacenter fabrics at Amazon, optimizing routing and cost.",
+      "llm_tldr_cn": "在亚马逊部署基于随机图的数据中心架构，优化了路由性能与成本。",
+      "llm_tldr": "在亚马逊部署基于随机图的数据中心架构，优化了路由性能与成本。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

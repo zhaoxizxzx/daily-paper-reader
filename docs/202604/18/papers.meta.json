@@ -1,0 +1,37 @@
+{
+  "label": "2026-04-18",
+  "date": "2026-04-18",
+  "generated_at": "2026-04-18T20:12:41",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202604/18/2604.14650v1-planb-efficient-software-ipv6-lookup-with-linearized-b-tree",
+      "section": "quick",
+      "title_en": "PlanB: Efficient Software IPv6 Lookup with Linearized $B^+$-Tree",
+      "authors": "Zhihao Zhang, Lanzheng Liu, Chen Chen, Huiba Li, Jiwu Shu, Windsor Hsu, Yiming Zhang",
+      "date": "2026-04-16",
+      "pdf": "https://arxiv.org/pdf/2604.14650v1",
+      "score": "6.0",
+      "evidence": "用于数据包转发的高速IPv6查找",
+      "tldr": "PlanB 是一种针对 IPv6 高速查找的新型方案，旨在解决传统最长前缀匹配（LPM）算法在处理长前缀和多样化长度时效率低下的问题。该方案通过将二维 LPM 搜索转换为一维基本区间搜索，并结合线性化 B+-树结构，利用向量化、批处理和无分支逻辑等 CPU 并行技术，显著提升了查找性能。实验表明，PlanB 在多核环境下可达到 3.4 BLPS 的吞吐量，性能大幅优于现有主流软件方案。",
+      "tags": "query:netmes",
+      "abstract_en": "IP lookup via Longest Prefix Match (LPM) is critical for packet forwarding. Unfortunately, conventional lookup algorithms are inefficient for IPv6 Forwarding Information Bases (FIBs), which are characterized by a set of long prefixes with diverse lengths. We observe that LPM inherently represents a two-dimensional (2D) search problem over both prefix values and prefix lengths, but existing algorithms mostly treat LPM as two separate levels of one-dimensional (1D) searches, causing poor lookup performance and high memory overhead. This paper presents PlanB, a novel scheme for high-speed IPv6 lookup. We transform the 2D LPM into an equivalent 1D search problem over elementary intervals, thereby unifying the search across prefix value and lengths. We then adapt a flat-array-based B-tree structure to the needs of LPM to propose the linearized $B^+$-tree, based on which we introduce an efficient search algorithm tailored to the properties of the transformed space. To maximize performance, we integrate PlanB with vectorization, batching, branch-free logic, and loop unrolling to fully exploit CPU parallelism. Extensive evaluation shows that PlanB achieves single-core performance of 390 Million Lookups Per Sec (MLPS) with real-world IPv6 FIBs on AMD processor, and scales to full-12-core performance of 3.4 Billion Lookups Per Sec (BLPS). This is 1.6$\\times$$\\sim$14$\\times$ higher than state-of-the-art software-based schemes (PopTrie, CP-Trie, Neurotrie and HBS).",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/18/2604.15261v1-expanding-into-reality-random-graphs-for-datacenter-networks",
+      "section": "quick",
+      "title_en": "Expanding into Reality: Random Graphs for Datacenter Networks",
+      "authors": "Giacomo Bernardi, Ratul Mahajan, C. Seshadhri, Enrico Carlesso, Chinchu Merine Joseph, Saurabh Kumar, Pavan Manikonda, Luiza Popa, Randy Ram, Steven Robinson, Elizabeth Tennent",
+      "date": "2026-04-16",
+      "pdf": "https://arxiv.org/pdf/2604.15261v1",
+      "score": "6.0",
+      "evidence": "生产数据中心架构与流量模式性能",
+      "tldr": "本文介绍了亚马逊在生产环境中首次部署的基于随机图的数据中心网络架构RNG。针对随机图在布线复杂性和路由扩展性上的长期挑战，研究团队开发了新型分布式路由协议以寻找大量边缘不相交路径，并设计了被动光学设备简化物理连接。RNG在保持甚至超越传统Fat-tree性能的同时，将成本降低了高达45%，目前已成为亚马逊处理多数工作负载的默认网络架构。",
+      "tags": "query:netmes",
+      "abstract_en": "We design and deploy at Amazon the first production datacenter fabrics based on random graphs. While the cost and fault-tolerance benefits of such topologies have been long known, their practical realization has been hampered by a lack of scalable routing and cabling approaches. Our design, called RNG, has a new distributed routing protocol that exploits the properties of random graphs to find a large number of edge disjoint paths between endpoint pairs. A novel passive optical device that internally shuffles cable endpoints makes Amazon's cabling complexity similar to that of fat trees. We show that RNG fabrics match or exceed the performance of fat trees for a range of traffic patterns, despite being up to 45% cheaper. At Amazon, we made RNG the default datacenter fabric for most workloads.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
