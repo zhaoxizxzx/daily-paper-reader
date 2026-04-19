@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-19 <!--dpr-date:20260419-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/19/2604.12655v1-robust-semi-supervised-temporal-intrusion-detection-for-adversarial-cloud-networks" data-sidebar-item="{&quot;title&quot;: &quot;Robust Semi-Supervised Temporal Intrusion Detection for Adversarial Cloud Networks&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.12655v1-robust-semi-supervised-temporal-intrusion-detection-for-adversarial-cloud-networks&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;netmes&quot;}], &quot;evidence&quot;: &quot;基于流级流量数据的云网络入侵检测&quot;}">Robust Semi-Supervised Temporal Intrusion Detection for Adversarial Cloud Networks</a>
   * 2026-04-18 <!--dpr-date:20260418-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/18/2604.14650v1-planb-efficient-software-ipv6-lookup-with-linearized-b-tree" data-sidebar-item="{&quot;title&quot;: &quot;PlanB: Efficient Software IPv6 Lookup with Linearized $B^+$-Tree&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.14650v1-planb-efficient-software-ipv6-lookup-with-linearized-b-tree&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;netmes&quot;}], &quot;evidence&quot;: &quot;用于数据包转发的高速IPv6查找&quot;}">PlanB: Efficient Software IPv6 Lookup with Linearized $B^+$-Tree</a>

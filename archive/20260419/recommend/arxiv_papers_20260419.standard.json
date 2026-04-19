@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-19T19:51:17.122270+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.12655v1",
+      "title": "Robust Semi-Supervised Temporal Intrusion Detection for Adversarial Cloud Networks",
+      "abstract": "Cloud networks increasingly rely on machine learning based Network Intrusion Detection Systems to defend against evolving cyber threats. However, real-world deployments are challenged by limited labeled data, non-stationary traffic, and adaptive adversaries. While semi-supervised learning can alleviate label scarcity, most existing approaches implicitly assume benign and stationary unlabeled traffic, leading to degraded performance in adversarial cloud environments. This paper proposes a robust semi-supervised temporal learning framework for cloud intrusion detection that explicitly addresses adversarial contamination and temporal drift in unlabeled network traffic. Operating on flow-level data, this framework combines supervised learning with consistency regularization, confidence-aware pseudo-labeling, and selective temporal invariance to conservatively exploit unlabeled traffic while suppressing unreliable samples. By leveraging the temporal structure of network flows, the proposed method improves robustness and generalization across heterogeneous cloud environments. Extensive evaluations on publicly available datasets (CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15) under limited-label conditions demonstrate that the proposed framework consistently outperforms state-of-the-art supervised and semi-supervised network intrusion detection systems in detection performance, label efficiency, and resilience to adversarial and non-stationary traffic.",
+      "authors": [
+        "Anasuya Chattopadhyay",
+        "Daniel Reti",
+        "Hans D. Schotten"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "published": "2026-04-14T12:23:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.12655v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Intrusion detection for cloud networks operating on flow-level traffic data",
+      "llm_evidence_cn": "基于流级流量数据的云网络入侵检测",
+      "llm_evidence": "基于流级流量数据的云网络入侵检测",
+      "canonical_evidence": "基于流级流量数据的云网络入侵检测",
+      "llm_tldr_en": "Proposes a semi-supervised learning framework for robust intrusion detection in adversarial cloud traffic.",
+      "llm_tldr_cn": "提出了一种半监督学习框架，用于对抗性云流量环境下的鲁棒入侵检测。",
+      "llm_tldr": "提出了一种半监督学习框架，用于对抗性云流量环境下的鲁棒入侵检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

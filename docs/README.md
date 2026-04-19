@@ -6,29 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-18
-- 运行时间：2026-04-18 20:12:32 UTC
+- 最新运行日期：2026-04-19
+- 运行时间：2026-04-19 19:51:33 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：1
 - 精读区：0
-- 速读区：2
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦网络基础设施优化，速读了关于 IPv6 高效查找与数据中心随机图拓扑的两篇前沿论文。
-核心结论涵盖了利用线性化 $B^+$-Tree 提升软件路由效率，以及探索随机图在构建现实数据中心网络中的扩展潜力。
-建议关注网络架构与高性能转发的读者，重点了解 PlanB 算法如何优化大规模 IPv6 检索性能。
-- 详情：[/202604/18/README](/202604/18/README)
+今日聚焦云网络安全，探索对抗环境下鲁棒的半监督入侵检测技术。
+该研究通过结合时序特征与半监督学习，提升了云端入侵检测在面对恶意对抗时的防御稳健性。
+建议关注如何在标签稀缺的动态云环境中，利用时序建模强化系统的安全防护能力。
+- 详情：[/202604/19/README](/202604/19/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [PlanB: Efficient Software IPv6 Lookup with Linearized $B^+$-Tree](/202604/18/2604.14650v1-planb-efficient-software-ipv6-lookup-with-linearized-b-tree)  
+1. [Robust Semi-Supervised Temporal Intrusion Detection for Adversarial Cloud Networks](/202604/19/2604.12655v1-robust-semi-supervised-temporal-intrusion-detection-for-adversarial-cloud-networks)  
    标签：评分：6.0/10、query:netmes
-   evidence：用于数据包转发的高速IPv6查找
-2. [Expanding into Reality: Random Graphs for Datacenter Networks](/202604/18/2604.15261v1-expanding-into-reality-random-graphs-for-datacenter-networks)  
-   标签：评分：6.0/10、query:netmes
-   evidence：生产数据中心架构与流量模式性能
+   evidence：基于流级流量数据的云网络入侵检测
 
 
 <div class="dpr-home-promo-card">
