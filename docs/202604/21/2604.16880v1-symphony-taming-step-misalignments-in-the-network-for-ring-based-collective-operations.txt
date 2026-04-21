@@ -1,0 +1,909 @@
+Title: Symphony: Taming Step Misalignments in the Network for Ring-based Collective Operations
+
+URL Source: https://arxiv.org/pdf/2604.16880v1
+
+Published Time: Tue, 21 Apr 2026 00:36:02 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# Symphony : Taming Step Misalignments in the Network for Ring-based Collective Operations 
+
+# Yuze Jin 
+
+jin.yuze@u.nus.edu National University of Singapore Singapore 
+
+# Xin Zhe Khooi 
+
+khooixz@u.nus.edu National University of Singapore Singapore 
+
+# Ruyi Yao 
+
+ryyao20@fudan.edu.cn Fudan University China 
+
+# Mun Choon Chan 
+
+dcscmc@nus.edu.sg National University of Singapore Singapore 
+
+## Abstract 
+
+Ring-based collective operations are widely used in distri-buted AI training due to their efficient bandwidth utilization. While ring communication excels at pipelining, its perfor-mance is heavily dependent on having synchronized step-wise progression. This presents a mismatch to the under-lying network conditions in practice: collective operations are vulnerable to network jitter and congestion, leading to step misalignment and increased collective completion time. To that end, we propose Symphony , an in-network solution that detects pipeline step misalignment and mitigates its impact. Symphony introduces (1) a lightweight mechanism to track per-job pipeline progress and (2) a novel use of congestion signals to selectively throttle outpacing flows, allowing lagging flows to catch up without global coordina-tion. Through simulations using Astra-Sim, we show that  
+
+> Symphony
+
+effectively mitigates step misalignments in ring-based collectives, resulting in up to 54% improvement in job/collective communication time. Finally, we prototype and validate Symphony on an Intel Tofino2 programmable switch to demonstrate its practicality. 
+
+## 1 Introduction 
+
+Training modern AI models, such as Large Language Mod-els (LLMs), is resource-intensive and often spans weeks to months, requiring tens of thousands of GPUs running in par-allel [ 38 , 74 ]. At this scale, training becomes communication-heavy: gradients and parameters must be exchanged across GPUs every iteration. In production clusters, communication bottlenecks often consume a significant portion of the total training iteration time, ranging from 16% to over 50% depend-ing on the model size and parallelism strategy [1, 63, 85]. To fully utilize available bandwidth [ 33 , 90 ], today’s large-scale distributed AI training and inference workloads [ 9, 23 ,60 , 61 , 67 , 70 ] rely heavily on ring-based collective operations such as Ring-AllReduce. This is because ring-based collective operations excel at pipelining data, where different parts of a message (chunks) are sent concurrently across different links. Through pipelining, not only can the available network bandwidth be fully utilized, but the latency of large messages can also be effectively amortized. For ring-based collective operations to achieve their the-oretical performance, they rely on the tight synchroniza-tion of the pipeline steps: concurrent transfers between adja-cent nodes must proceed in lockstep . Therefore, even minor network perturbations, such as ECMP hash collisions, tran-sient congestion, physical-layer packet losses [ 39 , 45 , 49 ], switch/link failures [ 1 , 38 ], or contention from background traffic in multi-tenant clusters [ 85 ], can cause step misalign-ment , where flows from different steps overlap on the same bottleneck link. This overlap causes bandwidth contention, triggers cascading delays, and dramatically inflates collective completion time (CCT). Unfortunately, today’s data center networks provide lim-ited support for the synchronization needs of ring-based col-lectives. Existing mechanisms optimize for aggregate throu-ghput and link utilization through techniques like perfecting load balancing [ 4 , 22 , 76 ] and congestion control [ 46 , 89 ], to squeeze every bit of utilization out of the networking fabric. However, such approaches blindly accelerate all flows, includ-ing those already ahead, and thus widen progress gaps and exacerbate misalignment. Host -side schedulers [ 12 , 71 , 85 ]and application - level straggler mitigation techniques [ 28 , 77 ]also fall short because they lose visibility and control once packets enter the network fabric [ 21 , 34 ]. In fact, stragglers remain an important issue for LLM training [38, 63, 81]. 
+
+Key insight: Improving the performance of ring-based collective operations is not just about pushing more band-width; it requires the explicit control of the timing of flows so that steps stay synchronized as much as possible. To this end, we propose Symphony , an in-network mecha-nism that detects and mitigates step misalignment for ring-based collective operations. Symphony introduces a novel 
+
+> 1
+> arXiv:2604.16880v1 [cs.NI] 18 Apr 2026
+
+Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan Node  2                                                           
+
+> Node 1
+> Node 3
+> Node 6
+> Node 5
+> Node 7
+> Node 10
+> Node 9
+> Node 11
+> Node 14
+> Node 13
+> Node 15
+> Spine 0 Spine 1
+> ToR 0 ToR 1 ToR 2 ToR 3
+> Node 0 Node 4 Node 8 Node 12
+> Ring 0 Ring 1 Ring 2 Ring 3
+> Path
+> T1-S0-T2
+> Path
+> T1-S1-T2
+> Node 2
+> Node 1
+> Node 3
+> Node 6
+> Node 5
+> Node 7
+> Node 10
+> Node 9
+> Node 11
+> Node 14
+> Node 13
+> Node 15
+> Node 0Node 4Node 8Node 12
+> idle
+> Node 2
+> Node 1
+> Node 3
+> Node 6
+> Node 5
+> Node 7
+> Node 10
+> Node 9
+> Node 11
+> Node 14
+> Node 13
+> Node 15
+> Node 0Node 4Node 8Node 12
+
+!
+
+!
+
+> Link 0-4
+> Link 4-8
+> Link 8-12
+> a0
+> b1
+> c2
+> d3
+> a0+a1
+> b1+b2
+> c2+c3
+> d0+d3
+
+Links      
+
+> Link 12-0
+> Step kStep k+1 Future Steps
+
+Time 
+
+... 
+
+... 
+
+... 
+
+...  
+
+> a0
+> c2
+> d3 c2+c3
+> d0+d3
+
+Links 
+
+> b1
+> a0+a1
+
+Time 
+
+> idle link
+> idle link
+> Link 0-4
+> Link 4-8
+> Link 8-12
+> Link 12-0
+> Congested
+
+...       
+
+> Step kStep k+1
+> a0
+> b0
+> c0
+> d0+d3
+> a0+a1
+> b1
+> c1
+> d1
+> a2
+> b1+b2
+> c2
+> d2
+> a3
+> b3
+> c2+c3
+> d3
+> Node-0 Node-4 Node-8 Node-12
+
+(a)  Ideally balanced paths 
+
+(b) Path conflicts 
+
+(c) Logical view of a single ring 
+
+(d) Ideal step synchronization 
+
+(e) Misalignment from lagging flows 
+
+> (lagging flow)
+> (outpacing flow)
+
+Figure 1: Ideal vs. Realistic behavior of ring - based collective operations. (a–b) Even small path imbalances (e.g., ECMP hash collisions) cause uneven link sharing and flow accumulation, unlike the ideal case. (c) Logical view of a single ring. (d) Under ideal conditions, steps progress in perfect lockstep. (e) In practice, congestion on a single link delays a step, causing subsequent steps to overlap and creating pipeline bubbles that amplify misalignment. 
+
+control strategy to restore pipeline alignment, where we throttle outpacing flows to dynamically free up bandwidth for lagging flows (or “stragglers”) to catch up. To achieve this, Symphony introduces two key ideas: (1) progress track-ing : a lightweight per-job mechanism that infers real-time step progress using only packet metadata, and (2) selective throttling : a targeted use of congestion signaling (i.e., ECN marking) to throttle outpacing flows, allowing lagging flows to catch up without explicit coordination. Through extensive evaluations using Astra-Sim [ 65 , 83 ]with NS-3 [ 59 ], we show that Symphony effectively mini-mizes step alignments across various workloads, resulting in improved job and collective completion times (JCT/CCT) of up to 54%. To demonstrate Symphony ’s practical deploya-bility, we prototype Symphony on an Intel Tofino2 [ 35 ] pro-grammable switch, and show that Symphony can track step progress efficiently and throttle outpacing flows effectively to allow lagging flows to catch up. 
+
+Contributions. This paper is the first to identify and quan-tify step misalignment as a hidden bottleneck in ring -based collective operations. Building on this insight, we introduce 
+
+Symphony , a practical in - network mechanism, validated with 0
+
+> 10
+> 20
+> 30
+> Degree of
+> Step Overlap
+
+(a)      
+
+> 0500 1000 1500 2000 2500
+
+Time (ms) 
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Normalized Step
+> Completion Rate (%)
+
+(b) 
+
+> Theoretical
+> Load Imbalance (1.13x)
+> Congestion (Transient)
+> Baseline
+
+Figure 2: Degree of step overlap and normalized step completion rates under different network conditions. 
+
+a Tofino2 hardware prototype, that detects and mitigates step misalignments through a novel use of ECN marking to realize the selective throttling of outpacing flows. 
+
+2Symphony 
+
+## 2 Background and Motivation 2.1 A primer on ring-based primitives 
+
+Ring-based algorithms are commonly adopted for bandwidth-intensive LLM workloads due to their optimal link utiliza-tion via concurrent transmission [ 31 , 60 , 61 ]. Taking Ring All-Reduce as an example, each of the 𝑁 nodes divides their data into 𝑁 equal-sized chunks and exchanges data chunks over 2(𝑁 − 1) pipelined steps. In each step, every node si-multaneously transmits to its successor and receives from its predecessor, optionally undergoing computation (e.g., re-duction) at each hop, as shown in Fig. 1c. Crucially, this throughput optimality relies on strict alignment: bandwidth is fully utilized only when concurrent flows start and finish in lockstep, leaving no links idle (Fig. 1d). In practice, modern AI clusters deploy high-performance hosts equipped with multiple GPUs and NICs (e.g., 8 GPUs/ NICs per host) [ 1, 38 , 63 ]. To fully saturate the available band-width, the communication library does not run a single giant ring. Instead, it establishes multiple parallel 1D rings (often referred to as channels or rails) [ 31 , 60 , 61 , 79 ]. Each ring operates independently over a dedicated NIC port, pipelining chunks concurrently. We illustrate an example in Fig. 1a. 
+
+## 2.2 The problem of step misalignments 
+
+While the aligned progression described above is elegant in theory, it is fragile in practice. Production networks face inherent runtime uncertainties, such as ECMP hash colli-sions [ 21 , 76 ] and transient congestion [ 38 , 63 ], physical-layer network failures [ 1, 34 , 39 , 45 , 49 ], that inevitably dis-rupt synchronization. We refer to this loss of lockstep pro-gression as step misalignment , where flows from different steps overlap on the same bottleneck link and fragment avail-able bandwidth (see Fig. 1d). A minor network perturbation is enough to trigger a cas-cading failure. Consider the example shown in Fig. 1a, where a single 1D ring (e.g., the ring connecting Nodes 0, 4, 8, 12) within a larger collective job that spans multiple ToR switches. In Fig. 1b, a load imbalance between ToR 1 and ToR 2 causes congestion on path T1-S0-T2. Consequently, the flows from Node 4 to Node 8 (carrying step 𝑘 ) are impacted. This delay breaks the pipeline synchronization: Node 4 begins transmitting step 𝑘 + 1 before step 𝑘 completes. These concurrent steps now compete for the same bottleneck link, splitting bandwidth and further slowing down the already lagging step 𝑘 . This creates a destructive feedback loop: the worsening delay causes subsequent flows (step 𝑘 + 2 and beyond) to arrive and pile up. Hence, what started as a small link jitter cascades into significant performance degradation. In practice, the completion times of flows within the same step can vary significantly due to runtime uncertainties and can persist even in well-provisioned networks [ 21 , 38 , 63 ], continuously disrupting alignment. 
+
+Motivating example. We show how this phenomenon man-ifests in Fig. 2 using a multiple 1D Ring AllReduce workload (see Table 1 in §4). To pinpoint the sources of misalignment, we compare four scenarios: (1) a Theoretical lower bound as-suming perfect lockstep; (2) a Baseline using standard ECMP routing; and two controlled scenarios using static balanced routing with injected noise – (3) Load Imbalance (1.13x) ,where we introduce a minor 1.13 × traffic skew on a sin-gle hop, and (4) Congestion (Transient) , where we introduce light background traffic. Fig. 2a shows that while the theoretical curve remains flat at 1, the baseline shows a runaway effect, with step overlap climbing to 30. Even under the scenarios with “light” perturbations, the degree of misalignment increases to 10 steps. This accumulation of misalignment directly degrades the step completion rate (calculated as the inverse of inter-step completion intervals): Fig. 2b shows that the normalized step completion rate drops significantly as overlap grows, inflating the CCT by 60% in the baseline and 7% even with minor perturbations. These observations confirm a strong correlation between step alignments and the CCT. Any “loss” of alignment, triggered by even minimal network jitter, is a fundamental bottleneck in ring-based communication. 
+
+## 2.3 Existing approaches do not address the problem of step misalignments 
+
+Here, we discuss why existing approaches fail to address step misalignments. 
+
+Straggler mitigation in MLSys. Traditional straggler miti-gation techniques focus on compute - side delays, arising from hardware heterogeneity, OS noise, or uneven workload distri-bution. These include redundancy -based coding [ 28 , 44 , 77 ], dynamic scheduling, and compute -overlap optimizations [ 6 ,37 , 84 ]. However, they treat the network as a black box and are unaware of the underlying collective operations. Conse-quently, these solutions cannot address the problem of step misalignments. Symphony complements these approaches by mitigating stragglers at the network-level. 
+
+Framework-level communication scheduling. Emerg-ing training frameworks prioritize communication using DAG -aware scheduling [ 71 , 85 , 88 ], compression/fusion [ 48 ,54 , 80 ], and overlap [ 57 , 62 , 66 ] techniques. While these mech-anisms optimize the logical execution order at the sender, they lose visibility the moment when data is enqueued at the NIC. Runtime jitter inside the fabric, e.g., ECMP hash collisions or congestion, invalidates even perfect host - side scheduling. Consequently, step misalignment persists even                         
+
+> 3Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan 𝑠 𝑡 𝑒 𝑝 𝑚 𝑖 𝑛 𝑝 𝑠 𝑛 𝑟 𝑒 𝑐
+> 𝑠 𝑡 𝑒 𝑝 𝑝 𝑠 𝑛
+> 𝑃 𝐸 𝐶 𝑁
+> **>
+> Progress Tracker Node 0
+> Node 1
+> Node 2
+> Node 3
+> ECN-marked
+> outpacing flow
+> packets
+> Bandwidth
+> **********
+> Node 3 reacts to ECN
+> Node 0 - Step k
+> Node 1 - Step k
+> Node 2 - Step k
+> Node 3 - Step k
+> Node 0 - Step k+1
+> Node 1 - Step k+1
+> Node 2 - Step k+1
+> Node 3 - Step k+1
+> ECN
+> decision
+> Step k's flows
+> Step k+1 's flows
+> time
+> Selective Throttling
+> Pkt
+> 𝛼
+> Cnt total
+> Cnt op
+> Outpace Tracker
+> Progress Gap Δ
+
+Figure 3: Overview of Symphony . The switch performs progress tracking to identify and throttle outpacing flows, proactively freeing up bandwidth for lagging steps without global coordination. 
+
+when the framework enforces ideal coordination at the end-points, highlighting the need for an in -network mechanism that manages the step-level progress. 
+
+Network load balancing. Data center load balancing solu-tions [ 4, 22 , 25 , 41 , 76 ] aim to distribute traffic as evenly as possible across paths to reduce congestion [ 21 ]. Yet even ideal load balancing cannot prevent step misalignment, because unavoidable network jitter (e.g., due to gray failures [ 34 ,39]) still causes temporal progress divergence among flows. Worse, LB is generally throughput - centric, and it indiscrimi-nately accelerates all flows, including those already ahead, thereby widening the relative progress gap that drives mis-alignment. Thus, LB solves spatial imbalance but does not address the temporal coupling of ring-based primitives. 
+
+Priority scheduling. One might consider prioritizing lag-ging flows directly inside switches [ 3 , 5 ]. However, strict priority scheduling is unstable for RDMA traffic: line -rate bursts rapidly fill shallow buffers [ 46 , 56 ], causing severe star-vation for non - prioritized flows. This, in turn, triggers aggres-sive congestion - control responses (e.g., DCQCN backoff or PFC) [ 27 , 55 , 89 ], which introduce oscillations and worsen tail latency. Instead of restoring alignment, this heavy -handed approach often degrades overall CCT (more in §4.3). 
+
+Key takeaway. Existing approaches fail because none of them coordinate the temporal progress of ring-based col-lective operations. They either optimize compute, logical scheduling, or spatial load distribution. None accounts for the fundamental constraint: flows in a ring collective are tightly coupled, and their performance is dictated by the slowest step, not average throughput. This gap motivates the need for a new mechanism that explicitly manages step -level progress in the network, which we introduce next. 
+
+## 3 Symphony 
+
+## 3.1 Overview of Symphony 
+
+Symphony addresses step misalignment by coordinating the temporal progress of flows directly inside the network. To achieve this, there are two key requirements: 
+
+• R1: How to efficiently track the progress of collective pipelines across multiple jobs to enable timely detection of step misalignment? 
+
+• R2: How to selectively throttle outpacing flows while yield-ing bandwidth to lagging flows , thereby restoring pipeline alignment without compromising utilization? 
+
+Symphony addresses step misalignment by combining two mechanisms: (1) progress tracking (§3.4): lightweight per -job tracking that infers real - time progress of each step from packet metadata, while maintaining minimum states, and (2) 
+
+selective throttling (§3.3): selective throttling that uses ECN to apply backpressure only to outpacing flows, allowing lagging flows to catch up. As illustrated in Fig. 3, when a flow from step 𝑘 + 1 be-gins overlapping with a still -unfinished step 𝑘 , Symphony 
+
+increases the marking probability of the outpacing flow. This slows the outpacing flow at the source via the existing congestion -control loop (e.g., DCQCN), implicitly reallocat-ing bandwidth to the lagging step and restoring alignment. 
+
+## 3.2 Problem modeling and assumptions 
+
+3.2.1 Problem modeling. We model the network as a set of switches serving concurrent collective jobs. Symphony relies on the following abstractions to perform alignment. 
+
+Traffic granularity. We conceptualize the collective traffic hierarchy in three levels: 
+
+• Job : A distributed training task consisting of multiple collective operations. We assume a multi-tenant DC envi-ronment where multiple jobs may coexist concurrently. 
+
+• Step ( 𝑠 ): A logical stage in the ring-based collective (e.g., Ring AllReduce). A collective operation proceeds in a se-quence of synchronized steps 𝑠 0, 𝑠 1, ..., 𝑠 𝑛 .
+
+• Flow ( 𝑓 ): The data transmission required for a single node to complete one step. Ideally, all flows in step 𝑠 𝑘 should complete before any flow in step 𝑠 𝑘 +1 begins. We assume that for a given step, the data volume to be transferred is uniform across nodes (typical for ring-based collectives). 
+
+Switch visibility. We assume the switch can parse two critical metadata fields from each packet’s header. 
+
+• Step index (𝑠𝑡𝑒𝑝 ): Indicates the step to which the packet’s flow belongs. Comparing these indices between flows al-lows Symphony to determine the degree of step misalign-ment between outpacing and lagging flows. 
+
+> 4Symphony
+
+• Packet sequence number (𝑝𝑠𝑛 ): Denotes the packet’s position within its flow. This provides a fine-grained esti-mate of data transferred by that flow, allowing Symphony 
+
+to determine the progress of a flow within its step. 
+
+Objective. The goal of Symphony is to minimize the mis-alignment gap between the fastest outpacing flows and the slowest lagging flows at bottleneck link(s), by giving a larger share of bandwidth to lagging flow(s). At the same time, we target a fully distributed solution: each switch minimizes misalignment based solely on its local visibility of the traffic, eliminating the need for coordination. 
+
+3.2.2 Technical assumptions. Symphony assumes the ability to distinguish traffic at both job and step granularity. While such metadata is not natively encoded in legacy RDMA fabrics, Symphony aligns with emerging AI/HPC in-terconnect standards such as the Ultra Ethernet Consortium (UEC) [ 16 ]. Specifically, the JobID [ 16 , Table 2-39] and PD-CID (Packet Delivery Context ID) [ 16 , Table 3-33] fields in the UEC specification map directly to Symphony ’s job iden-tifier and step index, respectively [ 16 ]. In our RDMA-based testbed, we emulate this capability by embedding the job ID and step index into the RDMA reserved fields and UDP source port (details in §4.7). With these assumptions in place, we now detail the de-sign of Symphony . While our model accounts for multiple concurrent jobs, the core logic of Symphony operates inde-pendently per job on a switch. For simplicity, we will present  
+
+> Symphony
+
+running with a single job in §3.3–§3.4. Then we discuss support for multi-tenancy in §3.5. 
+
+## 3.3 Selective throttling 
+
+To efficiently track misalignment across collective steps, each switch maintains a compact Per-Job State Block . This design ensures scalability with constant memory overhead per job. The state block comprises two logical components: 
+
+1. Progress Tracking State. These variables serve as the synchronization anchors: 
+
+• 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 : The smallest step index currently observed among all active flows. This serves as a coarse-grained indicator of the collective’s global synchronization anchor. 
+
+• 𝑝𝑠𝑛 𝑟𝑒𝑐 : The estimated packet sequence number (PSN) rep-resents the progress of lagging flows within 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 . This serves as a fine-grained reference for intra-step progress (approximation details in §3.4). 
+
+2. Adaptive Control State. To enable dynamic throttling,  
+
+> Symphony
+
+maintains a scalar state 𝛼 (𝑡 ) and transient coun-ters to monitor traffic intensity: 
+
+• 𝛼 (𝑡 ): The adaptive aggressiveness factor. This factor cali-brates the calculated progress gap based on the historical persistence of misalignment. 
+
+• 𝜌 (𝑡 ): The misalignment intensity (transient), representing the fraction of outpacing traffic observed in the current time window 𝑡 .
+
+• 𝜏 : A static tolerance threshold for 𝜌 (𝑡 ), determining the condition for increasing 𝛼 (𝑡 ).
+
+Detection strategy. Symphony examines each dequeued packet 𝑖 by comparing its progress ( 𝑠𝑡𝑒𝑝 𝑖 , 𝑝𝑠𝑛 𝑖 ) against the global lagging flow reference ( 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 , 𝑝𝑠𝑛 𝑟𝑒𝑐 ). If the packet belongs to a lagging flow ( 𝑠𝑡𝑒𝑝 𝑖 ≤ 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 ), no action is needed. However, if the packet belongs to an outpacing flow (𝑠𝑡𝑒𝑝 𝑖 > 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 ), Symphony calculates a Progress Gap , de-noted as Δ, to quantify the severity of misalignment. 
+
+Δ(𝑡 ) = 𝛼 (𝑡 ) · 𝑝𝑠𝑛 𝑖 
+
+𝑝𝑠𝑛 𝑟𝑒𝑐 
+
+(1) 
+
+Δ has two components. The first component 𝑝𝑠𝑛 𝑖  
+
+> 𝑝𝑠𝑛 𝑟𝑒𝑐
+
+cap-tures difference in flow-level progress for the current packet. On the other hand, the second component adaptive aggres-siveness factor 𝛼 (𝑡 ) captures the misalignment observed over time. Symphony updates 𝛼 (𝑡 ) by accumulating the observed misalignment over time as follows: 
+
+𝛼 (𝑡 ) = max (1, 𝛼 (𝑡 − 1) + 𝛿 (𝑡 )) (2) 
+
+𝛿 (𝑡 ) =
+
+(
+
++1, if 𝜌 (𝑡 ) ≥ 𝜏 
+
+−1, if 𝜌 (𝑡 ) < 𝜏 (3) Here, 𝜌 (𝑡 ) represents the ratio of outpacing traffic vol-ume (packets from steps > 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 ) observed in the current time window, and 𝜏 is a small constant (e.g., 0.25). 𝛿 allows  
+
+> Symphony
+
+to differentiate between transient and persistent 
+
+misalignment. With persistent misalignment, 𝛼 (𝑡 ) increases, which in turn scales the throttling probability when out-pacing flows dominate the bandwidth for extended periods. Conversely, when misalignment reduces ( 𝜌 < 𝜏 ), 𝛼 (𝑡 ) de-creases correspondingly. 
+
+Probabilistic throttling. Based on the calculated gap,  
+
+> Symphony
+
+applies ECN marking with a probability propor-tional to Δ to enforce throttling. The marking probability is formulated as: 
+
+𝑃 𝐸𝐶𝑁 (Δ) = min (1, 𝑘 · Δ) (4) where 𝑘 is a control parameter that determines the gain of the throttling feedback loop. Since Symphony relies on relative progress rather than absolute traffic volume, an appropriate 
+
+𝑘 is primarily determined by the control loop latency (i.e., network RTT) rather than specific workload characteristics. We demonstrate in §4.6 that a static, robust 𝑘 suffices for diverse workloads. 
+
+Coexistence with congestion control mechanisms. It is important to note that Symphony is designed to complement, 
+
+> 5Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan
+
+Algorithm 1 Symphony Selective Throttling Logic 
+
+Inputs: 𝑠𝑡𝑒𝑝 , 𝑝𝑠𝑛 
+
+Output: 𝑡𝑜 _𝑚𝑎𝑟𝑘 _𝑒𝑐𝑛 
+
+Parameter: 𝑘 
+
+Constant: 𝑁 𝑤𝑎𝑟𝑚𝑢𝑝 
+
+States: 𝑠𝑡𝑒𝑝 min , 𝑝𝑠𝑛 rec , 𝛼  
+
+> 1:
+
+Function Symphony (𝑠𝑡𝑒𝑝 , 𝑝𝑠𝑛 ) 
+
+> 2:
+
+UpdateTrafficStats (𝑠𝑡𝑒𝑝 ) // Updates 𝐶𝑛𝑡 𝑡𝑜𝑡𝑎𝑙 , 𝐶𝑛𝑡 𝑜𝑝  
+
+> 3:
+
+if Is_RDMA_LastWrite () then  
+
+> 4:
+
+𝑠𝑡𝑒𝑝 min ← 𝑠𝑡𝑒𝑝 + 1 
+
+> 5:
+
+𝑝𝑠𝑛 rec ← 0 
+
+> 6:
+
+else if 𝑠𝑡𝑒𝑝 < 𝑠𝑡𝑒𝑝 min then  
+
+> 7:
+
+𝑠𝑡𝑒𝑝 min , 𝑝𝑠𝑛 rec ← 𝑠𝑡𝑒𝑝, 𝑝𝑠𝑛  
+
+> 8:
+
+else if 𝑠𝑡𝑒𝑝 = 𝑠𝑡𝑒𝑝 min then  
+
+> 9:
+
+𝑝𝑠𝑛 rec ← max (𝑝𝑠𝑛 rec , 𝑝𝑠𝑛 ) 
+
+> 10:
+
+end if  
+
+> 11:
+
+if (𝑠𝑡𝑒𝑝 ≤ 𝑠𝑡𝑒𝑝 min )or (𝑝𝑠𝑛 𝑟𝑒𝑐 ≤ 𝑁 𝑤𝑎𝑟𝑚𝑢𝑝 ) then  
+
+> 12:
+
+𝑡𝑜 _𝑚𝑎𝑟𝑘 _𝑒𝑐𝑛 ← 𝑓 𝑎𝑙𝑠𝑒  
+
+> 13:
+
+else  
+
+> 14:
+
+Δ ← 𝛼 × ( 𝑝𝑠𝑛 /𝑝𝑠𝑛 rec ) // 𝛼 is updated periodically  
+
+> 15:
+
+𝑃 Δ ← min (1, 𝑘 · Δ) 
+
+> 16:
+
+𝑡𝑜 _𝑚𝑎𝑟𝑘 _𝑒𝑐𝑛 ← TossCoin (𝑃 Δ) 
+
+> 17:
+
+end if  
+
+> 18:
+
+return 𝑡𝑜 _𝑚𝑎𝑟𝑘 _𝑒𝑐𝑛 
+
+not replace, existing congestion control mechanisms (e.g., DCQCN [ 89 ]). Symphony operates in a logical OR relationship 
+
+with the underlying congestion control: a packet is marked if 
+
+either the switch buffer exceeds the standard ECN threshold (indicating physical congestion) or Symphony ’s logic triggers a mark based on eq. (4) (indicating logical misalignment). This design allows Symphony to mitigate step misalignment even when the network is not physically congested, while retaining the fail-safe protection of traditional mechanisms. As summarized in Alg. 1, if 𝑠𝑡𝑒𝑝 𝑖 ≤ 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 or the lagging progress is insufficient ( 𝑝𝑠𝑛 𝑟𝑒𝑐 ≤ 𝑁 𝑤𝑎𝑟𝑚𝑢𝑝 ), the packet is treated as normal flow (skipping Symphony marking); other-wise, it is subject to the selective throttling described above. This warm-up threshold ensures numerical stability during the initial transient phase of a step. Next, we detail how Symphony efficiently approximates the state variables ( 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 and 𝑝𝑠𝑛 𝑟𝑒𝑐 ) in the data plane to ensure hardware feasibility and robustness. 
+
+## 3.4 Progress tracking 
+
+3.4.1 Tracking inter-step progress. To track the global mini-mum step 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 within the hardware constraints of mod-ern network switches [ 11 ], Symphony employs an optimistic advancement strategy with lazy correction .
+
+State maintenance. Symphony monitors transport headers for step completion signals (e.g., the “LAST” bit in RDMA WRITEs) 1. Upon observing a packet with the “LAST” bit set for 𝑠𝑡𝑒𝑝 𝑖 , the switch tentatively updates 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 ← 𝑠𝑡𝑒𝑝 𝑖 +1.This assignment operates on the optimistic assumption that the collective is progressing uniformly. 
+
+Self-correction and robustness. A critical challenge is maintaining state consistency in an unreliable network en-vironment. Symphony addresses these edge cases through a series of resilient self-correcting logic: 
+
+• Packet reordering & late arrivals: If the switch has ad-vanced 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 to 𝑠𝑡𝑒𝑝 𝑖 +1 (due to an outpacing flow) but subsequently receives a packet from the previous 𝑠𝑡𝑒𝑝 𝑖 
+
+(e.g., a severely lagging flow), the comparison 𝑠𝑡𝑒𝑝 𝑖 <
+
+𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 triggers an immediate correction. The switch up-dates 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 ← 𝑠𝑡𝑒𝑝 𝑖 , ensuring that the throttling logic correctly reflects the earlier system state. Furthermore, since Symphony relies on value assignment rather than incrementing counters, duplicate packets (e.g., retransmis-sions) are idempotent and do not corrupt the state. 
+
+• Packet loss (e.g., missed “LAST” bit): If the packet car-rying the “LAST” bit is dropped (e.g., due to transient link failures [ 39 ]), the switch fails to advance 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 . In such a case, incoming packets from the subsequent step (𝑠𝑡𝑒𝑝 𝑖 +1) are identified as outpacing relative to the stale 
+
+𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 , triggering throttling. This behavior acts as a nat-ural fail-safe : by suppressing the leading wave of traffic,  
+
+> Symphony
+
+mitigates contention, thereby facilitating the eventual retransmission of the lost packet in 𝑠𝑡𝑒𝑝 𝑖 . Since flows belonging to the (stale) 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 are never throttled, the retransmission faces minimal contention, ensuring rapid convergence once the transport reliability mecha-nism (e.g., Go-Back-N) succeeds. Finally, given the high packet rate of RDMA, any tran-sient state inconsistency is corrected within microseconds by subsequent arriving packets, ensuring negligible impact on throttling accuracy. 
+
+3.4.2 Monitoring intra-step progress. Ideally, to precisely quantify the misalignment gap Δ, Symphony would calculate the ratio between the current flow’s progress and that of the slowest flow (the “tail”) in the lagging step ( 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 ). However, tracking the true global minimum PSN requires maintaining per-flow counters to compare all active flows, which incurs a memory overhead of 𝑂 (𝑁 ) that scales linearly with the number of concurrent flows. This is prohibitively expensive due to switch hardware constraints [42]. 
+
+Conservative approximation with max PSN. To ensure scalability, we adopt a constant-state approximation. Instead of tracking the slowest flow, Symphony tracks the maximum 
+
+PSN observed among flows in the current 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 , denoted   
+
+> 1For network transports other than RDMA, similar semantics are also present [16], and Symphony can be adapted accordingly. 6Symphony
+
+as 𝑝𝑠𝑛 𝑟𝑒𝑐 . This approach requires only keeping track of a single state per job. We acknowledge that using the maximum PSN is a con-servative estimate. By defining the progress of the lagging step ( 𝑝𝑠𝑛 𝑟𝑒𝑐 ) based on the “head” of the lagging pack rather than the “tail”, we effectively increase the denominator in the progress gap calculation ( eq. (4)). This yields a smaller Δ and, consequently, a more lenient throttling probability. This de-sign choice is intentional: it acts as a safeguard against over-throttling, ensuring that Symphony intervenes only when the outpacing flow is substantially ahead of the fastest flow in the lagging step. 
+
+Time-windowed estimation. A potential side effect of tracking the maximum PSN is “staleness”: a single bursty flow in 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 could set a high 𝑝𝑠𝑛 𝑟𝑒𝑐 early on, which would then persist and mask the presence of slower flows, prevent-ing necessary throttling. To mitigate this, we employ a time-windowed max mecha-nism. The switch resets the 𝑝𝑠𝑛 𝑟𝑒𝑐 register at periodic inter-vals (e.g., every 100 μs in our implementation). Within each interval, 𝑝𝑠𝑛 𝑟𝑒𝑐 tracks the maximum PSN of currently active 
+
+packets among 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 . This ensures that 𝑝𝑠𝑛 𝑟𝑒𝑐 remains a timely indicator of the effective throughput of the lagging step, rather than a historical high-water mark. Our evaluation (§4) confirms that this approximation faith-fully captures flow dynamics and enables effective throttling without per-flow book-keeping. 
+
+3.4.3 Monitoring outpacing traffic ratio. To periodically up-date 𝛼 (𝑡 ), Symphony must quantify the misalignment inten-sity 𝜌 (𝑡 ). Updating 𝛼 (𝑡 ) on a per-packet basis would be sus-ceptible to micro-burst noise and computationally expensive.  
+
+> Symphony
+
+addresses these using a window-based aggrega-tion mechanism. 
+
+Windowed Aggregation. Symphony maintains two coun-ters per job: a total packet counter 𝐶𝑛𝑡 𝑡𝑜𝑡𝑎𝑙 and an outpacing packet counter 𝐶𝑛𝑡 𝑜𝑝 . These counters accumulate traffic sta-tistics over a discrete time window 𝑇 𝑤𝑖𝑛 (e.g., 100 𝜇𝑠 ). 
+
+Update Logic. At the end of each window, Symphony up-dates 𝛼 (𝑡 ). Rather than computing the exact floating-point ratio 𝜌 (𝑡 ) = 𝐶𝑛𝑡 𝑜𝑝 /𝐶𝑛𝑡 𝑡𝑜𝑡𝑎𝑙 , Symphony simply checks if the outpacing traffic exceeds the tolerance threshold: 
+
+𝐶𝑛𝑡 𝑜𝑝 ≥ 𝜏 · 𝐶𝑛𝑡 𝑡𝑜𝑡𝑎𝑙 (5) If the condition holds, it implies 𝜌 (𝑡 ) ≥ 𝜏 , triggering an in-crement in 𝛼 (𝑡 ); otherwise, 𝛼 (𝑡 ) decays. This integer-based comparison is HW-friendly and avoids complex division op-erations. Finally, to ensure statistical significance, the update is skipped if the total sample count 𝐶 𝑡𝑜𝑡𝑎𝑙 is insufficient. 
+
+Handling Noise and Transience. To ensure control loop stability, Symphony incorporates two safeguards. First, to pre-vent oscillation during low-traffic periods, we apply a Sample Guard : the update logic is triggered only if the window’s sam-ple count exceeds a minimum threshold ( 𝐶𝑛𝑡 𝑡𝑜𝑡𝑎𝑙 > 𝑁 𝑠𝑎𝑚𝑝𝑙𝑒 ). Second, the integral nature of 𝛼 (𝑡 ) naturally dampens tran-sient inconsistencies (e.g., mismatches during 𝑠𝑡𝑒𝑝 𝑚𝑖𝑛 transi-tions), as isolated “noisy” windows have negligible impact on the cumulative system state. 
+
+## 3.5 Supporting multi-tenancy 
+
+Per-job state isolation. To accommodate concurrent jobs without interference, Symphony maintains isolated progress tracking states and counters for each job, indexed by a unique identifier, Job_ID . Upon packet arrival, the switch parser extracts the Job_ID and utilizes it to index the corresponding state slot in the register memory. This design ensures that the control loop of one job operates completely independently from others, effectively instantiating a dedicated “virtual regulator” for each tenant. 
+
+Control plane orchestration. Identity management inte-grates naturally with the SDN control plane. When a new training job is scheduled, the cluster scheduler requests a  
+
+> Job_ID
+
+from the Symphony controller. The controller then programs the necessary match-action rules onto the relevant switches along the job’s path. This centralized coordination ensures ID uniqueness and facilitates policy-based resource allocation, enabling Symphony to seamlessly integrate into existing cluster management stacks. 
+
+Scalability. Symphony is lightweight because it tracks pro-gress at the coarse granularity of steps and aggregates intra-step markers; rather than maintaining per-flow sequence numbers, the memory footprint per job is minimal. This effi-ciency allows Symphony to scale to support thousands of con-current jobs within the on-chip SRAM capacity constraints of commodity programmable switches. For instance, even when scaled to support 16k concurrent jobs, the total state memory footprint of Symphony remains in the order of hundreds of KB. This overhead is negligible for modern switching ASICs, which typically contain tens of MB of SRAM [11]. 
+
+## 3.6 Putting things together 
+
+By integrating the progress tracking and throttling mecha-nisms described above, Symphony delivers a cohesive solu-tion that offers two advantages. First, Symphony enables selective throttling to dynamically rebalance bandwidth: outpacing steps are modulated to yield bandwidth resources that lagging flows can opportunistically utilize. Second, by leveraging pre-existing congestion signals (§3.3) and lightweight progress tracking (§3.4), Symphony is 
+
+> 7Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan
+
+Table 1: Default parameters for software simulations. Param Definition Default Values                   
+
+> 𝑘 Selective throttling parameter 0.01
+> 𝑃 Physical topology 4 ToR, 4 Spine 2/4 Core switches
+> 𝑆 Network Scale 32 nodes
+> 𝐿 Logical topology (2D ring dim.) 8×4(32 nodes)
+> 32 ×4(128 nodes)
+> 𝑆 chunk Chunk size ( collective size # of nodes )8 MB
+
+designed to be deployable on existing systems. We discuss data plane implementation challenges, including arithmetic limits on programmable switches, later in §4.7. 
+
+## 4 Evaluation 
+
+We evaluate Symphony using both packet-level simulations and hardware prototyping. Our evaluation seeks to answer the following questions: 
+
+• Can Symphony effectively mitigate step misalignment and restore pipeline synchronization? (§4.2) 
+
+• Does Symphony improve collective communication per-formance and end-to-end AI training? (§4.3 - §4.4) 
+
+• Is Symphony effective in multi-tenant environments? (§4.5) 
+
+• Is Symphony robust across varying network configura-tions? (§4.6) Finally, we validate the feasibility of Symphony using a Tofino2-based hardware prototype (§4.7). 
+
+## 4.1 Simulation setup 
+
+We use software simulations to study how Symphony can improve the communication performance for various work-loads at scale. We use Astra-Sim [ 65 , 83 ] with NS-3 [ 59 ] to perform the simulations, where Astra-Sim models collective operations and pipelining behavior, while NS-3 simulates the underlying network stack. 
+
+Implementation. The core logic of Symphony is imple-mented using ≈150 lines of code in NS-3’s memory man-agement unit (MMU) to perform both progress tracking and selective throttling. 
+
+Network topology. We simulate a standard two-tier leaf-spine topology with 10 Gbps links. Clusters of up to 128 nodes reside within a single spine group, while larger clus-ters (256/512 nodes) employ multi-pod interconnects with oversubscription ratios of 1:2 to 1:8. The underlying network uses ECMP with 5-tuple flow hashing for load balancing. 
+
+Simulation parameters. We follow the RDMA configura-tion of HPCC [ 46 ]. Symphony operates alongside DCQCN. We utilize standard RED parameters ( 𝐾 𝑚𝑖𝑛 = 50 , 𝐾 𝑚𝑎𝑥 =
+
+100 , 𝑃 𝑚𝑎𝑥 = 0.2) [ 46 ] without specific tuning 2. The control loop parameters are fixed at 𝜏 = 0.25 and 𝑇 𝑤𝑖𝑛 = 100 𝜇𝑠 to           
+
+> 2This choice is deliberate: Symphony addresses temporal misalignment (log-ical coordination), which is orthogonal to the physical rate mismatches 0500 1000 1500 2000 2500
+> Time (ms)
+> 0
+> 10
+> 20
+> 30
+> Degree of
+> Step Overlap
+> Symphony On
+> Theoretical
+> Baseline
+> Symphony
+> Symphony (Late-Start)
+
+(a) Degree of step overlap over time. 0 10 20 30 
+
+> Maximum Step Overlapping
+> 0.0
+> 0.5
+> 1.0
+> CDF
+> P50=31 P50=4
+> Baseline
+> Symphony
+
+(b) CDF of the maximum step overlap. 
+
+Figure 4: Step misalignment mitigation effectiveness. 
+
+model the hardware constraints, and the throttling parameter is set to 𝑘 = 0.01 . Unless otherwise specified, the simulations use the default parameters in Table 1. 
+
+Methodology. We evaluate Symphony against a standard DCQCN-enabled RoCEv2 baseline. This mirrors the prevail-ing configuration in various large-scale production AI clus-ters [ 38 , 63 ]. The metrics used for evaluations are Job Com-pletion Time (JCT) and Collective Completion Time (CCT). All reported metrics (JCT and CCT) are averaged across at least 20 runs using random seeds. 
+
+## 4.2 Effectiveness in mitigating step misalignment 
+
+We demonstrate that Symphony can effectively minimize step misalignment for ring-based collective operations. We replicate Fig. 2 and compare the performance of the Baseline against Symphony . The results are depicted in Fig. 4. 
+
+Comparison with baseline. For the Baseline case, Fig. 4a reproduces the “snowball effect” highlighted in §2.2: under ECMP routing, minor timing skews compound into severe misalignment, with up to 30 overlapping steps and inflating CCT to 60% more than the theoretical value. As for Symphony , we observe that the number of overlap-ping steps is kept low, i.e., no more than 5 steps throughout the entire execution (see Fig. 4a). Even with ECMP, this “clamping” effect directly limits the runaway misalignment and reduces CCT by about 30% as compared to the Baseline. We evaluate the scenario of Symphony (Late Start) , where 
+
+Symphony is only activated 500 ms into the session. Despite     
+
+> handled by CC. Even a perfectly tuned CC cannot identify that a non-congested fast flow should yield for synchronization. Thus, using standard parameters confirms that our gains stem from structural alignment rather than parameter sensitivity. 8Symphony 600 700 800 900 1000
+> CCT (ms)
+> 0.0
+> 0.5
+> 1.0
+> CDF  Baseline
+> Priority Queue
+> Symphony
+
+Figure 5: CDF of CCT for Ring AllReduce. 1× 2× 4× 8× 16× 32× 64× 
+
+> Computation Reduction Ratio
+> 0.6
+> 0.8
+> 1.0
+> Normalized JCT
+> Baseline
+> Symphony
+
+Figure 6: Normalized JCT for Transformer training under varying computation reduction ratios. 
+
+an initial accumulation of 10 overlapping steps, Symphony 
+
+prevents further divergence and keeps the number of over-lapping steps under control (unlike Baseline), and effectively brings down the CCT. 
+
+Robustness. We further test the robustness of Symphony by observing its behavior over multiple runs. Fig. 4b shows the CDF of maximum step overlap across 50 runs. While Baseline shows maximum step overlap between 24 and 35, Symphony 
+
+consistently keeps the number of overlapping steps low, with maximum step overlap in the range between 3 and 6 over all runs. This further substantiates that Symphony is indeed effective in mitigating step misalignments. 
+
+## 4.3 Collective communication performance 
+
+We now evaluate the effectiveness of Symphony in reducing the CCT of collective operations. We analyze the distribu-tion of CCT over 100 runs of a Ring AllReduce operation (following Table 1). Additionally, we also compare Symphony 
+
+against a priority queuing (PQ) strategy (discussed in §2.3) for lagging flows. The results are shown in Fig. 5. 
+
+Results. We observe that Symphony consistently outper-forms both baseline and PQ with substantially lower CCT, with ≈22% and ≈19% reduction at the median, respectively. In the case of priority queuing, as it enforces strict pri-ority for lagging flows, it inevitably causes starvation for non-prioritized flows, triggering aggressive DCQCN throt-tling, which explains the poor performance. This explains why strict priority queuing is not suitable for addressing step misalignment, and hence highlights the importance of 
+
+> Symphony
+
+’s selective throttling approach to free up band-width for lagging flows to catch up and restore alignment. 
+
+Table 2: End-to-end data parallel test, gradient synchro-nization phase time comparison. JCT is in ms. Workload & Scale Baseline JCT                
+
+> Symphony
+> JCT Improvement
+> VGG-128 2450.34 1220.22 50.2% VGG-512 2676.09 1220.30 54.4% ResNet-128 977.27 739.85 24.3% ResNet-512 1034.91 819.31 20.8% Transformer 96389.86 96324.31 0.068%
+
+## 4.4 End-to-end AI training workloads 
+
+Next, we study how Symphony can improve AI model train-ing workloads. We evaluate three representative models: ResNet50 [ 29 ] and VGG16 [ 75 ] (Data Parallel, represents communication-bound workloads), and the original Trans-former [ 78 ] architecture (Hybrid Data & Model parallelism, represents a compute-bound workload). These workloads are the common benchmarking suite for Astra-Sim [ 65 , 83 ]. They cover a spectrum of communication patterns, from massive gradient synchronizations to small and frequent exchanges. 
+
+Results. From Table 2, we observe that Symphony achieves significant gains for communication-intensive workloads. For VGG16, the JCT is reduced by 50.2% and 54.4%, for job sizes of 128 and 512 nodes, respectively. As for ResNet50, the reduction is 24.3% and 20.8%. As expected, for the compute-bound Transformer baseline, there is a minimum difference since communication has a much smaller role. To understand the impact of communication overhead, for the compute-bound Transformer baseline, Fig. 6 shows how normalized JCT changes when the communication-to-computation ratio increases (to simulate the faster next-generation accelerators). The result shows that as normalized JCT decreases, reaching nearly 30% when the relative com-putation times reduce by 64 times. These results highlight the following. Symphony is particu-larly effective for situations where collective communication constitutes a larger fraction of total job time, such as data-parallel workloads. As Symphony prioritizes mitigating the impact of lagging flows, there are also more improvements in jobs where collective steps vary significantly in size or cost, such as VGG workloads with both small and large collectives. Finally, when the ratio of communication over computation increases, Symphony becomes more effective. 
+
+## 4.5 Multi-tenant environment workloads 
+
+Next, we evaluate Symphony’s robustness under a multi-tenant environment. 
+
+Two-job scenario. We evaluate a co-location scenario where two identical jobs (job A followed by job B after 500 ms )    
+
+> 9Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan 0500 1000 1500 2000
+> Time (ms)
+> 0
+> 200
+> 400
+> Aggregated
+> Throughput (Gbps)
+
+Baseline     
+
+> 0500 1000 1500 2000
+> Time (ms)
+
+Symphony 
+
+> Job A
+> Job B
+> Total
+
+(a) Throughput timeline of two co-located jobs. 0 100 200 300 400 
+
+> Span of Last Collective Step (ms)
+> 0.0
+> 0.5
+> 1.0
+> CDF
+> Baseline
+> Symphony
+
+(b) CDF of the time span of the final collective step. 0.6 0.7 0.8 0.9 1.0 
+
+> Normalized JCT
+> 0.0
+> 0.5
+> 1.0
+> CDF  64 nodes
+> 32 nodes
+> 16 nodes
+> Baseline
+
+(c) JCT improvement of Symphony across different job scales when multiple jobs are co-located with each other. 
+
+Figure 7: Multi-tenant environment workloads 
+
+compete for the same bottleneck links on a 128-node cluster (configured as 32 parallel 1D rings, 16 rings each). Fig. 7a illustrates how throughput varies as the jobs over-lap. Unlike the Baseline, where step misalignment degrades aggregate throughput, Symphony maintains a consistently higher throughput. Note that Symphony eliminates the “heavy tail” lagging flows seen in the Baseline, where Job A spends much more time in the “completion phase” when throughput starts to decrease as some flows have completed. In Fig. 7b, we plot the CDF of the span of the final col-lective step, computed from the time difference between the completion times of the fastest and slowest flow over 50 runs. Clearly, Symphony consistently minimizes the span duration of the final collective step, minimizing the tail latencies of overlapping jobs. 
+
+Multiple jobs with random arrival.. We further simulated a dynamic environment on a 128-node cluster to evaluate robustness. To create dynamic resource contention, we gener-ate a continuous stream of jobs (Ring AllReduce operations) with varying scales (16, 32, and 64 nodes), workload sizes (4, 16, and 32MB), and durations (controlled by varying the number of operation passes from 16 to 128). The arrival times are randomized to simulate unpredictable job starts, main-taining a maximum concurrency of 3–4 jobs. The experiment is repeated for 50 runs with different random seeds. 0.75 0.80 0.85 0.90 0.95 1.00 
+
+> Normalized JCT
+> 0.0
+> 0.5
+> 1.0
+> CDF
+> 1.13 1.29 1.67
+
+(a) Impact of load imbalance ratios. 10 5 10 4 10 3 10 2 10 1 10 0 
+
+> Value of k
+> 0.8
+> 1.0
+> 1.2
+> Normalized CCT
+> 32MB
+> 128MB
+> 256MB
+
+(b) Impact of different 𝑘 values. 128kB 512kB 2MB 8MB 32MB 
+
+> Chunk Size
+> 0.8
+> 1.0
+> Normalized CCT
+> Baseline
+> Symphony
+
+(c) Impact of different chunk sizes. 
+
+Figure 8: Impact of different network conditions and system parameters. 
+
+Fig. 7c shows the normalized JCT of Symphony ’s improve-ment over baseline. We observe a clear trend where the bene-fits of Symphony amplify with job scale. For smaller 16-node jobs, the median JCT is reduced by 1.53%, while the larger 64-node jobs achieve up to ≈17% JCT reduction. Note that for smaller jobs (16 nodes) where improvement is limited, 
+
+Symphony does not degrade the performance as well. This validates Symphony as a safe “performance insurance”: it de-livers substantial gains for vulnerable large-scale jobs while retaining similar performance for lighter workloads. 
+
+## 4.6 Impact of different network conditions and system parameters 
+
+Here, we study Symphony ’s behavior under varying network conditions, traffic patterns, and parameter configurations. We employ the standard Multiple 1D Ring AllReduce to eval-uate robustness against network imbalance under 128 nodes cluster. For the impact of parameter 𝑘 and chunk size, we utilize a 2D Ring AllReduce pattern. 
+
+Impact of load imbalance ratios. Since load imbalance is a common driver of step misalignment (as discussed in §2.2), we evaluate Symphony ’s relation to load imbalance. Fig. 8a plots the normalized JCT as we increase the network load imbalance ratio from 1.1x to 1.7x. By including small load 
+
+> 10 Symphony
+
+imbalance ratios (e.g., Meta reports an imbalance ratio of over 1.2 even in highly optimized clusters [ 21 ]), we try to em-ulate state-of-the-art load balancing algorithms. The results show a clear correlation between the amount of workload imbalance and Symphony ’s efficacy. As the imbalance in-creases, Symphony provides a larger (relative) improvement, and vice versa. This shows that even with better load balanc-ing algorithms, Symphony can consistently improve the CCT, and therefore highlights Symphony ’s indispensable role even when good traffic optimization schemes are in place. 
+
+Impact of different 𝑘 values. Next, we evaluate how dif-ferent values of 𝑘 (which controls the aggressiveness of 
+
+> Symphony
+
+’s throttling, see §3.3) impact performance 3. From the results shown in Fig. 8b, it indicates a broad “sweet spot” (10 −3 to 10 −2) where performance remains consistently high. Performance degrades only at extreme values: 𝑘 ≥ 0.1 leads to over-reaction, whereas 𝑘 ≤ 10 −4 yields insufficient feed-back. Crucially, this effective range spans an order of magni-tude and, as observed in our experiments, remains consistent across varying flow sizes and traffic patterns. This suggests that 𝑘 is insensitive to traffic characteristics and is instead determined by intrinsic network properties, such as RTT. Therefore, in practice, operators can deploy Symphony with a single cluster-wide 𝑘 value, eliminating the need for fragile per-job parameter tuning. 
+
+Impact of chunk size. The chunk size impacts how much data is sent between nodes. The longer the transmission du-ration, the more likely the flow is to be affected and thus making them more prone to step misalignments. As shown in Fig. 8c, Symphony ’s gains are most pronounced with larger chunk sizes (i.e., ≥ 512 kB ), reducing the CCT relative to the baseline by up to ≈20%. Larger chunks create long-duration flows prone to compounding overlaps, which Symphony ef-fectively mitigates. Conversely, small chunks (e.g., 128 kB )complete too quickly for significant misalignment to accu-mulate. 
+
+## 4.7 Hardware prototype validation 
+
+To demonstrate the practicality of Symphony , we prototype  
+
+> Symphony
+
+on an Intel Tofino2 [ 35 ] switch in about 1100 lines of P4 [10] code. 
+
+Adapting to hardware constraints. We utilize stateful ALUs to maintain the per-job states. A key challenge in mon-itoring the outpacing traffic ratio (§3.4.3) is that calculating 
+
+𝜌 (𝑡 ) requires division, which is resource-intensive on switch-ing ASICs. But as simplified by eq. (5), the multiplication-based inequality checking and additive operation make it workable on a switch. Similarly, calculating the precise ECN                     
+
+> 3We focus on the primary parameter 𝑘 , as the architectural constants (𝜏,𝑇 𝑤𝑖𝑛 ) are determined by the definition of misalignment (majority con-sensus) and switch processing latency. 0929 928 Flow A
+> Flow B
+> 1000
+> 750
+> 500
+> 250
+> 1885
+> 1877
+> 1877
+> 1637 1647
+> 1387
+> 1382 1399
+> 882
+> 1132 1146
+> 382 Baseline
+> 1000 500 0500 1000 1500 2000
+> Time (ms)
+> 1000
+> 750
+> 500
+> 250
+> 1348 1936
+> 1348
+> 1306 1680
+> 1056
+> 1210 1423
+> 710
+> 1073 1166
+> 323 Symphony (k=0.01)
+> Delay (ms)
+
+Figure 9: HW prototype evaluation. We show the trans-mission timelines of the data streams, and compare the ideal case (two flows run independently), the baseline (DCQCN-only), and Symphony .
+
+marking probability is non-trivial given that modern switch-ing hardware only supports simple arithmetic operations [ 42 ]. We address this by approximating the marking probability using logarithms and hardware lookup tables. 
+
+Experiment setup. To evaluate our prototype, two flows (A and B) of the same size (e.g., 1GB) are transmitted through the switch and go through the same port. In our setup, DCQCN is enabled on our RDMA NICs (NVIDIA ConnectX-6) and the DCQCN parameters are set as per [ 82 ]. Similar to the simulations, the NICs are set to 10G, and the application tags its packets with the step index in the UDP source port by using the mlx5dv_modify_qp_udp_sport API [ 50 ]. We observe how long each flow takes to complete as we vary their starting times. The results are shown in Fig. 9. 
+
+Results. As a reference, we validate that if flow B starts immediately after flow A completes, without any overlap in transmission time, both flows complete in the same amount of time, with each flow fully utilizing the link when it is active. As we delay the start time of flow A from 250 ms (Flow A starts 250 ms later than the baseline) to 1000 ms (two flows start at the same time), we observe that the differences in CCT between baseline and Symphony increase as the amount of time the two flows transmit concurrently increases. Compared to the baseline, for the same amount of time that flow A is being delayed, Symphony reduces the comple-tion time of flow A significantly. At the same time, note that  
+
+> Symphony
+
+is also reducing the duration that both flows are transmitting concurrently, mitigating the misalignment in 
+
+> 11 Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan
+
+this step. For example, when flow A starts 500 ms later, com-pletion time of flow A reduces from 1382 ms to 1210 ms (12 % 
+
+reduction), with a relatively small increase in completion time of flow B, from 1399 ms to 1433 ms (2 % increase). The concurrent transmission duration between flow A and B also reduces from 882 ms to 710 ms .
+
+## 5 Discussion and Future Work 
+
+Practical deployment. As Symphony relies on existing hard-ware capabilities (i.e., simple state tracking and ECN mark-ing), it can be readily implemented on today’s network hard-ware through a software/firmware update. Additionally, as the selective throttling mechanism depends on identifying progress at the ingress, Symphony only needs to be deployed on ToR switches. Combined, they eliminate the need for ex-tensive changes as well as hardware upgrades to support 
+
+> Symphony
+
+. At the same time, Symphony can be deployed incrementally across the cluster, given how each switches perform flow tracking and selective throttling independently without coordination. This allows operators to gradually in-troduce Symphony in their network in a controlled manner. 
+
+Large-scale testbed evaluations. Given the lack of access to large-scale testbed infrastructure, our current evaluation focuses on using packet-level simulation and hardware proto-type to validate the mechanism and feasibility of Symphony .To better quantify the gains of Symphony under more realis-tic network conditions, we plan to explore the deployment of Symphony in large-scale testbeds as part of future work. Considering the massive scale of LLM training, where even a 0.01 % efficiency gain for a model like Llama3-405B saves over 10K GPU hours [ 1 ], quantifying these benefits in a real-world cluster is our priority for future work. 
+
+General applicability of Symphony . By design, Symphony 
+
+caters only to workloads dependent on ring-based collective operations. While the evaluation of Symphony on emerg-ing Mixture -of -Experts (MoE) workloads was absent in our simulations, given framework limitations, it is important to note that ring -based collectives remain the dominant com-munication primitive in dense LLM training and ZeRO -style sharding [ 1, 64 ]. As such, this highlights the importance of 
+
+> Symphony
+
+. Beyond ring-based collectives, we plan to explore how Symphony can be adapted to different communication patterns (e.g., tree) in future work. 
+
+Practical concerns. Unlike strict priority scheduling or admission control schemes that risk starvation, Symphony 
+
+imposes a soft limit via probabilistic ECN marking. Crucially, this pacing mechanism is inherently bounded by the under-lying transport stack (e.g., DCQCN [ 89 ]), which enforces minimum sending rates even under aggressive marking. In scenarios of internal failure, such as control plane timeouts or state loss, the selective throttling of Symphony simply ceases to mark any flows. Consequently, the network falls back to the baseline behavior, without compromising network con-nectivity. Additionally, Symphony operates transparently to non-ring-based operations, as it only applies tracking and throttling on ring-based collective operations. 
+
+## 6 Related Work 
+
+Collective communication optimization. There have been various attempts to enhance the efficiency and scal-ability of collective communications. Examples include rout-ing and traffic engineering by leveraging datacenter topol-ogy [ 60 , 63 , 79 ], traffic characteristics [ 52 , 53 , 85 ], traffic aggregation [ 43 , 51 , 68 ], and even specialized hardware like optical switches [ 47 ]. Others focus on synthesizing efficient collective algorithms [ 90 ] or automating parallelism strate-gies [ 71 , 88 ] to maximize bandwidth utilization. Recent works also propose advanced scheduling mechanisms to prioritize critical flows or mitigate pipeline bubbles [ 12 , 84 ]. In parallel, payload-centric methods exploit ML traffic characteristics to reduce communication overhead through compression and fusion [ 33 , 54 , 80 ], or employ data redundancy to handle het-erogeneity and stragglers [ 40 , 48 , 81 ]. However, these works largely treat collective operations as a black box or focus solely on data volume reduction. They do not examine the fine-grained temporal synchronization of the collective oper-ation itself. While diagnosis tools like Mycroft [ 18 ] improve observability by tracing dependencies to debug reliability issues, they are not designed to mitigate the misalignment problem actively. Symphony examines the black box to tar-get fine-grained progression within collective operations, identifies step misalignment as a critical inefficiency, and introduces a mechanism to mitigate its impact. 
+
+Congestion signaling and marking. To alleviate conges-tion in datacenter networks, ECN has been widely deployed as a key mechanism for achieving high throughput and low latency. Existing ECN marking strategies can be broadly cate-gorized into three paradigms. First, per-port marking applies a uniform threshold to all packets traversing a physical port, deriving from the classic RED algorithm [ 7, 19 , 20 , 86 , 87 , 89 ]. Second, per-queue marking sets distinct thresholds for dif-ferent output queues or service classes to provide isola-tion [ 8, 26 , 58 ]. Third, per-flow marking assigns differentiated thresholds or drop probabilities at the granularity of indi-vidual flows to ensure fairness or minimize flow completion times [ 30 , 32 , 72 ]. Symphony falls under a flow-level differ-entiated strategy but introduces a critical distinction. Unlike prior approaches that differentiate flows based on static at-tributes (e.g., flow size) or fairness metrics, Symphony adopts a progress-aware selective scheme. By marking outpacing 
+
+> 12 Symphony
+
+flows while suppressing signals for lagging ones, it actively enforces temporal synchronization for collective operations. 
+
+Scheduling-based queue management. Scheduling al-gorithms differentiate packet forwarding to satisfy diverse QoS objectives. Classic mechanisms enforce bandwidth fair-ness [ 17 , 24 , 73 ], minimizing FCT [ 5 , 69 ], ensuring deadline guarantees [ 13 ], or focus on minimizing CCT [ 2, 14 , 15 , 36 ]. While the latter is particularly important for collective com-munication, these approaches primarily manage inter-job 
+
+contention and fall short in addressing the intra-job step misalignment identified in this paper. Moreover, step mis-alignment can unpredictably prolong job processing time, distorting the completion time estimates these algorithms rely on, leading to incorrect scheduling decisions. 
+
+## 7 Conclusion 
+
+In this paper, we identify step misalignment as a fundamental yet underexplored bottleneck in ring-based collective com-munication, arising from subtle progress divergence across flows under realistic datacenter conditions. We reveal how steps overlap and compound over time, significantly inflat-ing collective completion time. Motivated by this insight, we explore an in-network approach Symphony that can effi-ciently detect and mitigate step misalignments entirely in the data plane. Our findings highlight the importance of align-ing collective operations at the step granularity and point to new directions in co-designing network mechanisms with collective communications. 
+
+This work does not raise any ethical concerns. 
+
+## References 
+
+[1] Grattafiori Aaron, Dubey Abhimanyu, Jauhri Abhinav, Pandey Ab-hinav, Kadian Abhishek, Al-Dahle Ahmad, Letman Aiesha, Mathur Akhil, Schelten Alan, et al . 2024. The Llama 3 Herd of Models. arXiv:2407.21783 [cs.AI] https://arxiv.org/abs/2407.21783 [2] Saksham Agarwal, Shijin Rajakrishnan, Akshay Narayan, Rachit Agar-wal, David Shmoys, and Amin Vahdat. 2018. Sincronia: near-optimal network design for coflows. In ACM SIGCOMM .[3] Albert Gran Alcoz, Alexander Dietmüller, and Laurent Vanbever. 2020. SP-PIFO: Approximating Push-In First-Out Behaviors using Strict-Priority Queues. In USENIX NSDI .[4] Mohammad Alizadeh, Tom Edsall, Sarang Dharmapurikar, Ramanan Vaidyanathan, Kevin Chu, Andy Fingerhut, Vinh The Lam, Francis Ma-tus, Rong Pan, Navindra Yadav, and George Varghese. 2014. CONGA: distributed congestion-aware load balancing for datacenters. In ACM SIGCOMM . doi:10.1145/2619239.2626316 [5] Mohammad Alizadeh, Shuang Yang, Milad Sharif, Sachin Katti, Nick McKeown, Balaji Prabhakar, and Scott Shenker. 2013. pFabric: minimal near-optimal datacenter transport. In ACM SIGCOMM .[6] Sanjith Athlur, Nitika Saran, Muthian Sivathanu, Ramachandran Ram-jee, and Nipun Kwatra. 2022. Varuna: scalable, low-cost training of massive deep learning models. In ACM EuroSys . doi:10.1145/3492321. 3519584 [7] Wei Bai, Kai Chen, Li Chen, Changhoon Kim, and Haitao Wu. 2016. Enabling ECN over Generic Packet Scheduling. In ACM CoNEXT .[8] Wei Bai, Li Chen, Kai Chen, and Haitao Wu. 2016. Enabling ECN in multi-service multi-queue data centers. In USENIX NSDI .[9] Baidu Research. 2017. Baidu AllReduce: A Lightweight Library for Distributed Deep Learning. https://github.com/baidu-research/baidu-allreduce. [10] Pat Bosshart, Dan Daly, Glen Gibb, Martin Izzard, Nick McKeown, Jennifer Rexford, Cole Schlesinger, Dan Talayco, Amin Vahdat, George Varghese, and David Walker. 2014. P4: programming protocol-independent packet processors. SIGCOMM Comput. Commun. Rev. 44, 3 (July 2014), 87–95. doi:10.1145/2656877.2656890 [11] Pat Bosshart, Glen Gibb, Hun-Seok Kim, George Varghese, Nick McK-eown, Martin Izzard, Fernando Mujica, and Mark Horowitz. 2013. For-warding metamorphosis: fast programmable match-action processing in hardware for SDN. In ACM SIGCOMM . doi:10.1145/2486001.2486011 [12] Jiamin Cao, Yu Guan, Kun Qian, Jiaqi Gao, Wencong Xiao, Jianbo Dong, Binzhang Fu, Dennis Cai, and Ennan Zhai. 2024. Crux: GPU-Efficient Communication Scheduling for Deep Learning Training. In 
+
+ACM SIGCOMM . doi:10.1145/3651890.3672239 [13] Houssine Chetto and Maryline Chetto. 1989. Some Results of the Earliest Deadline Scheduling Algorithm. IEEE Trans. Softw. Eng. 15, 10 (Oct. 1989), 1261–1269. doi:10.1109/TSE.1989.559777 [14] Mosharaf Chowdhury and Ion Stoica. 2015. Efficient Coflow Schedul-ing Without Prior Knowledge. In ACM SIGCOMM .[15] Mosharaf Chowdhury, Yuan Zhong, and Ion Stoica. 2014. Efficient coflow scheduling with Varys. In ACM SIGCOMM .[16] Ultra Ethernet Consortium. 2025. Ultra Ethernet Specification v1.0 (UEC Specification 6.11.25). Specification: https://ultraethernet.org/ wp-content/uploads/sites/20/2025/06/UE-Specification-6.11.25.pdf. [17] A. Demers, S. Keshav, and S. Shenker. 1989. Analysis and simulation of a fair queueing algorithm. In ACM SIGCOMM .[18] Yangtao Deng, Lei Zhang, Qinlong Wang, Xiaoyun Zhi, Xinlei Zhang, Zhuo Jiang, Haohan Xu, Lei Wang, Zuquan Song, Gaohong Liu, Yang Bai, Shuguang Wang, Wencong Xiao, Jianxi Ye, Minlan Yu, and Hong Xu. 2025. Mycroft: Tracing Dependencies in Collec-tive Communication Towards Reliable LLM Training. In ACM SOSP .doi:10.1145/3731569.3764848 [19] Sally Floyd and Van Jacobson. 1993. Random early detection gateways for congestion avoidance. IEEE/ACM Trans. Netw. 1, 4 (Aug. 1993), 397–413. doi:10.1109/90.251892 [20] Sally Floyd, Dr. K. K. Ramakrishnan, and David L. Black. 2001. The Addition of Explicit Congestion Notification (ECN) to IP. RFC 3168. doi:10.17487/RFC3168 [21] Adithya Gangidi, Rui Miao, Shengbao Zheng, Sai Jayesh Bondu, Guilherme Goes, Hany Morsy, Rohit Puri, Mohammad Riftadi, Ashmitha Jeevaraj Shetty, Jingyi Yang, Shuqiang Zhang, Mikel Jimenez Fernandez, Shashidhar Gandham, and Hongyi Zeng. 2024. RDMA over Ethernet for Distributed Training at Meta Scale. In ACM SIGCOMM .doi:10.1145/3651890.3672233 [22] Soudeh Ghorbani, Zibin Yang, P. Brighten Godfrey, Yashar Ganjali, and Amin Firoozshahian. 2017. DRILL: Micro Load Balancing for Low-latency Data Center Networks. In ACM SIGCOMM . doi:10.1145/ 3098822.3098839 [23] Andrew Gibiansky. 2017. Bringing HPC Techniques to Deep Learn-ing (ring allreduce). https://andrew.gibiansky.com/blog/machine-learning/baidu-allreduce/ [24] Pawan Goyal, Harrick M. Vin, and Haichen Chen. 1996. Start-time fair queueing: a scheduling algorithm for integrated services packet switching networks. In ACM SIGCOMM .[25] Greg Dorai. 2025. Cisco: The New Family of Cisco Smart Switches: Built to Power What’s Next. https://www.cisco.com/site/us/en/ products/networking/silicon-one/index.html. 13 Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan 
+
+[26] Matthew P. Grosvenor, Malte Schwarzkopf, Ionel Gog, Robert N. M. Watson, Andrew W. Moore, Steven Hand, and Jon Crowcroft. 2015. Queues Don’t Matter When You Can JUMP Them!. In USENIX NSDI .[27] Chuanxiong Guo, Haitao Wu, Zhong Deng, Gaurav Soni, Jianxi Ye, Jitu Padhye, and Marina Lipshteyn. 2016. RDMA over Commodity Ethernet at Scale. In ACM SIGCOMM . doi:10.1145/2934872.2934908 [28] Aaron Harlap, Henggang Cui, Wei Dai, Jinliang Wei, Gregory R. Ganger, Phillip B. Gibbons, Garth A. Gibson, and Eric P. Xing. 2016. Addressing the straggler problem for iterative convergent parallel ML. In ACM SoCC . doi:10.1145/2987550.2987554 [29] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015. Deep Residual Learning for Image Recognition. arXiv:1512.03385 [cs.CV] https://arxiv.org/abs/1512.03385 [30] T. Hoeiland-Joergensen, P. McKenney, D. Taht, J. Gettys, and E. Du-mazet. 2018. RFC 8290: The Flow Queue CoDel Packet Scheduler and Active Queue Management Algorithm. [31] Zhiyi Hu, Siyuan Shen, Tommaso Bonato, Sylvain Jeaugey, Cedell Alexander, Eric Spada, James Dinan, Jeff Hammond, and Torsten Hoefler. 2025. Demystifying NCCL: An In-depth Analysis of GPU Communication Protocols and Algorithms. arXiv:2507.04786 [cs.DC] https://arxiv.org/abs/2507.04786 [32] Hanlin Huang, Ke Xu, Tong Li, Zhuotao Liu, Xinle Du, and Xi-angyu Gao. 2025. DiffECN: Differential ECN Marking for Datacenter Networks. IEEE Transactions on Networking 33, 1 (2025), 210–225. doi:10.1109/TNET.2024.3477511 [33] Jiajun Huang, Sheng Di, Xiaodong Yu, Yujia Zhai, Jinyang Liu, Yafan Huang, Ken Raffenetti, Hui Zhou, Kai Zhao, Xiaoyi Lu, Zizhong Chen, Franck Cappello, Yanfei Guo, and Rajeev Thakur. 2024. gZCCL: Compression-Accelerated Collective Communication Framework for GPU Clusters. In ACM ICS . doi:10.1145/3650200.3656636 [34] Peng Huang, Chuanxiong Guo, Lidong Zhou, Jacob R. Lorch, Yingnong Dang, Murali Chintalapati, and Randolph Yao. 2017. Gray Failure: The Achilles’ Heel of Cloud-Scale Systems. In ACM HotOS . doi:10.1145/ 3102980.3103005 [35] Intel Corporation. [n. d.]. Intel ® Tofino ™ 2. https://www.intel.com/ content/www/us/en/products/network-io/programmable-ethernet-switch/tofino-2-series.html. [36] Akshay Jajoo, Y. Charlie Hu, and Xiaojun Lin. 2019. Your Coflow has Many Flows: Sampling them for Fun and Speed. In USENIX ATC .[37] Insu Jang, Zhenning Yang, Zhen Zhang, Xin Jin, and Mosharaf Chowd-hury. 2023. Oobleck: Resilient Distributed Training of Large Models Using Pipeline Templates. In ACM SOSP . doi:10.1145/3600006.3613152 [38] Ziheng Jiang, Haibin Lin, Yinmin Zhong, Qi Huang, Yangrui Chen, Zhi Zhang, Yanghua Peng, Xiang Li, Cong Xie, Shibiao Nong, Yulu Jia, Sun He, Hongmin Chen, Zhihao Bai, Qi Hou, Shipeng Yan, Ding Zhou, Yiyao Sheng, Zhuo Jiang, Haohan Xu, Haoran Wei, Zhang Zhang, Pengfei Nie, Leqi Zou, Sida Zhao, Liang Xiang, Zherui Liu, Zhe Li, Xiaoying Jia, Jianxi Ye, Xin Jin, and Xin Liu. 2024. MegaScale: scaling large language model training to more than 10,000 GPUs. In USENIX NSDI .[39] Raj Joshi, Cha Hwan Song, Xin Zhe Khooi, Nishant Budhdev, Ayush Mishra, Mun Choon Chan, and Ben Leong. 2023. Masking Corruption Packet Losses in Datacenter Networks with Link-local Retransmission. In ACM SIGCOMM . doi:10.1145/3603269.3604853 [40] Can Karakus, Yifan Sun, Suhas Diggavi, and Wotao Yin. 2017. Straggler mitigation in distributed optimization through data encoding. In NIPS .Curran Associates Inc. [41] Naga Katta, Mukesh Hira, Changhoon Kim, Anirudh Sivaraman, and Jennifer Rexford. 2016. HULA: Scalable Load Balancing Using Pro-grammable Data Planes. In ACM Proceedings of the Symposium on SDN Research (SOSR ’16) . doi:10.1145/2890955.2890968 [42] Xin Zhe Khooi, Levente Csikor, Jialin Li, Min Suk Kang, and Dinil Mon Divakaran. 2021. Revisiting Heavy-Hitter Detection on Commodity Programmable Switches. In 2021 IEEE 7th International Conference on Network Softwarization (NetSoft) .[43] ChonLam Lao, Yanfang Le, Kshiteej Mahajan, Yixi Chen, Wenfei Wu, Aditya Akella, and Michael Swift. 2021. ATP: In-network Aggregation for Multi-tenant Learning. In USENIX NSDI .[44] Kangwook Lee, Maximilian Lam, Ramtin Pedarsani, Dimitris Papail-iopoulos, and Kannan Ramchandran. 2016. Speeding up distributed machine learning using codes. In IEEE International Symposium on Information Theory (ISIT) .[45] Wenxue Li, Xiangzhou Liu, Yunxuan Zhang, Zihao Wang, Wei Gu, Tao Qian, Gaoxiong Zeng, Shoushou Ren, Xinyang Huang, Zhenghang Ren, Bowen Liu, Junxue Zhang, Kai Chen, and Bingyang Liu. 2025. Revisiting RDMA Reliability for Lossy Fabrics. In ACM SIGCOMM .doi:10.1145/3718958.3750480 [46] Yuliang Li, Rui Miao, Hongqiang Harry Liu, Yan Zhuang, Fei Feng, Lingbo Tang, Zheng Cao, Ming Zhang, Frank Kelly, Mohammad Al-izadeh, and Minlan Yu. 2019. HPCC: high precision congestion control. In ACM SIGCOMM . doi:10.1145/3341302.3342085 [47] Xudong Liao, Yijun Sun, Han Tian, Xinchen Wan, Yilun Jin, Zilong Wang, Zhenghang Ren, Xinyang Huang, Wenxue Li, Kin Fai Tse, Zhizhen Zhong, Guyue Liu, Ying Zhang, Xiaofeng Ye, Yiming Zhang, and Kai Chen. 2025. MixNet: A Runtime Reconfigurable Optical-Electrical Fabric for Distributed Mixture-of-Experts Training. In ACM SIGCOMM . doi:10.1145/3718958.3750465 [48] Hwijoon Lim, Juncheol Ye, Sangeetha Abdu Jyothi, and Dongsu Han. 2024. Accelerating Model Training in Multi-cluster Environments with Consumer-grade GPUs. In ACM SIGCOMM . doi:10.1145/3651890. 3672228 [49] Shengkai Lin, Qinwei Yang, Zengyin Yang, Yuchuan Wang, and Shizhen Zhao. 2024. LubeRDMA: A Fail-safe Mechanism of RDMA. In ACM APNET . doi:10.1145/3663408.3663411 [50] linux-rdma contributors. 2024. rdma-core: RDMA Core Userspace Libraries and Daemons. https://github.com/linux-rdma/rdma-core. [51] Shuo Liu, Qiaoling Wang, Junyi Zhang, Wenfei Wu, Qinliang Lin, Yao Liu, Meng Xu, Marco Canini, Ray C. C. Cheung, and Jianfei He. 2023. In-Network Aggregation with Transport Transparency for Distributed Training. In ACM ASPLOS . doi:10.1145/3582016.3582037 [52] Tongrui Liu, Chenyang Hei, Fuliang Li, Chengxi Gao, Jiamin Cao, Tian-shu Wang, Ennan Zhai, and Xingwei Wang. 2025. ResCCL: Resource-Efficient Scheduling for Collective Communication. In ACM SIGCOMM .doi:10.1145/3718958.3750514 [53] Xuting Liu, Behnaz Arzani, Siva Kesava Reddy Kakarla, Liangyu Zhao, Vincent Liu, Miguel Castro, Srikanth Kandula, and Luke Marshall. 2024. Rethinking Machine Learning Collective Communication as a Multi-Commodity Flow Problem. In ACM SIGCOMM . doi:10.1145/ 3651890.3672249 [54] Zhangqiang Ming, Yuchong Hu, Xinjue Zheng, Wenxiang Zhou, and Dan Feng. 2025. SAFusion: Efficient Tensor Fusion with Sparsifica-tion Ahead for High-Performance Distributed DNN Training. In ACM HPDC . New York, NY, USA. doi:10.1145/3731545.3731581 [55] Radhika Mittal, Vinh The Lam, Nandita Dukkipati, Emily Blem, Hassan Wassel, Monia Ghobadi, Amin Vahdat, Yaogong Wang, David Wether-all, and David Zats. 2015. TIMELY: RTT-based Congestion Control for the Datacenter. In ACM SIGCOMM . doi:10.1145/2785956.2787510 [56] Behnam Montazeri, Yilong Li, Mohammad Alizadeh, and John Ouster-hout. 2018. Homa: a receiver-driven low-latency transport protocol using network priorities. In ACM SIGCOMM . doi:10.1145/3230543. 3230564 [57] Deepak Narayanan, Aaron Harlap, Amar Phanishayee, Vivek Seshadri, Nikhil R. Devanur, Gregory R. Ganger, Phillip B. Gibbons, and Matei Zaharia. 2019. PipeDream: generalized pipeline parallelism for DNN 14 Symphony 
+
+training. In ACM SOSP . doi:10.1145/3341301.3359646 [58] Kathleen Nichols and Van Jacobson. 2012. Controlling queue delay. 
+
+Commun. ACM 55, 7 (July 2012), 42–50. doi:10.1145/2209249.2209264 [59] nsnam. 2025. ns-3 Network Simulator. https://www.nsnam.org/ [60] Nvidia. 2022. Doubling all2all Performance with NVIDIA Col-lective Communication Library 2.12. https://developer.nvidia. com/blog/doubling-all2all-performance-with-nvidia-collective-communication-library-2-12/ [61] NVIDIA. 2025. NVIDIA Collective Communication Library (NCCL) Documentation. https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html. [62] Penghui Qi, Xinyi Wan, Guangxing Huang, and Min Lin. 2023. Zero Bubble Pipeline Parallelism. arXiv:2401.10241 [cs.DC] https://arxiv. org/abs/2401.10241 [63] Kun Qian, Yongqing Xi, Jiamin Cao, Jiaqi Gao, Yichi Xu, Yu Guan, Binzhang Fu, Xuemei Shi, Fangbo Zhu, Rui Miao, Chao Wang, Peng Wang, Pengcheng Zhang, Xianlong Zeng, Eddie Ruan, Zhiping Yao, Ennan Zhai, and Dennis Cai. 2024. Alibaba HPN: A Data Center Network for Large Language Model Training. In ACM SIGCOMM .doi:10.1145/3651890.3672265 [64] Samyam Rajbhandari, Jeff Rasley, Olatunji Ruwase, and Yuxiong He. 2020. ZeRO: Memory Optimizations Toward Training Trillion Parame-ter Models. arXiv:1910.02054 [cs.LG] https://arxiv.org/abs/1910.02054 [65] Saeed Rashidi, Srinivas Sridharan, Sudarshan Srinivasan, and Tushar Krishna. 2020. ASTRA-SIM: Enabling SW/HW Co-Design Exploration for Distributed DL Training Platforms. In IEEE ISPASS .[66] Jeff Rasley, Samyam Rajbhandari, Olatunji Ruwase, and Yuxiong He. 2020. DeepSpeed: System Optimizations Enable Training Deep Learning Models with Over 100 Billion Parameters. In ACM SIGKDD .doi:10.1145/3394486.3406703 [67] Joshua Romero, Junqi Yin, Nouamane Laanait, Bing Xie, M. Todd Young, Sean Treichler, Vitalii Starchenko, Albina Borisevich, Alex Sergeev, and Michael Matheson. 2022. Accelerating Collective Com-munication in Data Parallel Training across Deep Learning Frame-works. In USENIX NSDI 22 .[68] Amedeo Sapio, Marco Canini, Chen-Yu Ho, Jacob Nelson, Panos Kalnis, Changhoon Kim, Arvind Krishnamurthy, Masoud Moshref, Dan Ports, and Peter Richtarik. 2021. Scaling Distributed Machine Learning with In-Network Aggregation. In USENIX NSDI .[69] Linus E Schrage and Louis W Miller. 1966. The Queue M/G/1 with the Shortest Remaining Processing Time Discipline. Operations Research 
+
+14, 4 (1966), 670–684. [70] Alexander Sergeev and Mike Del Balso. 2018. Horovod: fast and easy distributed deep learning in TensorFlow. arXiv:1802.05799 [cs.LG] https://arxiv.org/abs/1802.05799 [71] Aashaka Shah, Vijay Chidambaram, Meghan Cowan, Saeed Maleki, Madan Musuvathi, Todd Mytkowicz, Jacob Nelson, Olli Saarikivi, and Rachee Singh. 2023. TACCL: Guiding Collective Algorithm Synthesis using Communication Sketches. In USENIX NSDI .[72] Naveen Kr. Sharma, Ming Liu, Kishore Atreya, and Arvind Krish-namurthy. 2018. Approximating fair queueing on reconfigurable switches. In USENIX NSDI .[73] M. Shreedhar and G. Varghese. 1996. Efficient fair queuing using deficit round-robin. IEEE/ACM Transactions on Networking 4, 3 (1996), 375–385. doi:10.1109/90.502236 [74] Min Si, Pavan Balaji, Yongzhou Chen, Ching-Hsiang Chu, Adi Gangidi, Saif Hasan, Subodh Iyengar, Dan Johnson, Bingzhe Liu, Regina Ren, Deep Shah, Ashmitha Jeevaraj Shetty, Greg Steinbrecher, Yulun Wang, Bruce Wu, Xinfeng Xie, Jingyi Yang, Mingran Yang, Kenny Yu, Min-lan Yu, Cen Zhao, Wes Bland, Denis Boyda, Suman Gumudavelli, Prashanth Kannan, Cristian Lumezanu, Rui Miao, Zhe Qu, Venkat Ramesh, Maxim Samoylov, Jan Seidel, Srikanth Sundaresan, Feng Tian, Qiye Tan, Shuqiang Zhang, Yimeng Zhao, Shengbao Zheng, Art Zhu, and Hongyi Zeng. 2026. Collective Communication for 100k+ GPUs. arXiv:2510.20171 [cs.DC] https://arxiv.org/abs/2510.20171 [75] Karen Simonyan and Andrew Zisserman. 2015. Very Deep Convolutional Networks for Large-Scale Image Recognition. arXiv:1409.1556 [cs.CV] https://arxiv.org/abs/1409.1556 [76] Cha Hwan Song, Xin Zhe Khooi, Raj Joshi, Inho Choi, Jialin Li, and Mun Choon Chan. 2023. Network Load Balancing with In-network Re-ordering Support for RDMA. In ACM SIGCOMM . doi:10.1145/3603269. 3604849 [77] Rashish Tandon, Qi Lei, Alexandros G. Dimakis, and Nikos Karam-patziakis. 2017. Gradient coding: avoiding stragglers in distributed learning. In ICML . JMLR.org. [78] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2023. Attention Is All You Need. arXiv:1706.03762 [cs.CL] https://arxiv.org/ abs/1706.03762 [79] Weiyang Wang, Manya Ghobadi, Kayvon Shakeri, Ying Zhang, and Naader Hasani. 2024. Rail-only: A Low-Cost High-Performance Net-work for Training LLMs with Trillion Parameters. In IEEE Symposium on High-Performance Interconnects (HOTI) .[80] Zhuang Wang, Xinyu Wu, Zhaozhuo Xu, and T. S. Eugene Ng. [n. d.]. In MLsys .[81] Ertza Warraich, Omer Shabtai, Khalid Manaa, Shay Vargaftik, Yonatan Piasetzky, Matty Kadosh, Lalith Suresh, and Muhammad Shahbaz. 2025. OptiReduce: Resilient and Tail-Optimal AllReduce for Distributed Deep Learning in the Cloud. In USENIX NSDI .[82] Bai Wei, Sainul Abdeen Shanim, Agrawal Ankit, Kumar Attre Krishan, Bahl Paramvir, Bhagat Ameya, Bhaskara Gowri, Brokhman Tanya, Cao Lei, Cheema Ahmad, Chow Rebecca, et al . 2023. Empowering Azure Storage with RDMA. In USENIX NSDI .[83] William Won, Taekyung Heo, Saeed Rashidi, Srinivas Sridharan, Sudar-shan Srinivasan, and Tushar Krishna. 2023. ASTRA-sim2.0: Modeling Hierarchical Networks and Disaggregated Systems for Large-model Training at Scale. In IEEE ISPASS .[84] Tianyuan Wu, Lunxi Cao, Hanfeng Lu, Xiaoxiao Jiang, Yinghao Yu, Siran Yang, Guodong Yang, Jiamang Wang, Lin Qu, Liping Zhang, and Wei Wang. 2026. Queues Attack of the Bubbles: Straggler-Resilient Pipeline Parallelism for Large Model Training. In USENIX NSDI . USENIX Association. https://www.usenix.org/conference/ nsdi26/presentation/wu-tianyuan (to appear). [85] Yongji Wu, Yechen Xu, Jingrong Chen, Zhaodong Wang, Ying Zhang, Matthew Lentz, and Danyang Zhuo. 2024. MCCS: A Service-based Approach to Collective Communication for Multi-Tenant Cloud. In 
+
+ACM SIGCOMM . doi:10.1145/3651890.3672252 [86] Siyu Yan, Xiaoliang Wang, Xiaolong Zheng, Yinben Xia, Derui Liu, and Weishan Deng. 2021. ACC: automatic ECN tuning for high-speed datacenter networks. In ACM SIGCOMM .[87] Junxue Zhang, Wei Bai, and Kai Chen. 2019. Enabling ECN for data-center networks with RTT variations. In ACM CoNEXT . doi:10.1145/ 3359989.3365426 [88] Lianmin Zheng, Zhuohan Li, Hao Zhang, Yonghao Zhuang, Zhifeng Chen, Yanping Huang, Yida Wang, Yuanzhong Xu, Danyang Zhuo, Eric P. Xing, Joseph E. Gonzalez, and Ion Stoica. 2022. Alpa: Au-tomating Inter- and Intra-Operator Parallelism for Distributed Deep Learning. In USENIX OSDI .[89] Yibo Zhu, Haggai Eran, Daniel Firestone, Chuanxiong Guo, Marina Lipshteyn, Yehonatan Liron, Jitendra Padhye, Shachar Raindel, Mo-hamad Haj Yahia, and Ming Zhang. 2015. Congestion Control for Large-Scale RDMA Deployments. In ACM SIGCOMM . doi:10.1145/ 2785956.2787484 15 Yuze Jin, Xin Zhe Khooi, Ruyi Yao, and Mun Choon Chan 
+
+[90] Ruixing Zong, Jiapeng Zhang, Zhuo Tang, and Kenli Li. 2025. IBing: An Efficient Interleaved Bidirectional Ring All-Reduce Algorithm for Gradient Synchronization. ACM Trans. Archit. Code Optim. 22, 1, Article 35 (March 2025), 23 pages. doi:10.1145/3711818 16

@@ -1,0 +1,204 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-21T19:55:55.541900+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2604.16810v1",
+      "title": "Gleaner: A Semantically-Rich and Efficient Online Sampler for Microservice Diagnostics",
+      "abstract": "Distributed tracing in microservices is critical for diagnostics but generates overwhelming data volumes, necessitating intelligent sampling. To maximize fidelity, state-of-the-art (SOTA) tail-based samplers analyze complete (or even log-enriched) traces by modeling them as graphs. However, this reliance on computationally expensive graph analysis creates a performance bottleneck that prohibits their use in online settings.   To this end, we propose Gleaner, an online tail-sampling framework that breaks this trade-off. It is founded on the key insight that explicit graph structures are unnecessary for high-fidelity trace grouping. Instead, Gleaner represents each trace as a \"bag-of-edges\" augmented with log semantics, replacing slow graph algorithms with highly efficient set-based operations. It also employs an alarm-driven quota and a diversity-preserving strategy to prioritize anomalous and rare traces for downstream Root Cause Analysis (RCA). Experimentally, Gleaner processes traces at 0.74ms each, improving Trace Pattern Coverage by up to 128.7% and Shannon Entropy by up to 32.9% over baselines. At just a 1% sampling rate, Gleaner improves RCA accuracy by 42%-107% over the next-best sampler. Moreover, RCA on Gleaner's sampled data is more accurate than with the entire, unsampled dataset. This result reframes intelligent sampling from a data reduction technique to a powerful signal enhancement paradigm for automated operations.",
+      "authors": [
+        "Yifan Yang",
+        "Aoyang FANG",
+        "Songhan Zhang",
+        "Pinjia He"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-04-18T03:43:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.16810v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "online sampler for microservice diagnostics and trace grouping",
+      "llm_evidence_cn": "用于微服务诊断和追踪分组的在线采样器",
+      "llm_evidence": "用于微服务诊断和追踪分组的在线采样器",
+      "canonical_evidence": "用于微服务诊断和追踪分组的在线采样器",
+      "llm_tldr_en": "Gleaner is an efficient online sampler for microservice tracing that avoids expensive graph analysis.",
+      "llm_tldr_cn": "Gleaner是一种高效的在线微服务追踪采样框架，通过避免昂贵的图分析提高性能。",
+      "llm_tldr": "Gleaner是一种高效的在线微服务追踪采样框架，通过避免昂贵的图分析提高性能。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "adaptive traffic sampling techniques for accurate measurement",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.13522v2",
+      "title": "TORAI: Multi-source Root Cause Analysis for Blind Spots in Microservice Service Call Graph",
+      "abstract": "Existing multi-source root cause analysis (RCA) methods for microservice systems assume all services have traces to construct a service call graph. However, this assumption is not practical as microservice systems evolve rapidly and may contain blackbox services without traces, such as compiled software or unsupported services. We refer to these services as blind spots. In the presence of blind spots, the performance of existing multi-source RCA methods may be affected, as they only diagnose visible services on the call graph. To overcome this limitation, we propose TORAI, a novel unsupervised approach that effectively pinpoints fine-grained root causes without relying on the service call graph. Instead, TORAI first measures anomaly severity using available multi-source telemetry data. It then performs clustering to group services based on their severity symptoms and conducts causal analysis to rank services within each severity cluster. Finally, TORAI aggregates the cluster rankings and uses hypothesis testing to identify fine-grained root causes. TORAI provides an unsupervised approach that leverages available multi-source telemetry data for RCA without requiring a constructed service call graph or further intrusive actions, thus addressing the limitations of existing methods. Our experiments on three benchmark systems demonstrate that TORAI outperforms state-of-the-art baselines remarkably in the presence of blind spots. Performance on real-world failures further shows that TORAI can accurately pinpoint the root causes in top-3 recommendations.",
+      "authors": [
+        "Luan Pham",
+        "Huong Ha",
+        "Xiuzhen Zhang",
+        "Hongyu Zhang"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-04-15T06:11:45+00:00",
+      "link": "https://arxiv.org/pdf/2604.13522v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "root cause analysis using multi-source telemetry data in microservices",
+      "llm_evidence_cn": "在微服务中使用多源遥测数据进行根因分析",
+      "llm_evidence": "在微服务中使用多源遥测数据进行根因分析",
+      "canonical_evidence": "在微服务中使用多源遥测数据进行根因分析",
+      "llm_tldr_en": "TORAI performs unsupervised root cause analysis using telemetry data to handle blind spots in microservices.",
+      "llm_tldr_cn": "TORAI利用遥测数据进行无监督根因分析，解决了微服务调用链中的盲点问题。",
+      "llm_tldr": "TORAI利用遥测数据进行无监督根因分析，解决了微服务调用链中的盲点问题。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.13600v2",
+      "title": "SAKURAONE: An Open Ethernet-Based AI HPC System and Its Observed Workload Dynamics in a Single-Tenant LLM Development Environment",
+      "abstract": "SAKURAONE is a managed high performance computing (HPC) cluster developed and operated by the SAKURA Internet Research Center. It builds on the KOKARYOKU PHY bare metal GPU platform and is optimized for advanced workloads, including large language model (LLM) training. In ISC 2025 TOP500, SAKURAONE is ranked 49th by HPL and is the only top 100 system that uses a fully open networking stack - 800 GbE with SONiC - demonstrating the scalability of vendor-neutral technology. Measured performance is 33.95 PFLOP/s (HPL Rmax), 396.295 TFLOP/s (HPCG), and 339.86 PFLOP/s on HPL-MxP with FP8. The system consists of 100 nodes, each with eight NVIDIA H100 GPUs and a 2 PB all-flash Lustre file system, interconnected via a rail-optimized 800 GbE leaf-spine fabric with RoCEv2. Through exclusive use by a single research project, we observed the characteristics of development-related jobs. Consistent with previous HPC studies, small-scale jobs dominated in number, while a few large-scale jobs accounted for most GPU resource time. As the project progressed, resource use shifted from large-scale to mid-scale jobs, reflecting a transition from initial large-scale training to iterative refinement. These observations illustrate the real-world utilization dynamics of GPU clusters under unified project workloads.",
+      "authors": [
+        "Fumikazu Konishi",
+        "Yuuki Tsubouchi",
+        "Hirofumi Tsuruta"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.NI"
+      ],
+      "published": "2026-04-15T08:09:15+00:00",
+      "link": "https://arxiv.org/pdf/2604.13600v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "observed workload dynamics in 800 GbE Ethernet-based AI HPC system",
+      "llm_evidence_cn": "800 GbE以太网AI HPC系统中的工作负载动态观测",
+      "llm_evidence": "800 GbE以太网AI HPC系统中的工作负载动态观测",
+      "canonical_evidence": "800 GbE以太网AI HPC系统中的工作负载动态观测",
+      "llm_tldr_en": "Analyzes workload dynamics and performance of a large-scale 800 GbE AI HPC cluster using open networking.",
+      "llm_tldr_cn": "分析了使用开放网络技术的800 GbE大规模AI HPC集群的工作负载动态与性能。",
+      "llm_tldr": "分析了使用开放网络技术的800 GbE大规模AI HPC集群的工作负载动态与性能。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.16575v1",
+      "title": "Evaluating Temporal and Structural Anomaly Detection Paradigms for DDoS Traffic",
+      "abstract": "Unsupervised anomaly detection is widely used to detect Distributed Denial-of-Service (DDoS) attacks in cloud-native 5G networks, yet most studies assume a fixed traffic representation, either temporal or structural, without validating which feature space best matches the data. We propose a lightweight decision framework that prioritizes temporal or structural features before training, using two diagnostics: lag-1 autocorrelation of an aggregated flow signal and PCA cumulative explained variance. When the probes are inconclusive, the framework reserves a hybrid option as a future fallback rather than an empirically validated branch. Experiments on two statistically distinct datasets with Isolation Forest, One-Class SVM, and KMeans show that structural features consistently match or outperform temporal ones, with the performance gap widening as temporal dependence weakens.",
+      "authors": [
+        "Yasmin Souza Lima",
+        "Rodrigo Moreira",
+        "Larissa F. Rodrigues Moreira",
+        "Tereza Cristina M. de B. Carvalho",
+        "Flávio de Oliveira Silva"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-17T12:59:48+00:00",
+      "link": "https://arxiv.org/pdf/2604.16575v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "anomaly detection for DDoS traffic in cloud-native 5G networks",
+      "llm_evidence_cn": "云原生5G网络中DDoS流量的异常检测",
+      "llm_evidence": "云原生5G网络中DDoS流量的异常检测",
+      "canonical_evidence": "云原生5G网络中DDoS流量的异常检测",
+      "llm_tldr_en": "Evaluates temporal and structural features for lightweight unsupervised DDoS traffic anomaly detection.",
+      "llm_tldr_cn": "评估了用于轻量级无监督DDoS流量异常检测的时间和结构特征。",
+      "llm_tldr": "评估了用于轻量级无监督DDoS流量异常检测的时间和结构特征。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.16880v1",
+      "title": "Symphony: Taming Step Misalignments in the Network for Ring-based Collective Operations",
+      "abstract": "Ring-based collective operations are widely used in distributed AI training due to their efficient bandwidth utilization. While ring communication excels at pipelining, its performance is heavily dependent on having synchronized step-wise progression. This presents a mismatch to the underlying network conditions in practice: collective operations are vulnerable to network jitter and congestion, leading to step misalignment and increased collective completion time. To that end, we propose Symphony, an in-network solution that detects pipeline step misalignment and mitigates its impact. Symphony introduces (1) a lightweight mechanism to track per-job pipeline progress and (2) a novel use of congestion signals to selectively throttle outpacing flows, allowing lagging flows to catch up without global coordination. Through simulations using Astra-Sim, we show that Symphony effectively mitigates step misalignments in ring-based collectives, resulting in up to 54% improvement in job/collective communication time. Finally, we prototype and validate Symphony on an Intel Tofino2 programmable switch to demonstrate its practicality.",
+      "authors": [
+        "Yuze Jin",
+        "Xin Zhe Khooi",
+        "Ruyi Yao",
+        "Mun Choon Chan"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-18T07:10:11+00:00",
+      "link": "https://arxiv.org/pdf/2604.16880v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "in-network solution for detecting pipeline misalignment using congestion signals",
+      "llm_evidence_cn": "利用拥塞信号检测流水线错位的网络内解决方案",
+      "llm_evidence": "利用拥塞信号检测流水线错位的网络内解决方案",
+      "canonical_evidence": "利用拥塞信号检测流水线错位的网络内解决方案",
+      "llm_tldr_en": "Symphony is an in-network system that monitors and mitigates step misalignment in distributed AI training.",
+      "llm_tldr_cn": "Symphony是一种网络内解决方案，用于监测和缓解分布式AI训练中的流水线步调不一致。",
+      "llm_tldr": "Symphony是一种网络内解决方案，用于监测和缓解分布式AI训练中的流水线步调不一致。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

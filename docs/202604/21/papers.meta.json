@@ -1,0 +1,79 @@
+{
+  "label": "2026-04-21",
+  "date": "2026-04-21",
+  "generated_at": "2026-04-21T19:56:58",
+  "count": 5,
+  "papers": [
+    {
+      "paper_id": "202604/21/2604.16810v1-gleaner-a-semantically-rich-and-efficient-online-sampler-for-microservice-diagnostics",
+      "section": "deep",
+      "title_en": "Gleaner: A Semantically-Rich and Efficient Online Sampler for Microservice Diagnostics",
+      "authors": "Yifan Yang, Aoyang FANG, Songhan Zhang, Pinjia He",
+      "date": "2026-04-18",
+      "pdf": "https://arxiv.org/pdf/2604.16810v1",
+      "score": "8.0",
+      "evidence": "用于微服务诊断和追踪分组的在线采样器",
+      "tldr": "针对微服务分布式追踪中数据量巨大且现有图分析采样器计算开销过高的问题，本文提出Gleaner。它通过将Trace建模为增强日志语义的“边集”，利用高效的集合运算替代复杂的图算法，并结合告警驱动配额与多样性保留策略，实现了极低延迟下的高保真采样，显著提升了下游根因分析的效率与准确性。",
+      "tags": "query:netmes",
+      "abstract_en": "Distributed tracing in microservices is critical for diagnostics but generates overwhelming data volumes, necessitating intelligent sampling. To maximize fidelity, state-of-the-art (SOTA) tail-based samplers analyze complete (or even log-enriched) traces by modeling them as graphs. However, this reliance on computationally expensive graph analysis creates a performance bottleneck that prohibits their use in online settings.   To this end, we propose Gleaner, an online tail-sampling framework that breaks this trade-off. It is founded on the key insight that explicit graph structures are unnecessary for high-fidelity trace grouping. Instead, Gleaner represents each trace as a \"bag-of-edges\" augmented with log semantics, replacing slow graph algorithms with highly efficient set-based operations. It also employs an alarm-driven quota and a diversity-preserving strategy to prioritize anomalous and rare traces for downstream Root Cause Analysis (RCA). Experimentally, Gleaner processes traces at 0.74ms each, improving Trace Pattern Coverage by up to 128.7% and Shannon Entropy by up to 32.9% over baselines. At just a 1% sampling rate, Gleaner improves RCA accuracy by 42%-107% over the next-best sampler. Moreover, RCA on Gleaner's sampled data is more accurate than with the entire, unsampled dataset. This result reframes intelligent sampling from a data reduction technique to a powerful signal enhancement paradigm for automated operations.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.13522v2-torai-multi-source-root-cause-analysis-for-blind-spots-in-microservice-service-call-graph",
+      "section": "quick",
+      "title_en": "TORAI: Multi-source Root Cause Analysis for Blind Spots in Microservice Service Call Graph",
+      "authors": "Luan Pham, Huong Ha, Xiuzhen Zhang, Hongyu Zhang",
+      "date": "2026-04-15",
+      "pdf": "https://arxiv.org/pdf/2604.13522v2",
+      "score": "7.0",
+      "evidence": "在微服务中使用多源遥测数据进行根因分析",
+      "tldr": "针对微服务系统中存在无追踪信息的“盲点”服务导致传统根因分析（RCA）失效的问题，本文提出了一种名为TORAI的无监督多源RCA方法。TORAI不依赖服务调用图，而是利用多源遥测数据衡量异常严重程度，通过聚类、因果分析和假设检验来定位细粒度根因。实验证明，TORAI在存在盲点的情况下显著优于现有方法，能准确推荐前三名根因。",
+      "tags": "query:netmes",
+      "abstract_en": "Existing multi-source root cause analysis (RCA) methods for microservice systems assume all services have traces to construct a service call graph. However, this assumption is not practical as microservice systems evolve rapidly and may contain blackbox services without traces, such as compiled software or unsupported services. We refer to these services as blind spots. In the presence of blind spots, the performance of existing multi-source RCA methods may be affected, as they only diagnose visible services on the call graph. To overcome this limitation, we propose TORAI, a novel unsupervised approach that effectively pinpoints fine-grained root causes without relying on the service call graph. Instead, TORAI first measures anomaly severity using available multi-source telemetry data. It then performs clustering to group services based on their severity symptoms and conducts causal analysis to rank services within each severity cluster. Finally, TORAI aggregates the cluster rankings and uses hypothesis testing to identify fine-grained root causes. TORAI provides an unsupervised approach that leverages available multi-source telemetry data for RCA without requiring a constructed service call graph or further intrusive actions, thus addressing the limitations of existing methods. Our experiments on three benchmark systems demonstrate that TORAI outperforms state-of-the-art baselines remarkably in the presence of blind spots. Performance on real-world failures further shows that TORAI can accurately pinpoint the root causes in top-3 recommendations.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.13600v2-sakuraone-an-open-ethernet-based-ai-hpc-system-and-its-observed-workload-dynamics-in-a-single-tenant-llm-development-environment",
+      "section": "quick",
+      "title_en": "SAKURAONE: An Open Ethernet-Based AI HPC System and Its Observed Workload Dynamics in a Single-Tenant LLM Development Environment",
+      "authors": "Fumikazu Konishi, Yuuki Tsubouchi, Hirofumi Tsuruta",
+      "date": "2026-04-15",
+      "pdf": "https://arxiv.org/pdf/2604.13600v2",
+      "score": "7.0",
+      "evidence": "800 GbE以太网AI HPC系统中的工作负载动态观测",
+      "tldr": "SAKURAONE是SAKURA互联网研究中心开发的AI HPC集群，在ISC 2025 TOP500中排名第49位。它是全球前100强中唯一采用全开放网络栈（800 GbE与SONiC）的系统，展示了非供应商锁定技术的可扩展性。该系统包含100个配备8路H100的节点，通过RoCEv2互联。研究还分析了单租户大模型开发环境下的负载动态，揭示了从大规模初始训练到中规模迭代优化的资源使用演变。",
+      "tags": "query:netmes",
+      "abstract_en": "SAKURAONE is a managed high performance computing (HPC) cluster developed and operated by the SAKURA Internet Research Center. It builds on the KOKARYOKU PHY bare metal GPU platform and is optimized for advanced workloads, including large language model (LLM) training. In ISC 2025 TOP500, SAKURAONE is ranked 49th by HPL and is the only top 100 system that uses a fully open networking stack - 800 GbE with SONiC - demonstrating the scalability of vendor-neutral technology. Measured performance is 33.95 PFLOP/s (HPL Rmax), 396.295 TFLOP/s (HPCG), and 339.86 PFLOP/s on HPL-MxP with FP8. The system consists of 100 nodes, each with eight NVIDIA H100 GPUs and a 2 PB all-flash Lustre file system, interconnected via a rail-optimized 800 GbE leaf-spine fabric with RoCEv2. Through exclusive use by a single research project, we observed the characteristics of development-related jobs. Consistent with previous HPC studies, small-scale jobs dominated in number, while a few large-scale jobs accounted for most GPU resource time. As the project progressed, resource use shifted from large-scale to mid-scale jobs, reflecting a transition from initial large-scale training to iterative refinement. These observations illustrate the real-world utilization dynamics of GPU clusters under unified project workloads.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.16575v1-evaluating-temporal-and-structural-anomaly-detection-paradigms-for-ddos-traffic",
+      "section": "quick",
+      "title_en": "Evaluating Temporal and Structural Anomaly Detection Paradigms for DDoS Traffic",
+      "authors": "Yasmin Souza Lima, Rodrigo Moreira, Larissa F. Rodrigues Moreira, Tereza Cristina M. de B. Carvalho, Flávio de Oliveira Silva",
+      "date": "2026-04-17",
+      "pdf": "https://arxiv.org/pdf/2604.16575v1",
+      "score": "7.0",
+      "evidence": "云原生5G网络中DDoS流量的异常检测",
+      "tldr": "针对云原生5G网络中的DDoS攻击检测，本研究探讨了时间与结构化流量特征的选择问题。作者提出了一个轻量级决策框架，通过滞后1阶自相关和PCA累积解释方差来预先评估特征空间。实验表明，结构化特征在多数情况下优于时间特征，且在时间依赖性较弱时优势更明显，为异常检测提供了更优的特征选择范式。",
+      "tags": "query:netmes",
+      "abstract_en": "Unsupervised anomaly detection is widely used to detect Distributed Denial-of-Service (DDoS) attacks in cloud-native 5G networks, yet most studies assume a fixed traffic representation, either temporal or structural, without validating which feature space best matches the data. We propose a lightweight decision framework that prioritizes temporal or structural features before training, using two diagnostics: lag-1 autocorrelation of an aggregated flow signal and PCA cumulative explained variance. When the probes are inconclusive, the framework reserves a hybrid option as a future fallback rather than an empirically validated branch. Experiments on two statistically distinct datasets with Isolation Forest, One-Class SVM, and KMeans show that structural features consistently match or outperform temporal ones, with the performance gap widening as temporal dependence weakens.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.16880v1-symphony-taming-step-misalignments-in-the-network-for-ring-based-collective-operations",
+      "section": "quick",
+      "title_en": "Symphony: Taming Step Misalignments in the Network for Ring-based Collective Operations",
+      "authors": "Yuze Jin, Xin Zhe Khooi, Ruyi Yao, Mun Choon Chan",
+      "date": "2026-04-18",
+      "pdf": "https://arxiv.org/pdf/2604.16880v1",
+      "score": "7.0",
+      "evidence": "利用拥塞信号检测流水线错位的网络内解决方案",
+      "tldr": "针对分布式AI训练中环形集合通信易受网络抖动影响导致步骤失调的问题，本文提出Symphony。它是一种网络内解决方案，通过轻量级机制跟踪作业进度，并利用拥塞信号选择性抑制领先流，使落后流得以追赶。实验表明，Symphony在模拟中提升了高达54%的通信性能，并在Tofino2交换机上验证了其实用性。",
+      "tags": "query:netmes",
+      "abstract_en": "Ring-based collective operations are widely used in distributed AI training due to their efficient bandwidth utilization. While ring communication excels at pipelining, its performance is heavily dependent on having synchronized step-wise progression. This presents a mismatch to the underlying network conditions in practice: collective operations are vulnerable to network jitter and congestion, leading to step misalignment and increased collective completion time. To that end, we propose Symphony, an in-network solution that detects pipeline step misalignment and mitigates its impact. Symphony introduces (1) a lightweight mechanism to track per-job pipeline progress and (2) a novel use of congestion signals to selectively throttle outpacing flows, allowing lagging flows to catch up without global coordination. Through simulations using Astra-Sim, we show that Symphony effectively mitigates step misalignments in ring-based collectives, resulting in up to 54% improvement in job/collective communication time. Finally, we prototype and validate Symphony on an Intel Tofino2 programmable switch to demonstrate its practicality.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
