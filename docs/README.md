@@ -6,36 +6,42 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-21
-- 运行时间：2026-04-21 19:56:48 UTC
+- 最新运行日期：2026-04-22
+- 运行时间：2026-04-22 20:16:32 UTC
 - 运行状态：成功
-- 本次总论文数：5
+- 本次总论文数：7
 - 精读区：1
-- 速读区：4
+- 速读区：6
 
 ### 今日简报（AI）
-今日聚焦微服务诊断与 AI 算力架构，深度解析了高效在线采样与多源根因分析技术。
-重点推荐 Gle
-- 详情：[/202604/21/README](/202604/21/README)
+今日聚焦全球 IPv6 网络边界安全深度评测，并同步追踪 Agentic AI 与数字孪生在网络验证中的前沿应用。
+核心推荐评分 9.0 的 IPv6 全球规模测量研究，该文详尽分析了网络外
+- 详情：[/202604/22/README](/202604/22/README)
 
 ### 精读区论文标签
-1. [Gleaner: A Semantically-Rich and Efficient Online Sampler for Microservice Diagnostics](/202604/21/2604.16810v1-gleaner-a-semantically-rich-and-efficient-online-sampler-for-microservice-diagnostics)  
-   标签：评分：8.0/10、query:netmes
-   evidence：用于微服务诊断和追踪分组的在线采样器
+1. [Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis](/202604/22/2604.19487v1-revisiting-and-expanding-the-ipv6-network-periphery-global-scale-measurement-and-security-analysis)  
+   标签：评分：9.0/10、query:netmes
+   evidence：全球规模的IPv6网络边缘测量与安全分析
 
 ### 速读区论文标签
-1. [TORAI: Multi-source Root Cause Analysis for Blind Spots in Microservice Service Call Graph](/202604/21/2604.13522v2-torai-multi-source-root-cause-analysis-for-blind-spots-in-microservice-service-call-graph)  
+1. [Enhancing Anomaly-Based Intrusion Detection Systems with Process Mining](/202604/22/2604.18066v1-enhancing-anomaly-based-intrusion-detection-systems-with-process-mining)  
    标签：评分：7.0/10、query:netmes
-   evidence：在微服务中使用多源遥测数据进行根因分析
-2. [SAKURAONE: An Open Ethernet-Based AI HPC System and Its Observed Workload Dynamics in a Single-Tenant LLM Development Environment](/202604/21/2604.13600v2-sakuraone-an-open-ethernet-based-ai-hpc-system-and-its-observed-workload-dynamics-in-a-single-tenant-llm-development-environment)  
+   evidence：基于分组级序列分析的异常入侵检测
+2. [Aether: Network Validation Using Agentic AI and Digital Twin](/202604/22/2604.18233v1-aether-network-validation-using-agentic-ai-and-digital-twin)  
    标签：评分：7.0/10、query:netmes
-   evidence：800 GbE以太网AI HPC系统中的工作负载动态观测
-3. [Evaluating Temporal and Structural Anomaly Detection Paradigms for DDoS Traffic](/202604/21/2604.16575v1-evaluating-temporal-and-structural-anomaly-detection-paradigms-for-ddos-traffic)  
-   标签：评分：7.0/10、query:netmes
-   evidence：云原生5G网络中DDoS流量的异常检测
-4. [Symphony: Taming Step Misalignments in the Network for Ring-based Collective Operations](/202604/21/2604.16880v1-symphony-taming-step-misalignments-in-the-network-for-ring-based-collective-operations)  
-   标签：评分：7.0/10、query:netmes
-   evidence：利用拥塞信号检测流水线错位的网络内解决方案
+   evidence：利用数字孪生和人工智能进行网络验证与监控
+3. [Clustering-Enhanced Domain Adaptation for Cross-Domain Intrusion Detection in Industrial Control Systems](/202604/22/2604.12183v1-clustering-enhanced-domain-adaptation-for-cross-domain-intrusion-detection-in-industrial-control-systems)  
+   标签：评分：6.0/10、query:netmes
+   evidence：工业系统中的流量测量与入侵检测
+4. [FAST: A Synergistic Framework of Attention and State-space Models for Spatiotemporal Traffic Prediction](/202604/22/2604.13453v1-fast-a-synergistic-framework-of-attention-and-state-space-models-for-spatiotemporal-traffic-prediction)  
+   标签：评分：6.0/10、query:netmes
+   evidence：大型传感器网络上的时空流量预测
+5. [Prefill-as-a-Service: KVCache of Next-Generation Models Could Go Cross-Datacenter](/202604/22/2604.15039v1-prefill-as-a-service-kvcache-of-next-generation-models-could-go-cross-datacenter)  
+   标签：评分：6.0/10、query:netmes
+   evidence：跨数据中心大模型推理中的KVCache流量动态
+6. [DP-FlogTinyLLM: Differentially private federated log anomaly detection using Tiny LLMs](/202604/22/2604.19118v1-dp-flogtinyllm-differentially-private-federated-log-anomaly-detection-using-tiny-llms)  
+   标签：评分：6.0/10、query:netmes
+   evidence：用于分布式系统监控的联邦日志异常检测
 
 
 <div class="dpr-home-promo-card">

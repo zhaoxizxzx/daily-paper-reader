@@ -1,0 +1,292 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-22T20:15:08.612551+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2604.19487v1",
+      "title": "Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis",
+      "abstract": "As IPv6 deployment accelerates, understanding the evolving security posture of network peripheries becomes increasingly important. A DSN 2021 study introduced the first large-scale discovery of IPv6 network peripheries, uncovering risks like service exposure and routing loops. However, its scope was limited to three regions and is now outdated. In this paper, we revisit and significantly expand upon that work, presenting a comprehensive, up-to-date security assessment of IPv6 network peripheries. To support efficient large-scale scanning, we propose a novel Response-Guided Prefix Selection (RGPS) strategy to identify high-value IPv6 prefixes for probing. Our global-scale measurement covers 73 countries/regions and identifies over 281.9M active IPv6 network peripheries, including a 371.2\\% increase (245M) over the 52M reported in 2021 for India, China, and America. Our service exposure analysis shows that 2.5\\% of reachable services are still dangerously exposed, including outdated administrative interfaces and misconfigured servers, while correlation with known CVEs reveals recurring software vulnerabilities. Building on this service-exposure perspective, we further design a Hierarchical LLM Exposure Verification (HLEV) framework to identify unauthorized-access risks in exposed LLM deployment tools, revealing multiple security weaknesses caused by insecure default configurations and missing authentication. Additionally, we revisit routing loop vulnerabilities and identify 4.5M loop-prone responses, confirming that flawed routing behaviors remain widespread across vendors and countries/regions. These findings suggest that while IPv6 adoption has surged, key security challenges persist and are structurally embedded.",
+      "authors": [
+        "Zixuan Xie",
+        "Zitao Yang",
+        "Shurui Fang",
+        "Zhaoyang Li",
+        "Wenxing Xie",
+        "Nannan Fu",
+        "Liangyu Dong",
+        "Xiang Li"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-21T14:09:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.19487v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Global-scale measurement of IPv6 network peripheries and security analysis",
+      "llm_evidence_cn": "全球规模的IPv6网络边缘测量与安全分析",
+      "llm_evidence": "全球规模的IPv6网络边缘测量与安全分析",
+      "canonical_evidence": "全球规模的IPv6网络边缘测量与安全分析",
+      "llm_tldr_en": "Presents a global-scale measurement study of IPv6 network peripheries using a novel prefix selection strategy.",
+      "llm_tldr_cn": "通过新型前缀选择策略对全球IPv6网络边缘进行大规模测量与安全评估。",
+      "llm_tldr": "通过新型前缀选择策略对全球IPv6网络边缘进行大规模测量与安全评估。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.18066v1",
+      "title": "Enhancing Anomaly-Based Intrusion Detection Systems with Process Mining",
+      "abstract": "Anomaly-based Intrusion Detection Systems (IDSs) ensure protection against malicious attacks on networked systems. While deep learning-based IDSs achieve effective performance, their limited trustworthiness due to black-box architectures remains a critical constraint. Despite existing explainable techniques offering insight into the alarms raised by IDSs, they lack process-based explanations grounded in packet-level sequencing analysis. In this paper, we propose a method that employs process mining techniques to enhance anomaly-based IDSs by providing process-based alarm severity ratings and explanations for alerts. Our method prioritizes critical alerts and maintains visibility into network behavior, while minimizing disruption by allowing misclassified benign traffic to pass. We apply the method to the publicly available USB-IDS-TC dataset, which includes anomalous traffic affected by different variants of the Slowloris DoS attack. Results show that our method is able to discriminate between low- to very-high-severity alarms while preserving up to 99.94% recall and 99.99% precision, effectively discarding false positives while providing different degrees of severity for the true positives.",
+      "authors": [
+        "Francesco Vitale",
+        "Francesco Grimaldi",
+        "Massimiliano Rak",
+        "Nicola Mazzocca"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-04-20T10:35:16+00:00",
+      "link": "https://arxiv.org/pdf/2604.18066v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Anomaly-based intrusion detection using packet-level sequencing analysis",
+      "llm_evidence_cn": "基于分组级序列分析的异常入侵检测",
+      "llm_evidence": "基于分组级序列分析的异常入侵检测",
+      "canonical_evidence": "基于分组级序列分析的异常入侵检测",
+      "llm_tldr_en": "Enhances anomaly-based IDS with process mining for packet-level sequencing analysis and alert prioritization.",
+      "llm_tldr_cn": "利用流程挖掘增强异常入侵检测系统，提供分组级序列分析和告警优先级。",
+      "llm_tldr": "利用流程挖掘增强异常入侵检测系统，提供分组级序列分析和告警优先级。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12183v1",
+      "title": "Clustering-Enhanced Domain Adaptation for Cross-Domain Intrusion Detection in Industrial Control Systems",
+      "abstract": "Industrial control systems operate in dynamic environments where traffic distributions vary across scenarios, labeled samples are limited, and unknown attacks frequently emerge, posing significant challenges to cross-domain intrusion detection. To address this issue, this paper proposes a clustering-enhanced domain adaptation method for industrial control traffic. The framework contains two key components. First, a feature-based transfer learning module projects source and target domains into a shared latent subspace through spectral-transform-based feature alignment and iteratively reduces distribution discrepancies, enabling accurate cross-domain detection. Second, a clustering enhancement strategy combines K-Medoids clustering with PCA-based dimensionality reduction to improve cross-domain correlation estimation and reduce performance degradation caused by manual parameter tuning. Experimental results show that the proposed method significantly improves unknown attack detection. Compared with five baseline models, it increases detection accuracy by up to 49%, achieves larger gains in F-score, and demonstrates stronger stability. Moreover, the clustering enhancement strategy further boosts detection accuracy by up to 26% on representative tasks. These results suggest that the proposed method effectively alleviates data scarcity and domain shift, providing a practical solution for robust cross-domain intrusion detection in dynamic industrial environments.",
+      "authors": [
+        "Luyao Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-04-14T01:25:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.12183v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "traffic measurement and intrusion detection in industrial systems",
+      "llm_evidence_cn": "工业系统中的流量测量与入侵检测",
+      "llm_evidence": "工业系统中的流量测量与入侵检测",
+      "canonical_evidence": "工业系统中的流量测量与入侵检测",
+      "llm_tldr_en": "Develops a domain adaptation method for cross-domain intrusion detection in industrial control traffic.",
+      "llm_tldr_cn": "开发了一种用于工业控制流量跨域入侵检测的领域自适应方法。",
+      "llm_tldr": "开发了一种用于工业控制流量跨域入侵检测的领域自适应方法。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.18233v1",
+      "title": "Aether: Network Validation Using Agentic AI and Digital Twin",
+      "abstract": "Network change validation remains a critical yet predominantly manual, time-consuming, and error-prone process in modern network operations. While formal network verification has made substantial progress in proving correctness properties, it is typically applied in offline, pre-deployment settings and faces challenges in accommodating continuous changes and validating live production behavior. Current operational approaches typically involve scattered testing tools, resulting in partial coverage and errors that surface only after deployment. In this paper, we present Aether, a novel approach that integrates Generative Agentic AI with a multi-functional Network Digital Twin to automate and streamline network change validation workflows. It features an agentic architecture with five specialized Network Operations AI agents that collaboratively handle the change validation lifecycle from intent analysis to network verification and testing. Aether agents use a unified Network Digital Twin integrating modeling, simulation, and emulation to maintain a consistent, up-to-date network view for verification and testing. By orchestrating agent collaboration atop this digital twin, Aether enables automated, rapid network change validation while reducing manual effort, minimizing errors, and improving operational agility and cost-effectiveness. We evaluate Aether over synthetic network change scenarios covering main classes of network changes and on past incidents from a major ISP operational network, demonstrating promising results in error detection (100%), diagnostic coverage (92-96%), and speed (6-7 minutes) over traditional methods.",
+      "authors": [
+        "Jordan Auge",
+        "Sam Betts",
+        "Giovanna Carofiglio",
+        "Giulio Grassi",
+        "Martin Gysi",
+        "John Kenneth d'Souza"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.AI"
+      ],
+      "published": "2026-04-20T13:18:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.18233v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "network validation and monitoring using digital twins and AI",
+      "llm_evidence_cn": "利用数字孪生和人工智能进行网络验证与监控",
+      "llm_evidence": "利用数字孪生和人工智能进行网络验证与监控",
+      "canonical_evidence": "利用数字孪生和人工智能进行网络验证与监控",
+      "llm_tldr_en": "Introduces Aether, a system using Agentic AI and Digital Twins to automate network change validation.",
+      "llm_tldr_cn": "介绍了Aether系统，利用代理AI和数字孪生技术自动化网络变更验证。",
+      "llm_tldr": "介绍了Aether系统，利用代理AI和数字孪生技术自动化网络变更验证。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.13453v1",
+      "title": "FAST: A Synergistic Framework of Attention and State-space Models for Spatiotemporal Traffic Prediction",
+      "abstract": "Traffic forecasting requires modeling complex temporal dynamics and long-range spatial dependencies over large sensor networks. Existing methods typically face a trade-off between expressiveness and efficiency: Transformer-based models capture global dependencies well but suffer from quadratic complexity, while recent selective state-space models are computationally efficient yet less effective at modeling spatial interactions in graph-structured traffic data. We propose FAST, a unified framework that combines attention and state-space modeling for scalable spatiotemporal traffic forecasting. FAST adopts a Temporal-Spatial-Temporal architecture, where temporal attention modules capture both short- and long-term temporal patterns, and a Mamba-based spatial module models long-range inter-sensor dependencies with linear complexity. To better represent heterogeneous traffic contexts, FAST further introduces a learnable multi-source spatiotemporal embedding that integrates historical traffic flow, temporal context, and node-level information, together with a multi-level skip prediction mechanism for hierarchical feature fusion. Experiments on PeMS04, PeMS07, and PeMS08 show that FAST consistently outperforms strong baselines from Transformer-, GNN-, attention-, and Mamba-based families. In particular, FAST achieves the best MAE and RMSE on all three benchmarks, with up to 4.3\\% lower RMSE and 2.8\\% lower MAE than the strongest baseline, demonstrating a favorable balance between accuracy, scalability, and generalization.",
+      "authors": [
+        "Xinjin Li",
+        "Jinghan Cao",
+        "Mengyue Wang",
+        "Yue Wu",
+        "Longxiang Yan",
+        "Yeyang Zhou",
+        "Ziqi Sha",
+        "Yu Ma"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-15T04:05:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.13453v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "spatiotemporal traffic prediction over large sensor networks",
+      "llm_evidence_cn": "大型传感器网络上的时空流量预测",
+      "llm_evidence": "大型传感器网络上的时空流量预测",
+      "canonical_evidence": "大型传感器网络上的时空流量预测",
+      "llm_tldr_en": "Proposes FAST, a framework for scalable spatiotemporal traffic forecasting in large-scale networks.",
+      "llm_tldr_cn": "提出了FAST框架，用于大规模网络中可扩展的时空流量预测。",
+      "llm_tldr": "提出了FAST框架，用于大规模网络中可扩展的时空流量预测。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.15039v1",
+      "title": "Prefill-as-a-Service: KVCache of Next-Generation Models Could Go Cross-Datacenter",
+      "abstract": "Prefill-decode (PD) disaggregation has become the standard architecture for large-scale LLM serving, but in practice its deployment boundary is still determined by KVCache transfer. In conventional dense-attention models, prefill generates huge KVCache traffics that keep prefill and decode tightly coupled within a single high-bandwidth network domain, limiting heterogeneous deployment and resource elasticity. Recent hybrid-attention architectures substantially reduce KVCache size, making cross-cluster KVCache transport increasingly plausible. However, smaller KVCache alone does not make heterogeneous cross-datacenter PD serving practical: real workloads remain bursty, request lengths are highly skewed, prefix caches are unevenly distributed, and inter-cluster bandwidth fluctuates. A naive design that fully externalizes prefill can therefore still suffer from congestion, unstable queueing, and poor utilization.   We present Prefill-as-a-Service (PrfaaS), a cross-datacenter serving architecture that selectively offloads long-context prefill to standalone, compute-dense prefill clusters and transfers the resulting KVCache over commodity Ethernet to local PD clusters for decode. Rather than treating reduced KVCache as sufficient, PrfaaS combines model-side KV efficiency with system-side selective offloading, bandwidth-aware scheduling, and cache-aware request placement. This design removes the requirement that heterogeneous accelerators share the same low-latency RDMA fabric, enabling independent scaling of prefill and decode capacity across loosely coupled clusters. In a case study using an internal 1T-parameter hybrid model, a PrfaaS-augmented heterogeneous deployment achieves 54% and 32% higher serving throughput than homogeneous PD and naive heterogeneous baselines, respectively, while consuming only modest cross-datacenter bandwidth.",
+      "authors": [
+        "Ruoyu Qin",
+        "Weiran He",
+        "Yaoyu Wang",
+        "Zheming Li",
+        "Xinran Xu",
+        "Yongwei Wu",
+        "Weimin Zheng",
+        "Mingxing Zhang"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-16T14:07:41+00:00",
+      "link": "https://arxiv.org/pdf/2604.15039v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "KVCache traffic dynamics in cross-datacenter LLM serving",
+      "llm_evidence_cn": "跨数据中心大模型推理中的KVCache流量动态",
+      "llm_evidence": "跨数据中心大模型推理中的KVCache流量动态",
+      "canonical_evidence": "跨数据中心大模型推理中的KVCache流量动态",
+      "llm_tldr_en": "Analyzes KVCache traffic patterns to enable practical cross-datacenter prefill-decode disaggregation.",
+      "llm_tldr_cn": "分析KVCache流量模式，以实现实用的跨数据中心预填充-解码分离架构。",
+      "llm_tldr": "分析KVCache流量模式，以实现实用的跨数据中心预填充-解码分离架构。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.19118v1",
+      "title": "DP-FlogTinyLLM: Differentially private federated log anomaly detection using Tiny LLMs",
+      "abstract": "Modern distributed systems generate massive volumes of log data that are critical for detecting anomalies and cyber threats. However, in real world settings, these logs are often distributed across multiple organizations and cannot be centralized due to privacy and security constraints. Existing log anomaly detection methods, including recent large language model (LLM) based approaches, largely rely on centralized training and are not suitable for such environments. In this paper, we propose DP-FLogTinyLLM, a privacy preserving federated framework for log anomaly detection using parameter efficient LLMs. Our approach enables collaborative learning without sharing raw log data by integrating federated optimization with differential privacy. To ensure scalability in resource constrained environments, we employ low rank adaptation (LoRA) for efficient fine tuning of Tiny LLMs at each client. Empirical results on the Thunderbird and BGL datasets show that the proposed framework matches the performance of centralized LLM based methods, while incurring additional computational overhead due to privacy mechanisms. Compared to existing federated baselines, DP-FLogTinyLLM consistently achieves higher precision and F1-score, with particularly strong gains on the Thunderbird dataset, highlighting its effectiveness in detecting anomalies while minimizing false positives.",
+      "authors": [
+        "Isaiah Thompson",
+        "Tanmay Sen",
+        "Ritwik Bhattacharya"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-21T05:56:51+00:00",
+      "link": "https://arxiv.org/pdf/2604.19118v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Federated log anomaly detection for distributed systems monitoring",
+      "llm_evidence_cn": "用于分布式系统监控的联邦日志异常检测",
+      "llm_evidence": "用于分布式系统监控的联邦日志异常检测",
+      "canonical_evidence": "用于分布式系统监控的联邦日志异常检测",
+      "llm_tldr_en": "Proposes a privacy-preserving federated framework for log anomaly detection using Tiny LLMs.",
+      "llm_tldr_cn": "提出了一种使用轻量级大模型进行日志异常检测的隐私保护联邦框架。",
+      "llm_tldr": "提出了一种使用轻量级大模型进行日志异常检测的隐私保护联邦框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
