@@ -1,0 +1,444 @@
+Title: Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis
+
+URL Source: https://arxiv.org/pdf/2604.19487v2
+
+Published Time: Thu, 23 Apr 2026 00:23:08 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 1
+
+# Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis 
+
+Zixuan Xie, Zitao Yang, Shurui Fang, Zhaoyang Li, Wenxing Xie, Nannan Fu, Liangyu Dong, and Xiang Li 
+
+Abstract —As IPv6 deployment accelerates, understanding the evolving security posture of network peripheries becomes increasingly important. A DSN 2021 study introduced the first large-scale discovery of IPv6 network peripheries, uncovering risks like service exposure and routing loops. However, its scope was limited to three regions and is now outdated. In this paper, we revisit and significantly expand upon that work, presenting a comprehensive, up-to-date security assessment of IPv6 network peripheries. To support efficient large-scale scanning, we propose a novel Response-Guided Prefix Selection (RGPS) strategy to identify high-value IPv6 prefixes for probing. Our global-scale measurement covers 73 countries/regions and identifies over 281.9M active IPv6 network peripheries, including a 371.2% increase (245M) over the 52M reported in 2021 for India, China, and America. Our service exposure analysis shows that 2.5% of reachable services are still dangerously exposed, including outdated administrative interfaces and misconfigured servers, while correlation with known CVEs reveals recurring software vulnerabilities. Building on this service-exposure perspective, we further design a Hierarchical LLM Exposure Verification (HLEV) framework to identify unauthorized-access risks in exposed LLM deployment tools, revealing multiple security weaknesses caused by insecure default configurations and missing authentication. Additionally, we revisit routing loop vulnerabilities and identify 4.5M loop-prone responses, confirming that flawed routing behaviors remain widespread across vendors and countries/regions. These findings suggest that while IPv6 adoption has surged, key security challenges persist and are structurally embedded. 
+
+Index Terms —IPv6, network periphery, Internet measurement, service exposure, routing loop 
+
+✦
+
+1 INTRODUCTION 
+
+# OVER the past few years, IPv6 deployment has pro-gressed steadily, with growing support from both net-works and end-host devices. APNIC Labs reported that, as of October 2024, IPv6 adoption had risen to encompass about 40% of the global Internet user base [1]. At the same time, the IPv6 routing system has continued to expand: as of March 2026, 36,034 ASes were originating IPv6 prefixes, and the BGP table contained 246,752 advertised IPv6 prefixes [2]. Google’s official statistics further show that 46.82% of users accessed Google services over IPv6 in February 2026, repre-senting a 54.1% increase compared with January 2021 [3]. IPv6 introduces a vastly expanded address space, re-vised address allocation strategies, and enables direct end-to-end device communication [4]. Despite the protocol’s widespread adoption, its security implications–particularly at the network periphery–remain insufficiently understood. Previous measurement efforts have been limited either in 
+
+Zixuan Xie and Zitao Yang contributed equally to this work. Zixuan Xie, Shurui Fang, Zhaoyang Li, Wenxing Xie, and Xiang Li are with Nankai University, Tianjin, China(e-mail: 2312585@mail.nankai.edu.cn; 2213459@mail.nankai.edu.cn;2312092@mail.nankai.edu.cn; 2310500@mail.nankai.edu.cn; lixiang@nankai.edu.cn). Zitao Yang, Nannan Fu, and Liangyu Dong are with China Industrial Control Systems Cyber Emergency Response Team and also with the Key Laboratory of Industrial Information Security Perception and Evaluation Technology, Ministry of Industry and Information Technology, Beijing 100040, China (e-mail: iamyangzt@163.com; fxycic96@163.com; dongliangyu78@163.com). Corresponding Authors: Liangyu Dong and Xiang Li (e-mail: dongliangyu78@163.com; lixiang@nankai.edu.cn). 
+
+scope, geography, or technical coverage, and thus fail to fully capture the global IPv6 security landscape. A notable contribution in this domain is the 2021 DSN study [5], which proposed a novel approach to discovering IPv6 network periphery devices by leveraging commonly used address allocation strategies and deploying a high-speed scanner (XMap). This study identified 52M active IPv6 periphery devices across twelve major ISPs and re-vealed two major classes of vulnerabilities: unintended ex-posure of sensitive services and flawed routing behaviors leading to exploitable routing loops. However, this work focused solely on three regions, China, India, and America, and its findings are now four years old. Motivated by the limitations and temporal gap in the 2021 study, this work aims to conduct a renewed and more comprehensive measurement of IPv6 network peripheries. We extend the geographic scope to include dozens of re-gions across multiple continents and revisit the state of service exposure and routing security in today’s IPv6 land-scape. Our goal is to assess how the IPv6 security posture has evolved over the past four years, identify emerging risks, and provide updated insights to guide future miti-gation strategies. As IPv6 adoption continues to accelerate and more devices become publicly reachable, timely re-evaluation of the global IPv6 periphery is both urgent and necessary. 
+
+Our Paper. We aim to provide a comprehensive assessment of the global security landscape of IPv6 network peripheries, with a focus on comparison with the past four years. We first introduce our measurement methodology, experimental  
+
+> arXiv:2604.19487v2 [cs.NI] 22 Apr 2026 IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 2
+
+design, and toolchain (Section 2), and then perform large-scale scanning and analysis to quantify the growth and geographic distribution of IPv6 network periphery devices (Section 3), identify service exposures (Section 4), routing loop attack (Section 6), and new risks introduced by local deployment of LLMs (Section 5). In order to evaluate the landscape of IPv6 network periphery exposure, we adopt a two-stage measurement strategy. In the first stage, we generate target addresses within selected prefixes using randomized probing tech-niques optimized for sparsely populated IPv6 space. In the second stage, we capture and analyze responses from active hosts to identify periphery devices, characterize ex-posed services, and detect potential vulnerabilities such as open administrative interfaces and routing anomalies. We leverage high-performance scanning tools (e.g., XMap and ZGrab2) to ensure scalability and protocol-level granularity in our measurements (Section 2). To identify IPv6 network periphery devices at a global scale, we design and execute a comprehensive measure-ment campaign across diverse geographical and topological regions. Guided by our Response-Guided Prefix Selection (RGPS) strategy, our scanning covers high-value IPv6 pre-fixes selected from BGP-announced address space across 73 regions. These prefixes are operated by 164 major ISPs and span all five RIRs, ensuring balanced regional representa-tion. Through this methodology, we identify 281.9M IPv6 network periphery devices in total and characterize their highly uneven global distribution. For direct comparison with prior work, we further revisit the 15 original ISP blocks in India, China, and America studied in 2021 [5]. Across these blocks, the number of discovered devices rises from 52.6M to 244.8M, revealing both the substantial expansion of IPv6 deployment and its strong concentration in a limited number of large access networks (Section 3). To better acknowledge the development of IPv6 services, we revisit the deployment of most commonly used services and protocols. While prior works focus on limited geo-graphic regions or small address spaces, our broader cov-erage enables a more comprehensive assessment of ongoing risks. We find 2.5% services under exposure-related risks. To further evaluate the potential impact of these exposures, we construct a CVE reference using official documentation for widely deployed service software [6]. These exposed CVEs are not merely theoretical: they correspond to known software vulnerabilities that are typically of high severity, confirming that they indeed pose substantial security threats (Section 4). With the widespread adoption of Large Language Mod-els (LLMs), we further investigate unauthorized-access risks in locally deployed LLM tools. Because these risks arise when runtime APIs or WebUI interfaces become Internet reachable without sufficient protection, this problem re-mains closely connected to the broader issue of service expo-sure. To identify such cases, we design a Hierarchical LLM Exposure Verification (HLEV) framework that progressively validates candidate services and reduces false positives. Our results show that insecure defaults, missing authentication, and weak deployment practices can lead to meaningful ex-posure risks in Internet-reachable LLM services (Section 5). Then, to evaluate routing-loop vulnerabilities in the IPv6 network periphery, we also revisit this long-standing is-sue through a global-scale measurement campaign. Using ICMPv6-based active validation, we reassess the prevalence of loop-prone devices in today’s IPv6 deployments, analyze their global distribution, compare the results with the 2021 baseline, and further examine the vendor landscape of af-fected devices. Overall, we identify 4.5M loop-prone devices globally, while the proportion in the original three main re-gions declines substantially compared with 2021, indicating meaningful improvement but also persistent regional and operational disparities (Section 6). In summary, in addition to revisiting the current global landscape of IPv6 network peripheries, we uncover several classes of security risks associated with this protocol and de-rive corresponding mitigation insights.To provide a concise overview of the overall measurement framework, analysis pipeline, and main findings, we summarize the structure of our study in Fig. 1. 
+
+Our Contributions. We make following contributions: 1) We conduct a large-scale global measurement of IPv6 network peripheries across 73 regions and 164 major ISPs, identifying 281.9M active devices. To make Internet-scale probing over the sparse IPv6 address space practical, we introduce a Response-Guided Prefix Selection strategy that prioritizes high-value prefixes for efficient target discovery. 2) We provide a comprehensive security analysis of the contemporary IPv6 periphery. Specifically, we characterize exposed services and associated software vulnerabilities, investigate unauthorized-access risks in LLM deployment tools using aHierarchical LLM Exposure Verification (HLEV) framework, and revisit routing-loop vulnerabili-ties through large-scale ICMPv6 validation together with vendor-level analysis. 3) We build a scalable measurement and visualization platform that supports automated data collection, fingerprint analysis, storage, and real-time visual-ization for longitudinal IPv6 security studies. We will release the framework and dataset to facilitate continuous monitoring of IPv6 deployment trends and security posture. 
+
+2 REVISIT OVERVIEW 
+
+This section comprehensively details the preparatory phase for our revisit, covering the end-to-end methodology. We explicitly state the research objectives that guided our study, describe the architecture of our experiment, and specify the tools used for data acquisition and analysis. 
+
+Goals . Our paper aims to evaluate the global security pos-ture of IPv6 network peripheries, with a focus on trends, vulnerabilities, and remediation efforts over the past four years. We conduct large-scale measurements to character-ize the growth and geographic distribution of IPv6 hosts, identify unintended service exposure, and detect routing-loop vulnerabilities that reflect systematic weaknesses in operational deployments. Based on a dataset of over 281.9M IPv6 network periphery devices, we provide a large-scale empirical foundation for understanding today’s IPv6 secu-rity landscape. Building upon these findings, we further IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 3
+
+> Fig. 1. Global IPv6 Network Periphery: Measurement, Service Exposure, and Security Analysis Overview.
+
+derive data-driven defense strategies and best practices to mitigate the identified risks and strengthen the broader IPv6 ecosystem. 
+
+Experiment Design. Our experiment follows a two-stage measurement pipeline: 1) the prefix scanning and target generation stage; 2) the response capture and classification stage. In the first stage, we select high-value IPv6 prefixes from global BGP routing data [7] and generate probing tar-gets within them. To make large-scale scanning practical over the sparse IPv6 address space, this stage is guided by our Response-Guided Prefix Selection (RGPS) strategy, which focuses on prefixes with lengths ranging from /28 to /48 while further refining shorter prefixes when necessary. These prefixes are operated by major ISPs across 73 regions with substantial IPv6 deployment. In the second stage, we capture and analyze responses from active hosts to identify periphery devices, characterize exposed services, and detect potential vulnerabilities such as open administrative inter-faces and routing anomalies. To detect routing loop attacks, we further monitor ICMPv6 messages [8] and track Hop Limit variations to identify looping behaviors. Finally, we conduct statistical analysis to assess the distribution and scale of identified devices across different regions. 
+
+Tools. We primarily utilize XMap and ZGrab2 to carry out our measurements [9], [10]. XMap, the high-speed scanner employed in this study, is a high-performance IPv6 network probing framework derived from ZMap [11]. It was de-signed to support Internet-scale active measurements across the vast IPv6 address space by introducing a generalized and fully permutable address–generation architecture. Unlike conventional tools that are often restricted to specific prefixes or subnets [11]–[13], XMap enables ran-domized traversal of arbitrary IPv6 prefix sets through a redesigned address–generation module based on the GNU Multiple Precision (GMP) arithmetic library [14], enabling the discovery of a diverse set of active hosts and services within a short time window. This module converts IPv6 addresses into large-integer representations and applies permutation modulo–multiplication techniques to generate complete, mathematically validated address permutations within user-specified ranges. The XMap scanner adopts a modular architecture that integrates system initialization, target–space processing, address randomization, protocol–specific scanning, high-speed asynchronous packet I/O, and flexible result–output pipelines. The system initialization and target–space mod-ules provide flexible construction of IPv6 scanning ranges, partitioned into fixed prefixes, permutable regions, and user-defined identifiers, and support sophisticated exclu-sion handling, outperforming prefix-limited systems such as ZMap and Masscan. At the scanning stage, XMap incor-porates customizable protocol modules capable of probing IPv4/IPv6, TCP/UDP/ICMP, DNS, and a variety of applica-tion behaviors. Its packet sending and receiving subsystem employs asynchronous decoupling to achieve near line-rate throughput while ensuring reliable matching of response packets across IPv4 and IPv6. The framework also sup-ports extensible result export, enabling researchers to store selective fields (e.g., addresses, ports, payloads) in TXT, CSV, or database formats [15]. The architecture provides the flexibility required to adapt the scanning process to our experimental objectives. We additionally incorporate ZGrab2 [10] to perform de-tailed application-layer fingerprinting, service–version iden-tification, and configuration retrieval on hosts discovered by XMap. Together, XMap and ZGrab2 form a scalable, extensi-ble, and robust framework that enables broad IPv6 address-space exploration followed by detailed service character-IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 4
+
+ization. This integrated workflow provides the flexibility and efficiency required for our large-scale IPv6 periphery measurement. 
+
+3 IP V6 N ETWORK PERIPHERY DISCOVERY 
+
+This section focuses on the discovery of IPv6 network periphery devices at a global scale. Prior work analyzed only 15 ISP blocks from 12 major ISPs in India, China, and America [5], which provided an important first look at IPv6 network peripheries but remained limited in scope. To revisit and extend that measurement, we broaden the study to representative ISPs across all five RIRs and analyze the resulting global device distribution. Specifically, we first describe how candidate prefixes are collected and selected for probing, then characterize the global distribution of the discovered devices, and finally compare our results with the 15 original blocks studied in 2021 to examine how deployment has evolved over the past four years. 
+
+3.1 Prefix Selection 
+
+For direct comparability with prior work, we retain the 15 ISP blocks studied in 2021 [5]. These blocks, drawn from 12 major ISPs in India, China, and America and categorized as broadband, mobile, and enterprise networks, serve as our longitudinal baseline. Our preliminary scan of this subset reveals that even a single prefix from each block can already yield a device count comparable to earlier results. Consequently, to support a clearer side-by-side comparison, we select one representative prefix from each block for the revisit. To move beyond this limited baseline, we extend the measurement to all five RIRs and collect representative ISPs across 73 regions. We query the BGP Toolkit platform, a global BGP routing information source, using each ISP’s name to identify its corresponding ASN [7]. We then retrieve the announced IPv6 prefixes managed by these ISPs to construct the candidate pool for large-scale probing. In the prefix scanning and target generation stage, we adopt a Response-Guided Prefix Selection (RGPS) strategy to identify “good” prefixes for active scanning based on their likelihood of containing a high concentration of network periphery devices. Algorithm 1 summarizes the workflow of the proposed RGPS strategy. Under RGPS, the selection of a prefix as a “good” prefix is determined by the following criteria: 1) Prefix length between /28 and /48: We prioritize prefixes with lengths ranging from /28 to /48. The upper bound of /48 follows common operational practice, where /48 is often regarded as the longest broadly routable IPv6 prefix [16]. The lower bound of /28 is chosen for efficiency, as scanning shorter prefixes at Internet scale is prohibitively expensive. 2) Decomposition of shorter prefixes: Excluding pre-fixes shorter than /28 would result in missing a considerable portion of network periphery devices. To address this, we implement a decomposition strategy. For instance, when processing a /24 pre-fix (e.g., xxxx:xx00::/24), we perform an initial ex-ploratory scan. After collecting a sufficient num-ber of response packets, we analyze the source 
+
+Algorithm 1: Response-Guided Prefix Selection 
+
+Input : Announced IPv6 prefix set P; early-stop threshold τ = 2 minutes 
+
+Output: Selected good prefix set G 
+
+> 1
+
+initialize G ← ∅ ; 
+
+> 2
+
+foreach prefix p ∈ P do  
+
+> 3
+
+if 28 ≤ | p| ≤ 48 then  
+
+> 4
+
+C ← { p}; 
+
+> 5
+
+else if |p| < 28 then  
+
+> 6
+
+perform an exploratory scan on p; 
+
+> 7
+
+collect responsive source addresses from the 
+
+saddr field;  
+
+> 8
+
+derive active /28 sub-prefixes C from these responses;  
+
+> 9
+
+else  
+
+> 10
+
+continue;  
+
+> 11
+
+foreach candidate prefix c ∈ C do  
+
+> 12
+
+start scanning c; 
+
+> 13
+
+if no responses are observed for τ consecutive minutes then  
+
+> 14
+
+terminate the scan of c early;  
+
+> 15
+
+else  
+
+> 16
+
+G ← G ∪ { c}; 
+
+> 17
+
+return G;                            
+
+> TABLE 1 Number of IPv6 Network Peripheries.
+> RIR Region ISP #%
+> AFRINIC 10 11 87.40k 0.03% APNIC 17 43 249.51M 88.50% ARIN 320 5.76M 2.04% LACNIC 827 4.52M 1.60% RIPE NCC 35 63 22.05M 7.82%
+> Total 73 164 281.92M 100%
+
+address (saddr) field and identify sub-prefixes that exhibit active responses, such as xxxx:xx10::/28 and xxxx:xx70::/28. By focusing on these derived /28 sub-prefixes, we achieve efficient coverage equiva-lent to scanning the entire /24 prefix. 3) Continuity of packet reception: We also evaluate the continuity of responses during the scanning process. Scanning a /32 prefix at the aforementioned transmission rate takes approximately 50 minutes. If responses are only received during the initial two minutes and no further packets are detected for the remainder of the scan, the process becomes inefficient. This typically occurs in prefixes with very low device density. To optimize resource usage, we monitor scanning logs in real time and terminate scans early when no responses are observed for two consecutive minutes. Following these principles, we gather a large amount of IPv6 prefix information and conduct global-scale scanning of IPv6 network periphery devices. IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 5
+
+> Fig. 2. Distribution of Peripheries by Country/Region.
+> Fig. 3. Top 10 Countries/Regions by Periphery Count.
+
+3.2 Global IPv6 Network Periphery Device 
+
+We identify a total of 281.9M IPv6 network periphery de-vices through our scanning procedure. Table 1 shows that this footprint is highly uneven across RIRs. APNIC alone contributes 249.51M devices (88.50% ) across 17 regions and 43 ISPs, accounting for the overwhelming majority of all discovered devices. By contrast, RIPE NCC covers the broadest regional span, with 35 regions and 63 ISPs, but contributes 22.05M devices ( 7.82% ), indicating a wider yet less concentrated deployment pattern. ARIN and LACNIC contribute 5.76M ( 2.04% ) and 4.52M ( 1.60% ) devices, respec-tively, while AFRINIC currently contributes 87.40k ( 0.03% )devices. Figure 2 further shows a clear long-tailed distribution across the 73 measured regions. Thirteen regions contain more than one million devices, while 19 fall into the 100K– 1M range and 16 into the 10K–100K range; the remain-ing regions are distributed across the 1K–10K and ≤1K categories. In terms of regional composition, RIPE NCC contributes the largest number of regions in several device-count bins, especially the medium-sized ones, whereas AP-NIC contributes fewer regions but dominates the highest-volume deployments. This pattern suggests that global IPv6 periphery deployment is broad in geographic coverage, but highly uneven in device concentration. The concentration becomes even clearer in Figure 3. India ( 216.17M ) and China ( 26.44M ) are far ahead of the remaining regions, while the rest of the top 10 are all in the low-single-digit millions. Overall, the global IPv6 periphery has expanded substantially, but its current distribution re-mains highly skewed toward a limited number of regions and networks. 
+
+3.3 Devices in Three Main Regions 
+
+For direct comparison with the 2021 study [5], we revisit the 15 original ISP blocks in India, China, and America. Based on our current scan, we observe a substantial increase in the number of IPv6 network periphery devices across these dominant blocks, reflecting rapid deployment and evolving allocation patterns in their corresponding access networks. The total number of detected devices across the 15 dom-inant IPv6 blocks has risen from 52.6M to nearly 244.8M— an increase of 192.2M devices . India, in particular, demon-strates extraordinary growth: mobile devices under Bharti Airtel’s address space have surged from 22.5M to 205.6M, representing an approximately 9-fold increase . Similarly, broadband devices provided by BSNL have experienced more than a 75-fold growth .Among the 15 dominant blocks, nine exhibit substantial growth, with increases ranging from 49.6% to 7440.4%. For the remaining six blocks, the observed decreases should be interpreted with caution, since our 2025 revisit probes only one representative prefix within each block rather than the full block coverage used in 2021 [5]. Indeed, in several cases, a single scanned prefix in 2025 already yields more devices than were identified across all prefixes of the same block four years earlier, underscoring the strong expansion of IPv6 deployment within active portions of these address spaces. Taken together, these results suggest that the overall trend across the revisited blocks is continued and often dramatic growth, while apparent declines in some blocks are at least partly attributable to differences in scanning scope. We also observe that the proportion of devices dis-tributed across unique /64 IPv6 prefixes has generally decreased, excluding blocks with minimal variation (i.e., fluctuations below 1%). As the overall number of devices grows, a larger share is being assigned within the same /64 prefix. This tendency may reflect addressing practices such as prefix reuse, denser subnet assignment, or shared access-network configurations. The detailed statistics of the detected devices are summa-rized in Table 2, which illustrates the growth across different IPv6 address blocks and service providers. Taken together, these longitudinal comparisons show that IPv6 deployment has continued to expand over the past four years, but the pace and structure of this growth differ substantially across countries, ISPs, and access-network types [17], [18]. 
+
+4 IP V6 E XPOSED SERVICE 
+
+Building on the IPv6 network periphery devices identified in Section 3, we next investigate the global deployment of IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 6                                                                                                                                                                  
+
+> TABLE 2 IPv6 Network Periphery Comparison (2021 vs. 2025).
+> Cty Net ISP Last Hop /64 prefix 21# 25# ∆#%incr 21# 21% 25# 25% ∆%
+> IN Bb Reliance Jio 3,365,175 2,301,020 -1,064,155 -31.6% 3,363,513 100.0 2,300,639 100.0 0.0 BSNL 2,404 181,271 +178,867 +7440.4% 2,276 94.7 181,159 99.9 +5.2 Mob Bharti Airtel 22,542,690 205,676,491 +183,133,801 +812.3% 22,340,370 99.1 203,215,204 98.8 -0.3 Vadafone 2,307,784 8,015,397 +5,707,613 +247.3% 2,307,672 100.0 8,014,921 100.0 0.0 US Bb Comcast 87,308 1,641,709 +1,554,401 +1780.3% 5,694 6.5 8,773 0.5 -6.0 AT&T 740,141 110,221 -629,920 -85.1% 735,958 99.4 107,140 97.2 -2.2 Charter 13,027 68,389 +55,362 +423.0% 1,573 12.1 2,665 3.9 -8.2 CenturyLink 249,835 21,486 -228,349 -91.4% 233,298 93.4 16,094 74.9 -18.5 Mob AT&T 1,734,506 331,637 -1,402,869 -80.9% 1,730,125 99.7 331,635 100.0 +0.3 Ent Mediacom 38,399 73,803 +35,404 +92.2% 516 1.3 490 0.7 -0.6 CN Bb Telecom 2,122,292 3,175,553 +1,053,261 +49.6% 2,100,034 99.0 3,148,221 99.1 +0.1 Unicom 1,273,075 2,600,801 +1,327,726 +104.3% 1,272,540 100.0 2,597,763 99.9 -0.1 Mobile 7,316,861 13,556,803 +6,239,942 +85.3% 7,315,713 100.0 13,529,403 99.8 -0.2 Mob Unicom 3,696,275 2,488,610 -1,207,665 -32.7% 3,693,605 99.9 2,483,673 99.8 -0.1 Mobile 7,193,972 4,616,008 -2,577,964 -35.8% 7,188,311 99.9 4,576,809 99.2 -0.7 Total 52,683,744 244,859,199 +192,175,455 +364.8% 52,291,198 99.3 240,514,589 98.2 -1.1
+> #: unique devices; ∆: 2025 vs 2021 change; %: percentage.
+
+IPv6 services, with a focus on their exposure characteristics and vulnerability trends. IPv6 significantly enhances global connectivity by pro-viding an extensive address space ( 2128 ) and improved protocol design, including simplified headers and native support for SLAAC and IPsec [4], [19], [20]. However, these advantages also introduce new challenges for network man-agement and security, particularly as IPv6 services become increasingly exposed at the network periphery. The security risks posed by exposed IPv6 services at the network periphery are increasingly well documented. NIST highlights that IPv6 deployment introduces distinct security considerations [21], and NSA further warns that dual-stack operation increases attack surface while transition tunnels may create unintended entry points [22]. Empirical studies have shown that such risks already manifest at Internet scale. Prior work on IPv6 network peripheries uncovered 52 million active periphery devices, including 4.7 million devices exposing unintended pub-lic services, 741 thousand open IPv6 DNS resolvers, and 1.3 million routers with Internet-accessible web manage-ment interfaces [5]. More recently, 6SENSE conducted the first Internet-wide scanning-driven security analysis of IPv6 hosts and identified 81 thousand security-sensitive exposed devices together with at least 70 applicable CVEs [23]. Meanwhile, independent measurements show that large-scale IPv6 scanning is active in the wild and targets specific services and addresses [24]. These findings collectively sug-gest that IPv6 service exposure in periphery environments is no longer anecdotal, but a measurable and significant security problem. To better understand this landscape, this section first analyzes global IPv6 service exposure, then revisits the historical baseline in America, China, and India to examine how exposure has evolved in the same major ISP blocks, and finally assesses the software vulnerabilities commonly associated with the remaining exposed services. 
+
+4.1 Global IPv6 Service Exposure 
+
+To characterize the security risks of the IPv6 network pe-riphery devices discovered in Section 3, we measure the ex-posure of commonly used IPv6 services at a global scale. Un-like previous efforts four years ago, we significantly expand the scope of measurement to include major ISP-managed prefixes located in regions with mature IPv6 deployments. Starting from scratch, we construct a Global IPv6 Periphery Fingerprint Database , which serves as a foundational resource for understanding the evolving IPv6 landscape and its asso-ciated security implications (Table 3). Among the exposed services we analyze, a total of 2.5% are found to pose exposure-related risks, with SSH (1.0%) and HTTP/80 (0.7%) remaining the most common risk points. Despite a decrease in service exposure compared to 2021, approximately 7.1M devices remain exposed to insecure services. At the RIR level, however, the exposure burden is highly uneven. APNIC contributes 2.53M exposed devices, whereas ARIN contributes 3.70M, meaning that the largest absolute exposure is not observed in the largest de-ployment region but in the region with the highest exposure density. This contrast is consistent with Figure 4: the average exposed service count per device reaches 1.040 in ARIN, far above APNIC (0.249), LACNIC (0.120), RIPE NCC (0.016), and AFRINIC (0.008). In other words, APNIC dominates in deployment scale, while ARIN shows markedly higher exposure intensity on a per-device basis. Table 3 further shows that the dominant exposed ser-vices also differ by RIR. In APNIC, the main contribution comes from sheer scale, with HTTP/80 (1.08M) and FTP (952.2k) contributing substantially to the global total. In ARIN, by contrast, exposure is concentrated in a smaller device population but with much higher densities, espe-cially for SSH (47.6%), HTTP/80 (8.3%), and TLS (5.6%). IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 7                                                                                                                                      
+
+> TABLE 3 Global IPv6 Network Periphery Service Exposure.
+> RIR DNS NTP FTP SSH TELNET HTTP80 TLS HTTP8080 Total #%#%#%#%#%#%#%#%#%
+> APNIC 232.9k 0.1 2.8k 0.0 952.2k 0.4 35.1k 0.0 33.3k 0.0 1.08M 0.4 83.5k 0.0 112.2k 0.0 2.53M 35.5 ARIN 5.2k 0.1 7.7k 0.1 49.4k 0.9 2.74M 47.6 21.6k 0.4 476.3k 8.3 324.5k 5.6 76.8k 1.3 3.70M 52.0 RIPE NCC 63.5k 0.3 1.8k 0.0 38.0k 0.2 25.0k 0.1 45.3k 0.2 105.3k 0.5 60.8k 0.3 4.5k 0.0 343.1k 4.8 LACNIC 3.2k 0.1 2.4k 0.1 117 0.0 39.6k 0.9 245.5k 5.4 249.8k 5.5 3.2k 0.1 1.2k 0.0 541.9k 7.6 AFRINIC 18 0.0 200 0.2 84 0.1 159 0.2 128 0.2 29 0.0 55 0.1 90.0 682 0.0 Total 304.8k 0.1 14.9k 0.0 1.04M 0.4 2.84M 1.0 345.8k 0.1 1.91M 0.7 472.1k 0.2 194.7k 0.1 7.12M 2.5
+> In the service columns (DNS, NTP, etc.), the percentage represents the proportion of devices within each RIR exposing that specific service. In the Total column, the percentage represents the proportion of exposed devices of each RIR relative to the global total exposed devices.
+> Fig. 4. Average Number of Exposed Services per Periphery.
+
+LACNIC stands out for relatively high TELNET (5.4%) and HTTP/80 (5.5%) exposure ratios, suggesting that legacy management or embedded-device services remain visible there. Taken together, these results indicate that global IPv6 service exposure is shaped by two different forces: very large deployment scale in APNIC and markedly higher exposure density in ARIN and parts of LACNIC. 
+
+4.2 Service Exposure in Three Main Regions 
+
+This subsection focuses on unexpectedly exposed services in the same major ISP blocks revisited from India, America, and China, and analyzes how service exposure has changed in these main regions. The current number of identified IPv6 network periph-ery devices in these blocks is nearly five times higher 
+
+than it was four years ago. Table 4 presents the statistics on unexpectedly exposed services. In contrast to the sharp growth in device count, the total exposure across the eight key services has dropped substantially, indicating that large-scale IPv6 deployment has not been accompanied by a proportional increase in visible service exposure. This reduction is evident across several major protocols. Compared with 2021, HTTP/8080 decreases from 3.5M to 78k, HTTP/80 from 1.3M to 138k, DNS from 741k to 210k, and TLS from 144k to 31.2k. In nine major IPv6 blocks (2, 3, 4, 5, 6, 7, 10, 11, and 12), the growth in device count has not resulted in a proportional increase in service exposure. This strongly suggests that many ISPs have introduced tighter filtering policies, such as firewalls and access control lists, during network expansion. At the same time, the decline is not uniform across all services and blocks. Some ISP blocks still show noticeable growth in selected protocols, implying that hardening has been service-specific rather than universal. For example, Comcast (block 5) shows clear increases in HTTP/80, TLS, and HTTP/8080 exposure, while China Telecom (block 11) exhibits growth in several management- or legacy-oriented services, including FTP, TELNET, and HTTP/8080. Bharti Airtel (block 3), despite its explosive device growth, still shows non-negligible increases in SSH and TLS exposure. These patterns likely reflect differences in ISP configuration practices, device ecosystems, and operational priorities. Overall, while the exposure surface in the three main regions has become narrower than in 2021, a considerable number of exposed services still persist, ranging from thou-sands to hundreds of thousands of devices depending on the protocol. Particularly for DNS, FTP, and SSH/TELNET-related services, the remaining exposure continues to pro-vide a meaningful basis for large-scale exploitation and therefore warrants continued defensive attention. 
+
+4.3 Software Vulnerabilities Associated with Exposed Services 
+
+Table 5 summarizes the observed service versions and their associated CVE counts. Although the overall exposure of several protocols has declined, the software stacks behind the remaining exposed services still exhibit substantial vul-nerability burden. 
+
+HTTP. Many exposed devices use common service versions such as micro httpd and Jetty. These implementations re-main security-relevant not only because HTTP exposure is still widespread, but also because they are often associated with weak authentication, poor input validation, and con-figuration errors [25], [26]. For example, CVE-2025-46421 exposes authorization-header leakage under redirection in the libsoup client, and CVE-2025-43859 highlights a request smuggling vulnerability in the h11 library. 
+
+SSH. The SSH ecosystem remains fragmented across mul-tiple versions of Dropbear and OpenSSH rather than be-ing dominated by a single implementation. For instance, CVE-2025-43013 in JetBrains products involves unencrypted credential transmission, and CVE-2025-22968 exposes an RCE vulnerability in routers. This fragmentation suggests that exposed SSH services are difficult to secure uniformly because different implementations introduce different attack surfaces. IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 8
+
+TABLE 4 IPv6 Network Periphery Service Exposure Comparison (2021 vs. 2025).                                                                                                                                                                                                                                                                                                                                                                                                                               
+
+> ISP DNS NTP FTP SSH TELNET HTTP80 TLS HTTP8080 21# 25# ∆#21# 25# ∆#21# 25# ∆#21# 25# ∆#21# 25# ∆#21# 25# ∆#21# 25# ∆#21# 25# ∆#
+> 130.3k 59 -30.2k 64-2 11094-5 18+7 102 14 -88 0001.4k 0-1.4k
+> 249+5 88 21 -67 21 9-12 89 25 -64 55 10 -45 24 1-23 20 2-18 40-4
+> 336.6k 5.7k -30.9k 131 0-131 27 23 -4 50 748 +698 19 24 +5 1k 19 -981 03.4k +3.4k 6.7k 1-6.7k
+> 4201 0-201 39 3-36 06+6 13 15 +2 20-2 141 206 +65 000623 0-623
+> 5998 +89 290 46 -244 54-1 13 128 +115 50 6-44 54 5.7k +5.6k 64 5.9k +5.8k 319 2.1k +1.8k 63.6k 7-3.6k 320 2.7k +2.4k 880 61 -819 223 533 +310 13 40 +27 340 9-331 3.4k 87 -3.3k 000
+> 7437 130 -307 58 130 +72 11046 30 -16 35+2 31 20 -11 372 242 -130 357 78 -279 83.6k 6-3.6k 14.9k 2.8k -12.1k 1k 93 -907 1.9k 569 -1.3k 1.5k 76 -1.4k 38 8-30 3k 89 -2.9k 20-2 900000000030-3 20-2 625 0-625 625 0-625 489 0-489
+> 10 93 54 -39 129 155 +26 14 2-12 1.2k 208 -992 1.1k 162 -938 2.6k 77 -2.5k 1.3k 489 -811 55 18 -37
+> 11 63.6k 16.3k -47.3k 146 396 +250 211 3.5k +3.3k 335 501 +166 240 1k +760 791 1.5k +709 51 20.7k +20.7k 7947 +940
+> 12 202k 186k -16k 76 951 +875 35.8k 956 -34.8k 20.5k 471 -20k 36.5k 1.1k -35.4k 211k 130k -81k 169 259 +90 229k 74.7k -155k
+> 13 403k 652 -402k 19 14 -5 139k 8-139k 114k 7-114k 140k 47 -140k 1M 86 -1M 138k 24 -138k 3.3M 172 -3.3M 14 468 2-466 21 11 -10 00087-1 51-4 147 11 -136 416 +12 176 53 -123 15 296 2-294 122 0-122 000133 5-128 130 3-127 96 0-96 10-1 236 3-233 Total 741k 210k -531k 16.1k 7.3k -8.8k 177k 4.7k -172k 139k 3.3k -135k 180k 2.5k -177k 1.3M 138k -1.16M 144k 31.2k -113k 3.5M 78k -3.42M
+
+India: 1=Reliance Jio b, 2=BSNL b, 3=Bharti Airtel m, 4=Vodafone m US: 5=Comcast b, 6=AT&T b, 7=Charter b, 8=CenturyLink b, 9=AT&T m, 10=Mediacom e China: 11=Telecom b, 12=Unicom b, 13=Mobile b, 14=Unicom m, 15=Mobile m b:Broadband, m:Mobile, e:Enterprise. 
+
+TABLE 5 Observed Service Versions and Associated CVE Counts. 
+
+Protocol Service Version CVE 
+
+HTTP micro httpd (126,922), Jetty (74,671), Xfinity (7,612), Boa (670), MiniWeb (461), AkamaiGHost (206) 199,820 SSH dropbear unknown (1,085), 2012.55 (161), 0.5x (148), OpenSSH 7.x (281), 3.5p1 (87), 8.x (60) 1,048 DNS dnsmasq 2.7x (7,026), 2.3x (692), 2.8x (145), 2.4x (92), 2.9x (42) 1,304 FTP FreeBSD 6.00LS (85), ASUS RT/GT (97), vsFTPd 3.0.x (76), FRITZ!Box (12) 2,608 
+
+DNS. The widespread use of dnsmasq version 2.7x is par-ticularly noteworthy. Issues such as DoS attacks, insufficient input validation, SSRF, and memory-management flaws, in-cluding the UAF issue in CVE-2025-31498, indicate that DNS exposure is still closely tied to long-lived and insufficiently maintained software. 
+
+FTP. While the overall exposure of FTP services is lower, many legacy systems continue to run old FTP software on FreeBSD or ASUS versions. Problems such as command injection and privilege escalation in PCMan FTP 2.0.7 (e.g., CVE-2025-31161, CVE-2025-3679) show that even a rela-tively smaller exposed population can still correspond to high-risk legacy software. Overall, the remaining exposed services still rely heavily on outdated software, misconfigurations, and weak authen-tication mechanisms. Therefore, exposure reduction alone is insufficient: there remains a need to strengthen security development lifecycle management, improve input valida-tion, adhere to the principle of least privilege, and conduct regular vulnerability assessments to reduce the real-world exploitability of exposed IPv6 services. 
+
+5 UNAUTHORIZED ACCESS TO LLM S
+
+With the growing popularity of Large Language Models (LLMs), locally deployed LLM tools have attracted increas-ing attention in both research and practice. Our paper in-vestigates unauthorized-access risks in such deployments and the security implications they introduce. When local runtime APIs or WebUI interfaces are made Internet reach-able without proper protection, attackers may enumerate available models, issue inference requests, abuse computing resources, or access sensitive interaction data. In this sense, the problem studied in this section remains rooted in service exposure and therefore naturally extends the analysis in Section 4, but here the focus shifts from generic exposed services to a specific class of LLM deployment tools. It should also be noted that our measurement surface differs substantially between IPv4 and IPv6. For IPv4, we conduct Internet-wide probing across the complete routable address space; for IPv6, we only perform exploratory prob-ing on the previously identified network periphery devices. Accordingly, the predominance of IPv4 exposure in our results should be interpreted primarily as a consequence of measurement coverage, rather than as definitive evidence that these tools inherently do not operate over IPv6. Against this background, this section first introduces the current de-ployment landscape and security motivation, then presents our measurement methodology, and finally analyzes the observed exposure patterns together with practical security recommendations. 
+
+5.1 Current Landscape of LLMs 
+
+In recent years, Large Language Models have under-gone significant advancements and are now deployed across a broad spectrum of applications. The emergence of lightweight and open-source local deployment frameworks has further lowered the barrier to adoption, making self-hosted LLM services increasingly common in practice. Ap-proximately 61.7% of machine learning teams have adopted or are planning to adopt LLM-based architectures in pro-duction environments [27]. At the same time, the growing popularity of local deployment has introduced a new class of security risks. Once the service interfaces of these local deployment tools become Internet reachable, attackers may enumerate available models, issue inference requests, abuse computing resources, or access sensitive interaction data. This class of exposure exemplifies the broader risk land-scape associated with poorly secured LLM deployments. However, the core problem is not merely reachability itself, but the lack of adequate security mechanisms in many IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 9
+
+deployments. When service ports are directly exposed to the public Internet without proper authentication, access control, or restrictive default settings, remote adversaries can trivially interact with the deployed models through their management or inference APIs. As a result, local de-ployments may inadvertently expose sensitive assets, such as model binaries, API credentials, runtime configurations, or user-provided inputs, to untrusted networks. These risks motivate our measurement and analysis of publicly exposed LLM deployment tools. 
+
+5.2 Access Methodology 
+
+This subsection outlines the methodology used to identify publicly exposed LLM services. To systematically verify candidate exposures, we propose a Hierarchical LLM Expo-sure Verification (HLEV) framework. HLEV is a three-stage probing framework designed to balance scanning efficiency with result accuracy by progressively refining candidates from transport-layer reachability to application-layer verifi-cation and finally to model-level exposure confirmation. In our study, HLEV is applied to the complete IPv4 Internet and, in an exploratory manner, to the previously discovered IPv6 network periphery devices. Algorithm 2 summarizes the workflow of HLEV. 
+
+Transport-Layer Reachability. HLEV begins with TCP SYN probing over the default ports of local LLM services. TCP SYN-ACK responses (Response 0) are treated as transport-layer evidence of reachable endpoints. For the Internet-wide IPv4 scan, this stage achieves near-complete coverage (exceeding 95.0%) of routable addresses within approxi-mately 24 hours and filters out 83.7% of non-responsive or unreachable hosts, thereby substantially narrowing the candidate space. 
+
+Application-Layer Verification. HLEV next performs application-layer verification with ZGrab2 on the Re-sponse 0 candidates. Rather than directly querying model-specific endpoints, this stage first issues HTTP requests using the default service settings of each tool and inspects the returned application-layer responses (Response 1). The verification is then carried out through status-code analysis together with pattern matching on response headers and payloads, allowing us to identify tool-specific traits indica-tive of active LLM deployments [28]–[33]. A summary of these application-layer response signatures is provided in Table 7. 
+
+Model-Level Confirmation. Finally, HLEV performs model-level confirmation on the verified services. Using tool-specific protocol parsing, it queries model-related interfaces and extracts model identifiers and configuration metadata from the returned responses; for example, confirmation may rely on interfaces that expose model lists or detailed con-figuration outputs. The resulting evidence (Response 2) is cross-referenced with known model repositories to confirm authenticity and exposure status, enabling precise identi-fication of LLM-hosting nodes and attribution to specific toolchains. 
+
+5.3 Result Analysis 
+
+Our analysis reveals that many locally deployed LLM tools are vulnerable to unauthorized access, primarily due to 
+
+Algorithm 2: Hierarchical LLM Exposure Verifica-tion (HLEV) 
+
+Input : Candidate address set A; default LLM service port set P; application-layer response signatures; model-specific confirmation endpoints and rules 
+
+Output: Verified exposed LLM service set E 
+
+> 1
+
+initialize E ← ∅ ; 
+
+> 2
+
+Transport-Layer Reachability ; 
+
+> 3
+
+foreach address a ∈ A do  
+
+> 4
+
+perform TCP SYN probing on a over ports in P
+
+using XMap;  
+
+> 5
+
+if SYN-ACK response is observed then  
+
+> 6
+
+record a as a Response 0 candidate;  
+
+> 7
+
+Application-Layer Verification ; 
+
+> 8
+
+foreach Response 0 candidate a do  
+
+> 9
+
+dispatch HTTP requests with default service settings using ZGrab2;  
+
+> 10
+
+analyze the returned HTTP status codes, headers, and payload signatures;  
+
+> 11
+
+if a matches tool-specific response traits then  
+
+> 12
+
+record a as a Response 1 verified service;  
+
+> 13
+
+Model-Level Confirmation ; 
+
+> 14
+
+foreach Response 1 verified service a do  
+
+> 15
+
+query model-related interfaces using tool-specific confirmation rules;  
+
+> 16
+
+extract identifiers and metadata from responses such as model lists or configuration outputs;  
+
+> 17
+
+cross-reference returned metadata with known model repositories or toolchain signatures;  
+
+> 18
+
+if model exposure is confirmed then  
+
+> 19
+
+E ← E ∪ { a}; 
+
+> 20
+
+record the corresponding Response 2 evidence;  
+
+> 21
+
+return E;open ports and the lack of proper authentication mecha-nisms. At the same time, the results also show that open ports alone are a poor proxy for actual exposure: millions of hosts answer on candidate ports, but only a very small frac-tion survive application-layer and model-level verification. Table 6 summarizes the probing results and observed access patterns across these systems. We discuss the main findings below. 
+
+Security Risks in Local Deployment Tools. The most no-table exposure is observed in local runtime tools such as Ollama, LM Studio, vLLM, and Xinference. For example, Ollama shows 3,163,140 open ports, 47,404 HTTP respon-ders, and 16,114 confirmed API responses, making it the most prominent exposed tool in our dataset. LM Studio exhibits a similar pattern of large transport-layer visibility but very limited confirmed exposure: 3,133,221 open ports and 351,635 HTTP responses eventually collapse to only 184 confirmed instances. A comparable filtering effect is visible for GPT4All and Jan.ai, where millions of open ports ultimately yield only 1 and 3 confirmed instances, IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 10 
+
+> TABLE 6 Tool Exposure Analysis via Open Ports and API Responses.
+
+Tool Required Port Open Port HTTP Protocol Body Match API Response IPv4/v6 
+
+Ollama 11434 3163140/1 47404/1 16114/1 16114/1 IPv4/v6 LM Studio 1234 3,133,221 351,635 184 184 IPv4 GPT4All 4891 3,229,754 10,891 1 1 IPv4 Jan.ai 1337 3,064,828 155,461 3 3 IPv4 vLLM 8000 7,352,664 1,876,944 25,590 598 IPv4 Xinference 9997 3,091,514 285,345 320 320 IPv4 LobeChat 3210 2,827,954 19,370 2,910 - IPv4                         
+
+> TABLE 7 Probing Requests and Valid Responses.
+> Tool Port Match 1 Match 2
+> Ollama 11434 ”body”=”Ollama running” –LM Studio 1234 ”body”=”Unexpected endpoint (GET /)” –GPT4All 4891 ”content-type”= ”application/x-empty” grep ”GPT4All” Jan.ai 1337 ”location”=”./static /index.html” –vLLM 8000 ”body”=” {detail: Not Found }”grep ”vLLM” Xinference 9997 ”location”=”/ui/” –LobeChat 3210 grep ”lobechat” –
+
+respectively. These gaps demonstrate that naive port-based enumeration would massively overestimate real exposure, and they also highlight the value of HLEV in suppressing false positives. Notably, Ollama has been associated with a critical unauthorized access vulnerability (CNVD-2025-04094), which allows unauthenticated adversaries to interact with the service via exposed network interfaces [34]. 
+
+Security Deficiencies in WebUI-Based Services. WebUI-based services present a somewhat different exposure pat-tern. As shown in Table 6, LobeChat yields 2,827,954 open ports, 19,370 HTTP responses, and 2,910 body matches, indicating that browser-accessible interfaces are easier to identify at the application layer than many runtime APIs. However, WebUI visibility does not necessarily imply full compromise. Our probing suggests that while the majority of publicly accessible LobeChat instances still present login-based access control, a subset are misconfigured to allow unauthenticated access. In such cases, exposed endpoints may permit enumeration of model configurations and can be leveraged for API misuse, prompt injection attacks, or unauthorized prompt execution. This shows that WebUI de-ployments may appear comparatively better protected than standalone runtime services, yet they still remain vulnerable to configuration mistakes. 
+
+General Observations and Recommendations. Two broader observations emerge from the results. First, con-firmed exposure is overwhelmingly concentrated in IPv4. In our exploratory IPv6 measurement, only a single Ollama instance is confirmed, which is consistent with the much narrower IPv6 probing scope rather than a strong claim about protocol preference. Second, once an active service instance is identified, exposed LLM endpoints can often be trivially abused. This is particularly evident in tools such as Ollama and LM Studio, where adversaries may query API paths like /api/ps or /api/chat to enumerate model data or initiate inference requests. The absence of access control across all tested versions of Ollama further amplifies this risk. To mitigate such exposures, we recommend that users avoid binding local services directly to public interfaces unless strictly necessary, reconfigure default ports, and re-strict access through host-based firewalls, reverse proxies, or source-IP whitelisting. Where remote access is required, authentication should be enforced by default rather than added as an afterthought. In short, the main problem re-vealed by our measurement is not merely that these tools are reachable, but that too many of them remain reachable without meaningful protection. 
+
+6 ROUTING LOOP ATTACK 
+
+In addition to the exposed-service analysis in Section 4 and the LLM exposure study in Section 5, we further investigate routing loop vulnerabilities on the discovered IPv6 network periphery devices. This section presents an active detection methodology based on ICMPv6 error mes-sages, then analyzes the global distribution of routing loop vulnerabilities, revisits the same 15 ISP blocks studied in 2021 for longitudinal comparison, and finally examines the vendor distribution of affected devices through service fin-gerprinting. Overall, we identify 4,517,099 devices involved in routing loops, accounting for 1.6% of all scanned devices. At the global level, routing loop vulnerability rates vary substantially across regions; for the 15 historical ISP blocks, the affected proportion decreases from 11.04% in 2021 to 1.43% in our revisit, indicating that although the problem persists, its prevalence in the original baseline has declined markedly. 
+
+6.1 Routing Loop Detection Methodology 
+
+Our approach adopts an active probing mechanism based on ICMPv6 error messages to identify network periphery devices susceptible to IPv6 routing loops. The core idea is to trigger forwarding behavior toward unassigned targets and then infer abnormal looping paths from the returned ICMPv6 diagnostics. IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 11 
+
+> TABLE 8 Routing Loop Distribution of Peripheries.
+
+RIR #Vulnerable #Total %
+
+AFRINIC 0.54k 87.40k 0.62% APNIC 3.96M 249.51M 1.59% ARIN 31.06k 5.76M 0.54% LACNIC 0.27M 4.52M 6.01% RIPE 0.25M 22.05M 1.15% 
+
+Total 4.51M 281.92M 1.60% 
+
+Response Capture and Classification. The detection logic centers on collecting and analyzing ICMPv6 Time Exceeded messages (Type 3), which indicate that a packet has traversed beyond the configured Hop Limit. During probing, we manipulate the Hop Limit field in IPv6 headers to elicit diagnostic feedback from intermediate routers. All returned ICMPv6 messages are captured and parsed in accordance with RFC 4443 [8], and each response is clas-sified by type and code to distinguish ordinary unreachable behavior from loop-induced feedback: 1) Type=1 (Destination Unreachable): Indicates that the destination network or address is unreachable, requiring further inspection of the Code field. 2) Type=3 (Time Exceeded): Typically generated when the Hop Limit expires in transit, and therefore serves as the main signal for potential forwarding loops. In the initial probing phase, an ICMPv6 Echo Request is transmitted to a target located in an unassigned subnet with a default Hop Limit of 32. This value is selected based on empirical evidence that 99% of Internet paths involve fewer than 32 hops, thereby reducing false negatives while lim-iting the amplification of potential loop effects [35]. When a target device returns a Type=3 message, we retransmit the same packet with an incremented Hop Limit value (i.e., h + 2 ). If another Type=3 message is received, we confirm the presence of a routing loop, indicating that the probe is circulating between forwarding devices rather than progressing toward a valid destination. Repeated probing is applied to reduce false positives and improve robustness. 
+
+6.2 Global Routing Loop Vulnerability 
+
+On a global scale, the average routing loop vulnerabil-ity rate stands at 1.6%. Table 8 shows that this risk is highly uneven across regions. APNIC contributes the largest number of affected devices, with 3.96M vulnerable devices out of 249.51M total devices, corresponding to a rate of 1.59%. By contrast, LACNIC has only 4.52M total devices but 0.27M affected ones, yielding the highest regional vul-nerability rate at 6.01%. ARIN exhibits the lowest rate, at 0.54%, together with the smallest number of affected devices among the large-deployment regions, suggesting compara-tively stronger operational mitigation. RIPE remains in the middle, with 0.25M affected devices and a rate of 1.15%, while AFRINIC shows a low rate of 0.62% but over a much smaller IPv6 deployment base. This unevenness is further reflected in Figure 5 and Figure 6. The vulnerable population is strongly concentrated 
+
+> Fig. 5. Top 10 ASNs by Routing Loop.
+> Fig. 6. Top 10 Countries/Regions by Routing Loop.
+
+in a small number of ASNs and countries rather than being evenly distributed across all deployments. In Figure 5, the largest four ASNs all belong to APNIC, with AS9808 alone contributing 2,341,168 affected devices and AS4134 con-tributing another 778,618. Figure 6 shows a similarly skewed pattern at the country level: China contributes 3,375,219 affected devices, far ahead of the second-ranked region, Vietnam, with 480,751. Together, these results indicate that routing loop vulnerabilities remain a structurally concen-trated problem, driven by a limited number of large net-works and regions rather than by uniform global weakness. 
+
+6.3 Routing Loop Vulnerability in Three Main Regions 
+
+For direct comparison with the 2021 study, we revisit the same 15 IPv6 address blocks in India, China, and Amer-ica. As summarized in Table 9, the overall number of de-vices under routing loop attack decreases from 5,792,237 to 3,501,369, while the corresponding proportion drops much more sharply from 11.04% to 1.43%. This large reduction suggests that mitigation efforts introduced after the earlier disclosure have had a substantial effect on the original baseline. The reduction is particularly evident in the major Chi-nese broadband blocks. China Telecom (block 11), China Unicom (block 12), and China Mobile (block 13) all show large absolute declines, with the corresponding vulnerabil-ity ratios decreasing by 15.22, 69.02, and 35.72 percentage IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 12                                                                                                                 
+
+> TABLE 9 Peripheries Under Routing Loop Attack.
+> Cty Net ISP Last Hop 21 # 21% 25 # 25% ∆#∆%
+> IN Bb 18,606 0.26 830 0.04 -7,776 -0.22 2324 13.48 21,481 11.85 +21,157 -1.63 Mob 329,135 0.13 78,023 0.04 +48,888 -0.09 4207 0.01 66 0.00 -141 -0.01 US Bb 531 0.04 422 0.03 +391 -0.01 61,598 0.22 11,510 10.44 +9,912 +10.22 7373 2.86 573 0.84 +200 -2.02 820,055 8.03 12,389 57.66 -7,666 +49.63 Mob 920.00 00.00 -2 0.00 Ent 10 7,161 18.65 856 1.16 -6,305 -17.49 CN Bb 11 843,375 39.74 778,618 24.52 -64,757 -15.22 12 1,003,635 78.84 255,411 9.82 -748,224 -69.02 13 3,877,512 52.99 2,341,134 17.27 -1,536,378 -35.72 Mob 14 190 0.01 22 0.00 -168 -0.01 15 353 0.00 34 0.00 -319 0.00 Total 5,792,237 11.04 3,501,369 1.43 -2,290,868 -9.61
+> India: 1=Reliance Jio, 2=BSNL, 3=Bharti Airtel, 4=Vodafone US: 5=Comcast, 6=AT&T, 7=Charter, 8=CenturyLink, 9=AT&T, 10=Mediacom China: 11=Tele-com, 12=Unicom, 13=Mobile, 14=Unicom, 15=Mobile Bb: Broadband, Mob: Mobile, Ent: Enterprise.
+
+points, respectively. These three blocks account for most of the improvement in the revisit and indicate that large-scale remediation can significantly reduce routing loop exposure even in very large access networks. At the same time, the improvement is not uniform across all blocks. Several US broadband blocks continue to exhibit elevated or even increased vulnerability ratios, most notably block 6 (AT&T) and block 8 (CenturyLink), whose proportions rise to 10.44% and 57.66%, respectively. These exceptions show that routing loop vulnerabilities remain dynamic and operationally heterogeneous. Since our 2025 revisit uses representative prefixes within each historical block, individual block-level changes should be interpreted with some caution; nevertheless, the aggregate decline across the baseline is large enough to indicate meaningful overall improvement rather than a purely measurement-driven effect. 
+
+6.4 Periphery Device Vendor Information 
+
+To characterize routing loop vulnerabilities at the vendor level, we perform service fingerprinting on devices already confirmed to be involved in routing loops and extract device metadata to infer associated hardware manufacturers. Com-pared with the previous routing loop detection stage, the goal here is no longer to determine whether a loop exists, but to identify which vendors’ devices are most frequently associated with the affected infrastructure. 
+
+Service Fingerprinting and Vendor Identification. We an-alyze the packet contents of eight exposed services and find that HTTP on ports 80 and 8080, FTP on port 21, and 
+
+> Fig. 7. Top 10 Vendors by Routing Loop Periphery Count.
+
+Telnet on port 23 are particularly likely to disclose vendor-specific information. For devices confirmed to be involved in routing loops, we use ZGrab2 to rescan common ports (HTTP/80, HTTP/8080, FTP/21, and Telnet/23). We then extract metadata such as Server , WWW-Authenticate ,
+
+X-Powered-By , page title (from HTTP), and service ban-ners (from FTP/Telnet) to infer device vendors. 
+
+We find that 22 vendors’ CPE devices exhibit routing loop vulnerabilities. Figure 7 presents the top ten most common vendors associated with routing loop vulnerabilities and their corresponding RIRs, with each region normalized to fractions to highlight proportional structure. The resulting pattern is again highly uneven. APNIC is dominated by China Mobile, contributing 3,925 identified devices, whereas RIPE is overwhelmingly dominated by ZTE with 1,757 de-vices. LACNIC is primarily associated with Huawei, which contributes 617 devices, while ARIN shows a comparatively more diverse mix, including Huawei (70), Juniper (61), Cisco (16), Linksys (8), and Nokia (11). AFRINIC contains only a very small number of identified vendors, mainly Juniper and Cisco. These results suggest that routing loop vulnerabilities are not tied to a single vendor family, but instead arise across multiple hardware ecosystems and operational en-vironments. At the same time, the strong dominance of a few vendors within particular RIRs indicates that regional market structure and deployment preferences materially influence the observed attack surface. Cisco and Juniper appear across multiple regions, highlighting that the prob-lem is globally distributed rather than limited to one local vendor ecosystem. To address routing loop attacks, major network equip-ment vendors have introduced a range of mitigation mech-anisms, including hop-limit enforcement [36], loop sup-pression techniques such as Split Horizon and Poison Re-verse [37], [38], and protocol- and control-plane safeguards in modern routing systems, such as OSPFv3 [39] and BGP AS-path loop detection [40], as well as, more recently, AI-assisted dynamic route optimization. IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 13 
+
+7 DISCUSSION 
+
+Findings and Comparison. With the continued advance-ment of global IPv6 deployment, the number of IPv6-enabled hosts has increased substantially and their distribu-tion has expanded across a much broader set of regions. At the same time, our measurements show that this growth has not translated into a uniformly improved security posture. Although the overall exposure of IPv6 services on network periphery devices has declined compared with four years ago, a non-trivial number of devices remain exposed due to misconfigurations, outdated software, and inconsistent access-control practices. Similarly, routing loop vulnerabili-ties have improved markedly in the historical baseline when compared with the 2021 study, but they remain highly un-even across regions, ASNs, and vendor ecosystems. Taken together, these findings suggest that IPv6 security risks are not disappearing as deployment matures; rather, they are becoming more structurally concentrated, operationally heterogeneous, and increasingly intertwined with software and deployment practices. 
+
+Newly Exposed Vulnerabilities. Our results highlight two classes of security risks that deserve particular at-tention. First, exposed IPv6 services such as DNS, FTP, SSH/TELNET, and HTTP remain present at non-negligible scale in some environments, often because of misconfig-ured servers, weak segmentation, or insufficient filtering. In particular, publicly reachable DNS services can still create opportunities for abuse ranging from DNS amplification to unauthorized data access, while the associated software stacks frequently remain tied to long-lived and insufficiently maintained implementations. Second, the rise of locally deployed LLM frameworks introduces a newer and quali-tatively different attack surface. These tools are increasingly adopted for private automation, knowledge processing, and inference serving, yet many deployments still expose run-time or WebUI interfaces without adequate authentication, thereby enabling unauthorized model enumeration, infer-ence abuse, and possible leakage of configuration or inter-action data. In this sense, the threat landscape is expanding from traditional exposed infrastructure services to newer application-layer systems that were often not designed with Internet exposure in mind. 
+
+Limitations. Our study has several limitations. First, re-gional disparities in scan coverage may bias the estimated vulnerability rates, especially in areas with limited IPv6 deployment or less representative ISP coverage. Second, while representative ISP or ASN prefixes improve measure-ment feasibility and comparability, they may not fully reflect country-level or region-wide exposure conditions. Third, the large and sparse IPv6 address space means that some active devices or exposed services may remain undetected despite large-scale probing. Fourth, the measurement surface for LLM exposure is not symmetric across protocols: IPv4 is scanned Internet-wide, whereas IPv6 probing is limited to the previously discovered network periphery devices. As a result, the predominance of IPv4 in our LLM findings should be interpreted with caution and should not be taken as a definitive statement about protocol preference in real-world deployments. These limitations do not overturn our main findings, but they do suggest that continued longitu-dinal measurement and broader coverage will be necessary to refine future estimates. 
+
+Ethical Considerations. We follow strict ethical guidelines throughout our measurement activities, prioritizing the principle of “do no harm” [11], [41]. Our scanning and probing operations are designed to avoid disrupting target systems, with packet transmission rates carefully controlled to minimize network load (e.g., below 100 kpps where applicable). We maintain transparency by notifying vendors or organizations of identified vulnerabilities when appro-priate, thereby supporting timely remediation. User privacy is safeguarded through anonymization and sanitization of collected data, and we exclude any personally identifiable information (PII) from analysis and release artifacts. Our goal is not merely to uncover vulnerabilities, but to promote better operational practices and strengthen the long-term security of the IPv6 ecosystem. 
+
+8 RELATED WORK 
+
+As IPv6 deployment continues to expand, Internet-wide measurement of IPv6 hosts, networks, and security expo-sures has become increasingly important. However, unlike IPv4, the vast and sparsely populated IPv6 address space makes exhaustive scanning infeasible, forcing researchers to rely on more adaptive discovery strategies. In recent years, a growing body of work has focused on improving the efficiency, coverage, and security relevance of IPv6 measure-ment. Recent studies most closely related to our work can be broadly grouped into four themes: Internet-wide active discovery, target generation and prefix-aware refinement, security analysis of discovered IPv6 assets, and routing- or control-plane-oriented measurement. 
+
+Internet-wide active discovery. A major line of work has aimed to improve the efficiency of Internet-wide IPv6 host discovery. Recent systems such as 6SENSE [42], Addr-Probe [43], HMap [44], TNet [45], and 6Seeks [46] all ad-dress the core challenge of identifying active IPv6 targets under limited probing budgets. These works exploit differ-ent forms of structural guidance, including reinforcement learning, dynamic feedback, BGP-informed search, and fine-grained pattern mining, to discover active addresses, active networks, or network periphery devices more efficiently than prior approaches. Related efforts also focus on dis-covering IPv6 router interfaces and topology-related assets at scale, such as Treestrace [47] and 6PSTree [48], further demonstrating the importance of scalable seedless or weak-seed measurement methodologies. 
+
+Target generation and prefix-aware refinement. Another closely related direction studies how to generate promising IPv6 probing targets or refine the search space during scan-ning. Target generation algorithms have been extensively explored, and recent evaluations show that different TGAs vary substantially in responsiveness, stability, and mea-surement suitability across use cases [49]. Language-model-and learning-based approaches, including 6Former [50], 6Vision [51], and Gungnir [52], attempt to infer address patterns, fully responsive prefixes, or likely active regions from limited observations. Meanwhile, other works improve discovery by leveraging alternative probing primitives or address sources, such as subnet-router anycast probing [53], IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 14 
+
+NTP-based IPv6 scanning [54], and Internet-wide subnet discovery with hierarchical refinement [55]. These studies collectively show that IPv6 scanning efficiency increasingly depends on prefix awareness, response guidance, and adap-tive refinement of probing space, which is closely aligned with the design philosophy of our RGPS strategy. 
+
+Security analysis of discovered IPv6 assets. Beyond host discovery itself, several recent studies extend IPv6 measure-ment toward security analysis. 6SENSE conducts Internet-wide scanning-driven security analysis of IPv6 hosts, cover-ing open ports, security-sensitive services, and IPv6-specific TLS exposure [42]. HMap and TNet likewise move be-yond pure discovery and analyze exposed internal de-vices, gateway-related risks, and security-sensitive services in discovered IPv6 networks [44], [45]. Other work high-lights emerging operational risks in deployed IPv6 envi-ronments, including reflection amplification exposure [56], NAT-centric consumer gateway security under IPv6 [57], underestimated insecurity among NTP-sourced consumer and IoT hosts [54], and privacy leakage caused by IPv6 addressing practices in end-user networks [58]. Together, these efforts reinforce that modern IPv6 measurement is no longer limited to asset enumeration, but increasingly serves as a basis for security assessment at Internet scale. 
+
+Routing and control-plane measurement. A final line of work focuses on routing behavior, ICMPv6 signals, and control-plane anomalies in IPv6 networks. Maier et al. per-form one of the first comprehensive studies of persistent routing loops in today’s IPv4/IPv6 Internet and show that IPv6 exhibits even higher threat potential in this regard [59]. Pan et al. demonstrate that ICMP rate-limiting side chan-nels can be exploited to measure IPv6 networks remotely, enabling large-scale inference of inbound source address validation deployment and inter-network reachability [60]. Holzbauer et al. further analyze what ICMPv6 error mes-sages reveal about their sources, highlighting the broader measurement value of protocol-level feedback in IPv6 [61]. In parallel, longitudinal observation of IPv6 scanners shows that scanning behavior is strongly shaped by BGP an-nouncements and prefix visibility, emphasizing the opera-tional importance of prefix-level measurement bias [62]. Overall, prior work has made substantial progress in IPv6 target generation, active discovery, topology inference, and security measurement. However, existing studies often focus on only one layer of the problem, such as active address discovery, router interface collection, or specific exposure classes. In contrast, our work revisits IPv6 network peripheries from a broader and more integrated perspective, combining large-scale periphery discovery with service ex-posure analysis, LLM-related unauthorized-access measure-ment, and routing-loop validation to provide an updated global security view of the contemporary IPv6 edge. 
+
+9 CONCLUSION 
+
+In this paper, we revisit and expand the measurement of IPv6 network peripheries at a global scale. Using the pro-posed Response-Guided Prefix Selection (RGPS) strategy, we identify a large population of active IPv6 network pe-riphery devices and characterize their highly uneven global distribution. Based on this measurement, we further examine three major security issues in the contemporary IPv6 periphery: exposed services, unauthorized access risks in LLM deploy-ment tools, and routing loop vulnerabilities. Our results show that, despite the continued growth of IPv6 deploy-ment, important security risks remain present in multiple forms and across multiple layers. Overall, this study suggests that the security challenges of the IPv6 periphery have not disappeared with deploy-ment growth, but instead continue to evolve alongside operational practices, software ecosystems, and emerging services. We hope that our measurement framework and findings can support future longitudinal studies and con-tribute to the continuous improvement of the IPv6 security ecosystem. 
+
+ACKNOWLEDGMENT 
+
+Authors were supported by the National Natural Sci-ence Foundation of China (No. 62502236, No. U25B2025), the Natural Science Foundation of Tianjin (No. 24JC-QNJC02070), and the Open Project of Key Laboratory of Industrial Information Security Perceptionand Evaluation Technology, Ministry of Industry andInformation Technol-ogy. 
+
+REFERENCES                                             
+
+> [1] APNIC Labs, “The IPv6 Transition,” accessed on 2025. [Online]. Available: https://labs.apnic.net/index.php/2024/10/ 19/the-ipv6-transition/ [2] BGP, “AS131072 IPv6 BGP Table Data,” accessed on 2026. [Online]. Available: https://bgp.potaroo.net/v6/as2.0/index.html [3] Google, “IPv6 Adoption Statistics,” accessed on 2026. [Online]. Available: https://www.google.com/intl/en/ipv6/statistics [4] S. Deering and R. Hinden, “Internet protocol, version 6 (IPv6) specification,” Tech. Rep., 2017. [5] X. Li, B. Liu, X. Zheng, H. Duan, Q. Li, and Y. Huang, “Fast IPv6 network periphery discovery and security implications,” in
+> 2021 51st Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN) .IEEE, 2021, pp. 88–100. [6] CVE, “Common Vulnerabilities and Exposures (CVE),” accessed on 2025. [Online]. Available: https://www.cve.org [7] Hurricane Electric, “BGP Toolkit,” accessed on 2025. [Online]. Available: https://bgp.he.net/ [8] A. Conta, S. Deering, and M. Gupta, “Internet control message protocol (icmpv6) for the internet protocol version 6 (ipv6) speci-fication,” Tech. Rep., 2006. [9] XMap, “XMap,” accessed on 2025. [Online]. Available: https: //github.com/idealeer/xmap [10] ZGrab2, “ZGrab 2.0,” accessed on 2025. [Online]. Available: https://github.com/zmap/zgrab2 [11] Z. Durumeric, E. Wustrow, and J. A. Halderman, “ {ZMap }: Fast internet-wide scanning and its security applications,” in 22nd USENIX Security Symposium (USENIX Security 13) , 2013, pp. 605– 620. [12] F. Gont, “IPv6 Toolkit,” accessed on 2025. [Online]. Available: https://www.si6networks.com/research/tools/ipv6toolkit [13] masscan, “MASSCAN: Mass IP port scanner,” accessed on 2025. [Online]. Available: https://github.com/robertdavidgraham/ masscan [14] GNU MP, “The GNU MP Bignum Library,” accessed on 2025. [Online]. Available: https://gmplib.org [15] X. Li, Z. Xie, L. Sun, Y. Qiu, Z. Xu, and Z. Liu, “XMap: Fast Internet-wide IPv4 and IPv6 Network Scanner,” arXiv preprint arXiv:2602.09333 , 2026. [16] G. Huston, “Considerations on the IPv6 Host Density Metric,” Tech. Rep., 2006. [17] E. Davies, S. Krishnan, and P. Savola, “IPv6 transition/co-existence security considerations,” Tech. Rep., 2007. IEEE TRANSACTIONS ON DEPENDABLE AND SECURE COMPUTING, UNDER REVIEW 15
+
+[18] ETSI, “IPv6 Best Practices, Benefits, Transition Challenges and the Way Forward,” accessed on 2025. [Online]. Available: https://www.etsi.org/images/files/ETSIWhitePapers/etsi WP35 IPv6 Best Practices Benefits Transition Challenges and the Way Forward.pdf [19] S. Thomson, T. Narten, and T. Jinmei, “IPv6 stateless address autoconfiguration,” Tech. Rep., 2007. [20] S. Kent and K. Seo, “Security architecture for the internet proto-col,” Tech. Rep., 2005. [21] S. Frankel, R. Graveman, J. Pearce, and M. Rooks, “Guidelines for the secure deployment of IPv6,” NIST Special Publication , vol. 800, p. 119, 2010. [22] National Security Agency, “IPv6 Security Guidance,” accessed on 2025. [Online]. Available: https://media.defense.gov/2023/Jan/ 18/2003145994/-1/-1/0/CSI IPV6 SECURITY GUIDANCE.PDF [23] G. Williams, M. Erdemir, A. Hsu, S. Bhat, A. Bhaskar, F. Li, and P. Pearce, “6sense: {Internet-Wide }{ IPv6 } scanning and its secu-rity applications,” in 33rd USENIX Security Symposium (USENIX Security 24) , 2024, pp. 2281–2298. [24] P. Richter, O. Gasser, and A. Berger, “Illuminating large-scale ipv6 scanning in the internet,” in Proceedings of the 22nd ACM Internet Measurement Conference , 2022, pp. 410–418. [25] A. Zilberman, A. Dvir, and A. Stulman, “IPv6 Routing Protocol for Low-Power and Lossy Networks Security Vulnerabilities and Mit-igation Techniques: A Survey,” ACM Computing Surveys , vol. 57, no. 11, pp. 1–77, 2025. [26] Jetty, “Security Advisories,” accessed on 2025. [Online]. Available: https://github.com/eclipse/jetty.project/security/advisories [27] Arize AI, “Survey: Large Language Model Adoption Reaches Tipping Point,” accessed on 2025. [Online]. Available: https: //arize.com/blog/llm-survey/ [28] Ollama Endpoint, “API,” accessed on 2025. [Online]. Available: https://github.com/ollama/ollama/blob/main/docs/api.md [29] LM Studio Endpoint, “OpenAI Compatibility Endpoints,” accessed on 2025. [Online]. Available: https://lmstudio.ai/docs/ app/api/endpoints/openai [30] vLLM, “OpenAI-Compatible Server,” accessed on 2025. [Online]. Available: https://docs.vllm.ai/en/latest/serving/ openai compatible server.html [31] Jan, “Local API Server,” accessed on 2025. [Online]. Available: https://jan.ai/docs/api-server#server-settings [32] GPT4All, “GPT4All API Server,” accessed on 2025. [Online]. Available: https://docs.gpt4all.io/gpt4all api server/ home.html#activating-the-api-server [33] Xinference, “The internals of Xinference,” accessed on 2025. [Online]. Available: https://inference.readthedocs.io/en/latest/ development/xinference internals.html#restful-api [34] CNVD, “CNVD-2025-04094 Detail,” accessed on 2025. [Online]. Available: https://www.cnvd.org.cn/flaw/show/ CNVD-2025-04094 [35] R. Beverly, R. Durairajan, D. Plonka, and J. P. Rohrer, “In the IP of the beholder: Strategies for active IPv6 topology discovery,” in 
+
+Proceedings of the Internet Measurement Conference 2018 , 2018, pp. 308–321. [36] Juniper Networks, “Junos OS Transport and Internet Protocols User Guide,” accessed on 2025. [Online]. Avail-able: https://www.juniper.net/documentation/us/en/software/ junos/transport-ip/transport-ip.pdf [37] Cisco, “Configuring RIP,” accessed on 2025. [Online]. Available: https://www.cisco.com/c/en/us/td/docs/switches/ datacenter/nexus3548/sw/unicast/6x/b Cisco Nexus 3548 Unicast Routing Configuration Guide Release 6 x/b Cisco Nexus 3548 Unicast Routing Configuration Guide Release 6 x chapter 01000.pdf [38] ——, “RIP Commands on Cisco IOS XR Software,” accessed on 2025. [Online]. Available: https://www.cisco.com/c/en/us/td/ docs/routers/xr12000/software/xr12k r4-0/routing/command/ reference/rr40xr12kbook chapter7.html [39] R. Coltun, D. Ferguson, J. Moy, and A. Lindem, “OSPF for IPv6,” Tech. Rep., 2008. [40] Juniper Networks, “loops (BGP Address Family),” accessed on 2025. [Online]. Available: https://www.juniper.net/ documentation/us/en/software/junos/cli-reference/topics/ref/ statement/loops-edit-protocols-bgp-family.html [41] M. Bailey, D. Dittrich, E. Kenneally, and D. Maughan, “The menlo report,” IEEE Security & Privacy , vol. 10, no. 2, pp. 71–75, 2012. [42] G. W. M. E. A. Hsu, S. Bhat, and A. B. F. L. P. Pearce, “6sense: Internet-wide ipv6 scanning and its security applications.” [43] D. Cheng, L. He, Q. Yin, G. Han, Y. Zhang, B. Jin, Y. Liu, G. Song, T. Yang, J. Yang et al. , “Addrprobe: An internet-wide active ipv6 address probing system with limited seeds,” IEEE Transactions on Networking , vol. 34, pp. 2498–2513, 2025. [44] B. Hou, Z. Yang, X. Meng, X. Wang, Y. Yang, L. Hu, X. Li, and Z. Cai, “Hmap: Efficient internet-wide ipv6 scanning with dynamic search,” IEEE Transactions on Network and Service Manage-ment , 2026. [45] J. Zhao, F. Shi, C. Xu, J. Peng, M. Ge, P. Xue, and M. Zhang, “Tnet: Efficient ipv6 active network discovery,” Computer Networks , p. 112170, 2026. [46] T. Yang, B. Hou, Y. Yang, Z. Yang, and Z. Cai, “6seeks: A global ipv6 network periphery scanning system,” IEEE Transactions on Networking , 2025. [47] T. Yang and Z. Cai, “Efficient ipv6 router interface discovery,” in IEEE INFOCOM 2024-IEEE Conference on Computer Communi-cations . IEEE, 2024, pp. 1641–1650. [48] K. Wen, L. Ju, and T. Chen, “6pstree: Efficient large-scale ipv6 topology discovery based on prefix space tree,” Available at SSRN 5320433 .[49] L. Steger, L. Kuang, J. Zirngibl, G. Carle, and O. Gasser, “Tar-get acquired? evaluating target generation algorithms for ipv6,” in 2023 7th Network Traffic Measurement and Analysis Conference (TMA) . IEEE, 2023, pp. 1–10. [50] Q. Liu and X. Li, “6former: Transformer-based ipv6 address gener-ation,” in 2023 IEEE Symposium on Computers and Communications (ISCC) . IEEE, 2023, pp. 1142–1148. [51] W. Zhang, G. Song, L. He, J. Lin, S. Wu, Z. Wang, C. Li, and J. Yang, “6vision: Image-encoding-based ipv6 target generation in few-seed scenarios,” in 2024 IEEE 32nd International Conference on Network Protocols (ICNP) . IEEE, 2024, pp. 1–12. [52] C. Wei, Y. Liu, L. He, D. Cheng, and J. Zhou, “Gungnir: Autore-gressive model for unified generation of ipv6 fully responsive prefixes,” in 2025 IEEE 33rd International Conference on Network Protocols (ICNP) . IEEE, 2025, pp. 1–12. [53] M. Koch, R. Hiesgen, M. Nawrocki, T. C. Schmidt, and M. W¨ ahlisch, “Scanning the ipv6 internet using subnet-router anycast probing,” Proceedings of the ACM on Networking , vol. 3, no. CoNEXT4, pp. 1–15, 2025. [54] M. Klopsch, C. Sander, K. Wehrle, and M. Dahlmanns, “Time to scan: Digging into ntp-based ipv6 scanning,” in Proceedings of the 2025 ACM Internet Measurement Conference , 2025, pp. 970–982. [55] J. Zhou, Y. Liu, L. He, Y. Yang, X. Shi, D. Cheng, C. Wei, Y. Fan, and G. Song, “Subrecon: Efficient internet-wide ipv6 subnet discovery and its applications,” in 2025 IEEE 33rd International Conference on Network Protocols (ICNP) . IEEE, 2025, pp. 1–12. [56] L. Hu, T. Yang, Y. Pang, B. Hou, Z. Cai, and B. Yu, “Grey rhino warning: Ipv6 is becoming fertile ground for reflection amplifica-tion attacks,” in 2025 IEEE/ACM 33rd International Symposium on Quality of Service (IWQoS) . IEEE, 2025, pp. 1–6. [57] K. Olson, J. Wampler, and E. Keller, “Doomed to repeat with ipv6? characterization of nat-centric security in soho routers,” ACM Computing Surveys , vol. 55, no. 14s, pp. 1–37, 2023. [58] S. J. Saidi, O. Gasser, and G. Smaragdakis, “One bad apple can spoil your ipv6 privacy,” ACM SIGCOMM Computer Communica-tion Review , vol. 52, no. 2, pp. 10–19, 2022. [59] M. Maier and J. Ullrich, “In the loop: A measurement study of persistent routing loops on the ipv4/ipv6 internet,” Computer Networks , vol. 221, p. 109500, 2023. [60] L. Pan, J. Yang, L. He, Z. Wang, L. Nie, G. Song, and Y. Liu, “Your router is my prober: Measuring ipv6 networks via icmp rate limiting side channels,” arXiv preprint arXiv:2210.13088 , 2022. [61] F. Holzbauer, M. Maier, and J. Ullrich, “Destination reachable: what icmpv6 error messages reveal about their sources,” in Pro-ceedings of the 2024 ACM on Internet Measurement Conference , 2024, pp. 280–294. [62] I. Egloff, R. Hiesgen, M. Koch, T. C. Schmidt, and M. W¨ ahlisch, “A detailed measurement view on ipv6 scanners and their adaption to bgp signals,” Proceedings of the ACM on Networking , vol. 3, no. CoNEXT3, pp. 1–23, 2025.

@@ -1,0 +1,65 @@
+{
+  "label": "2026-04-23",
+  "date": "2026-04-23",
+  "generated_at": "2026-04-23T19:54:05",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202604/23/2604.19487v2-revisiting-and-expanding-the-ipv6-network-periphery-global-scale-measurement-and-security-analysis",
+      "section": "deep",
+      "title_en": "Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis",
+      "authors": "Zixuan Xie, Zitao Yang, Shurui Fang, Zhaoyang Li, Wenxing Xie, Nannan Fu, Liangyu Dong, Xiang Li",
+      "date": "2026-04-21",
+      "pdf": "https://arxiv.org/pdf/2604.19487v2",
+      "score": "9.0",
+      "evidence": "全球规模的 IPv6 网络测量和响应引导的前缀选择",
+      "tldr": "本研究针对快速扩张的IPv6网络边界，在2021年研究基础上进行了全球规模的扩展。通过提出响应引导的前缀选择（RGPS）策略，对73个国家和地区进行了测量，识别出2.819亿个活跃边界。研究深入分析了服务暴露风险（包括利用HLEV框架识别LLM工具的未授权访问）及路由环路漏洞，揭示了IPv6环境下持久且结构性的安全挑战。",
+      "tags": "query:netmes",
+      "abstract_en": "As IPv6 deployment accelerates, understanding the evolving security posture of network peripheries becomes increasingly important. A DSN 2021 study introduced the first large-scale discovery of IPv6 network peripheries, uncovering risks like service exposure and routing loops. However, its scope was limited to three regions and is now outdated. In this paper, we revisit and significantly expand upon that work, presenting a comprehensive, up-to-date security assessment of IPv6 network peripheries. To support efficient large-scale scanning, we propose a novel Response-Guided Prefix Selection (RGPS) strategy to identify high-value IPv6 prefixes for probing. Our global-scale measurement covers 73 countries/regions and identifies over 281.9M active IPv6 network peripheries, including a 371.2% increase (245M) over the 52M reported in 2021 for India, China, and America. Our service exposure analysis shows that 2.5% of reachable services are still dangerously exposed, including outdated administrative interfaces and misconfigured servers, while correlation with known CVEs reveals recurring software vulnerabilities. Building on this service-exposure perspective, we further design a Hierarchical LLM Exposure Verification (HLEV) framework to identify unauthorized-access risks in exposed LLM deployment tools, revealing multiple security weaknesses caused by insecure default configurations and missing authentication. Additionally, we revisit routing loop vulnerabilities and identify 4.5M loop-prone responses, confirming that flawed routing behaviors remain widespread across vendors and countries/regions. These findings suggest that while IPv6 adoption has surged, key security challenges persist and are structurally embedded.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/23/2604.20214v1-computationally-efficient-sparse-signal-recovery-via-linear-sketching-and-deep-unfolding",
+      "section": "quick",
+      "title_en": "Computationally Efficient Sparse Signal Recovery via Linear Sketching and Deep Unfolding",
+      "authors": "Tatsuki Tokumura, Ayano Nakai-Kasai, Tadashi Wadayama",
+      "date": "2026-04-22",
+      "pdf": "https://arxiv.org/pdf/2604.20214v1",
+      "score": "7.0",
+      "evidence": "用于高维信号恢复的线性Sketch技术",
+      "tldr": "针对高维稀疏信号恢复中计算效率与精度的平衡问题，本文提出 DU-PSISTA 算法。该方法引入线性压缩（Sketching）技术降低梯度计算维度，并采用周期性交替执行标准 ISTA 与压缩变体的混合结构。通过深度展开技术对步长和阈值进行数据驱动优化，DU-PSISTA 在显著降低计算复杂度的同时，保持了与传统深度展开 ISTA 相当的恢复精度，并提供了收敛性理论支持。",
+      "tags": "query:netmes",
+      "abstract_en": "This paper provides a sparse signal recovery algorithm, DU-PSISTA (Deep Unfolded-Periodic Sketched Iterative Shrinkage-Thresholding Algorithm), which aims to balance computational efficiency and accuracy for recovering high-dimensional sparse signals, and a convergence analysis under sufficient conditions. DU-PSISTA introduces a random matrix projection known as sketching to reduce the dimensionality of gradient computations and periodically alternates between the standard ISTA and the sketched variant. This hybrid structure enables flexible control over the trade-off between accuracy and computational complexity through a pre-configurable period parameter. The algorithm includes many parameters to be tuned such as step sizes and thresholding factors so that we incorporate deep unfolding that optimizes the parameters through data-driven training, enabling the algorithm to adaptively improve convergence speed and performance. We show that the proposed method achieves a linear-type contraction to a neighborhood of the true sparse signal with properly selected parameters. The analysis provides an interpretation for the effectiveness of the hybrid structure to improve recovery accuracy. Numerical experiments confirm that our method achieves comparable recovery performance to conventional deep unfolded ISTA while reducing computational complexity, especially when the period parameter and sketch size are properly selected. The results are also consistent with the theoretical insights.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/23/2604.20483v1-forecasting-individual-netflows-using-a-predictive-masked-graph-autoencoder",
+      "section": "quick",
+      "title_en": "Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder",
+      "authors": "Georgios Anyfantis, Pere Barlet-Ros",
+      "date": "2026-04-22",
+      "pdf": "https://arxiv.org/pdf/2604.20483v1",
+      "score": "7.0",
+      "evidence": "使用GNN预测流级流量(NetFlow)",
+      "tldr": "本研究提出一种基于预测型掩码图自动编码器的GNN模型，用于实现细粒度的网络流（NetFlow）预测。通过滑动窗口将流量转化为包含IP、端口和连接节点的异构双向图，该模型能同时捕捉网络结构的演变和连接特征。实验表明，该方法在识别连接目标方面表现优异，且特征重建能力与强基准模型相当，展示了GNN在逐流预测领域的应用潜力。",
+      "tags": "query:netmes",
+      "abstract_en": "In this paper, we propose a proof-of-concept Graph Neural Network model that can successfully predict network flow-level traffic (NetFlow) by accurately modelling the graph structure and the connection features. We use sliding-windows to split the network traffic in equal-sized heterogeneous bidirectional graphs containing IP, Port, and Connection nodes. We then use the GNN to model the evolution of the graph structure and the connection features. Our approach shows superior results when identifying the Port and IP to which connections attach, while feature reconstruction remains competitive with strong forecasting baselines. Overall, our work showcases the use of GNNs for per-flow NetFlow prediction.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/23/2604.18052v1-exai5g-a-logic-based-explainable-ai-framework-for-intrusion-detection-in-5g-networks",
+      "section": "quick",
+      "title_en": "ExAI5G: A Logic-Based Explainable AI Framework for Intrusion Detection in 5G Networks",
+      "authors": "Saeid Sheikhi, Panos Kostakos, Lauri Loven",
+      "date": "2026-04-20",
+      "pdf": "https://arxiv.org/pdf/2604.18052v1",
+      "score": "6.0",
+      "evidence": "针对高流量5G网络的入侵检测",
+      "tldr": "针对5G网络入侵检测中黑盒模型缺乏透明度的问题，本文提出ExAI5G框架。该框架结合Transformer深度学习模型与逻辑可解释AI技术，利用集成梯度和代理决策树提取逻辑规则，并引入大语言模型（LLM）生成并评估具有可操作性的解释。实验表明，该系统在保持极高检测准确率的同时，实现了高度的模型推理透明度，为构建可信5G安全防御提供了新方案。",
+      "tags": "query:netmes",
+      "abstract_en": "Intrusion detection systems (IDSs) for 5G networks must handle complex, high-volume traffic. Although opaque \"black-box\" models can achieve high accuracy, their lack of transparency hinders trust and effective operational response. We propose ExAI5G, a framework that prioritizes interpretability by integrating a Transformer-based deep learning IDS with logic-based explainable AI (XAI) techniques. The framework uses Integrated Gradients to attribute feature importance and extracts a surrogate decision tree to derive logical rules. We introduce a novel evaluation methodology for LLM-generated explanations, using a powerful evaluator LLM to assess actionability and measuring their semantic similarity and faithfulness. On a 5G IoT intrusion dataset, our system achieves 99.9\\% accuracy and a 0.854 macro F1-score, demonstrating strong performance. More importantly, we extract 16 logical rules with 99.7\\% fidelity, making the model's reasoning transparent. The evaluation demonstrates that modern LLMs can generate explanations that are both faithful and actionable, indicating that it is possible to build a trustworthy and effective IDS without compromising performance for the sake of marginal gains from an opaque model.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

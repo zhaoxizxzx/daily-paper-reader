@@ -1,0 +1,169 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-23T19:53:05.602304+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2604.19487v2",
+      "title": "Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis",
+      "abstract": "As IPv6 deployment accelerates, understanding the evolving security posture of network peripheries becomes increasingly important. A DSN 2021 study introduced the first large-scale discovery of IPv6 network peripheries, uncovering risks like service exposure and routing loops. However, its scope was limited to three regions and is now outdated. In this paper, we revisit and significantly expand upon that work, presenting a comprehensive, up-to-date security assessment of IPv6 network peripheries. To support efficient large-scale scanning, we propose a novel Response-Guided Prefix Selection (RGPS) strategy to identify high-value IPv6 prefixes for probing. Our global-scale measurement covers 73 countries/regions and identifies over 281.9M active IPv6 network peripheries, including a 371.2% increase (245M) over the 52M reported in 2021 for India, China, and America. Our service exposure analysis shows that 2.5% of reachable services are still dangerously exposed, including outdated administrative interfaces and misconfigured servers, while correlation with known CVEs reveals recurring software vulnerabilities. Building on this service-exposure perspective, we further design a Hierarchical LLM Exposure Verification (HLEV) framework to identify unauthorized-access risks in exposed LLM deployment tools, revealing multiple security weaknesses caused by insecure default configurations and missing authentication. Additionally, we revisit routing loop vulnerabilities and identify 4.5M loop-prone responses, confirming that flawed routing behaviors remain widespread across vendors and countries/regions. These findings suggest that while IPv6 adoption has surged, key security challenges persist and are structurally embedded.",
+      "authors": [
+        "Zixuan Xie",
+        "Zitao Yang",
+        "Shurui Fang",
+        "Zhaoyang Li",
+        "Wenxing Xie",
+        "Nannan Fu",
+        "Liangyu Dong",
+        "Xiang Li"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-21T14:09:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.19487v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "global-scale IPv6 network measurement and response-guided prefix selection",
+      "llm_evidence_cn": "全球规模的 IPv6 网络测量和响应引导的前缀选择",
+      "llm_evidence": "全球规模的 IPv6 网络测量和响应引导的前缀选择",
+      "canonical_evidence": "全球规模的 IPv6 网络测量和响应引导的前缀选择",
+      "llm_tldr_en": "Conducts a global-scale measurement of IPv6 network peripheries using a novel scanning strategy.",
+      "llm_tldr_cn": "采用新型扫描策略对 IPv6 网络边缘进行全球规模的测量分析。",
+      "llm_tldr": "采用新型扫描策略对 IPv6 网络边缘进行全球规模的测量分析。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.20214v1",
+      "title": "Computationally Efficient Sparse Signal Recovery via Linear Sketching and Deep Unfolding",
+      "abstract": "This paper provides a sparse signal recovery algorithm, DU-PSISTA (Deep Unfolded-Periodic Sketched Iterative Shrinkage-Thresholding Algorithm), which aims to balance computational efficiency and accuracy for recovering high-dimensional sparse signals, and a convergence analysis under sufficient conditions. DU-PSISTA introduces a random matrix projection known as sketching to reduce the dimensionality of gradient computations and periodically alternates between the standard ISTA and the sketched variant. This hybrid structure enables flexible control over the trade-off between accuracy and computational complexity through a pre-configurable period parameter. The algorithm includes many parameters to be tuned such as step sizes and thresholding factors so that we incorporate deep unfolding that optimizes the parameters through data-driven training, enabling the algorithm to adaptively improve convergence speed and performance. We show that the proposed method achieves a linear-type contraction to a neighborhood of the true sparse signal with properly selected parameters. The analysis provides an interpretation for the effectiveness of the hybrid structure to improve recovery accuracy. Numerical experiments confirm that our method achieves comparable recovery performance to conventional deep unfolded ISTA while reducing computational complexity, especially when the period parameter and sketch size are properly selected. The results are also consistent with the theoretical insights.",
+      "authors": [
+        "Tatsuki Tokumura",
+        "Ayano Nakai-Kasai",
+        "Tadashi Wadayama"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.IT"
+      ],
+      "published": "2026-04-22T06:01:21+00:00",
+      "link": "https://arxiv.org/pdf/2604.20214v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "linear sketching for high-dimensional signal recovery",
+      "llm_evidence_cn": "用于高维信号恢复的线性Sketch技术",
+      "llm_evidence": "用于高维信号恢复的线性Sketch技术",
+      "canonical_evidence": "用于高维信号恢复的线性Sketch技术",
+      "llm_tldr_en": "Develops a computationally efficient sparse signal recovery algorithm using linear sketching and deep unfolding.",
+      "llm_tldr_cn": "开发了一种利用线性Sketch和深度展开的高效稀疏信号恢复算法。",
+      "llm_tldr": "开发了一种利用线性Sketch和深度展开的高效稀疏信号恢复算法。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "sketch-based algorithms for network telemetry and measurement",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.18052v1",
+      "title": "ExAI5G: A Logic-Based Explainable AI Framework for Intrusion Detection in 5G Networks",
+      "abstract": "Intrusion detection systems (IDSs) for 5G networks must handle complex, high-volume traffic. Although opaque \"black-box\" models can achieve high accuracy, their lack of transparency hinders trust and effective operational response. We propose ExAI5G, a framework that prioritizes interpretability by integrating a Transformer-based deep learning IDS with logic-based explainable AI (XAI) techniques. The framework uses Integrated Gradients to attribute feature importance and extracts a surrogate decision tree to derive logical rules. We introduce a novel evaluation methodology for LLM-generated explanations, using a powerful evaluator LLM to assess actionability and measuring their semantic similarity and faithfulness. On a 5G IoT intrusion dataset, our system achieves 99.9\\% accuracy and a 0.854 macro F1-score, demonstrating strong performance. More importantly, we extract 16 logical rules with 99.7\\% fidelity, making the model's reasoning transparent. The evaluation demonstrates that modern LLMs can generate explanations that are both faithful and actionable, indicating that it is possible to build a trustworthy and effective IDS without compromising performance for the sake of marginal gains from an opaque model.",
+      "authors": [
+        "Saeid Sheikhi",
+        "Panos Kostakos",
+        "Lauri Loven"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-04-20T10:19:57+00:00",
+      "link": "https://arxiv.org/pdf/2604.18052v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "intrusion detection for high-volume 5G traffic",
+      "llm_evidence_cn": "针对高流量5G网络的入侵检测",
+      "llm_evidence": "针对高流量5G网络的入侵检测",
+      "canonical_evidence": "针对高流量5G网络的入侵检测",
+      "llm_tldr_en": "Develops an explainable AI framework for intrusion detection in high-volume 5G network traffic.",
+      "llm_tldr_cn": "为高流量5G网络中的入侵检测开发了一个可解释的AI框架。",
+      "llm_tldr": "为高流量5G网络中的入侵检测开发了一个可解释的AI框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.20483v1",
+      "title": "Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder",
+      "abstract": "In this paper, we propose a proof-of-concept Graph Neural Network model that can successfully predict network flow-level traffic (NetFlow) by accurately modelling the graph structure and the connection features. We use sliding-windows to split the network traffic in equal-sized heterogeneous bidirectional graphs containing IP, Port, and Connection nodes. We then use the GNN to model the evolution of the graph structure and the connection features. Our approach shows superior results when identifying the Port and IP to which connections attach, while feature reconstruction remains competitive with strong forecasting baselines. Overall, our work showcases the use of GNNs for per-flow NetFlow prediction.",
+      "authors": [
+        "Georgios Anyfantis",
+        "Pere Barlet-Ros"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.LG"
+      ],
+      "published": "2026-04-22T12:14:29+00:00",
+      "link": "https://arxiv.org/pdf/2604.20483v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "predicting flow-level traffic (NetFlow) using GNNs",
+      "llm_evidence_cn": "使用GNN预测流级流量(NetFlow)",
+      "llm_evidence": "使用GNN预测流级流量(NetFlow)",
+      "canonical_evidence": "使用GNN预测流级流量(NetFlow)",
+      "llm_tldr_en": "Uses Graph Neural Networks to forecast individual NetFlows by modeling graph structure and connection features.",
+      "llm_tldr_cn": "利用图神经网络通过建模图结构和连接特征来预测单个NetFlow流量。",
+      "llm_tldr": "利用图神经网络通过建模图结构和连接特征来预测单个NetFlow流量。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
