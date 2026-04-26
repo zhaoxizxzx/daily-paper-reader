@@ -1,0 +1,255 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-26T19:41:15.654231+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2604.21795v1",
+      "title": "NEST: Network Enforced Session Types (Technical Report)",
+      "abstract": "This paper introduces NEST (Network-Enforced Session Types), a runtime verification framework that moves application-level protocol monitoring into the network fabric. Unlike prior work that instruments or wraps application code, we synthesize packet-level monitors that enforce protocols directly in the data plane. We develop algorithms to generate network-level monitors from session types and extend them to handle packet loss and reordering. We implement NEST in P4 and evaluate it on applications including microservice and network-function models, showing that network-level monitors can enforce realistic non-trivial protocols.",
+      "authors": [
+        "Jens Kanstrup Larsen",
+        "Alceste Scalas",
+        "Guy Amir",
+        "Jules Jacobs",
+        "Jana Wagemaker",
+        "Nate Foster"
+      ],
+      "primary_category": "cs.PL",
+      "categories": [
+        "cs.PL"
+      ],
+      "published": "2026-04-23T15:55:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.21795v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "P4-based packet-level protocol monitoring in the data plane",
+      "llm_evidence_cn": "基于P4的数据平面数据包级协议监控",
+      "llm_evidence": "基于P4的数据平面数据包级协议监控",
+      "canonical_evidence": "基于P4的数据平面数据包级协议监控",
+      "llm_tldr_en": "NEST implements P4-based monitors in the network fabric to enforce application protocols at the packet level.",
+      "llm_tldr_cn": "NEST在网络架构中实现基于P4的监控器，以在数据包级别强制执行应用协议。",
+      "llm_tldr": "NEST在网络架构中实现基于P4的监控器，以在数据包级别强制执行应用协议。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.21881v1",
+      "title": "SPAC: Automating FPGA-based Network Switches with Protocol Adaptive Customization",
+      "abstract": "With network requirements diverging across emerging applications, latency-critical services demand minimal logic delay, while hyperscale training and collectives require sustained line-rate throughput for synchronized bulk transfers. This divergence creates an urgent need for custom network switches tailored to specialized protocols and application-specific traffic patterns. This paper presents SPAC (Switch and Protocol Adaptive Customization), a novel approach that automates the generation of FPGA-based network switches co-optimized for custom protocols and application-specific traffic patterns. SPAC introduces a unified workflow with a domain-specific language (DSL) for protocol-architecture co-design, a library of modular HLS-based adaptive switch components, and a trace-aware Design Space Exploration (DSE) engine. By providing a multi-fidelity simulation stack, SPAC enables rapid identification of Pareto-optimal designs prior to deployment. We demonstrate the efficacy of the domain-specific adaptation of SPAC across a spectrum of real-world scenarios, spanning from latency-sensitive sensor and HFT networks to hyperscale datacenter fabrics. Experimental results show that by tailoring the micro-architecture and protocol to the specific workload, SPAC-generated designs reduce LUT and BRAM usage by 55% and 53%, respectively. Compared to fixed-architecture counterparts, SPAC delivers latency reductions ranging from 7.8% to 38.4% across various tasks while maintaining adequate resource consumption and packet drop rate.",
+      "authors": [
+        "Guoyu Li",
+        "Yang Cao",
+        "Lucas H L Ng",
+        "Alexander Charlton",
+        "Qianzhou Wang",
+        "Will Punter",
+        "Philippos Papaphilippou",
+        "Ce Guo",
+        "Hongxiang Fan",
+        "Wayne Luk",
+        "Saman Amarasinghe",
+        "Ajay Brahmakshatriya"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.AR"
+      ],
+      "published": "2026-04-23T17:25:03+00:00",
+      "link": "https://arxiv.org/pdf/2604.21881v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Automating FPGA-based network switches for custom protocols and traffic patterns",
+      "llm_evidence_cn": "针对自定义协议和流量模式自动化生成基于 FPGA 的网络交换机",
+      "llm_evidence": "针对自定义协议和流量模式自动化生成基于 FPGA 的网络交换机",
+      "canonical_evidence": "针对自定义协议和流量模式自动化生成基于 FPGA 的网络交换机",
+      "llm_tldr_en": "SPAC automates the design of FPGA-based switches optimized for specific protocols and traffic patterns.",
+      "llm_tldr_cn": "SPAC 实现了针对特定协议和流量模式优化的 FPGA 交换机的自动化设计。",
+      "llm_tldr": "SPAC 实现了针对特定协议和流量模式优化的 FPGA 交换机的自动化设计。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.20483v2",
+      "title": "Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder",
+      "abstract": "In this paper, we propose a proof-of-concept Graph Neural Network model that can successfully predict network flow-level traffic (NetFlow) by accurately modelling the graph structure and the connection features. We use sliding-windows to split the network traffic in equal-sized heterogeneous bidirectional graphs containing IP, Port, and Connection nodes. We then use the GNN to model the evolution of the graph structure and the connection features. Our approach shows superior results when identifying the Port and IP to which connections attach, while feature reconstruction remains competitive with strong forecasting baselines. Overall, our work showcases the use of GNNs for per-flow NetFlow prediction.",
+      "authors": [
+        "Georgios Anyfantis",
+        "Pere Barlet-Ros"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.LG"
+      ],
+      "published": "2026-04-22T12:14:29+00:00",
+      "link": "https://arxiv.org/pdf/2604.20483v2",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "forecasting individual NetFlows using graph neural networks",
+      "llm_evidence_cn": "使用图神经网络预测单个NetFlow流量",
+      "llm_evidence": "使用图神经网络预测单个NetFlow流量",
+      "canonical_evidence": "使用图神经网络预测单个NetFlow流量",
+      "llm_tldr_en": "Uses GNNs to predict flow-level network traffic by modeling graph structure and connection features.",
+      "llm_tldr_cn": "利用图神经网络通过建模图结构和连接特征来预测流级网络流量。",
+      "llm_tldr": "利用图神经网络通过建模图结构和连接特征来预测流级网络流量。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.19705v1",
+      "title": "Predictive Autoscaling for Node.js on Kubernetes: Lower Latency, Right-Sized Capacity",
+      "abstract": "Kubernetes offers two default paths for scaling Node.js workloads, and both have structural limitations. The Horizontal Pod Autoscaler scales on CPU utilization, which does not directly measure event loop saturation: a Node.js pod can queue requests and miss latency SLOs while CPU reports moderate usage. KEDA extends HPA with richer triggers, including event-loop metrics, but inherits the same reactive control loop, detecting overload only after it has begun. By the time new pods start and absorb traffic, the system may already be degraded. Lowering thresholds shifts the operating point but does not change the dynamic: the scaler still reacts to a value it has already crossed, at the cost of permanent over-provisioning.   We propose a predictive scaling algorithm that forecasts where load will be by the time new capacity is ready and scales proactively based on that forecast. Per-instance metrics are corrupted by the scaler's own actions: adding an instance redistributes load and changes every metric, even if external traffic is unchanged. We observe that operating on a cluster-wide aggregate that is approximately invariant under scaling eliminates this feedback loop, producing a stable signal suitable for short-term extrapolation.   We define a metric model (a set of three functions that encode how a specific metric relates to scaling) and a five-stage pipeline that transforms raw, irregularly-timed, partial metric data into a clean prediction signal. In benchmarks against HPA and KEDA under steady ramp and sudden spike, the algorithm keeps per-instance load near the target threshold throughout. Under the steady ramp, median latency is 26ms, compared to 154ms for KEDA and 522ms for HPA.",
+      "authors": [
+        "Ivan Tymoshenko",
+        "Luca Maraschi",
+        "Matteo Collina"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "cs.DC"
+      ],
+      "published": "2026-04-21T17:25:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.19705v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "real-time monitoring of event loop metrics for scaling",
+      "llm_evidence_cn": "用于扩缩容的事件循环指标实时监控",
+      "llm_evidence": "用于扩缩容的事件循环指标实时监控",
+      "canonical_evidence": "用于扩缩容的事件循环指标实时监控",
+      "llm_tldr_en": "A predictive autoscaling system for Kubernetes that monitors event-loop saturation to maintain latency SLOs.",
+      "llm_tldr_cn": "一种针对 Kubernetes 的预测性自动扩缩容系统，通过监控事件循环饱和度维持延迟目标。",
+      "llm_tldr": "一种针对 Kubernetes 的预测性自动扩缩容系统，通过监控事件循环饱和度维持延迟目标。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "real-time network monitoring systems for data centers",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.20934v1",
+      "title": "SDNGuardStack: An Explainable Ensemble Learning Framework for High-Accuracy Intrusion Detection in Software-Defined Networks",
+      "abstract": "Software-Defined Networking (SDN) is another technology that has been developing in the last few years as a relevant technique to improve network programmability and administration. Nonetheless, its centralized design presents a major security issue, which requires effective intrusion detection systems. The SDN-specific machine learning-based intrusion detection system described in this paper is innovative because it is trained and tested on the InSDN dataset which models attack scenarios and realistic traffic patterns in SDN. Our approach incorporates a comprehensive preprocessing pipeline, feature selection via Mutual Information, and a novel ensemble learning model, SDNGuardStack, which combines multiple base learners to enhance detection accuracy and efficiency. In addition, we include explainable AI methods, including SHAP to add transparency to model predictions, which helps security analysts respond to incidents. The experiments prove that SDNGuard-Stack has an accuracy rate of 99.98% and a Cohen Kappa of 0.9998, surpassing other models, and at the same time being interpretable and practically executable. It is interesting to see such features like Flow ID, Bwd Header Len, and Src Port as the most important factors in the model predictions. The work is a step towards closing the gap between performance intrusion detection and realistic deployment in SDN, which will lead to the creation of secure and resilient network infrastructures.",
+      "authors": [
+        "Ashikuzzaman",
+        "Md. Saifuzzaman Abhi",
+        "Mahabubur Rahman",
+        "Md. Manjur Ahmed",
+        "Md. Mehedi Hasan",
+        "Md. Ahsan Arif"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-22T11:52:43+00:00",
+      "link": "https://arxiv.org/pdf/2604.20934v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "intrusion detection using realistic traffic patterns in SDN",
+      "llm_evidence_cn": "在SDN中使用真实流量模式进行入侵检测",
+      "llm_evidence": "在SDN中使用真实流量模式进行入侵检测",
+      "canonical_evidence": "在SDN中使用真实流量模式进行入侵检测",
+      "llm_tldr_en": "Develops an ensemble learning framework for intrusion detection in programmable SDN environments.",
+      "llm_tldr_cn": "为可编程SDN环境开发了一种用于入侵检测的集成学习框架。",
+      "llm_tldr": "为可编程SDN环境开发了一种用于入侵检测的集成学习框架。",
+      "llm_tags": [
+        "query:netmes:composite"
+      ],
+      "matched_query_tag": "query:netmes:composite",
+      "matched_query_text": "Papers central to 网络测量领域的最新论文，涵盖流量测量、Sketch数据结构、流量采样及网络监控，重点关注高速网络与数据中心场景。, especially work that connects or combines: latest research on network measurement techniques and systems; network traffic measurement methods for high-speed links; sketch-based algorithms for network telemetry and measurement; adaptive traffic sampling techniques for accurate measurement; real-time network monitoring systems for data centers; network measurement using P4 and programmable switches; latest papers on sketch based network measurement in high speed networks; traffic measurement and monitoring systems for data centers; advancements in network traffic sampling and heavy hitter detection.",
+      "matched_requirement_id": "req-composite-netmes",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.21083v1",
+      "title": "Behavioral Consistency and Transparency Analysis on Large Language Model API Gateways",
+      "abstract": "Third-party Large Language Model (LLM) API gateways are rapidly emerging as unified access points to models offered by multiple vendors. However, the internal routing, caching, and billing policies of these gateways are largely undisclosed, leaving users with limited visibility into whether requests are served by the advertised models, whether responses remain faithful to upstream APIs, or whether invoices accurately reflect public pricing policies. To address this gap, we introduce GateScope, a lightweight black-box measurement framework for evaluating behavioral consistency and operational transparency in commercial LLM gateways. GateScope is designed to detect key misbehaviors, including model downgrading or switching, silent truncation, billing inaccuracies, and instability in latency by auditing gateways along four critical dimensions: response content analysis, multi-turn conversation performance, billing accuracy, and latency characteristics. Our measurements across 10 real-world commercial LLM API gateways reveal frequent gaps between expected and actual behaviors, including silent model substitutions, degraded memory retention, deviations from announced pricing, and substantial variation in latency stability across platforms.",
+      "authors": [
+        "Guanjie Lin",
+        "Yinxin Wan",
+        "Shichao Pei",
+        "Ting Xu",
+        "Kuai Xu",
+        "Guoliang Xue"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.NI",
+        "cs.SE"
+      ],
+      "published": "2026-04-22T20:51:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.21083v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "measurement framework for evaluating LLM API gateways",
+      "llm_evidence_cn": "评估大模型 API 网关的测量框架",
+      "llm_evidence": "评估大模型 API 网关的测量框架",
+      "canonical_evidence": "评估大模型 API 网关的测量框架",
+      "llm_tldr_en": "GateScope is a black-box measurement framework to evaluate the transparency and consistency of LLM gateways.",
+      "llm_tldr_cn": "GateScope 是一个用于评估大模型 API 网关透明度和一致性的黑盒测量框架。",
+      "llm_tldr": "GateScope 是一个用于评估大模型 API 网关透明度和一致性的黑盒测量框架。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

@@ -6,34 +6,40 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-23
-- 运行时间：2026-04-23 19:53:56 UTC
+- 最新运行日期：2026-04-26
+- 运行时间：2026-04-26 19:42:08 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：1
+- 本次总论文数：6
+- 精读区：3
 - 速读区：3
 
 ### 今日简报（AI）
-今日深度复盘全球 IPv6 边界安全态势，并同步探索 5G 流量预测与可解释入侵检测技术。
-核心结论指出 IPv6 扩展正重塑全球网络边界风险，而图自编码器在个体流量预测中展现出显著潜力。
-建议优先研读 IPv6 安全分析报告以应对边界威胁，并关注 AI 模型在网络防御中的逻辑透明度。
-- 详情：[/202604/23/README](/202604/23/README)
+今日聚焦网络协议的形式化验证与流量预测，深度解析 6 篇涵盖 SDN 安全及 LLM 网关的前沿论文。
+重点推荐 NEST 协议强化框架与基于图自编码器的 NetFlow 预测技术，实现网络安全与性能的双重提升。
+建议优先研读高分技术报告以掌握会话类型验证新范式，并关注 K8s 环境下 Node.js 的预测性扩缩容实践。
+- 详情：[/202604/26/README](/202604/26/README)
 
 ### 精读区论文标签
-1. [Revisiting and Expanding the IPv6 Network Periphery: Global-Scale Measurement and Security Analysis](/202604/23/2604.19487v2-revisiting-and-expanding-the-ipv6-network-periphery-global-scale-measurement-and-security-analysis)  
+1. [NEST: Network Enforced Session Types (Technical Report)](/202604/26/2604.21795v1-nest-network-enforced-session-types-technical-report)  
    标签：评分：9.0/10、query:netmes
-   evidence：全球规模的 IPv6 网络测量和响应引导的前缀选择
+   evidence：基于P4的数据平面数据包级协议监控
+2. [Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder](/202604/26/2604.20483v2-forecasting-individual-netflows-using-a-predictive-masked-graph-autoencoder)  
+   标签：评分：8.0/10、query:netmes
+   evidence：使用图神经网络预测单个NetFlow流量
+3. [SPAC: Automating FPGA-based Network Switches with Protocol Adaptive Customization](/202604/26/2604.21881v1-spac-automating-fpga-based-network-switches-with-protocol-adaptive-customization)  
+   标签：评分：8.0/10、query:netmes
+   evidence：针对自定义协议和流量模式自动化生成基于 FPGA 的网络交换机
 
 ### 速读区论文标签
-1. [Computationally Efficient Sparse Signal Recovery via Linear Sketching and Deep Unfolding](/202604/23/2604.20214v1-computationally-efficient-sparse-signal-recovery-via-linear-sketching-and-deep-unfolding)  
-   标签：评分：7.0/10、query:netmes
-   evidence：用于高维信号恢复的线性Sketch技术
-2. [Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder](/202604/23/2604.20483v1-forecasting-individual-netflows-using-a-predictive-masked-graph-autoencoder)  
-   标签：评分：7.0/10、query:netmes
-   evidence：使用GNN预测流级流量(NetFlow)
-3. [ExAI5G: A Logic-Based Explainable AI Framework for Intrusion Detection in 5G Networks](/202604/23/2604.18052v1-exai5g-a-logic-based-explainable-ai-framework-for-intrusion-detection-in-5g-networks)  
+1. [Predictive Autoscaling for Node.js on Kubernetes: Lower Latency, Right-Sized Capacity](/202604/26/2604.19705v1-predictive-autoscaling-for-nodejs-on-kubernetes-lower-latency-right-sized-capacity)  
    标签：评分：6.0/10、query:netmes
-   evidence：针对高流量5G网络的入侵检测
+   evidence：用于扩缩容的事件循环指标实时监控
+2. [SDNGuardStack: An Explainable Ensemble Learning Framework for High-Accuracy Intrusion Detection in Software-Defined Networks](/202604/26/2604.20934v1-sdnguardstack-an-explainable-ensemble-learning-framework-for-high-accuracy-intrusion-detection-in-software-defined-networks)  
+   标签：评分：6.0/10、query:netmes
+   evidence：在SDN中使用真实流量模式进行入侵检测
+3. [Behavioral Consistency and Transparency Analysis on Large Language Model API Gateways](/202604/26/2604.21083v1-behavioral-consistency-and-transparency-analysis-on-large-language-model-api-gateways)  
+   标签：评分：6.0/10、query:netmes
+   evidence：评估大模型 API 网关的测量框架
 
 
 <div class="dpr-home-promo-card">

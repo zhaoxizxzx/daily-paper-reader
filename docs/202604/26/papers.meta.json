@@ -1,0 +1,93 @@
+{
+  "label": "2026-04-26",
+  "date": "2026-04-26",
+  "generated_at": "2026-04-26T19:42:18",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202604/26/2604.21795v1-nest-network-enforced-session-types-technical-report",
+      "section": "deep",
+      "title_en": "NEST: Network Enforced Session Types (Technical Report)",
+      "authors": "Jens Kanstrup Larsen, Alceste Scalas, Guy Amir, Jules Jacobs, Jana Wagemaker, Nate Foster",
+      "date": "2026-04-23",
+      "pdf": "https://arxiv.org/pdf/2604.21795v1",
+      "score": "9.0",
+      "evidence": "基于P4的数据平面数据包级协议监控",
+      "tldr": "NEST是一个运行时验证框架，旨在将应用层协议监控从应用程序代码转移到网络架构中。该研究通过会话类型自动生成P4数据平面监控器，直接在网络硬件中强制执行协议，并解决了丢包和乱序等实际网络问题。通过在微服务和网络功能模型上的评估，证明了该方法能有效且高效地在网络层强制执行复杂的应用协议。",
+      "tags": "query:netmes",
+      "abstract_en": "This paper introduces NEST (Network-Enforced Session Types), a runtime verification framework that moves application-level protocol monitoring into the network fabric. Unlike prior work that instruments or wraps application code, we synthesize packet-level monitors that enforce protocols directly in the data plane. We develop algorithms to generate network-level monitors from session types and extend them to handle packet loss and reordering. We implement NEST in P4 and evaluate it on applications including microservice and network-function models, showing that network-level monitors can enforce realistic non-trivial protocols.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/26/2604.20483v2-forecasting-individual-netflows-using-a-predictive-masked-graph-autoencoder",
+      "section": "deep",
+      "title_en": "Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder",
+      "authors": "Georgios Anyfantis, Pere Barlet-Ros",
+      "date": "2026-04-22",
+      "pdf": "https://arxiv.org/pdf/2604.20483v2",
+      "score": "8.0",
+      "evidence": "使用图神经网络预测单个NetFlow流量",
+      "tldr": "本研究提出了一种基于预测型掩码图自动编码器的图神经网络模型，旨在实现细粒度的网络流（NetFlow）预测。通过滑动窗口将流量转化为包含IP、端口和连接节点的异构图，该模型能同时建模图结构演化与连接特征。实验证明，该方法在识别连接归属的IP和端口方面表现优异，且特征重建能力与强基准模型相当，展示了GNN在逐流预测中的巨大潜力。",
+      "tags": "query:netmes",
+      "abstract_en": "In this paper, we propose a proof-of-concept Graph Neural Network model that can successfully predict network flow-level traffic (NetFlow) by accurately modelling the graph structure and the connection features. We use sliding-windows to split the network traffic in equal-sized heterogeneous bidirectional graphs containing IP, Port, and Connection nodes. We then use the GNN to model the evolution of the graph structure and the connection features. Our approach shows superior results when identifying the Port and IP to which connections attach, while feature reconstruction remains competitive with strong forecasting baselines. Overall, our work showcases the use of GNNs for per-flow NetFlow prediction.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/26/2604.21881v1-spac-automating-fpga-based-network-switches-with-protocol-adaptive-customization",
+      "section": "deep",
+      "title_en": "SPAC: Automating FPGA-based Network Switches with Protocol Adaptive Customization",
+      "authors": "Guoyu Li, Yang Cao, Lucas H L Ng, Alexander Charlton, Qianzhou Wang, Will Punter, Philippos Papaphilippou, Ce Guo, Hongxiang Fan, Wayne Luk, Saman Amarasinghe, Ajay Brahmakshatriya",
+      "date": "2026-04-23",
+      "pdf": "https://arxiv.org/pdf/2604.21881v1",
+      "score": "8.0",
+      "evidence": "针对自定义协议和流量模式自动化生成基于 FPGA 的网络交换机",
+      "tldr": "SPAC是一个自动化生成FPGA网络交换机的框架，旨在解决不同应用（如低延迟传感器网络或高吞吐数据中心）对定制化协议和架构的需求。它通过领域特定语言（DSL）、模块化HLS组件库和设计空间搜索（DSE）引擎，实现了协议与架构的协同优化。实验表明，SPAC能显著降低资源消耗并优化延迟，为特定工作负载提供帕累托最优的交换机设计。",
+      "tags": "query:netmes",
+      "abstract_en": "With network requirements diverging across emerging applications, latency-critical services demand minimal logic delay, while hyperscale training and collectives require sustained line-rate throughput for synchronized bulk transfers. This divergence creates an urgent need for custom network switches tailored to specialized protocols and application-specific traffic patterns. This paper presents SPAC (Switch and Protocol Adaptive Customization), a novel approach that automates the generation of FPGA-based network switches co-optimized for custom protocols and application-specific traffic patterns. SPAC introduces a unified workflow with a domain-specific language (DSL) for protocol-architecture co-design, a library of modular HLS-based adaptive switch components, and a trace-aware Design Space Exploration (DSE) engine. By providing a multi-fidelity simulation stack, SPAC enables rapid identification of Pareto-optimal designs prior to deployment. We demonstrate the efficacy of the domain-specific adaptation of SPAC across a spectrum of real-world scenarios, spanning from latency-sensitive sensor and HFT networks to hyperscale datacenter fabrics. Experimental results show that by tailoring the micro-architecture and protocol to the specific workload, SPAC-generated designs reduce LUT and BRAM usage by 55% and 53%, respectively. Compared to fixed-architecture counterparts, SPAC delivers latency reductions ranging from 7.8% to 38.4% across various tasks while maintaining adequate resource consumption and packet drop rate.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/26/2604.19705v1-predictive-autoscaling-for-nodejs-on-kubernetes-lower-latency-right-sized-capacity",
+      "section": "quick",
+      "title_en": "Predictive Autoscaling for Node.js on Kubernetes: Lower Latency, Right-Sized Capacity",
+      "authors": "Ivan Tymoshenko, Luca Maraschi, Matteo Collina",
+      "date": "2026-04-21",
+      "pdf": "https://arxiv.org/pdf/2604.19705v1",
+      "score": "6.0",
+      "evidence": "用于扩缩容的事件循环指标实时监控",
+      "tldr": "针对 Kubernetes 中 Node.js 扩缩容的局限性（如 HPA 反应滞后、CPU 指标无法反映事件循环饱和度），本文提出一种预测性扩缩容算法。该算法通过集群全局聚合指标消除扩缩容反馈干扰，并利用五阶段流水线预测未来负载，实现主动扩容。实验表明，该方法在保持资源利用率的同时，显著降低了请求延迟，提升了系统稳定性。",
+      "tags": "query:netmes",
+      "abstract_en": "Kubernetes offers two default paths for scaling Node.js workloads, and both have structural limitations. The Horizontal Pod Autoscaler scales on CPU utilization, which does not directly measure event loop saturation: a Node.js pod can queue requests and miss latency SLOs while CPU reports moderate usage. KEDA extends HPA with richer triggers, including event-loop metrics, but inherits the same reactive control loop, detecting overload only after it has begun. By the time new pods start and absorb traffic, the system may already be degraded. Lowering thresholds shifts the operating point but does not change the dynamic: the scaler still reacts to a value it has already crossed, at the cost of permanent over-provisioning.   We propose a predictive scaling algorithm that forecasts where load will be by the time new capacity is ready and scales proactively based on that forecast. Per-instance metrics are corrupted by the scaler's own actions: adding an instance redistributes load and changes every metric, even if external traffic is unchanged. We observe that operating on a cluster-wide aggregate that is approximately invariant under scaling eliminates this feedback loop, producing a stable signal suitable for short-term extrapolation.   We define a metric model (a set of three functions that encode how a specific metric relates to scaling) and a five-stage pipeline that transforms raw, irregularly-timed, partial metric data into a clean prediction signal. In benchmarks against HPA and KEDA under steady ramp and sudden spike, the algorithm keeps per-instance load near the target threshold throughout. Under the steady ramp, median latency is 26ms, compared to 154ms for KEDA and 522ms for HPA.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/26/2604.20934v1-sdnguardstack-an-explainable-ensemble-learning-framework-for-high-accuracy-intrusion-detection-in-software-defined-networks",
+      "section": "quick",
+      "title_en": "SDNGuardStack: An Explainable Ensemble Learning Framework for High-Accuracy Intrusion Detection in Software-Defined Networks",
+      "authors": "Ashikuzzaman, Md. Saifuzzaman Abhi, Mahabubur Rahman, Md. Manjur Ahmed, Md. Mehedi Hasan, Md. Ahsan Arif",
+      "date": "2026-04-22",
+      "pdf": "https://arxiv.org/pdf/2604.20934v1",
+      "score": "6.0",
+      "evidence": "在SDN中使用真实流量模式进行入侵检测",
+      "tldr": "针对软件定义网络（SDN）集中化架构带来的安全挑战，本文提出SDNGuardStack框架。该框架基于InSDN数据集，结合互信息特征选择与集成学习模型，实现了极高的入侵检测精度。同时引入SHAP解释性方法，增强了模型决策的透明度，为构建安全、可扩展的SDN防御体系提供了高效且可解释的解决方案。",
+      "tags": "query:netmes",
+      "abstract_en": "Software-Defined Networking (SDN) is another technology that has been developing in the last few years as a relevant technique to improve network programmability and administration. Nonetheless, its centralized design presents a major security issue, which requires effective intrusion detection systems. The SDN-specific machine learning-based intrusion detection system described in this paper is innovative because it is trained and tested on the InSDN dataset which models attack scenarios and realistic traffic patterns in SDN. Our approach incorporates a comprehensive preprocessing pipeline, feature selection via Mutual Information, and a novel ensemble learning model, SDNGuardStack, which combines multiple base learners to enhance detection accuracy and efficiency. In addition, we include explainable AI methods, including SHAP to add transparency to model predictions, which helps security analysts respond to incidents. The experiments prove that SDNGuard-Stack has an accuracy rate of 99.98% and a Cohen Kappa of 0.9998, surpassing other models, and at the same time being interpretable and practically executable. It is interesting to see such features like Flow ID, Bwd Header Len, and Src Port as the most important factors in the model predictions. The work is a step towards closing the gap between performance intrusion detection and realistic deployment in SDN, which will lead to the creation of secure and resilient network infrastructures.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/26/2604.21083v1-behavioral-consistency-and-transparency-analysis-on-large-language-model-api-gateways",
+      "section": "quick",
+      "title_en": "Behavioral Consistency and Transparency Analysis on Large Language Model API Gateways",
+      "authors": "Guanjie Lin, Yinxin Wan, Shichao Pei, Ting Xu, Kuai Xu, Guoliang Xue",
+      "date": "2026-04-22",
+      "pdf": "https://arxiv.org/pdf/2604.21083v1",
+      "score": "6.0",
+      "evidence": "评估大模型 API 网关的测量框架",
+      "tldr": "随着第三方大语言模型（LLM）API网关的兴起，其内部运作的透明度问题日益凸显。本研究提出了GateScope，一个轻量级黑盒测量框架，旨在评估商业网关的行为一致性和运营透明度。通过对10家主流网关在响应内容、多轮对话、计费准确性和延迟稳定性四个维度的审计，揭示了模型降级、静默替换、计费偏差及性能不稳定等普遍存在的违规行为，为用户选择和监管提供了重要参考。",
+      "tags": "query:netmes",
+      "abstract_en": "Third-party Large Language Model (LLM) API gateways are rapidly emerging as unified access points to models offered by multiple vendors. However, the internal routing, caching, and billing policies of these gateways are largely undisclosed, leaving users with limited visibility into whether requests are served by the advertised models, whether responses remain faithful to upstream APIs, or whether invoices accurately reflect public pricing policies. To address this gap, we introduce GateScope, a lightweight black-box measurement framework for evaluating behavioral consistency and operational transparency in commercial LLM gateways. GateScope is designed to detect key misbehaviors, including model downgrading or switching, silent truncation, billing inaccuracies, and instability in latency by auditing gateways along four critical dimensions: response content analysis, multi-turn conversation performance, billing accuracy, and latency characteristics. Our measurements across 10 real-world commercial LLM API gateways reveal frequent gaps between expected and actual behaviors, including silent model substitutions, degraded memory retention, deviations from announced pricing, and substantial variation in latency stability across platforms.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

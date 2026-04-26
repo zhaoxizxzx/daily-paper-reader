@@ -1,0 +1,1957 @@
+Title: Predictive Autoscaling for Node.js on Kubernetes: Lower Latency, Right-Sized Capacity
+
+URL Source: https://arxiv.org/pdf/2604.19705v1
+
+Published Time: Wed, 22 Apr 2026 01:25:06 GMT
+
+Number of Pages: 46
+
+Markdown Content:
+# Predictive Autoscaling for Node.js on Kubernetes: Lower Latency, Right-Sized Capacity 
+
+Ivan Tymoshenko, Luca Maraschi, and Matteo Collina, Ph.D Platformatic March 2026 
+
+Abstract 
+
+Kubernetes offers two default paths for scaling Node.js workloads, and both have structural limitations. The Horizontal Pod Autoscaler scales on CPU utilization, which does not directly measure event loop saturation: a Node.js pod can queue requests and miss latency SLOs while CPU reports moderate usage. KEDA extends HPA with richer triggers, including event-loop metrics, but inherits the same reactive control loop, detecting overload only after it has begun. By the time new pods start and absorb traffic, the system may already be degraded. Lowering thresholds shifts the operating point but does not change the dynamic: the scaler still reacts to a value it has already crossed, at the cost of permanent over-provisioning. We propose a predictive scaling algorithm that forecasts where load will be by the time new capacity is ready and scales proactively based on that forecast. Per-instance metrics are corrupted by the scaler’s own actions: adding an instance redistributes load and changes every metric, even if external traffic is unchanged. We observe that operating on a cluster-wide aggregate that is approximately invariant under scaling eliminates this feedback loop, producing a stable signal suitable for short-term extrapolation. We define a metric model (a set of three functions that encode how a specific metric relates to scaling) and a five-stage pipeline that transforms raw, irregularly-timed, partial metric data into a clean prediction signal. In benchmarks against HPA and KEDA under steady ramp and sudden spike, the algorithm keeps per-instance load near the target threshold throughout. Under the steady ramp, median latency is 26 ms, compared to 154 ms for KEDA and 522 ms for HPA. 
+
+# Contents 
+
+1 Introduction & Motivation 4
+
+1.1 The Problem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41.2 Predict and Act Ahead . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41.3 The Core Idea . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41.4 The Metric . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61.5 Challenges . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61.6 Applicability . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+
+2 Existing Scaling Solutions 73 High-Level Architecture 9
+
+3.1 Core Algorithm . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 93.2 Data Format and Delivery . . . . . . . . . . . . . . . . . . . . . . . . . . . . 91
+
+> arXiv:2604.19705v1 [cs.SE] 21 Apr 2026
+
+Contents 23.3 Processing Cadence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 93.4 Inputs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10 3.5 Notation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10 
+
+4 Alignment 11 
+
+4.1 The Problem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11 4.2 The Solution: Grid Snapping with Interpolation . . . . . . . . . . . . . . . . 11 4.3 Continuity Across Batches . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12 4.4 Output . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12 
+
+5 Imputation 12 
+
+5.1 The Problem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12 5.2 Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12 5.3 The Imputation Step . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13 5.4 Self-Correction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 5.5 Resilience . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 5.6 Cold Start . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 
+
+6 Redistribution 15 
+
+6.1 The Problem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15 6.2 The Solution: Gradual Weighted Inclusion . . . . . . . . . . . . . . . . . . . 16 6.3 Stabilization Weight . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17 6.4 The Calculation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 6.5 Absorbing the Redistribution Drop . . . . . . . . . . . . . . . . . . . . . . . 19 6.6 Catching the Spike . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19 6.7 Contribution-Weighted Count . . . . . . . . . . . . . . . . . . . . . . . . . . 20 6.8 Redistribution Delta . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 6.9 Output . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 
+
+7 Prediction 21 
+
+7.1 Purpose . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 7.2 Holt’s Method . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 7.3 Smoothing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23 7.4 Trend Generation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23 7.5 Asymmetric Reaction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23 7.6 Trend Dampening . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 7.7 Redistribution Delta Compensation . . . . . . . . . . . . . . . . . . . . . . . 25 7.8 Metric Saturation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25 7.9 The Prediction Horizon . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 7.10 Extrapolation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 7.11 Output . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 
+
+8 Scaling Decision 28 
+
+8.1 Purpose . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28 8.2 Trend Direction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29 8.3 Scaling Direction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29 8.4 Scale-Up . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30 8.5 Scale-Down . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33 8.6 Output . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33 Contents 3
+
+9 Cooldowns 33 
+
+9.1 Not Required, But Useful . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33 9.2 Trading Efficiency for Stability . . . . . . . . . . . . . . . . . . . . . . . . . 33 9.3 The Four Cooldown Types . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34 9.4 Relationship to Redistribution . . . . . . . . . . . . . . . . . . . . . . . . . 34 
+
+10 Adaptive Init Timeout 34 
+
+10.1 Context . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34 10.2 How It’s Measured . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34 10.3 Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35 10.4 The Calculation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35 
+
+11 Metric Model Examples 35 
+
+11.1 The General Pattern . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35 11.2 Non-Trivial Models . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36 11.3 What Does Not Work: Cross-Instance Coupling . . . . . . . . . . . . . . . . 36 
+
+12 Implementation: Intelligent Command Center 37 
+
+12.1 Deployment Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37 12.2 Concept Mapping . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37 12.3 Architecture . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38 12.4 Multi-Application Deployments . . . . . . . . . . . . . . . . . . . . . . . . . 39 
+
+13 Performance Comparison 39 
+
+13.1 Test Design . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39 13.2 Scaling Behavior . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39 13.3 Test Environment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43 
+
+14 Conclusion 45 1 Introduction & Motivation 4
+
+# 1 Introduction & Motivation 
+
+1.1 The Problem 
+
+Scalers typically react to the current value of a metric: when it crosses a threshold, they add instances. Each evaluation is discrete: the scaler sees a single value, compares it to a target, and makes a decision. There is no memory of prior state, no understanding of whether the metric is rising, falling, or stable. The scaler cannot distinguish a sustained rise from a momentary spike (both look the same at the moment of evaluation). It cannot anticipate overload, it detects it only after the threshold has been crossed. And it cannot right-size the response, because without knowing how fast the metric is changing, it has no basis to estimate how many instances will actually be needed. Existing solutions and their limitations are compared in Section 2. These problems are amplified by the startup gap: the delay between a scaling decision and the moment new capacity is ready. A new instance must start, initialize, and begin absorbing traffic, a process that takes seconds to minutes. During this window, the existing instances carry the full load. A scaler that only reacts when the threshold is crossed is already behind: by the time the new instances are ready, the system may already be degraded. 
+
+1.2 Predict and Act Ahead 
+
+The predictive scaler uses time-series forecasting to estimate where the load will be in the near future — by the time a new instance would start and absorb its share of the traffic. If the predicted load at that future point exceeds the capacity of the current instance count, the scaler adds instances now , so they are ready exactly when the extra capacity is needed. This shifts the scaling decision from “we are overloaded, add capacity” to “we will be overloaded in T seconds, add capacity now so it’s ready in time.” 
+
+1.3 The Core Idea 
+
+The main idea is to take per-instance metrics, combine them into a single value that represents the total load on the cluster, predict where that value is heading, and convert the prediction back into an instance count. This approach requires two properties of the aggregation to work. First, the aggregate must encode the number of instances . A per-instance statistic (whether an average, median, or percentile) describes load intensity but says nothing about scale: an average of 0.5 across 2 instances is a fundamentally different cluster state than 0.5 across 10. To understand cluster health at any moment, the metric value alone is not enough, you also need to know how many instances produced it. A cluster-wide aggregate that sums across all instances captures both in a single number: the load intensity and the number of instances carrying it are folded together. Second, the aggregate must be approximately invariant under scaling . Scaling changes how load is distributed across instances, not how much load there is. A per-instance metric depends on both — it moves when load changes and when instances are added or removed. A prediction based on the per-instance metric would be corrupted by the algorithm’s own actions. An aggregate with the invariance property doesn’t have this problem. When instances are added and load redistributes, individual metrics shift but the aggregate stays close to where it was. This lets the algorithm base its predictions on the load itself, not on the side effects of its own scaling decisions. 1 Introduction & Motivation 5The simplest aggregation with both properties is a sum: A(v) = ∑ vi. The examples and figures below use it for concreteness, but the algorithm works with any aggregation that satisfies these two properties (the general form is defined in Section 3). 
+
+t1 t2 t3 t4 t5 t6 t7
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8 
+
+> scale-up scale-up
+
+Time Metric value 
+
+> Instance A
+> Instance B
+> Instance C
+
+Figure 1: Per-instance metrics as instances are added over time. Each curve shows the load on one instance, but from these values alone it is not possible to determine whether the total load on the cluster is growing, shrinking, or stable. 
+
+t1 t2 t3 t4 t5 t6 t7
+
+0
+
+0.4
+
+0.8
+
+1.2
+
+1.6
+
+2
+
+Time Metric value  Aggregate (sum) 
+
+Figure 2: The aggregate (sum) over the same period. Despite the chaotic per-instance behavior, the total load grows as a steady linear trend. 
+
+The metric model. The relationship between per-instance values and the cluster-wide aggregate is encapsulated in a metric model : a set of three functions specific to each metric. 
+
+• A (aggregation ), combines per-instance values into a single number representing the aggregate load on the cluster. Accepts optional per-instance weights for partial inclusion (used during redistribution, Section 6). 
+
+• P (projection ), the reverse: given an aggregate load and an instance count, produces the expected per-instance metric value. 
+
+• N (required count ), given an aggregate load and a per-instance threshold, returns the number of instances needed to keep the per-instance metric at or below the threshold. The metric model must satisfy two properties. First, scaling invariance : the aggregate stays approximately constant when load redistributes across instances after scaling, so the prediction signal reflects external load rather than the algorithm’s own actions. Second, per-instance separability : each instance’s contribution to the aggregate can be independently scaled by a weight, so the redistribution stage can gradually include new instances without creating artifacts. 1 Introduction & Motivation 6The simplest metric model is sum and average: A(v) = ∑ vi, P(S, N ) = S/N ,
+
+N (S, τ ) = S/τ . This works when the metric redistributes equally across instances and the entire measured value represents load-related work. When the metric has a more complex relationship with scaling (for example, a fixed per-instance baseline that does not redistribute, or a non-linear sensitivity to load), the model can be adjusted accordingly. The formal interface, its requirements, and examples of non-trivial models are given in Section 3 and Section 11. 
+
+1.4 The Metric 
+
+The algorithm works with any numeric, per-instance metric that satisfies these properties: 
+
+• Monotonically related to load. Higher values mean more load on the instance. 
+
+• Distributed across instances. The metric reflects each instance’s share of the total workload. When a new instance is added and absorbs traffic, the metric on existing instances decreases. 
+
+• Has a meaningful threshold. There is a per-instance value above which the instance is considered overloaded. For example: 
+
+• ELU (Event Loop Utilization) [1 ], how busy the Node.js event loop is, on a 0–1 scale. A primary indicator of CPU-bound load in Node.js applications. 
+
+• Heap usage , memory pressure per instance. Useful for detecting memory-bound workloads. Each metric is processed independently. When multiple metrics are used, the highest target instance count wins. 
+
+1.5 Challenges 
+
+Predicting load is straightforward in theory (fit a trend line and extrapolate). In practice, several complications arise: 
+
+• Working with the latest data. To react fast and build accurate predictions, the algorithm needs to work with the newest data possible. But in most systems, the scaler doesn’t have real-time access to instance metrics — continuous monitoring of every instance is impractical. Instead, metrics are delivered in batches: instances collect measurements and send them periodically. Since batches from different instances arrive at different times, the algorithm must be able to work with partial data. 
+
+• The redistribution problem. After scaling up, existing instances don’t shed load immediately: queues need to drain, in-flight requests must complete, garbage collection and buffers take time to settle. Meanwhile, the new instance may start receiving traffic right away. During this transition, per-instance metrics don’t reflect the actual distribution of load, which can mislead any algorithm that relies on them for prediction. 
+
+• Noise vs. trend. With historical data, noise is easy to spot (it’s a momentary spike that came back down). At the edge of the data, a new movement could be noise or the start of a real trend, and the difference isn’t yet visible. The algorithm must determine when it’s confident enough to treat a movement as a real trend and act on it. 2 Existing Scaling Solutions 7
+
+1.6 Applicability 
+
+The algorithm is deliberately abstract. It operates on instances and metric samples , without assuming anything about the infrastructure that manages them. An instance can be a Kubernetes pod, an OS process, a worker thread, or a virtual machine; the algorithm treats them identically. How instances are created, destroyed, or routed traffic is outside the algorithm’s scope. So is how metrics are delivered. The algorithm includes stages that handle the constraints of batch-based delivery: alignment (Section 4) places irregularly-timed samples onto a uniform grid, and imputation (Section 5) estimates values for instances that haven’t reported yet. In environments where the scaler can read metrics from all instances simultaneously — for example, a runtime that scales its own processes or threads, these stages may be unnecessary and can be skipped as an optimization. Whether this applies depends on the specific implementation and should be verified case by case. Section 12 describes an implementation for scaling Kubernetes application pods with the Platformatic Intelligent Command Center. 
+
+# 2 Existing Scaling Solutions 
+
+Several scaling approaches are widely deployed. They differ in trigger mechanisms and details, but most share a fundamental pattern: evaluate the metric at a point in time, compare it to a target, and adjust the instance count. (Vertical scaling, e.g. the Vertical Pod Autoscaler, adjusts per-instance resources rather than instance count and is outside the scope of this comparison.) 
+
+Reactive approaches. The Kubernetes Horizontal Pod Autoscaler [ 2 ] (HPA) computes the desired replica count from the ratio of the current metric value to the target value. KEDA [ 3 ] extends HPA with a wide range of event-driven triggers (queue length, HTTP request rate, custom metrics), but the scaling logic is the same. The Knative Autoscaler [ 4 ]targets per-instance request concurrency and adds a shorter panic window for rapid scale-up, but the panic mode reacts faster, not earlier. 
+
+Pattern-based prediction. AWS Predictive Scaling [ 5 ] analyzes historical load patterns using machine learning and pre-provisions capacity hours ahead. It is effective for recur-ring, predictable workloads (daily or weekly traffic cycles), but does not handle sudden unexpected spikes. A reactive scaler is still needed as a fallback. 
+
+Limitations of existing approaches. All reactive solutions treat the metric as a discrete value sampled at evaluation time. Each decision is independent, with no understanding of direction, velocity, or dynamics. Pattern-based prediction adds foresight, but on a different timescale: it learns recurring cycles over hours and days, not emerging trends over seconds and minutes. This algorithm takes a fundamentally different approach. It treats the metric as a continuous signal, where every sample contributes to a running estimate of the level and its rate of change. This continuous understanding provides dynamic awareness: the algorithm knows not just where the metric is, but where it is heading. Short-term prediction follows naturally: the trend is already known, so extrapolation is straightforward. Existing solutions apply the same formula to every metric regardless of its nature. This algorithm operates with a metric model that captures how the specific metric relates to scaling. This allows it to treat each metric according to its actual behavior, producing more precise scaling decisions rather than applying a single generic rule to every problem. 2 Existing Scaling Solutions 8The architecture is described in Section 3 and the details follow in Sections 4–8. 
+
+Where it excels Where it falls short HPA Simple to configure: one target value per metric, no parameter tuning. Uses per-instance average as its signal. When a pod is added, the average drops even if exter-nal load hasn’t changed; the sig-nal is corrupted by the scaler’s own actions, causing oscillation. Relies on cooldowns as a blunt workaround. 
+
+KEDA Wide ecosystem of event-driven triggers out of the box (message queues, HTTP rates, databases). The scaling logic is the same as HPA: snapshot-based, no trend awareness, same oscillation and cooldown limitations. Richer inputs, but the same decision model. 
+
+Knative Can scale to zero and wake on first request. Operates at request-level concurrency granularity. The panic mode shortens the eval-uation window to react faster, but still detects overload after it be-gins. Each evaluation is indepen-dent, with no memory of prior state. 
+
+AWS Predictive Learns recurring daily/weekly patterns from historical data and pre-provisions capacity hours ahead. Cannot handle sudden unex-pected spikes, needs a reactive scaler running alongside as fall-back. Operates on a timescale of hours, not seconds. Table 1: Comparison with existing scaling solutions, relative to the algorithm presented in this document. A direct performance comparison against HPA and KEDA under identical conditions is presented in Section 13. 3 High-Level Architecture 9
+
+# 3 High-Level Architecture 
+
+3.1 Core Algorithm 
+
+The algorithm is a pipeline of five stages. It processes metric samples and computes the number of instances needed to handle the load:     
+
+> Alignment Imputation Redistribution Prediction Decision
+
+Stage Role Alignment Snaps irregularly-timed metric samples onto a uniform time grid 
+
+Imputation Estimates values for instances that didn’t report in a given tick 
+
+Redistribution Compensates for newly-added instances that haven’t absorbed their share of load 
+
+Prediction Detects the metric trend and projects the value forward in time 
+
+Decision Converts the forecast into a target instance count Table 2: Pipeline stages and their roles. Each stage enriches the data and passes it to the next. The pipeline runs independently for each metric. 
+
+3.2 Data Format and Delivery 
+
+Instances send every individual measurement to the scaler with no client-side aggregation, so the scaler sees the full picture with no data lost. However, the scaler cannot monitor measurements in real time. Sending a request for every individual measurement would be too expensive. Instead, instances collect samples locally and send them to the scaler in batches. With fixed batch intervals, there is a tradeoff: long intervals reduce network overhead but delay spike detection; short intervals provide fresh data but waste resources when the instance is idle. Dynamic batch timing resolves this. Each instance uses two timeouts based on the metric values it has collected: 
+
+• Short batch timeout (e.g. 5 s), used when a batch contains high metric values. The instance is under load and the scaler needs fresh data. 
+
+• Long batch timeout (e.g. 40 s), used when metric values are normal. There is no urgency to report. This delivers fresh data when it matters (under load) and reduces overhead when the instance is healthy. 
+
+3.3 Processing Cadence 
+
+The pipeline is triggered by batch arrivals, but running it on every arrival would be wasteful: batches from different instances often arrive in close succession, and each run would repeat most of the work with only marginally more data. A scaler uses a processing cooldown (e.g. 10 s) after each run: batches that arrive during the cooldown are stored, and the pipeline runs once over all of them when the cooldown expires. 3 High-Level Architecture 10 
+
+3.4 Inputs 
+
+The algorithm requires the following inputs: 
+
+• Instances metric samples , per-instance metric values with timestamps: tuples (t, v )
+
+where t is the timestamp and v is the metric value. These arrive in batches (see Section 1). 
+
+• Instance state , for each instance i, the algorithm needs: 
+
+– t0 
+
+> i
+
+, when the instance started 
+
+– tend  
+
+> i
+
+, when the instance terminated 
+
+• Init timeout TI , how long a new instance takes to become ready. This determines the prediction horizon: how far into the future the algorithm looks. This value can be a fixed constant, or it can be adaptively estimated from observed startup times (see Section 10). 
+
+• Threshold τ , the per-instance metric value above which an instance is considered overloaded. 
+
+• Instance count bounds , min and max allowed instance counts Nmin , Nmax .
+
+3.5 Notation 
+
+The following symbols are used throughout the document. Stage-specific symbols are introduced in their respective sections. 
+
+Symbol Meaning 
+
+t Discrete tick index on the uniform time grid 
+
+∆t Sample interval, grid spacing (e.g. 1000 ms) 
+
+i Instance identifier 
+
+τ Per-instance overload threshold 
+
+Nmin , N max Instance count bounds 
+
+TI Init timeout (time for a new instance to become ready) 
+
+TR Redistribution timeout (expected time for full stabi-lization) 
+
+η Prediction horizon multiplier 
+
+Hmin , H max Prediction horizon bounds (H = clamp (η ·
+
+TI , H min , H max ))
+
+Nstep Maximum scale-up step per decision 
+
+t0 
+
+> i
+
+Start time of instance i
+
+Function Meaning 
+
+A(·) (default ∑ wj vj ) Aggregation: per-instance values → cluster aggregate 
+
+P(S, N ) (default S/N ) Projection: aggregate + count → per-instance value 
+
+N (S, τ ) (default S/τ ) Required count: aggregate + threshold → instance count Table 3: Notation and metric model functions (Section 1). 4 Alignment 11 
+
+# 4 Alignment 
+
+4.1 The Problem 
+
+Metric samples are timestamped locally on each instance at the moment of measurement. Each instance samples on its own schedule, so timestamps across instances never coincide. The rest of the pipeline needs to compare and aggregate values across instances at the same points in time, which requires placing them onto a uniform time grid. 
+
+4.2 The Solution: Grid Snapping with Interpolation 
+
+Alignment processes each instance’s samples independently, placing them onto a uniform grid defined by ∆t (e.g. 1000 ms). 
+
+Grid ticks are computed by flooring raw timestamps to the interval. Let trj and vrj
+
+denote the raw (unaligned) timestamp and value of sample j:
+
+t = 
+
+> ⌊
+
+trj
+
+∆t
+
+> ⌋
+
+· ∆t
+
+For each grid tick t that falls between two consecutive raw samples (trj , v rj ) and 
+
+(trj+1 , v rj+1 ), the value is linearly interpolated :
+
+λ = t − trj
+
+trj+1 − trj
+
+vt = vrj + ( vrj+1 − vrj ) · λ
+
+For example, given raw samples (1001 , 0.4) and (2003 , 0.6) with ∆t = 1000 ms, the grid tick at t = 2000 :
+
+λ = 2000 − 1001 2003 − 1001 = 0 .998 
+
+v2000 = 0 .4 + (0 .6 − 0.4) · 0.998 ≈ 0.5996 
+
+t1 t2 t3 t4
+
+0.20.30.40.50.60.7
+
+> ∆t
+
+Time (ms) 
+
+Metric value     
+
+> Raw samples (trj, v rj)
+> Aligned values vt
+
+Figure 3: Grid alignment by interpolation. Raw samples (grey circles) arrive at irregular timestamps and are connected by line segments. Aligned values (purple squares) are computed by linear interpolation at uniform grid ticks (dashed vertical lines, spaced 
+
+∆t = 1000 ms apart). 5 Imputation 12 
+
+4.3 Continuity Across Batches 
+
+When samples arrive in batches, the last sample from the previous batch is preserved. On the next batch, interpolation uses this previous sample as the starting point, producing multiple grid ticks across the gap. For example, if a batch ends at 5200 ms and the next starts at 8100 ms with ∆t = 1000 ms, alignment produces grid ticks at t = 6000 , 7000 , 8000 ,all interpolated between the last sample of the previous batch and the first of the new one. This ensures a continuous, gap-free aligned series regardless of batch timing. 
+
+4.4 Output 
+
+For each instance, alignment produces a sequence of grid values vt on the uniform time grid. These become the input to the next stage, where the instance index i is introduced to compare across instances: vit.
+
+# 5 Imputation 
+
+5.1 The Problem 
+
+After alignment, we have a uniform time series per instance, but different instances send their metric batches at different times with varying offsets. At any given processing moment, some instances have reported data up to timestamp T , others only up to T − 3 s, and others up to T − 7 s. There is no moment when you have complete data from all instances up to “now.” The prediction pipeline downstream needs a continuous estimate of the metric at every tick. Imputation’s job is to produce that estimate from incomplete data, and to do so in a way that is accurate enough for good scaling decisions, self-correcting as more data arrives, and resilient to instance failures. 
+
+5.2 Overview 
+
+The imputation maintains a running estimate of the total metric sum across all instances. At each tick, it updates this estimate using whatever data is available: 
+
+• Known instances contribute their real, measured values. 
+
+• Unknown instances (those that haven’t reported yet) are estimated by carrying forward their previous contribution to the total. The algorithm takes the previous total, removes the previous values of instances that are now known, and what remains is the estimated contribution of the instances that are still missing. The key property of this approach is that changes on known instances are immedi-ately reflected in the total, while unknown instances are held at their previous estimated level . Combined with the core assumption that load changes happen similarly across all instances, this produces accurate estimates across all load scenarios: 
+
+• Steady load. Unknown instances haven’t changed, so estimating them from the previous total is accurate. The imputed sum matches reality. 
+
+• During a spike. All instances are rising, but we only see some of them. The known instances’ increase is fully captured in the total. The unknown instances are estimated at their pre-spike level, so the total rises but less than reality. The underestimate is proportional to the fraction of missing instances: if 3 out of 4 report, we capture roughly 3/4 of the spike immediately. This is usually enough for the smoothing stage to detect the upward trend and begin predicting further increase. 5 Imputation 13 
+
+• During a drop. The mirror case. Known instances show the decrease, but unknown instances are estimated at their previous (higher) level. The imputed total drops slower than reality. This is conservative in the safe direction: it prevents the algorithm from thinking load has dropped faster than it actually has, avoiding premature scale-down. 
+
+5.3 The Imputation Step 
+
+At each tick t, the algorithm has: 
+
+• Ikt , the set of instances that reported at tick t (the “known” instances) 
+
+• vit, the aligned metric value of instance i at tick t, defined for i ∈ Ikt
+
+• Nt, the total number of instances that were active at time t
+
+• st−1, the imputed metric sum across all instances from the previous tick From these, it computes: 
+
+1. Count unknowns: 
+
+˜Nt = Nt − | Ikt |
+
+2. Compute the known sum: 
+
+skt = ∑
+
+> i∈Ikt
+
+vit
+
+3. Previous contribution of known instances. Every instance known at t was also known at t−1, so we can look up what they contributed to the previous total: 
+
+s∗ 
+
+> t−1
+
+= ∑  
+
+> i∈Ikt
+
+vit−1
+
+4. Estimate the unknown contribution. Since aligned data is continuous within each instance’s range, the set of known instances can only shrink over time: Ikt ⊆ Ikt−1.Subtract the accounted portion from the previous total. What remains is the estimated contribution of the instances that are no longer reporting: 
+
+sut = st−1 − s∗
+
+> t−1
+
+5. Impute per-instance values. Known instances retain their real measurements. Unknown instances are each assigned an equal share of the estimated unknown contribution: 
+
+ˆvit =
+
+> 
+
+vit if i ∈ Ikt
+
+sut / ˜Nt if i / ∈ Ikt
+
+6. Compute the tick’s total (carried forward internally as st−1 for the next tick): 
+
+st = skt + sut
+
+Example. Three instances report batches at different times. Instance C has the latest data (up to t6), instance A up to t4, and instance B only up to t2:5 Imputation 14 
+
+t1 t2 t3 t4 t5 t6
+
+Instance A 0.3 0.4 0.5 0.6 ? ?Instance B 0.2 0.3 ? ? ? ?Instance C 0.4 0.5 0.6 0.7 0.6 0.5 
+
+skt 0.9 1.2 1.1 1.3 0.6 0.5 
+
+sut 0 0 0.3 0.3 0.9 0.9 
+
+st 0.9 1.2 1.4 1.6 1.5 1.4 
+
+Imputed values ˆvit (estimated): 
+
+Instance A 0.3 0.4 0.5 0.6 0.45 0.45 Instance B 0.2 0.3 0.30 0.30 0.45 0.45 Instance C 0.4 0.5 0.6 0.7 0.6 0.5 Table 4: Imputation example. At t1–t2 all instances are known and sut = 0 . At t3,instance B has not yet reported; its contribution is estimated from st2 minus the known values at t2: sut3 = 1 .2 − 0.4 − 0.5 = 0 .3. As more instances drop off toward the right, the estimated portion sut grows while the total st gradually degrades; these estimates are temporary and self-correct as late batches arrive (Section 5.4). 
+
+5.4 Self-Correction 
+
+The estimates are temporary. Each processing cycle reruns imputation as a forward pass over the entire window using all currently available data. When a late batch arrives from a previously-missing instance, its values enter Ikt for the ticks it covers — what were previously imputed values are replaced by real measurements, and st is recomputed from scratch. Spikes are never missed : an imputed tick may undercount a spike initially, but when the real data arrives, the full spike is captured. Each new batch makes the imputation more accurate. As batches arrive from more instances, the fraction of imputed vs. real data shrinks and st converges toward the true value. 
+
+5.5 Resilience 
+
+Imputation is inherently resilient to instance failures. If an instance stops reporting entirely, the algorithm continues working with the remaining instances. The failed instance’s contri-bution remains embedded in sut temporarily. When the instance is confirmed terminated, 
+
+Nt decreases; on the next forward pass, the imputation recomputes without the terminated instance, and the estimates adjust accordingly. No single instance can block or break the pipeline. The algorithm produces imputed values from whatever data is available, whether that’s all instances, half of them, or just one. 
+
+5.6 Cold Start 
+
+When no previous data exists (first tick ever), there is no previous total to estimate from: 
+
+st−1 is undefined, so sut = 0 . Unknown instances are assigned a value of 0. This means the first tick may underestimate the total, but as more ticks arrive and more batches come in, the estimates converge quickly. 6 Redistribution 15 
+
+# 6 Redistribution 
+
+6.1 The Problem 
+
+The algorithm must be sensitive to changes in the external load on the cluster (that’s how it detects traffic spikes and triggers scaling before overload occurs). But scaling itself creates changes in the metrics that have nothing to do with external load; they are internal artifacts of the redistribution process. When the algorithm scales up, new instances don’t absorb traffic instantly, and the existing instances don’t shed load instantly either. Queues need to drain, garbage collection cycles complete, buffers flush. For a period after scale-up, the old instances remain at their elevated metric levels while the new instance starts accumulating additional load on top. The timing and pace of the actual redistribution is unpredictable. Different load balancers behave differently, network conditions vary, application warm-up times differ. We don’t know exactly when the major part of the redistribution will happen, or even whether it will complete cleanly at all. But we do know that the metric changes it causes are internal artifacts, not signals the algorithm should react to. 
+
+t1 t2 t3 t4 t5 t6
+
+0
+
+0.5
+
+1
+
+1.5
+
+2
+
+2.5
+
+3
+
+3.5                
+
+> 2.72 2.78
+> 2.93
+> 3.16
+> 3.40
+> 2.70
+> scale-up
+> .70
+> .70
+> .68 .68 .68
+> .90 .90
+> .82 .75 .70 .68
+> .90 .90 .82 .75 .70 .68
+> .90 .90 .82 .75 .70 .68
+
+Time Aggregated metric value    
+
+> Instance A Instance B Instance C Instance D (new)
+
+Figure 4: Redistribution after scaling from 3 to 4 instances. Before scale-up ( t1), three instances carry 0.9 each. The new instance immediately receives traffic ( t2), but the existing instances don’t shed load instantly: queues must drain, in-flight requests must complete, garbage collection must settle. The sum spikes from 2.70 to 3.40 before gradually settling as redistribution completes. The raw aggregation makes the system look more stressed after scaling up, not less. If the algorithm acts on this, it could trigger yet another scale-up, which would compound the problem. We can’t include the new instance’s metric into the aggregated value as is. 
+
+Why not use a cooldown? Redistribution might take some time. The algorithm just scaled because load was rising, the external pressure that triggered the scale-up is still there and may continue to grow. If the added capacity turns out to be insufficient, the algorithm needs to detect this and scale again. A cooldown would prevent it from making any decisions until redistribution completes, by which point the system may already be overloaded. 6 Redistribution 16 
+
+Why not ignore new instances? The simplest fix would be to completely ignore new instances for a stabilization period. But this creates its own problem (see Figure 5): 
+
+• While a new Instance D is ignored ( t2–t5), the stable instances gradually offload traffic to it. The aggregated value that the algorithm sees drops: 2.70 → 2.46 → 2.25 → 2.10 .
+
+• When the stabilization period expires ( t6) and Instance D is included, the value jumps: 
+
+2.10 + 0 .68 = 2 .72 .
+
+• The algorithm interprets this jump as a real load increase and may trigger an unnecessary scale-up. 
+
+t1 t2 t3 t4 t5 t6
+
+0
+
+0.5
+
+1
+
+1.5
+
+2
+
+2.5
+
+3
+
+3.5              
+
+> 2.72
+> 2.10
+> 2.25
+> 2.46
+> 2.70 2.70
+> scale-up
+> .68
+> .90 .90
+> .82 .75 .70 .68
+> .90 .90 .82 .75 .70 .68
+> .90 .90 .82 .75 .70 .68
+
+Time Aggregated metric value    
+
+> Instance A Instance B Instance C Instance D (new)
+
+Figure 5: The problem with ignoring new instances. Instance D exists from t2 onward (shown dashed) but is excluded from the aggregated value until t6.The goal of the redistribution stage is to smooth the metric values redistribution during the scale up, while preserving full sensitivity to changes in the external load . Redistribution artifacts are smoothed away; real signals pass through. 
+
+6.2 The Solution: Gradual Weighted Inclusion 
+
+The idea is to include new instances from the moment they appear, but gradually increase their contribution to the aggregated value over a redistribution period. When a new instance i starts at time t0 
+
+> i
+
+, it is assigned a weight wi that starts at 0 and increases linearly to 1 over the redistribution timeout TR.Redistribution only applies after a scale-up, when new instances exist. When all instances are stable, this stage is a pass-through: the aggregated value and count equal the raw aggregation and full instance count. Note that there is no single global redistribution period. Each instance increases its contribution independently based on its own age. The drop absorption works across all of them: as long as any instance has w < 1, drops are caught. 6 Redistribution 17 
+
+t1 t2 t3 t4 t5 t6
+
+0
+
+0.5
+
+1
+
+1.5
+
+2
+
+2.5
+
+3
+
+3.5
+
+> 2.72 2.78 2.79 2.79 2.79 2.70
+
+scale-up                  
+
+> .33 .54 .68 .68
+> .90 .90
+> .82 .75 .70 .68
+> .90 .90 .82 .75 .70 .68
+> .90 .90 .82 .75 .70 .68
+
+Time Aggregated metric value 
+
+Instance A Instance B Instance C Instance D (new) 
+
+Figure 6: The same scenario with gradual weighted inclusion ( κ = 1 , TR = 5 ∆ t). In-stance D’s contribution is included proportionally to its stabilization weight w. The aggregated value stays nearly flat (2.70–2.79) compared to the raw value (Figure 4) which spiked to 3.40. 
+
+6.3 Stabilization Weight 
+
+The weight models how quickly a new instance absorbs its share of traffic. It uses an exponential curve: 
+
+w(a) = eκ·a / T R − 1
+
+eκ − 1
+
+Where: 
+
+• a, how long the instance has been running (age) 
+
+• TR, the expected time for full stabilization (redistribution timeout) 
+
+• κ, shape parameter (default 1), controls the curve’s steepness The curve goes from w(0) = 0 to w(TR) = 1 . The exponential shape allows starting with small weights expecting the redistribution to happen earlier, but still reaching full weight by TR even if the redistribution is slow. Changing κ allows tuning the weight to match different redistribution patterns. Each instance has its own independent ramp-up timeline based on its own age. If the algorithm scales up multiple times, there may be instances at different stages of ramp-up simultaneously, each increasing its contribution at its own pace. 6 Redistribution 18 
+
+0 5 10 15 20 25 30 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Age a (s) Weight w(a)
+
+Figure 7: Stabilization weight w(a) with κ = 1 and TR = 30 s (solid) compared to linear ramp-up (dashed). The curve starts slowly, reflecting the initial period where load balancers gradually route traffic to the new instance, then accelerates as the instance proves healthy. 
+
+6.4 The Calculation 
+
+By this stage, every instance i active at tick t has a value ˆvit (measured or imputed) and a start time t0 
+
+> i
+
+. The instance’s age is ait = t − t0 
+
+> i
+
+. Let It denote the set of all active instances at tick t. They are classified into two subsets: 
+
+• Ist (stable ), instances with ait ≥ TR, contributing at full weight 
+
+• Int (new ), instances with ait < T R, contributing at partial weight w(ait)
+
+The redistributed aggregated value is computed as follows. 
+
+1. Raw aggregated value. Aggregate all instance values through the metric model’s aggregation function A (Section 1). This is the raw cluster-wide metric, the value the algorithm would use if it did not account for redistribution at all: 
+
+Art = A
+
+> ({(
+
+ˆvit, 1
+
+> )
+
+: i ∈ It  
+
+> }) 
+
+= ∑  
+
+> i∈It
+
+ˆvit when A is sum 
+
+> 
+
+2. Weighted aggregated value. Apply the aggregation function with per-instance weights: stable instances contribute at full weight, new instances at their stabilization weight: 
+
+ˆAt = A
+
+> ({(
+
+ˆvit, w it
+
+> )
+
+: i ∈ It  
+
+> }) 
+
+= ∑  
+
+> i∈It
+
+wit · ˆvit when A is sum 
+
+> 
+
+where 
+
+wit =
+
+> {
+
+1 i ∈ Ist
+
+w(ait) i ∈ Int
+
+3. Drop absorption (see Section 6.5): 
+
+At =
+
+> {
+
+min (Art , At−1 
+
+> )
+
+if At−1 > ˆAt
+
+ˆAt otherwise On the first tick, when no previous At−1 exists, drop absorption is skipped: At = ˆAt.6 Redistribution 19 
+
+6.5 Absorbing the Redistribution Drop 
+
+The redistribution can happen rapidly at any point after scale-up. If the algorithm ignores it and uses the weighted value ˆAt, it will create artificial fluctuations that may trigger unnecessary scaling. 
+
+The redistribution stage allows the aggregated value to rise to not miss the real load increase, but prevents it from dropping until the new instances are fully included. 
+
+If the weighted aggregation value ˆAt is lower than the previous value At−1, the algorithm increases new instances’ contributions until the new aggregated value At matches the previous value At−1 or the new instances’ values are fully included. 
+
+t1 t2 t3 t4 t5 t6
+
+0
+
+0.5
+
+1
+
+1.5
+
+2
+
+2.5
+
+3
+
+3.5                 
+
+> 2.55
+> 2.66 2.70 2.70 2.70 2.70 At= 2 .70
+> scale-up
+> .60 .62 .60 .90 .89 .88
+> .70 .68 .65
+> .90 .89 .88
+> .70 .68 .65
+> .90 .89 .88 .70 .68 .65
+
+Time Aggregated metric value    
+
+> Instance A Instance B Instance C Instance D (new)
+
+Figure 8: Drop absorption with a load decrease at t5. Instance D is added at t2 and begins absorbing traffic. At t4, redistribution happens rapidly — stable instances drop from 0.88 to 0.70. The dashed line shows the clamped level: At is held at 2.70 during 
+
+t2–t4 by increasing Instance D’s effective contribution (solid green) beyond its weighted share. At t5–t6, external load decreases and At drops below the clamped level — real load changes pass through immediately. 
+
+6.6 Catching the Spike 
+
+An essential requirement is that the redistribution step should not hide a spike caused by the external load. When traffic keeps rising after a scale-up, two things happen in parallel: 
+
+• Stable instances keep climbing. They are counted at full weight, so any continued increase is reflected immediately in At.
+
+• New instances ramp in. Their contribution grows with w(a), adding more of the rising signal over time rather than delaying it. Drop absorption only blocks downward movement during the redistribution window. It never clamps a rise. So if the spike continues, At keeps increasing and the trend estimate sees the sustained growth. 6 Redistribution 20 
+
+6.7 Contribution-Weighted Count 
+
+N wt is the contribution-weighted count : the number of instances weighted by how much they contribute to the aggregated At. During redistribution, new instances are only partially counted in At, and the count should reflect that same partial participation. Redistribution smooths the aggregated value by partially including new instances; if the count stayed integer while the aggregate was weighted, the per-instance estimate would jump downward whenever a new instance appears in the count. Those artificial drops would leak into the decision logic even though the total signal was smoothed. Weighting the count in the same way keeps the per-instance estimate P(At, N wt ) smooth, so the per-instance view reflects only real load changes, not redistribution artifacts. Each stable instance contributes 1; each new instance contributes its stabilization weight wit. With N St = |Ist |: 
+
+> A
+> B
+> C
+> D
+> At
+> ASt
+> Art
+
+N wt = N St + ∑  
+
+> i∈Int
+
+wit
+
+Figure 9: Decomposition of the aggregated value at a single tick. The count is derived from the weights alone, not from the metric values or from At.This means drop absorption (Section 6.5) does not affect N wt — even when At is clamped, the count continues to grow smoothly with the stabilization weights. This is important because At is smoothed through the prediction stage and changes slowly; if the count reacted to the clamp faster than the smoothed value, the per-instance estimate P(At, N wt )
+
+would oscillate. 
+
+6.8 Redistribution Delta 
+
+At every tick during redistribution, the aggregated value At changes for two reasons: 
+
+• Load change , the changes in the per-instance metric values driven by external load changes. 
+
+• Redistribution , the redistribution process itself moves At by gradually including new instances’ values; drop absorption may clamp the value. These changes are internal and happen even when external traffic is unchanged. The value At (with both effects combined) is the correct representation of the appli-cation’s metric state at each tick. The next stage in the pipeline, prediction (Section 7), needs to know the correct current state to know where to start the prediction. But it also tracks how fast the metric changes over time. The redistribution component creates its own impact on the At change rate that has nothing to do with changes in the external load. To filter it out, the delta ∆Rt is computed 7 Prediction 21 alongside At. It shows the change in the aggregated value driven only by new instances’ weight changes. 
+
+∆Rt = A
+
+> ({(
+
+ˆvit−1, wit
+
+> )
+
+: i ∈ Int−1
+
+> })
+
+− A 
+
+> ({(
+
+ˆvit−1, wit−1
+
+> )
+
+: i ∈ Int−1
+
+> })
+
+The delta is a difference between two aggregated values calculated for the previous tick with different weights. The first aggregates the previous metric values with current weights; the second with previous weights. The difference is purely the effect of weights changing. For instances that become fully redistributed at time t (wit = 1 ), the difference captures the final step from partial to full inclusion. On the first tick after new instances appear ( t−1 had no new instances), the previous aggregate has no new-instance component and ∆Rt = 0 .
+
+Interaction with drop absorption. When drop absorption holds the aggregate At at previous level At−1 (Section 6.5) — the redistribution impact is compensated by the drop in stable instances. The At does not change so the delta is 0. 
+
+∆Rt = 0 when drop absorption is active This ensures the two mechanisms never conflict. Drop absorption holds the input flat; the redistribution delta reports that no weight-driven change occurred in the input. 
+
+6.9 Output 
+
+Redistribution produces: 
+
+• At (every tick), the redistributed aggregated value, representing the effective total load. Passed to the prediction stage, which sees a clean signal: real traffic changes are preserved, redistribution artifacts are smoothed out. 
+
+• ∆Rt (every tick), the redistribution delta, representing the expected change in At from weight growth alone. Passed to the prediction stage so it can separate the weight-growth ramp from real load changes (Section 6.8). 
+
+• N wt (last tick only), the contribution-weighted count, representing the effective number of contributing instances. Passed directly to the decision stage. 
+
+# 7 Prediction 
+
+7.1 Purpose 
+
+This stage takes aggregated values At from the redistribution step, detects the current metric trend and uses it to extrapolate the value to the future. To do this, it applies the double exponential smoothing method, also known as Holt’s method [6]. 
+
+7.2 Holt’s Method 
+
+Holt’s method is a time series forecasting technique that extends simple exponential smoothing by incorporating a trend component. It is designed to handle data with a linear trend, making it suitable for predicting future values based on past observations. Although a metric’s behavior can be complex and non-linear, Holt’s method is still effective for short-term forecasting. The key is that the trend component captures the general direction of change, which is more important than modeling the exact shape of the curve when making predictions over a short horizon. 7 Prediction 22 Holt’s method maintains two state variables, level lt (the smoothed value) and trend 
+
+tt (the smoothed rate of change), and updates them at each tick using two parameters, α
+
+and β:
+
+• α controls how much each individual data point moves the level . At α = 1 the level equals the raw input; at α = 0 it ignores new data entirely and follows the forecast. In practice, a moderate α lets the level track real movement while absorbing single-tick noise. 
+
+• β controls how quickly the trend changes direction. When the signal reverses (say, load was rising and starts falling), a high β pivots the trend immediately, while a low β keeps extrapolating in the old direction until several ticks of sustained change accumulate. 
+
+Initialization (first tick, no prior state): 
+
+l0 = A0, t0 = 0 
+
+For each subsequent tick t ≥ 1:One-step-ahead forecast: 
+
+Ft = lt−1 + tt−1 + ∆ Rt
+
+The delta ∆Rt from Section 6.8 accounts for redistribution impact. When no new instances exist, ∆Rt = 0 and the forecast reduces to the standard Holt form. The motivation and mechanics are detailed in Section 7.7. Parameter selection: the algorithm uses direction-dependent parameters: (α↑, β ↑) when the input overshoots the forecast and (α↓, β ↓) otherwise (see Section 7.5). 
+
+(αt, β t) = 
+
+> {
+
+(α↑, β ↑) if At > F t
+
+(α↓, β ↓) otherwise Level update: 
+
+lt = αt · At + (1 − αt) · Ft
+
+Trend update: 
+
+tt = βt · (lt − lt−1 − ∆Rt ) + (1 − βt) · tt−1
+
+The redistribution delta is subtracted from the level difference to prevent it from leaking into the trend (Section 7.7). On the first tick the algorithm starts by tracking the input directly, with no prediction. Over subsequent ticks, the trend converges to the actual rate of change. 7 Prediction 23 
+
+−20 s −15 s −10 s −5s now 
+
+1
+
+1.2
+
+1.4
+
+1.6
+
+1.8
+
+2
+
+2.2
+
+2.4
+
+2.6  
+
+> Metric value
+> Aggregated value At
+> Level lt
+> Trend
+
+Figure 10: Holt’s method applied to the aggregated value. The grey line shows the raw input At with wave-like fluctuations and a noisy spike around −13 s; the solid purple line shows the smoothed level lt, which tracks the general movement while filtering both the waves and the spike. The dashed purple line shows the trend extrapolation beyond the current moment. 
+
+7.3 Smoothing 
+
+The α parameter controls how much the level reacts to each new input. A low α means the level changes slowly: noise is filtered, but real changes are detected late. A high α means the level tracks the input closely: real changes are detected immediately, but noise passes through. Holt’s method resolves this tension by combining the level with a trend. Even with a moderate α, the forecast Ft = lt−1 + tt−1 anticipates where the signal is heading. If the input keeps pushing in the same direction across multiple ticks, the trend accumulates and the level follows. A single noisy tick pushes the level only slightly and the trend absorbs the rest. This way the smoothing can be aggressive enough to filter noise while still reacting quickly to sustained changes. 
+
+7.4 Trend Generation 
+
+The trend is a natural byproduct of the Holt update. At each tick, β controls how much the trend adjusts to the latest level change. Over successive ticks, the trend converges to the actual rate of change of the signal. The prediction stage uses this trend to extrapolate the aggregated value forward to the prediction horizon (Section 7.9), producing AH (Section 7.10). 
+
+7.5 Asymmetric Reaction 
+
+The algorithm treats upward and downward movements differently. This is a crucial design choice that reflects the different risks of missing a spike versus overreacting to a drop. The whole point of the prediction stage is to catch spikes early and scale up before overload happens. A drop, on the other hand, only means the cluster is temporarily over-provisioned, which costs resources but doesn’t affect users. There is no urgency to scale down immediately; in fact, scaling down too eagerly on a momentary dip risks having to scale right back up. This asymmetry motivates using different parameters for each direction. When the forecast underestimates the input ( Ft < A t), the algorithm uses the aggressive pair (α↑, β ↑)
+
+so the level and trend react quickly, catching the spike faster. When the forecast meets or exceeds the input ( Ft ≥ At), it uses the conservative pair (α↓, β ↓), letting the downward 7 Prediction 24 trend build slowly over many ticks before the algorithm becomes confident that the drop is real. 
+
+(αt, β t) = 
+
+> {
+
+(α↑, β ↑) if At > F t
+
+(α↓, β ↓) otherwise Typically α↑ > α ↓ and β↑ > β ↓.
+
+7.6 Trend Dampening 
+
+Trend dampening addresses a fundamental problem with any smoothing that tracks a trend: downward overshoot .When the real signal drops and then levels off, the smoothed level follows the drop and the trend becomes increasingly negative. When the real signal flattens, the smoothed level can’t stop immediately: the accumulated negative trend carries it below the real value. To recover, the level must then rise back up toward the real signal, which creates a positive trend. The algorithm could interpret this upward recovery as a real load increase and trigger a false scale-up. The dampening mechanism prevents this overshoot by reducing the trend whenever the level is above the input. Whenever the smoothed level is above the actual input ( lt > A t), the trend is progressively reduced: 
+
+gt = lt − At
+
+tt = tt · gt
+
+gt + |tt| + ε
+
+The dampening factor gt / (gt + |tt| + ε) is self-regulating: when the trend is large relative to the gap, it’s dampened heavily; when the gap is large relative to the trend, the dampening is light. This decelerates the level as it approaches the real value from above: instead of crossing below and bouncing, it merges smoothly into the real curve. The level is allowed to overshoot upward but not downward. 
+
+−15 s −10 s −5s now 
+
+0.8
+
+1
+
+1.2
+
+1.4
+
+1.6
+
+1.8
+
+2
+
+> undershoot
+> Metric value
+> Without trend dampening
+> At
+> lt
+> Trend
+
+Figure 11: Without trend dampening: the level undershoots below the real value and then recovers upward, creating a false positive trend (a potential false scale-up signal). 7 Prediction 25 
+
+−15 s −10 s −5s now 
+
+0.8
+
+1
+
+1.2
+
+1.4
+
+1.6
+
+1.8
+
+2
+
+> Metric value
+> At
+> lt
+> Trend
+
+Figure 12: With trend dampening: the level converges to the real value from above and the trend settles to zero. The extrapolation is flat, correctly reflecting the steady load. 
+
+7.7 Redistribution Delta Compensation 
+
+During redistribution (Section 6), the aggregated value At changes for two reasons: changes in the external load to the application and gradual inclusion of new instances’ values. The prediction stage needs the redistributed value to maintain an accurate level, but the trend should reflect only real load changes; the redistribution component must be accounted for separately. The delta ∆Rt (Section 6.8) captures the expected redistribution component of the change in At. The smoother uses it in two places to neutralize the impact: 
+
+In the forecast. Adding ∆Rt to the one-step-ahead forecast makes the redistribution growth “expected.” When the actual input matches the forecast, the trend is unchanged. Only changes in the per-instance metrics, whether from stable or new instances, — affect the trend: 
+
+Ft = lt−1 + tt−1 + ∆ Rt
+
+In the trend update. Because ∆Rt appears in the forecast, it inflates lt via the level update lt = αtAt + (1 − αt)Ft. To prevent ∆Rt from leaking into the trend through the level, it is subtracted from the level difference: 
+
+tt = βt · (lt − lt−1 − ∆Rt ) + (1 − βt) · tt−1
+
+Without this correction, the level difference lt −lt−1 would carry the delta’s contribution, gradually building a false positive trend of approximately βt · ∆Rt per tick. 
+
+Effect on the trend. After the compensation, the trend captures only real load changes. Changes from stable instances impact the trend at full weight. Changes from new instances impact it proportionally to their current stabilization weight. The redistribution itself is invisible to the trend. When ∆Rt = 0 (either because no new instances exist, or because drop absorption is active, Section 6.8), both equations reduce to the standard Holt form. 
+
+7.8 Metric Saturation 
+
+Some metrics have a natural upper bound (for example, Event Loop Utilization (ELU) is capped at 1.0). When the metric approaches this bound, the signal is clipped : the real load may be growing, but the metric cannot rise further to reflect it. The trend, which is 7 Prediction 26 derived from level changes, would decay toward zero even though load is still increasing. The algorithm would underestimate future load and fail to scale up. 
+
+Detection. The algorithm detects saturation by comparing the raw (unweighted) aggre-gate Art against a per-instance maximum vmax , with a configurable saturation zone σz (e.g. 0.02): 
+
+Art ≥ Nt · vmax · (1 − σz )
+
+Behavior during saturation. When saturated, the level is clamped at the aggregate maximum Nt · vmax to prevent it from drifting above the clipped input. The trend is constrained: it may increase but never decrease: 
+
+lt ← min( lt, Nt · vmax )
+
+tt ← max( tt, tt−1)
+
+When saturation ends (the raw aggregate drops below the threshold), normal Holt updates resume and the trend self-corrects within a few ticks. 
+
+−15 s −10 s −5s now 
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+1.2
+
+1.4
+
+> Metric value
+> Without saturation handling
+> vmax
+> At
+> lt
+> Trend
+
+Figure 13: Without saturation handling: the metric is clamped at vmax = 1 .0 from −5s
+
+onward, but load is still growing behind the clipped signal. The trend decays toward zero and the extrapolation is nearly flat. The algorithm fails to predict continued growth. 
+
+−15 s −10 s −5s now 
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+1.2
+
+1.4
+
+> Metric value
+> With saturation handling
+> vmax
+> At
+> lt
+> Trend
+
+Figure 14: With saturation handling: the trend is preserved during the clipped period and the level is clamped at vmax . The extrapolation continues upward, correctly predicting that more capacity is needed. 7 Prediction 27 Saturation is enabled for metrics that have a natural upper bound (e.g. ELU, capped at 1.0). When vmax is not configured, the saturation check is skipped entirely. 
+
+7.9 The Prediction Horizon 
+
+The prediction horizon is derived from the init timeout, scaled by a configurable multiplier 
+
+η, and clamped to configurable bounds: 
+
+H = clamp( η · TI , Hmin , Hmax )
+
+The multiplier acts as a safety buffer on top of the measured init timeout. At η = 1 
+
+the algorithm predicts exactly one startup time ahead. In practice, a value between 1 and 2 is recommended: this accounts for cases where the next scale-up takes slightly longer than average and covers some of the redistribution time after the new instance starts. The floor Hmin ensures a useful prediction horizon even when TI is very short. Afast-starting application may produce a small TI , which is an accurate reflection of startup time, but a very short horizon makes the algorithm less effective. The floor guarantees the algorithm always looks far enough ahead to make meaningful predictions, regardless of how quickly instances start. The ceiling Hmax prevents the horizon from growing too long when TI is large. With a long prediction horizon, the algorithm tries to predict too far into the future, which is inherently uncertain. The trend extrapolation becomes less reliable and the algorithm may end up scaling up unnecessarily. The ceiling caps this risk even if TI or η are configured high. 
+
+7.10 Extrapolation 
+
+In its final step, the prediction stage takes the level lnow and trend tnow from the most recent tick and extrapolates forward to the prediction horizon, producing the predicted total load at the time a new instance would be ready: 
+
+AH = lnow + tnow · H
+
+∆t
+
+−20 s −15 s −10 s −5s now H
+
+1
+
+1.2
+
+1.4
+
+1.6
+
+1.8
+
+2
+
+2.2
+
+2.4
+
+2.6
+
+2.8 AH  
+
+> Metric value
+> Aggregated value At
+> Level lt
+> Trend extrapolation
+
+Figure 15: The complete prediction output. The level lt (solid purple) tracks the aggregated input At (grey), then the trend extrapolation (dashed purple) projects the level forward from now to the prediction horizon H, producing the predicted load AH .
+
+7.11 Output 
+
+The prediction stage passes the following to the decision stage: 8 Scaling Decision 28 
+
+• AH , the predicted aggregated value at the prediction horizon, representing the forecasted total load when a new instance would be ready. 
+
+• ¯Anow = lnow , the current smoothed aggregated value (the Holt level at time t = now). 
+
+• tnow , the current trend of the aggregated value. 
+
+# 8 Scaling Decision 
+
+8.1 Purpose 
+
+The decision stage takes AH , ¯Anow , and tnow from the prediction stage and converts them into a target instance count: how many instances need to be scaled up or down. The main purpose of the algorithm is to keep the per-instance load below a certain threshold τ with the minimum number of instances. To decide whether to scale, it needs to know the per-instance metric value. It applies a projection function P (by default, division) to convert the aggregated values into per-instance values. For a given tick, the current per-instance load is: 
+
+Pt = P(At, N t)
+
+where Nt is the instance count at time t. The current per-instance metric projection Pnow 
+
+is computed using the current level ¯Anow and the contribution-weighted count N w 
+
+> now
+
+from the redistribution stage: 
+
+Pnow = P( ¯Anow , N w
+
+> now
+
+)
+
+The same transformation is applied to the predicted value, but at the horizon the divisor is the target instance count Ntarget , the number of instances the scaler is currently aiming for. This is needed because the scaler can be triggered with a new batch before the previously scaled instances are initialized: 
+
+PH = P(AH , N target )
+
+This distinction matters: Pnow uses the weighted count because it reflects the load each instance is currently handling, while PH uses the target count because the question is whether the planned fleet will be overloaded. 
+
+−20 s −15 s −10 s −5s now H
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+0.8 Pnow PH   
+
+> Per-instance metric
+> Per-instance metric value PtOverload threshold τ
+> Per-instance metric prediction
+
+Figure 16: The per-instance metric projection and prediction. 8 Scaling Decision 29 
+
+8.2 Trend Direction 
+
+The algorithm uses different decision logic depending on whether the load is rising, falling, or nearly flat. To route to the correct path, it classifies the current trend into three categories. The trend tnow is normalized by the level to obtain the growth rate, so that the classification is independent of the absolute load: 
+
+γ = tnow 
+
+lnow 
+
+D =
+
+> 
+
+UP if γ > γ 0
+
+DOWN if γ < −γ0
+
+HORIZONTAL otherwise The threshold γ0 creates a deadband around zero. Small upward or downward move-ments are classified as HORIZONTAL rather than UP or DOWN , so they are handled by their own logic instead of being misrouted to a path designed for clear directional trends. 
+
+−1s now H
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1  
+
+> lnow
+> AH
+> θ
+> tnow ·H
+> ∆t
+> Metric value
+
+Figure 17: The trend extrapolation from now to the prediction horizon H. The angle θ
+
+between the trend line and the horizontal baseline lnow corresponds to the growth rate 
+
+γ = tan( θ).The growth rate γ is related to the angle θ of the trend line by: 
+
+γ = tan( θ)
+
+If the threshold is specified as an angle θ0 (in degrees), the equivalent growth rate threshold is: 
+
+γ0 = tan 
+
+> (
+
+θ0 · π
+
+180 
+
+> )
+
+A default of θ0 = 10ř (equivalently γ0 ≈ 0.176 ) classifies trends with a per-tick growth rate below ∼17 .6% of the current level as horizontal. 
+
+8.3 Scaling Direction 
+
+By this point, the algorithm has the following variables describing the current state: 
+
+• D, the trend direction ( up , down , horizontal )
+
+• Pnow , the current per-instance smoothed level 
+
+• PH , the predicted per-instance metric value at the horizon 8 Scaling Decision 30 Based on these, the algorithm decides which direction to scale, if scaling is needed at all. Choosing the scaling direction does not mean the algorithm will actually change the instance count; it still needs to calculate a target and check whether it differs from the current count. But if the conditions for scaling up or down are not met, the algorithm will maintain the current target count. 
+
+Scale-up is considered in one of two cases: 
+
+• D = up , the metric value is rising. 
+
+• PH > τ , the predicted per-instance value at the horizon exceeds the overload threshold. This catches the case when the application is already overloaded and the trend is not falling fast enough to bring the metric below τ by the horizon. 
+
+Scale-down is considered when all of the following hold: 
+
+• D ∈ { horizontal , down }, the metric value is not rising. 
+
+• PH ≤ τ , the predicted load at the horizon is within the threshold. 
+
+• Pnow ≤ τ , the system is not currently overloaded. 
+
+8.4 Scale-Up 
+
+The scale-up logic converts the predicted aggregated load AH into a target instance count 
+
+N ∗. The idea is to find the minimum number of instances that keeps the per-instance metric at or below τ :
+
+N ∗ = ⌈N (AH , τ )⌉ (
+
+= 
+
+> ⌈
+
+AH
+
+τ
+
+> ⌉
+
+for the default model 
+
+> )
+
+Asymmetric Risk 
+
+The predicted aggregated value AH = ¯Anow + tnow · H has two components with very different certainty. The level ¯Anow reflects the confirmed state of the metric, load that is already happening. The trend contribution ∆AH = tnow · H is a projection, load that 
+
+might happen if the trend continues. Every time the algorithm scales up based on the trend, it takes a risk: what if the trend flattens out right after the decision? The new instances were requested to handle load that never materialized, and the system ends up over-provisioned. The cost of this mistake depends on how much of the prediction comes from the uncertain trend versus the confirmed level. Consider two scenarios with N = 7 instances and τ = 0 .75 . Both have an upward trend, and both reach the same per-instance prediction PH = 0 .80 at the horizon, above the threshold (Figure 18). A naive approach would be to scale up in both cases, adding an 8th instance. Figure 19 reframes this from the cluster’s perspective. Instead of per-instance metrics, it shows the aggregated metric across all N = 7 instances stacked vertically. Each grey segment represents one instance’s capacity ( τ = 0 .75 ). The red dashed line marks the current total capacity N · τ .This view reveals a crucial difference. In Case A, the confirmed level is 3.34 (well below capacity) and the trend contributes 2.26 . In Case B, the confirmed level is 5.23 (nearly filling all 7 instances) and the trend contributes only 0.37 . Consider what happens if the spike stops right after the scale-up. In Case A, if the spike ends the moment we add the 8th instance, the cluster is over-scaled by 3 instances while in Case B, it’s only over-scaled by 1 instance. The risk of 8 Scaling Decision 31 over-scaling is much higher in Case A because the trend is a larger portion of the prediction. The algorithm must account for it. 
+
+−20 s −15 s −10 s −5s now H
+
+0
+
+0.25 
+
+0.5
+
+0.75 
+
+1
+
+Pnow 
+
+PH
+
+> Per-instance metric
+
+Case A: low level, steep trend 
+
+−20 s −15 s −10 s −5s now H
+
+0
+
+0.25 
+
+0.5
+
+0.75 
+
+1
+
+Pnow PH
+
+> Per-instance metric
+
+Case B: high level, gentle trend 
+
+Overload threshold τ Per-instance level Pt Trend extrapolation 
+
+Figure 18: Per-instance metric view. 
+
+Case A   
+
+> inst. 1
+> inst. 2
+> inst. 3
+> inst. 4
+> inst. 5
+> inst. 6
+> inst. 7
+> inst. 8
+> ¯Anow = 3 .34
+> ∆AH= 2 .26
+
+Case B        
+
+> inst. 1
+> inst. 2
+> inst. 3
+> inst. 4
+> inst. 5
+> inst. 6
+> inst. 7
+> ¯Anow = 5 .23
+> ∆AH= 0 .37 Predicted usage ( AH= 5 .60 )
+> Capacity threshold ( N·τ= 5 .25 )
+
+Confirmed usage ( ¯Anow ) Predicted usage increase ( ∆AH )
+
+Figure 19: Capacity comparison. 8 Scaling Decision 32 The algorithm adjusts the trend contribution based on the growth ratio — how much of the prediction relies on the trend: 
+
+ρ = ∆AH
+
+¯Anow 
+
+In Case A from Figures 18–19, ρ = 0 .68 : the trend adds 68% on top of the confirmed level, the target count relies heavily on the trend continuing, and the risk of over-provisioning is substantial if it does not. In Case B, ρ = 0 .07 : the trend adds only 7%, almost the entire prediction is confirmed load, so the risk is low regardless of what the trend does next. When the growth ratio is high, the algorithm reduces the trend contribution to limit the over-provisioning risk: 
+
+ω = kk + ρ
+
+ˆAH = ¯Anow + ω · ∆AH
+
+When ρ is small, ω is close to 1 and the trend contribution is preserved almost entirely, the target was already well-supported by confirmed load. When ρ is large, ω decreases and the trend contribution is reduced. The parameter k (default k = 2 ) controls the balance: under-provisioning is treated as k times more costly than over-provisioning. Higher k
+
+preserves more of the trend contribution; k = 1 would weight both risks equally. 
+
+N ∗ = ⌈N ( ˆAH , τ )⌉ (
+
+= 
+
+> ⌈
+
+ˆAH
+
+τ
+
+> ⌉
+
+for the default model 
+
+> )
+
+Trim spillover capacity 
+
+The predicted load ˆAH combines a confirmed component ( ¯Anow ) and an unconfirmed trend extrapolation. Ceiling division on this value guarantees enough capacity, but it can allocate an extra instance whose need rests entirely on the trend contribution. If the cluster needs less than 10% of the extra instance capacity, the evidence for provisioning it is weak: the trend may not materialize, and adding the instance now risks overscaling. The algorithm prefers to wait: if the load genuinely grows, the next evaluation cycle will confirm the need and provision the instance then.  
+
+> inst. 1
+> inst. 2
+> inst. 3
+> inst. 4
+> ¯Anow
+> ∆AH
+> δ
+
+δ = N ( ˆAH , τ ) − (N ∗ − 1) 
+
+Figure 20: Trim spillover capacity. δ is the fractional instance need: the amount by which the exact (real-valued) required count exceeds N ∗ − 1. For the default model, 
+
+δ = ˆAH /τ − (N ∗ − 1) .9 Cooldowns 33 If the system is not currently overloaded ( Pnow ≤ τ ) and the fractional need is small (δ ≤ 0.1): 
+
+N ∗ ← N ∗ − 1
+
+Safety bounds 
+
+The result is clamped to three constraints: scale-up never reduces the count below the current target (which would be a scale-down through the scale-up path), never exceeds the configured maximum, and never adds more than Nstep instances per decision. 
+
+N ∗ ← clamp( N ∗, Ntarget , min( Ntarget + Nstep , Nmax )) 
+
+8.5 Scale-Down 
+
+Scale-down is deliberately cautious. After removing an instance the load is redistributed across the cluster, raising the per-instance metric value. The algorithm must ensure that there is enough headroom to handle this increase plus some safety margin that prevents the immediate scale-up triggered by small fluctuations. The rule is: after scaling down and redistributing the load, the per-instance metric should be below the threshold τ by a μ·Pdown margin, where Pdown = P 
+
+> (
+
+¯Anow , N target − 1
+
+> )
+
+is the per-instance load after removal: 
+
+N ∗ =
+
+> ⌊
+
+N
+
+> (
+
+¯Anow , τ
+
+1 + μ
+
+> )⌋
+
++ 1 
+
+> (
+
+= 
+
+> ⌊
+
+(1 + μ) · ¯Anow 
+
+τ
+
+> ⌋
+
++ 1 for the default model 
+
+> )
+
+The result is clamped so that scale-down never drops below the configured minimum and never increases the count (which would be a scale-up through the scale-down path). 
+
+N ∗ ← clamp( N ∗, Nmin , Ntarget )
+
+8.6 Output 
+
+The decision stage produces a target instance count N ∗.
+
+# 9 Cooldowns 
+
+9.1 Not Required, But Useful 
+
+Cooldowns are optional . The core algorithm already prevents cascading scale-ups by tracking the target instance count: when the algorithm decides to scale up, it accounts for instances that have been requested but haven’t started yet. If the requested instances are enough to handle the predicted load, no additional scale-up is triggered. The algorithm can operate correctly without any cooldowns. So why have them? 
+
+9.2 Trading Efficiency for Stability 
+
+Even if the algorithm makes accurate decisions at every point in time, the resulting scaling behavior can be too volatile in some cases. A short traffic spike might trigger a scale-up, followed by a drop that triggers a scale-down a few minutes later. Both decisions are correct (the instances were needed during the spike and not needed after), but the rapid churn is undesirable. Starting and stopping instances has its own costs: resource allocation overhead, connection draining, potential brief disruptions. 10 Adaptive Init Timeout 34 Cooldowns allow a user to trade some efficiency for stability. By enforcing minimum intervals between scaling actions, they prevent the system from scaling too often. 
+
+9.3 The Four Cooldown Types 
+
+Each combination of consecutive scaling directions can have its own cooldown: 
+
+• Scale-up after scale-up : Minimum time since the last scale-up decision . Even though pending scale-ups prevent cascading, a user might want additional spacing. 
+
+• Scale-up after scale-down : Minimum time since the last scale-down decision .Prevents rapid back-and-forth oscillation. 
+
+• Scale-down after scale-up : Minimum time since the last instance actually started 
+
+(not since the scale-up decision). The clock starts when the instance registers, not when the decision was made; what matters is how long the instance has been running and absorbing load. The gap between the decision and the instance start is already covered: scale-down is blocked while there are pending scale-ups that haven’t materialized yet. 
+
+• Scale-down after scale-down : Minimum time since the last scale-down decision .Limits how quickly capacity is removed. 
+
+9.4 Relationship to Redistribution 
+
+One practical consideration: if the scale-down-after-scale-up cooldown is shorter than TR, a scale-down could happen while new instances are still ramping up. The redistribution stage smooths the signal during this period, but the signal hasn’t fully settled. It’s generally advisable to set the scale-down-after-scale-up cooldown ≥ TR.
+
+# 10 Adaptive Init Timeout 
+
+10.1 Context 
+
+The init timeout TI (how long a new instance takes to become ready after a scale-up decision) is a key input to the algorithm. It determines the prediction horizon: how far into the future the algorithm looks when deciding whether to scale. A fixed TI works if startup times are consistent. But in practice, they vary: different machine types, varying cluster load, image pull times, application warm-up that depends on cache state. The adaptive init timeout tracks these variations automatically. This is one way to provide the init timeout input. If the startup time is known and stable, a fixed value works fine. The core algorithm only needs the value; how it’s determined is independent. 
+
+10.2 How It’s Measured 
+
+Each time the algorithm decides to scale up, it records the decision timestamp tdec  
+
+> j
+
+. When the new instance actually registers at treg  
+
+> j
+
+, the difference is the measured startup time: 
+
+mj = treg  
+
+> j
+
+− tdec 
+
+> j
+
+These measurements are collected in a sliding window W of configurable size. 11 Metric Model Examples 35 
+
+10.3 Requirements 
+
+The calculation must satisfy three properties: 1. Exclude outliers. A single abnormally slow or fast startup should not shift the timeout significantly. A cold image pull, a scheduling delay, or a network hiccup is not representative of typical behavior. 2. Adapt over time. The real init timeout can change (a new application version may start faster or slower, the infrastructure may change). The timeout must converge toward the new reality, not stay anchored to historical values. 3. Not decrease too quickly. If the timeout drops too fast and the real startup time hasn’t actually improved, the algorithm will look at too short a horizon: it won’t scale early enough and instances won’t be ready in time. Decreasing slowly gives time to confirm the improvement is real. 
+
+10.4 The Calculation 
+
+The timeout converges toward the median of recent measurements, which satisfies require-ment 1, since median is inherently resistant to outliers. Let ˜m = median (W). The convergence uses clamped step sizes, satisfying requirements 2 and 3: 
+
+δ = ˜ m − TI
+
+δ+ = TI · r · f↑
+
+δ− = TI · r · f↓
+
+ˆδ = clamp( δ, −δ−, δ +)
+
+T ′ 
+
+> I
+
+= ⌊TI + ˆδ⌉
+
+where ⌊·⌉ denotes rounding to the nearest integer. The timeout moves toward the median, but no single update can shift it by more than a fraction of its current value. This keeps the convergence smooth and predictable. 
+
+f↑ > f ↓: the timeout increases faster than it decreases. If startup times have genuinely increased, the algorithm needs to extend its horizon quickly (being too short is dangerous). If startup times have decreased, the algorithm can shorten its horizon gradually (being too long is merely cautious). 
+
+# 11 Metric Model Examples 
+
+The algorithm is parameterized by three functions ( A, P, N ) that define how per-instance metric values relate to the cluster-wide aggregate (Section 1). The default model (sum / average) is the simplest choice, but any model satisfying the two required properties (scaling invariance and per-instance separability) will work. This section shows the general pattern, gives two non-trivial examples, and explains what falls outside the framework. 
+
+11.1 The General Pattern 
+
+All supported models share the same structure. Pick any monotonically increasing function 
+
+g with an inverse g−1. If the aggregate can be written as ∑ wi · g(vi) for some per-instance 11 Metric Model Examples 36 function g, it works. If any term depends on j̸ = i or on N , it does not (Section 11.3). The metric model is: 
+
+A({(vi, w i)}) = ∑
+
+> i
+
+wi · g(vi)
+
+P(S, N ) = g−1 
+
+> (
+
+SN
+
+> )
+
+N (S, τ ) = Sg(τ )
+
+The default model uses g(v) = v (the identity), giving the familiar sum and average. The non-linearity, if any, lives entirely in the per-instance transformation g. Because each instance’s contribution wi · g(vi) depends only on its own value and weight, the aggregate is separable and invariant under load redistribution. 
+
+11.2 Non-Trivial Models 
+
+Per-instance overhead. Suppose each instance has a fixed baseline cost b that does not redistribute when instances are added (e.g., a per-instance memory overhead, health-check load, or background task). Only vi − b of each instance’s metric value represents redistributable load. 
+
+g(v) = v − b (subtract baseline) 
+
+A = ∑ wi · (vi − b)
+
+P(S, N ) = S/N + b
+
+N (S, τ ) = S/ (τ − b) (requires τ > b )Using the default model here would underestimate the required instance count: it assumes the full aggregate can be spread evenly, but the b per instance stays fixed and does not redistribute. 
+
+Quadratic per-instance cost. In some systems, the cost each instance imposes grows non-linearly with its load. For example, at high CPU utilization request latency grows quadratically due to queueing effects (an instance at 0.90 is much more dangerous than one at 0.50 ). 
+
+g(v) = v2 (quadratic cost) 
+
+A = ∑ wi · v2
+
+> i
+
+P(S, N ) = √S/N 
+
+N (S, τ ) = S/τ 2
+
+Because the aggregate grows quadratically with per-instance load, the default model (which assumes a linear relationship) would underestimate the required count (it divides by τ instead of τ 2). 
+
+11.3 What Does Not Work: Cross-Instance Coupling 
+
+The algorithm cannot handle models where the aggregate depends on the fleet size N or on interactions between instances. It breaks the core assumptions the algorithm relies on. 12 Implementation: Intelligent Command Center 37 
+
+Scaling invariance breaks. The algorithm assumes A stays approximately constant when load redistributes after scaling (no external change). Consider A = ∑ vi − c · N 2:adding an instance changes the −c · N 2 term even though no external load arrived. The aggregate now moves with scaling decisions, not just with external load. 
+
+Prediction becomes circular. The prediction stage forecasts future A using trend smoothing, assuming A reflects external load. If A also depends on N , then the predicted 
+
+AH bakes in the current fleet size. Scaling changes N , which changes what A would be, which invalidates the prediction that motivated the scaling. 
+
+P may not be monotonically decreasing. For P(S, N ) = S/N + c · N , adding instances eventually makes per-instance load worse . N (S, τ ) may have no solution or two solutions, and the scale-up logic has no well-defined target. 
+
+# 12 Implementation: Intelligent Command Center 
+
+We implement and deploy the algorithm in a production Kubernetes environment using the Platformatic Intelligent Command Center (ICC), a cloud control plane that manages Node.js applications. ICC monitors resource usage across the cluster, runs the algorithm pipeline, and adjusts the number of pods to keep applications healthy under changing load. 
+
+12.1 Deployment Model 
+
+Applications run on Watt , the Platformatic runtime. A single Watt instance can run multiple applications, each in its own worker thread within the same process. In a Kubernetes deployment, each pod runs one Watt instance, and the Deployment is replicated across multiple pods. An application in this context is a logical Node.js service: it can be a pure Node.js server, a Next.js frontend, or any other framework supported by Watt. 
+
+12.2 Concept Mapping 
+
+The abstract concepts from the algorithm map to ICC as follows: 
+
+Algorithm concept ICC realization 
+
+Instance A Kubernetes pod running one Watt instance. Metric Event Loop Utilization (ELU) and heap memory usage, standard Node.js runtime metrics measured by Watt per application. Both satisfy the metric properties from Section 1: monotonically related to load, distributed across pods, and with meaningful overload thresholds. Metric model Default (sum / average). Both ELU and heap redistribute approx-imately linearly across pods when instances are added or removed. Threshold τ Configurable per application and per metric. Instance bounds Nmin and Nmax are configurable per application, and can also be set via Kubernetes labels on the Deployment. Scaling action Updating the Kubernetes Deployment replica count. Table 5: Mapping of algorithm concepts to the ICC implementation. 12 Implementation: Intelligent Command Center 38 
+
+12.3 Architecture   
+
+> Kubernetes API ICC
+> target replica count
+> Watt
+> App 1
+> App 2
+> Watt-Extra
+> Pod ( ×N)
+> metrics
+> metric batches
+> pod lifecycle
+
+Figure 21: Data flow in ICC. Each pod runs a Watt instance hosting one or more applications. Watt measures per-application metrics; Watt-Extra collects them into batches and sends them to ICC. ICC runs the algorithm pipeline and updates the Kubernetes Deployment replica count. Each Watt deployment is scaled independently: ICC maintains a separate pipeline instance per deployment, so scaling decisions for one never interfere with another. 
+
+Metric collection. Watt measures ELU and heap usage per application at regular intervals. A companion component, Watt-Extra , subscribes to these measurements, collects them into batches, and sends them to ICC over HTTP. Watt-Extra implements the dynamic batch timing described in Section 3: batches are sent frequently under load (e.g. every 5 s) and infrequently when idle (e.g. every 40 s). 
+
+Instance lifecycle. Watt-Extra maintains a persistent connection to ICC. When a pod starts, the connection is established and ICC records the pod’s start time — required by the redistribution stage (Section 6) to compute stabilization weights. When a pod is terminated (gracefully or not), the connection drops and ICC detects the loss immediately, allowing prompt removal of the pod from the active instance set. 
+
+Pipeline execution. Because metrics arrive in asynchronous batches from different pods, all five pipeline stages are used: alignment places irregularly-timed samples onto a uniform grid, imputation estimates values for pods that haven’t reported yet, and redistribution, prediction, and decision operate on the resulting clean signal. When the pipeline produces a target pod count that differs from the current count, ICC updates the Kubernetes Deployment replica count. 
+
+Adaptive init timeout. The init timeout TI is estimated from observed pod startup times using the adaptive mechanism from Section 10. This allows the prediction horizon to track the actual Kubernetes scheduling and initialization latency, which varies across clusters and over time. 13 Performance Comparison 39 
+
+12.4 Multi-Application Deployments 
+
+Because Watt can host multiple applications in the same process, each pod produces independent metrics for each application it runs. ICC runs the algorithm pipeline separately for each (application, metric) pair within a deployment. The final target pod count is the maximum across all pipelines: the most resource-constrained application drives the scaling decision. This ensures that no application becomes a bottleneck, even if others in the same Watt instance are lightly loaded. 
+
+# 13 Performance Comparison 
+
+This section compares the predictive scaling algorithm (running in ICC) against two widely-used Kubernetes scalers (HPA and KEDA) under the same load, on the same cluster, with the same application. 
+
+13.1 Test Design 
+
+A Next.js 16 e-commerce application (App Router, Server Components, SSR) runs on Platformatic Watt with one worker per pod (1 CPU / 2 GB RAM). An Envoy proxy with 30 s linear slow start sits between the load balancer and the pods, ramping traffic to new pods gradually so that V8 JIT compilation on cold code paths does not distort the comparison. All three scalers operate on the same deployment (min 4, max 20 pods): 
+
+• ICC , the predictive algorithm described in this document, scaling on Event Loop Utilization (ELU) with a 0.7 threshold. 
+
+• KEDA , scaling on the same metric (ELU) via a Prometheus query, with the same 0.7 threshold. 
+
+• HPA , scaling on CPU utilization with a 70% target. KEDA uses the same metric and threshold as ICC, so the comparison isolates the scaling algorithm. HPA is included because it is the most widely deployed Kubernetes scaler, not as a direct comparison: its results reflect the choice of metric (CPU instead of ELU) in addition to the reactive algorithm. CPU utilization does not directly measure event loop saturation in Node.js applications: the event loop can be nearly saturated while CPU reports moderate usage. Each scaler is tested under two load profiles: 
+
+• Steady ramp , traffic grows from 10 to 800 req/s over ∼2.5 minutes, then holds at 800 req/s for 90 seconds. This is the primary comparison: the most common real-world pattern, where traffic grows gradually as users arrive over the course of minutes. 
+
+• Sudden spike , traffic jumps from 0 to 800 req/s in 10 seconds, then holds at 800 req/s for 120 seconds. This tests behavior when there is minimal trend history to extrapolate from. Between tests, the deployment is reset to 4 pods and warmed up to ensure consistent starting conditions. 
+
+13.2 Scaling Behavior 
+
+Each chart below shows three traces: the average ELU across all pods (purple, left axis), the pod count (green, right axis), and the target request rate (grey shaded area). The dashed red line marks the ELU threshold τ = 0 .7.13 Performance Comparison 40 
+
+Steady ramp. Traffic grows from 10 to 800 req/s over ∼2.5 minutes, then holds at 800 req/s for 90 seconds. 1:00 2:00 3:00 4:00 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Time ELU (avg across pods)    
+
+> ELU threshold Target req/s Avg. ELU Pod count
+
+4
+
+6
+
+8
+
+10 
+
+12 
+
+> Pods
+
+Figure 22: ICC: ELU and pod count. The predictive algorithm in ICC keeps ELU near the 0.7 threshold. This happens because the algorithm acts on the trend, projects where ELU will be, and scales up in advance to adjust capacity accordingly. It also does not over-provision: it uses the minimum number of pods needed to keep ELU near the threshold. 1:00 2:00 3:00 4:00 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Time ELU (avg across pods)    
+
+> ELU threshold Target req/s Avg. ELU Pod count
+
+4
+
+6
+
+8
+
+10 
+
+12 
+
+> Pods
+
+Figure 23: KEDA: ELU and pod count. KEDA uses the same metric (ELU) and the same threshold (0.7). Both KEDA and HPA compute the target replica count from the sum of current metric values across all instances: 
+
+N ∗ = 
+
+> ⌈
+
+Sτ
+
+> ⌉
+
+, S =
+
+> N∑
+> i=1
+
+vi
+
+where vi is the current metric value of instance i. This is a reactive approach: it waits for ELU to cross the threshold before acting. As a result, it fails to keep ELU under the 13 Performance Comparison 41 threshold during the ramp-up period, and average ELU reaches 0.92 at the peak of the load. This shows the fundamental limitation of reactive scaling: it can only respond to changes after they happen, not anticipate them. When load grows, the scaler is always behind the curve, allowing ELU to climb well above the threshold before it reacts. The problem becomes even worse as overloaded instances’ performance decreases in a non-linear way due to queueing effects, which eventually forces KEDA and other reactive algorithms to over-provision. Lowering the threshold does not solve this. A lower threshold does not make the scaler react faster , it makes it react to a lower value . The only difference is that the application now runs at a lower utilization baseline permanently, using more pods to handle the same load. This trades constant over-provisioning for slightly more headroom when a spike hits, a cost paid at all times, not just during spikes. 1:00 2:00 3:00 4:00 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Time ELU (avg across pods)    
+
+> ELU threshold Target req/s Avg. ELU Pod count
+
+4
+
+6
+
+8
+
+10 
+
+12 
+
+> Pods
+
+Figure 24: HPA: ELU and pod count. HPA shows the same reactive pattern as KEDA, but scales on CPU utilization rather than ELU. CPU is a coarser indicator of Node.js application health: the event loop can be nearly saturated while CPU reports a different picture, or vice versa. 
+
+Impact on latency. The scaling behavior above directly determines what users experi-ence. When ELU is below the threshold, the event loop processes requests promptly. When ELU exceeds the threshold, requests queue and latencies climb into seconds — eventually reaching the client timeout. 
+
+ICC KEDA HPA 
+
+Success rate 99.47% 95.11% 90.97% Avg. latency 167 ms 1,174 ms 1,499 ms Median latency 26 ms 154 ms 522 ms p(90) latency 317 ms 3,530 ms 4,168 ms p(99) latency 1,970 ms 10,001 ms 10,001 ms Errors 718 6,591 12,039 Table 6: Steady ramp: latency and error rates. 13 Performance Comparison 42 ICC kept ELU near the threshold throughout, achieving a 99.47% success rate and 317 ms at p(90). KEDA and HPA spent extended periods well above the threshold: KEDA lost 5% of requests, HPA lost 9%. Their p(99) latencies hit the 10 s client timeout because the queue grew faster than the event loop could drain it. 
+
+Sudden spike. The spike scenario jumps from 0 to 800 req/s in 10 seconds, then holds. No scaler can prevent the initial overload: there is no trend history to predict from and no time for new pods to start. The question is how quickly each scaler recovers. 0:30 1:00 1:30 2:00 2:30 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Time ELU (avg across pods)    
+
+> ELU threshold Target req/s Avg. ELU Pod count
+
+4
+
+6
+
+8
+
+10 
+
+12 
+
+14 
+
+> Pods
+
+Figure 25: ICC: spike scenario. Without trend history, ICC cannot predict the spike. But once the first samples arrive, the trend estimate builds rapidly. The asymmetric parameters ( α↑ > α ↓) ensure the upward movement is captured within a few ticks. The saturation mechanism (Section 7.8) preserves the trend even while ELU is clipped at 1.0, so the algorithm continues scaling despite the flat signal. 0:30 1:00 1:30 2:00 2:30 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Time ELU (avg across pods)    
+
+> ELU threshold Target req/s Avg. ELU Pod count
+
+4
+
+6
+
+8
+
+10 
+
+12 
+
+14 
+
+> Pods
+
+Figure 26: KEDA: spike scenario. The reactive formula scales in proportion to the current overload ratio, but each decision is based on a single snapshot. It cannot account for the fact that load arrived all at once 13 Performance Comparison 43 and more capacity is needed than the current ratio suggests. The result is a staircase of incremental scale-ups, each insufficient, while ELU remains elevated. 0:30 1:00 1:30 2:00 2:30 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Time ELU (avg across pods)    
+
+> ELU threshold Target req/s Avg. ELU Pod count
+
+4
+
+6
+
+8
+
+10 
+
+12 
+
+14 
+
+> Pods
+
+Figure 27: HPA: spike scenario. HPA faces the same reactive limitation as KEDA, compounded by using CPU utilization, which lags behind event loop saturation in Node.js applications. The scaler sees less urgency than the actual ELU would suggest, resulting in even slower scaling. 
+
+ICC KEDA HPA 
+
+Success rate 91.51% 87.47% 77.31% Avg. latency 1,126 ms 1,989 ms 2,205 ms Median latency 55 ms 855 ms 1,102 ms p(90) latency 3,385 ms 6,108 ms 7,338 ms p(99) latency 10,001 ms 10,001 ms 10,001 ms Errors 8,028 11,212 21,067 Table 7: Sudden spike: latency and error rates. All three scalers suffer during the initial burst: the p(99) hits the 10 s client timeout across the board. The difference is in recovery. ICC’s median of 55 ms means most requests after the initial burst were served normally, while KEDA (855 ms) and HPA (1,102 ms) remained degraded throughout the hold period. HPA lost nearly a quarter of all requests. 
+
+13.3 Test Environment 
+
+The benchmark ran on AWS EKS (us-east-1), Kubernetes v1.35, with 4 worker nodes (m5.2xlarge: 8 vCPU, 32 GB RAM each). Load was generated from a dedicated EC2 instance (c7gn.2xlarge, ARM64) in the same VPC using Grafana k6. The full benchmark automation, scaler configurations, and raw data are available in the benchmark repository 1.
+
+> 1https://github.com/platformatic/k8s-watt-performance-demo/tree/scaler
+
+13 Performance Comparison 44 
+
+Parameter Value Description 
+
+τ (ELU) 0.7 Per-instance overload threshold 
+
+∆t 1000 ms Sample interval 
+
+TI 25 s Init timeout 
+
+TR 30 s Redistribution timeout 
+
+η 1.2 Prediction horizon multiplier 
+
+Hmin 10 s Minimum prediction horizon 
+
+κ 1 Stabilization weight shape 
+
+α↑ 0.2 Smoothing parameter (upward) 
+
+α↓ 0.1 Smoothing parameter (downward) 
+
+β↑ 0.2 Trend parameter (upward) 
+
+β↓ 0.1 Trend parameter (downward) 
+
+γ0 10ř Trend direction threshold 
+
+k 2 Risk dampening parameter 
+
+μ 0.3 Scale-down margin Table 8: ICC configuration. 
+
+Parameter Value Description 
+
+Metric ELU Via Prometheus query Threshold 0.7 Same as ICC Polling interval 15 s Reduced from default 30 s Table 9: KEDA configuration. 
+
+Parameter Value Description 
+
+Metric CPU Resource utilization Target 70% Average utilization Polling interval 15 s HPA default Table 10: HPA configuration. KEDA’s polling interval was reduced from its default of 30 s to 15 s to match HPA and provide a fairer comparison. With the default 30 s interval, KEDA’s results would be worse. References 45 
+
+# 14 Conclusion 
+
+We presented a predictive scaling algorithm organized as a five-stage pipeline. It takes a fundamentally different approach to scaling decisions than existing solutions. Rather than treating the metric as a discrete value sampled at evaluation time (where each decision is independent, with no understanding of direction or dynamics), the algorithm treats the metric as a continuous signal. Every sample contributes to a running estimate of the level and its rate of change. The algorithm knows not just where the metric is, but where it is heading. Short-term prediction follows naturally: because the trend is already maintained, extrapolating to a future horizon is straightforward: the algorithm forecasts where the load will be by the time new capacity is ready and scales based on that forecast. This continuous view works if the underlying signal reflects external load rather than the side effects of the algorithm’s own decisions. Per-instance metrics fail this: adding an instance redistributes load and moves every metric, even when traffic is unchanged. The algorithm operates on a cluster-wide aggregate that is invariant under scaling: the total load stays roughly the same when instances are added, even as individual metrics shift. This is what makes the trend estimate trustworthy. The five pipeline stages deliver this clean signal. Alignment places irregularly-timed samples onto a uniform grid. Imputation fills in values for instances that haven’t reported yet. Redistribution smooths the transient distortion after scale-up through gradual weighted inclusion, drop absorption, and a redistribution delta that communicates the expected weight-growth ramp to the prediction stage so it does not contaminate the trend estimate. By the time data reaches the prediction stage, it is continuous, complete, and free of scaling artifacts. The decision stage converts the forecast into a target instance count, with risk-aware dampening that accounts for the uncertainty in any extrapolation. Another core concept is the metric model. Different metrics relate to scaling in different ways. The three functions A, P, and N encode this relationship, so that every calculation in the pipeline, from aggregation to the final instance count, reflects how the specific metric actually behaves under scaling. The algorithm is risk-aware. Acting on a forecast carries a risk: if the predicted load does not materialize, the system ends up over-provisioned. The algorithm assesses how much each scaling decision depends on projection versus observed load, and adjusts its response accordingly. When the observed load already confirms the need, the algorithm acts decisively. The more the decision relies on the forecast, the more conservatively the algorithm responds, reducing the risk of committing resources to load that may never arrive. In a controlled comparison against HPA and KEDA, the algorithm kept per-instance load below the target threshold throughout, demonstrating that short-term prediction on a scaling-invariant signal can outperform reactive scaling under sustained load growth. 
+
+# References 
+
+[1] T. Norling, “Introduction to Event Loop Utilization in Node.js,” NodeSource Blog, 2020. https://nodesource.com/blog/event-loop-utilization-nodejs 
+
+[2] Kubernetes Authors, “Horizontal Pod Autoscaling,” Kubernetes Documen-tation, 2024. https://kubernetes.io/docs/concepts/workloads/autoscaling/ horizontal-pod-autoscale/ 
+
+[3] KEDA Contributors, “KEDA — Kubernetes Event-driven Autoscaling,” 2024. https: //keda.sh/docs/ References 46 [4] Knative Authors, “Configuring the Autoscaler,” Knative Documentation, 2024. https: //knative.dev/docs/serving/autoscaling/ 
+
+[5] Amazon Web Services, “Predictive scaling for Amazon EC2 Auto Scaling,” AWS Doc-umentation, 2024. https://docs.aws.amazon.com/autoscaling/ec2/userguide/ ec2-auto-scaling-predictive-scaling.html 
+
+[6] C. C. Holt, “Forecasting seasonals and trends by exponentially weighted moving aver-ages,” International Journal of Forecasting , vol. 20, no. 1, pp. 5–10, 2004. (Original work: ONR Memorandum No. 52, Carnegie Institute of Technology, 1957.)
