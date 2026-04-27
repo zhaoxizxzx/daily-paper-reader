@@ -6,40 +6,37 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-26
-- 运行时间：2026-04-26 19:42:08 UTC
+- 最新运行日期：2026-04-27
+- 运行时间：2026-04-27 20:30:43 UTC
 - 运行状态：成功
-- 本次总论文数：6
-- 精读区：3
-- 速读区：3
+- 本次总论文数：5
+- 精读区：1
+- 速读区：4
 
 ### 今日简报（AI）
-今日聚焦网络协议的形式化验证与流量预测，深度解析 6 篇涵盖 SDN 安全及 LLM 网关的前沿论文。
-重点推荐 NEST 协议强化框架与基于图自编码器的 NetFlow 预测技术，实现网络安全与性能的双重提升。
-建议优先研读高分技术报告以掌握会话类型验证新范式，并关注 K8s 环境下 Node.js 的预测性扩缩容实践。
-- 详情：[/202604/26/README](/202604/26/README)
+今日深入探讨了太阳风暴对低轨卫星轨道衰减及网络连接的冲击，并兼顾了云网络与实时通信协议的最新优化。
+重点推荐 CosmicDancePro 对星际环境威胁卫星互联网稳定性的量化分析，以及物理层辅助拥塞控制带来的性能提升。
+建议关注空间天气对通信基建的潜在风险，探索更具韧性的卫星组网与协议栈隔离技术。
+- 详情：[/202604/27/README](/202604/27/README)
 
 ### 精读区论文标签
-1. [NEST: Network Enforced Session Types (Technical Report)](/202604/26/2604.21795v1-nest-network-enforced-session-types-technical-report)  
-   标签：评分：9.0/10、query:netmes
-   evidence：基于P4的数据平面数据包级协议监控
-2. [Forecasting Individual NetFlows using a Predictive Masked Graph Autoencoder](/202604/26/2604.20483v2-forecasting-individual-netflows-using-a-predictive-masked-graph-autoencoder)  
+1. [CosmicDancePro -- Measuring LEO satellite's orbital decay and network connectivity implications during solar storms](/202604/27/2604.22685v1-cosmicdancepro----measuring-leo-satellites-orbital-decay-and-network-connectivity-implications-during-solar-storms)  
    标签：评分：8.0/10、query:netmes
-   evidence：使用图神经网络预测单个NetFlow流量
-3. [SPAC: Automating FPGA-based Network Switches with Protocol Adaptive Customization](/202604/26/2604.21881v1-spac-automating-fpga-based-network-switches-with-protocol-adaptive-customization)  
-   标签：评分：8.0/10、query:netmes
-   evidence：针对自定义协议和流量模式自动化生成基于 FPGA 的网络交换机
+   evidence：低轨卫星网络测量追踪与连通性分析
 
 ### 速读区论文标签
-1. [Predictive Autoscaling for Node.js on Kubernetes: Lower Latency, Right-Sized Capacity](/202604/26/2604.19705v1-predictive-autoscaling-for-nodejs-on-kubernetes-lower-latency-right-sized-capacity)  
+1. [OCC: Physical-Layer Assisted Congestion Control for Real-Time Communications](/202604/27/2604.22383v1-occ-physical-layer-assisted-congestion-control-for-real-time-communications)  
+   标签：评分：7.0/10、query:netmes
+   evidence：实时通信中的带宽探测与测量
+2. [Chamelio: A Fast Shared Cloud Network Stack for Isolated Tenant-Defined Protocols](/202604/27/2604.22603v1-chamelio-a-fast-shared-cloud-network-stack-for-isolated-tenant-defined-protocols)  
+   标签：评分：7.0/10、query:netmes
+   evidence：用于云和数据中心的可编程共享网络栈
+3. [Dynamic Risk Assessment by Bayesian Attack Graphs and Process Mining](/202604/27/2604.18080v1-dynamic-risk-assessment-by-bayesian-attack-graphs-and-process-mining)  
    标签：评分：6.0/10、query:netmes
-   evidence：用于扩缩容的事件循环指标实时监控
-2. [SDNGuardStack: An Explainable Ensemble Learning Framework for High-Accuracy Intrusion Detection in Software-Defined Networks](/202604/26/2604.20934v1-sdnguardstack-an-explainable-ensemble-learning-framework-for-high-accuracy-intrusion-detection-in-software-defined-networks)  
+   evidence：系统行为和恶意网络流量的在线监控
+4. [Risk-Aware and Stable Edge Server Selection Under Network Latency SLOs](/202604/27/2604.21483v1-risk-aware-and-stable-edge-server-selection-under-network-latency-slos)  
    标签：评分：6.0/10、query:netmes
-   evidence：在SDN中使用真实流量模式进行入侵检测
-3. [Behavioral Consistency and Transparency Analysis on Large Language Model API Gateways](/202604/26/2604.21083v1-behavioral-consistency-and-transparency-analysis-on-large-language-model-api-gateways)  
-   标签：评分：6.0/10、query:netmes
-   evidence：评估大模型 API 网关的测量框架
+   evidence：监控网络延迟以进行边缘服务器选择
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,79 @@
+{
+  "label": "2026-04-27",
+  "date": "2026-04-27",
+  "generated_at": "2026-04-27T20:30:53",
+  "count": 5,
+  "papers": [
+    {
+      "paper_id": "202604/27/2604.22685v1-cosmicdancepro----measuring-leo-satellites-orbital-decay-and-network-connectivity-implications-during-solar-storms",
+      "section": "deep",
+      "title_en": "CosmicDancePro -- Measuring LEO satellite's orbital decay and network connectivity implications during solar storms",
+      "authors": "Suvam Basak, Amitangshu Pal, Debopam Bhattacherjee",
+      "date": "2026-04-24",
+      "pdf": "https://arxiv.org/pdf/2604.22685v1",
+      "score": "8.0",
+      "evidence": "低轨卫星网络测量追踪与连通性分析",
+      "tldr": "2024年5月的太阳风暴凸显了低轨（LEO）卫星网络的脆弱性。本研究推出了开源工具CosmicDancePro，通过整合空间天气、大气密度及卫星轨迹等多模态数据，系统评估了太阳风暴对LEO网络的影响。研究深入分析了Starlink在风暴期间的轨道修正策略，揭示了轨道高度变化的物理机制，并量化了网络层面的性能下降，如延迟激增、丢包率上升及数据速率下跌。",
+      "tags": "query:netmes",
+      "abstract_en": "The May 2024 solar superstorm highlighted the vulnerability of rapidly expanding low Earth orbit (LEO) satellite networks to severe space weather events. To systematically evaluate LEO network resilience, we introduce an open-source tool, CosmicDancePro. It enables a comprehensive analysis of the effects of solar storms in the LEO satellite network. It integrates real-world multimodal datasets, including space weather measurements from several satellites, upper-atmospheric density conditions from data-driven and high-fidelity physics-based models, and LEO satellite trajectory and LEO network measurement traces to quantify orbital decay driven by enhanced atmospheric density and network connectivity degradation. We utilize CosmicDancePro to analyze the Starlink constellation's behavior during two recent major solar storms. First, we identify the specific fleet management strategies Starlink adopts during the May 2024 solar superstorm and how they differ from its regular orbit-correction strategy. Second, we identify the mechanisms driving the previously unexplained 'W'-shaped altitude variation pattern across orbital planes of LEO constellations. Finally, our network-layer analysis quantifies the connectivity degradation during these storms, revealing transient disruptions that include repetitive short-lived outages, reconfiguration latency spikes above 500 ms, up to 60% increase in uplink loss, distorted diurnal latency patterns, and a 10+ Mbps drop in end-user data rates during storm peaks.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/27/2604.22383v1-occ-physical-layer-assisted-congestion-control-for-real-time-communications",
+      "section": "quick",
+      "title_en": "OCC: Physical-Layer Assisted Congestion Control for Real-Time Communications",
+      "authors": "Yufan Zhuang, Zili Meng, Zehong Lin, Jun Zhang",
+      "date": "2026-04-24",
+      "pdf": "https://arxiv.org/pdf/2604.22383v1",
+      "score": "7.0",
+      "evidence": "实时通信中的带宽探测与测量",
+      "tldr": "针对6G实时通信中低延迟与高带宽的矛盾，本文提出OCC。传统方法依赖试错机制，难以应对波动的蜂窝网络。OCC利用物理层信息实时获取可用带宽，并通过帧感知测量、应用限制感知估计和编码器友好速率控制，解决了流量突发和编码延迟等挑战。实验显示，OCC显著降低了尾部延迟并提升了视频码率。",
+      "tags": "query:netmes",
+      "abstract_en": "Real-time communications (RTC) is a core technology for emerging applications in 6G, such as cloud gaming, teleoperation, and extended reality (XR), which require consistently low latency and high bitrates. Existing RTC solutions fundamentally struggle to maintain low latency while supporting high bitrates due to their reliance on trial-and-error-based mechanisms. These mechanisms fail to probe the available bandwidth (ABW) promptly and accurately, leading to a trade-off between latency reliability and bandwidth utilization. The tension becomes extremely more critical as the cellular bandwidth and application's demand fluctuate with a larger range in cellular networks nowadays. To address this trade-off, we propose OCC, a novel approach that utilizes physical-layer information to explicitly obtain the ABW in real time, enabling rapid adaptation to dynamic wireless network conditions. However, the unique characteristics of RTC, including traffic bursts, application (APP) limits, and encoder lag, make the physical-layer informed control non-trivial. OCC effectively addresses these issues through three innovative strategies: frame-aware bandwidth measurement, APP-limit-aware bandwidth estimation, and encoder-friendly rate control. Extensive over-the-air experiments on an open-source cellular testbed demonstrate that OCC significantly enhances the performance of mobile RTC, reducing tail network latency by $13\\%$ to $68\\%$ and improving video frame bitrate by $1.2\\times$ to $3.5\\times$.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/27/2604.22603v1-chamelio-a-fast-shared-cloud-network-stack-for-isolated-tenant-defined-protocols",
+      "section": "quick",
+      "title_en": "Chamelio: A Fast Shared Cloud Network Stack for Isolated Tenant-Defined Protocols",
+      "authors": "Matheus Stolet, Simon Peter, Antoine Kaufmann",
+      "date": "2026-04-24",
+      "pdf": "https://arxiv.org/pdf/2604.22603v1",
+      "score": "7.0",
+      "evidence": "用于云和数据中心的可编程共享网络栈",
+      "tldr": "Chamelio 是一种面向云环境的可编程共享网络栈，旨在解决传统虚拟化网络开销大和现有共享栈功能固定的问题。它利用 eBPF 允许租户自定义协议，并通过联合优化和运行时周期计费机制，在提供高性能和可编程性的同时，确保了租户间的强性能隔离。实验表明，其性能可媲美手写优化的网络栈，并能有效抑制恶意租户对延迟的影响。",
+      "tags": "query:netmes",
+      "abstract_en": "Conventional cloud network virtualization sends packets through multiple guest and host layers, inflating CPU cost and tail latency. Shared host datapaths collapse this layering into one optimized path across tenants, but existing shared stacks are fixed-function: tenants cannot specialize their protocols. eBPF is the natural vehicle for restoring programmability to a shared datapath, but today's extensions are hook-sized, and its verifier provides safety -- not performance isolation: one tenant's per-packet work can inflate every other tenant's tail latency.   Chamelio is a programmable shared network stack that lets tenants implement full protocols through a bounded eBPF fast path and a tenant slow path, while approaching the performance and preserving the strong isolation of fixed shared stacks. It combines three ideas: a shared-stack architecture for tenant-defined protocols; joint optimisation of tenant handlers with provider infrastructure and co-resident tenants in the shared fast path; and a bounded fast path contract with runtime cycle accounting that keeps tenant programmability compatible with strong performance isolation. A tenant programmable TCP on Chamelio reaches 9.2 Mreq/s, matching the hand-tuned TAS stack; joint compilation shrinks the programmability tax from 23.9% to 3.8%; and under a scaling TCP adversary that drives uninstrumented stacks to 154 microseconds, Chamelio bounds victim tail latency at 46 microseconds.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/27/2604.18080v1-dynamic-risk-assessment-by-bayesian-attack-graphs-and-process-mining",
+      "section": "quick",
+      "title_en": "Dynamic Risk Assessment by Bayesian Attack Graphs and Process Mining",
+      "authors": "Francesco Vitale, Simone Guarino, Stefano Perone, Massimiliano Rak, Nicola Mazzocca",
+      "date": "2026-04-20",
+      "pdf": "https://arxiv.org/pdf/2604.18080v1",
+      "score": "6.0",
+      "evidence": "系统行为和恶意网络流量的在线监控",
+      "tldr": "本研究针对攻击图在实时评估漏洞利用可能性方面的不足，提出了一种结合贝叶斯攻击图（BAG）与流程挖掘的动态风险评估方法。该方法利用流程挖掘技术分析恶意网络流量，提取漏洞被激活利用的证据，并据据此动态更新BAG的条件概率表。通过在包含多种CVE漏洞的实验环境中测试，证明了该方法能有效识别活跃攻击并实时更新系统受损概率，为网络安全提供了更精准的运营支持。",
+      "tags": "query:netmes",
+      "abstract_en": "While attack graphs are useful for identifying major cybersecurity threats affecting a system, they do not provide operational support for determining the likelihood of having a known vulnerability exploited, or that critical system nodes are likely to be compromised. In this paper, we perform dynamic risk assessment by combining Bayesian Attack Graphs (BAGs) and online monitoring of system behavior through process mining. Specifically, the proposed approach applies process mining techniques to characterize malicious network traffic and derive evidence regarding the probability of having a vulnerability actively exploited. This evidence is then provided to a BAG, which updates its conditional probability tables accordingly, enabling dynamic assessment of vulnerability exploitation. We apply our method to a cybersecurity testbed instantiating several machines deployed on different subnets and affected by several CVE vulnerabilities. The testbed is stimulated with both benign traffic and malicious behavior, which simulates network attack patterns aimed at exploiting the CVE vulnerabilities. The results indicate that our proposal effectively detects whether vulnerabilities are being actively exploited, allowing for an updated assessment of the probability of system compromise.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/27/2604.21483v1-risk-aware-and-stable-edge-server-selection-under-network-latency-slos",
+      "section": "quick",
+      "title_en": "Risk-Aware and Stable Edge Server Selection Under Network Latency SLOs",
+      "authors": "Mohan Liyanage, Arnova Abdullah, Eldiyar Zhantileuov, Rolf Schuster",
+      "date": "2026-04-23",
+      "pdf": "https://arxiv.org/pdf/2604.21483v1",
+      "score": "6.0",
+      "evidence": "监控网络延迟以进行边缘服务器选择",
+      "tldr": "针对延迟敏感型应用中的边缘服务器动态选择问题，本文提出了一种轻量级且可解释的决策框架。该框架通过预测延迟的均值和不确定性来评估服务水平目标（SLO）违规风险，并结合百分位评分与迟滞机制来抑制网络波动引起的频繁切换。实验表明，该方法在降低截止日期错过率的同时，显著提升了系统稳定性，实现了鲁棒的自适应服务器选择。",
+      "tags": "query:netmes",
+      "abstract_en": "We present a lightweight and interpretable decision framework for dynamic edge server selection in latency-critical applications that explicitly accounts for tail risk and switching stability. Each candidate server is characterised by predictive mean and uncertainty summaries of network latency, which are used to estimate the risk of service-level objective (SLO) violations and to guide selection. Risk is evaluated using a tight Normal approximation complemented by a conservative Cantelli bound, while percentile-based scoring coupled with hysteresis stabilizes decisions and suppresses oscillatory switching under short-lived network fluctuations.   Experimental results on a multi-server edge testbed with a strict SLO of $τ= 0.5$\\,s show that the proposed approach reduces the deadline-miss rate from 39\\% to 34\\% compared to a mean-only baseline, while reducing switching frequency from 46\\% to 5.5\\% ($\\approx$88\\% reduction) and maintaining sub-SLO average latency ($\\approx$0.45\\,s). These results demonstrate that explicit risk evaluation combined with stability-preserving control enables practical and robust adaptive server selection in dynamic edge environments.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
