@@ -1,0 +1,51 @@
+{
+  "label": "2026-04-28",
+  "date": "2026-04-28",
+  "generated_at": "2026-04-28T20:54:25",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202604/28/2604.23778v1-node-network-wide-top-k-flows-in-the-data-plane",
+      "section": "deep",
+      "title_en": "NODE: Network Wide Top-K Flows in the Data Plane",
+      "authors": "Eitan Stein, Lior Zeno, Shir Landau Feibish",
+      "date": "2026-04-26",
+      "pdf": "https://arxiv.org/pdf/2604.23778v1",
+      "score": "9.0",
+      "evidence": "利用可编程数据平面进行全网重流量检测",
+      "tldr": "针对网络流量监控中全局Top-K重流检测延迟高的问题，本文提出了NODE算法。NODE完全在数据平面运行，无需中心控制器干预。通过交换机间的信息聚合，确保全网交换机最终维护一致的全局Top-K表。实验表明，NODE在仅占用不到300KB内存的情况下，实现了超过95%的召回率，能有效应对短时网络事件。",
+      "tags": "query:netmes",
+      "abstract_en": "Monitoring network traffic is crucial for most network tasks, such as, identifying and blocking attacks, pinpointing failures and engineering and rerouting heavy traffic to maintain high throughput. One important metric when monitoring the traffic is finding the top-k heavy flows, that is the k heaviest flows in the traffic. Programmable networks allow performing advanced network analysis right in the data plane. In recent years, various solutions have been proposed for efficiently finding the top-k heavy flows within a single switch. However, at times we may need to find the global top-k flows. Existing solutions for global top-k detection use a centralized controller that collects and aggregates the measurements performed in each of the switches. Yet, the process of sending information to the control plane and then having the controller send back the information to the switches can be very lengthy. In order to be able to detect and mitigate short-lived events, solutions that work completely within the data plane are needed. In this paper we present NODE, a network-wide top-k detection algorithm that operates exclusively in the data plane. NODE allows the switches to aggregate information from all other switches in the network, and ensures that eventually all switches hold an identical global top-k table. We show that NODE manages to detect global top-k flows on both synthetic and real traces, with a recall rate of over 95\\% while using less than 300KB per switch.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/28/2604.24352v1-data-driven-adaptive-resource-allocation-for-reliable-low-latency-uplink-communications-in-rural-cellular-5g-multi-connectivity",
+      "section": "quick",
+      "title_en": "Data-Driven Adaptive Resource Allocation for Reliable Low-Latency Uplink Communications in Rural Cellular 5G Multi-Connectivity",
+      "authors": "Carlos S. Alvarez-Merino, Alejandro Ramirez-Arroyo, Rasmus Suhr Mogensen, Morten V. Pedersen, Miguel Villanueva-Fernández, Emil J. Khatib, Sergio Fortes, Raquel Barco, Preben E. Mogensen",
+      "date": "2026-04-27",
+      "pdf": "https://arxiv.org/pdf/2604.24352v1",
+      "score": "7.0",
+      "evidence": "5G 上行延迟与丢包的测量实验",
+      "tldr": "本研究针对农村5G网络中上行链路性能受限的问题，通过在多种环境下对商业5G NSA网络进行实测，分析了延迟、丢包与无线层KPI的关系。研究发现RSRP无法完全预测性能，上行功率限制是关键因素。为此，提出了一种基于数据驱动的PAAF自适应多连接框架，通过部分重复策略在保证高可靠低延迟的同时，显著降低了数据冗余开销。",
+      "tags": "query:netmes",
+      "abstract_en": "Reliable low-latency communication is a key requirement for mission-critical and mobile autonomous systems, including teleoperation, autonomous navigation, and real-time uplink-dominant telemetry applications. While commercial 5G networks often provide adequate downlink performance, uplink performance in rural deployments may be constrained by radio-resource limitations and uplink power-control mechanisms. This paper presents a comprehensive experimental evaluation of multi-connectivity strategies over commercial 5G Non-Standalone networks, based on measurement campaigns conducted in urban, suburban, and rural environments. The study analyzes per-packet uplink and downlink latency, packet loss, and radio-layer KPIs across two mobile network operators. The measurements indicate that latency and reliability cannot be inferred solely from coverage indicators such as RSRP. In coverage-constrained scenarios, performance appears to be strongly influenced by uplink power-limited operation and partially correlated impairments across operators. Several multi-connectivity strategies are evaluated, including link aggregation, switching-based policies, and conditional packet duplication. A Primary-Anchored Adaptive Failover (PAAF) framework is introduced to selectively activate redundancy based on radio, latency and service cost considerations. The results suggest that Partial Duplication (PD) approaches can approach the reliability of multi-connectivity while substantially reducing duplication overhead in the evaluated rural scenario.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/28/2604.22304v1-resource-aware-layered-intrusion-detection-allocation-model",
+      "section": "quick",
+      "title_en": "Resource-Aware Layered Intrusion Detection Allocation Model",
+      "authors": "Ioan Pădurean, Béla Genge, Roland Bolboacă",
+      "date": "2026-04-24",
+      "pdf": "https://arxiv.org/pdf/2604.22304v1",
+      "score": "6.0",
+      "evidence": "在更高协议层监控流量",
+      "tldr": "本研究针对异构网络提出一种资源感知的分层入侵检测分配模型。通过将检测深度分配建模为整数线性规划问题，综合考虑设备重要性、攻击概率及资源成本，在满足全局预算和设备性能限制的前提下，优化了监控资源的分配，有效提升了关键设备的防御能力。",
+      "tags": "query:netmes",
+      "abstract_en": "This paper proposes a resource-aware allocation model for layered intrusion detection in het erogeneous networks. Monitoring traffic at higher protocol layers improves the ability to detect sophisticated attacks, but it also increases computational and storage costs. The problem is formu lated as an integer linear program that assigns a single monitoring depth, ranging from Ethernet to the application layer, to each device, while accounting for device importance, attack probability, layer-dependent detection rates, and per-layer monitoring costs. The model further enforces a global resource budget, a minimum monitoring level for critical devices, and maximum-feasibility limits for constrained devices such as simple IoT sensors. The formulation is solved with the SCIP optimization framework on a small heterogeneous network of six devices, and the resulting allocation illustrates how the model concentrates monitoring effort on important and high-risk devices while respecting feasibility and budget constraints.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,133 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-28T20:51:58.167505+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2604.23778v1",
+      "title": "NODE: Network Wide Top-K Flows in the Data Plane",
+      "abstract": "Monitoring network traffic is crucial for most network tasks, such as, identifying and blocking attacks, pinpointing failures and engineering and rerouting heavy traffic to maintain high throughput. One important metric when monitoring the traffic is finding the top-k heavy flows, that is the k heaviest flows in the traffic. Programmable networks allow performing advanced network analysis right in the data plane. In recent years, various solutions have been proposed for efficiently finding the top-k heavy flows within a single switch. However, at times we may need to find the global top-k flows. Existing solutions for global top-k detection use a centralized controller that collects and aggregates the measurements performed in each of the switches. Yet, the process of sending information to the control plane and then having the controller send back the information to the switches can be very lengthy. In order to be able to detect and mitigate short-lived events, solutions that work completely within the data plane are needed. In this paper we present NODE, a network-wide top-k detection algorithm that operates exclusively in the data plane. NODE allows the switches to aggregate information from all other switches in the network, and ensures that eventually all switches hold an identical global top-k table. We show that NODE manages to detect global top-k flows on both synthetic and real traces, with a recall rate of over 95\\% while using less than 300KB per switch.",
+      "authors": [
+        "Eitan Stein",
+        "Lior Zeno",
+        "Shir Landau Feibish"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-04-26T16:02:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.23778v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Uses programmable data planes for network-wide heavy hitter detection",
+      "llm_evidence_cn": "利用可编程数据平面进行全网重流量检测",
+      "llm_evidence": "利用可编程数据平面进行全网重流量检测",
+      "canonical_evidence": "利用可编程数据平面进行全网重流量检测",
+      "llm_tldr_en": "NODE enables efficient network-wide top-k flow detection directly within programmable data planes.",
+      "llm_tldr_cn": "NODE 实现了在可编程数据平面内直接进行高效的全网 Top-K 重流量检测。",
+      "llm_tldr": "NODE 实现了在可编程数据平面内直接进行高效的全网 Top-K 重流量检测。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "network measurement using P4 and programmable switches",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.24352v1",
+      "title": "Data-Driven Adaptive Resource Allocation for Reliable Low-Latency Uplink Communications in Rural Cellular 5G Multi-Connectivity",
+      "abstract": "Reliable low-latency communication is a key requirement for mission-critical and mobile autonomous systems, including teleoperation, autonomous navigation, and real-time uplink-dominant telemetry applications. While commercial 5G networks often provide adequate downlink performance, uplink performance in rural deployments may be constrained by radio-resource limitations and uplink power-control mechanisms. This paper presents a comprehensive experimental evaluation of multi-connectivity strategies over commercial 5G Non-Standalone networks, based on measurement campaigns conducted in urban, suburban, and rural environments. The study analyzes per-packet uplink and downlink latency, packet loss, and radio-layer KPIs across two mobile network operators. The measurements indicate that latency and reliability cannot be inferred solely from coverage indicators such as RSRP. In coverage-constrained scenarios, performance appears to be strongly influenced by uplink power-limited operation and partially correlated impairments across operators. Several multi-connectivity strategies are evaluated, including link aggregation, switching-based policies, and conditional packet duplication. A Primary-Anchored Adaptive Failover (PAAF) framework is introduced to selectively activate redundancy based on radio, latency and service cost considerations. The results suggest that Partial Duplication (PD) approaches can approach the reliability of multi-connectivity while substantially reducing duplication overhead in the evaluated rural scenario.",
+      "authors": [
+        "Carlos S. Alvarez-Merino",
+        "Alejandro Ramirez-Arroyo",
+        "Rasmus Suhr Mogensen",
+        "Morten V. Pedersen",
+        "Miguel Villanueva-Fernández",
+        "Emil J. Khatib",
+        "Sergio Fortes",
+        "Raquel Barco",
+        "Preben E. Mogensen"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "eess.SY"
+      ],
+      "published": "2026-04-27T11:45:30+00:00",
+      "link": "https://arxiv.org/pdf/2604.24352v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "measurement campaigns for 5G uplink latency and packet loss",
+      "llm_evidence_cn": "5G 上行延迟与丢包的测量实验",
+      "llm_evidence": "5G 上行延迟与丢包的测量实验",
+      "canonical_evidence": "5G 上行延迟与丢包的测量实验",
+      "llm_tldr_en": "Evaluates 5G multi-connectivity performance through extensive measurement campaigns in various environments.",
+      "llm_tldr_cn": "通过在多种环境下的广泛测量实验，评估 5G 多连接技术的性能。",
+      "llm_tldr": "通过在多种环境下的广泛测量实验，评估 5G 多连接技术的性能。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "latest research on network measurement techniques and systems",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.22304v1",
+      "title": "Resource-Aware Layered Intrusion Detection Allocation Model",
+      "abstract": "This paper proposes a resource-aware allocation model for layered intrusion detection in het erogeneous networks. Monitoring traffic at higher protocol layers improves the ability to detect sophisticated attacks, but it also increases computational and storage costs. The problem is formu lated as an integer linear program that assigns a single monitoring depth, ranging from Ethernet to the application layer, to each device, while accounting for device importance, attack probability, layer-dependent detection rates, and per-layer monitoring costs. The model further enforces a global resource budget, a minimum monitoring level for critical devices, and maximum-feasibility limits for constrained devices such as simple IoT sensors. The formulation is solved with the SCIP optimization framework on a small heterogeneous network of six devices, and the resulting allocation illustrates how the model concentrates monitoring effort on important and high-risk devices while respecting feasibility and budget constraints.",
+      "authors": [
+        "Ioan Pădurean",
+        "Béla Genge",
+        "Roland Bolboacă"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.NI"
+      ],
+      "published": "2026-04-24T07:36:23+00:00",
+      "link": "https://arxiv.org/pdf/2604.22304v1",
+      "tags": [
+        "keyword:NetMes",
+        "query:NetMes"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "monitoring traffic at higher protocol layers",
+      "llm_evidence_cn": "在更高协议层监控流量",
+      "llm_evidence": "在更高协议层监控流量",
+      "canonical_evidence": "在更高协议层监控流量",
+      "llm_tldr_en": "Develops a resource-aware model for allocating intrusion detection monitoring depth across network devices.",
+      "llm_tldr_cn": "开发了一种资源感知模型，用于在网络设备中分配入侵检测监控深度。",
+      "llm_tldr": "开发了一种资源感知模型，用于在网络设备中分配入侵检测监控深度。",
+      "llm_tags": [
+        "query:netmes"
+      ],
+      "matched_query_tag": "query:netmes",
+      "matched_query_text": "traffic measurement and monitoring systems for data centers",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
